@@ -19,7 +19,9 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Need Docker, Java 11 and Maven
+# Need Docker, Java 11 and Maven.
+# Also need nodejs, npm and Angular,
+# but the frontend-maven-plugin installs those.
 
 FROM debian:stretch-backports
 RUN apt-get -y update && apt-get -y install \
