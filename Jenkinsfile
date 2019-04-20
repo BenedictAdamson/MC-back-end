@@ -112,8 +112,9 @@ pipeline {
                 def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'MC-back-end/target/spotbugsXml.xml'
                 publishIssues issues:[spotbugs]
             }
-            junit 'MC-back-end/target/surefire-reports/**/*.xml'  
-            junit 'MC-back-end/target/failsafe-reports/**/*.xml'  
+            junit 'MC-back-end/target/surefire-reports/**/*.xml'
+            junit 'MC-back-end/target/failsafe-reports/**/*.xml'
+            junit 'MC-fron-end/target/karama-reports/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
