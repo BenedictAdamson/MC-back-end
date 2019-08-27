@@ -28,6 +28,7 @@ RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
    curl \
+   firefox-esr \
    gnupg-agent \
    maven \
    openjdk-11-jdk-headless \
