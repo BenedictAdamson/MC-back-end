@@ -89,7 +89,7 @@ pipeline {
             steps {
      			script {
      				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION} .")
+                   	def image = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
                 }
             }
         }
@@ -100,7 +100,7 @@ pipeline {
             steps {
      			script {
      				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION} .")
+                   	def image = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
                    	image.push()
                 }
             }
@@ -109,14 +109,15 @@ pipeline {
     post {
         always {// We ESPECIALLY want the reports on failure
             script {
-                def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'target/spotbugsXml.xml'
+                def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'MC-back-end/target/spotbugsXml.xml'
                 publishIssues issues:[spotbugs]
             }
-            junit 'target/surefire-reports/**/*.xml'  
-            junit 'target/failsafe-reports/**/*.xml'  
+            junit 'MC-back-end/target/surefire-reports/**/*.xml'
+            junit 'MC-back-end/target/failsafe-reports/**/*.xml'
+            junit 'MC-front-end/target/karma-reports/*.xml'  
         }
         success {
-            archiveArtifacts artifacts: 'target/MC-*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
         }
     }
 }
