@@ -114,7 +114,7 @@ pipeline {
             }
             junit 'MC-back-end/target/surefire-reports/**/*.xml'
             junit 'MC-back-end/target/failsafe-reports/**/*.xml'
-            junit 'MC-front-end/target/karama-reports/*.xml'  
+            junit 'MC-front-end/target/karma-reports/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
