@@ -97,12 +97,12 @@ public class WebSteps {
    public void adding_a_player_named(final String name, final String password) {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
-      postResource("/player", new Player(name, password, Set.of()));
+      postResource("/api/player", new Player(name, password, Set.of()));
    }
 
    @Then("can get the list of players")
    public void can_get_the_list_of_players() {
-      getJson("/player");
+      getJson("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
    }
@@ -125,7 +125,7 @@ public class WebSteps {
 
    @When("getting the players")
    public void getting_the_players() {
-      getJson("/player");
+      getJson("/api/player");
    }
 
    @When("getting the unknown resource at {string}")

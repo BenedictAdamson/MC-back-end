@@ -40,13 +40,13 @@ import uk.badamson.mc.Authority;
 public class PresentationLayerSpringConfiguration {
 
    private void authorizeAdministration(final ServerHttpSecurity http) {
-      http.authorizeExchange().pathMatchers(HttpMethod.POST, "/player")
+      http.authorizeExchange().pathMatchers(HttpMethod.POST, "/api/player")
                .hasAuthority(Authority.ROLE_ADMIN.getAuthority());
    }
 
    private void authorizePublic(final ServerHttpSecurity http) {
       http.authorizeExchange().pathMatchers(HttpMethod.GET, "/", "/login",
-               "/logout", "/player").permitAll();
+               "/logout", "/api/player").permitAll();
       http.authorizeExchange()
                .pathMatchers(HttpMethod.POST, "/login", "/logout").permitAll();
    }

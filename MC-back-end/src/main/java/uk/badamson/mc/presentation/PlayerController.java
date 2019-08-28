@@ -71,7 +71,7 @@ public class PlayerController {
     *           The body of the request
     * @return The response.
     */
-   @PostMapping("/player")
+   @PostMapping("/api/player")
    @ResponseStatus(HttpStatus.CREATED)
    public Flux<Player> add(@RequestBody final Player player) {
       service.add(player).block();
@@ -85,7 +85,7 @@ public class PlayerController {
     *
     * @return The response.
     */
-   @GetMapping("/player")
+   @GetMapping("/api/player")
    public Flux<Player> getAll() {
       return service.getPlayers();
    }
