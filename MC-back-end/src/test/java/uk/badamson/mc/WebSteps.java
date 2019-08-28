@@ -41,9 +41,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import reactor.core.publisher.Hooks;
 import uk.badamson.mc.repository.PlayerRepository;
 import uk.badamson.mc.service.Service;
