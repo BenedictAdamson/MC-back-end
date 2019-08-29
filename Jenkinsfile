@@ -120,7 +120,7 @@ pipeline {
             junit 'MC-front-end/target/karma-reports/*.xml'  
         }
         success {
-            archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
+            archiveArtifacts artifacts: ['MC-back-end/target/MC-back-end-*.jar', 'MC-front-end/target/MC-front-end-*.tgz'], fingerprint: true
         }
     }
 }
