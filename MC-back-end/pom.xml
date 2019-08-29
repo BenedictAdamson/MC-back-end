@@ -93,6 +93,7 @@
 				<configuration>
 					<repository>benedictadamson/mc-back-end</repository>
 					<tag>${project.version}</tag>
+					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
 					<buildArgs>
 						<VERSION>${project.version}</VERSION>
 					</buildArgs>
