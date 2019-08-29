@@ -76,7 +76,7 @@ pipeline {
                 }
             }
         }
-        stage('Maven Deploy') {
+        stage('Deploy') {
         	/* Includes pushing Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
