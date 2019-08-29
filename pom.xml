@@ -28,5 +28,6 @@
 	<modules>
 		<module>MC-back-end</module>
 		<module>MC-front-end</module>
+		<module>MC-integration</module>
 	</modules>
 </project>
