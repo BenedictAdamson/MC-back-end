@@ -76,6 +76,28 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
+					JAR -->
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>benedictadamson/mc-back-end</repository>
+					<tag>${project.version}</tag>
+					<buildArgs>
+						<VERSION>${project.version}</VERSION>
+					</buildArgs>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
