@@ -54,7 +54,8 @@ pipeline {
                 }
             }
         }
-        stage('Build') { 
+        stage('Build') {
+        	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true clean package'
@@ -76,35 +77,10 @@ pipeline {
             }
         }
         stage('Maven Deploy') {
+        	/* Includes pushing Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
-                }
-            }
-        }
-        stage('Docker Build') {
-            when {
-                branch 'develop';
-            }
-            steps {
-     			script {
-     				def VERSION = readMavenPom().getVersion()
-                   	def imageBE = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
-                   	def imageFE = docker.build("benedictadamson/mc-front-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-front-end")
-                }
-            }
-        }
-        stage('Docker Build and Push') {
-            when {
-                branch 'master';
-            }
-            steps {
-     			script {
-     				def VERSION = readMavenPom().getVersion()
-                   	def imageBE = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
-                   	def imageFE = docker.build("benedictadamson/mc-front-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-front-end")
-                   	imageBE.push()
-                   	imageFE.push()
                 }
             }
         }
