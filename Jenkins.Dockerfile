@@ -23,7 +23,7 @@
 # Also need nodejs, npm and Angular,
 # but the frontend-maven-plugin installs those.
 
-FROM debian:stretch-backports
+FROM debian:10
 RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
