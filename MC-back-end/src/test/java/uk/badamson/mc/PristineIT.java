@@ -44,8 +44,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for MC, testing it operating as a pristine (fresh)
- * installation.
+ * Basic system test for the MC back-end, testing it operating as a pristine
+ * (fresh) installation.
  * </p>
  */
 @Testcontainers
