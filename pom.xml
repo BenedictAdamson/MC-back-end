@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC-parent</artifactId>
-		<version>1.5.1</version>
+		<version>1.6.0</version>
 	</parent>
 	<artifactId>MC</artifactId>
-	<version>2.0.0</version>
+	<version>2.1.0</version>
 	<packaging>pom</packaging>
 	<organization>
 		<name>Benedict Adamson</name>
@@ -28,5 +28,6 @@
 	<modules>
 		<module>MC-back-end</module>
 		<module>MC-front-end</module>
+		<module>MC-integration</module>
 	</modules>
 </project>

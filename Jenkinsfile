@@ -54,7 +54,8 @@ pipeline {
                 }
             }
         }
-        stage('Build') { 
+        stage('Build') {
+        	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true clean package'
@@ -75,33 +76,11 @@ pipeline {
                 }
             }
         }
-        stage('Maven Deploy') {
+        stage('Deploy') {
+        	/* Includes pushing Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
-                }
-            }
-        }
-        stage('Docker Build') {
-            when {
-                branch 'develop';
-            }
-            steps {
-     			script {
-     				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
-                }
-            }
-        }
-        stage('Docker Build and Push') {
-            when {
-                branch 'master';
-            }
-            steps {
-     			script {
-     				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("benedictadamson/mc-back-end:${VERSION}", "--build-arg VERSION=${VERSION} MC-back-end")
-                   	image.push()
                 }
             }
         }
@@ -118,6 +97,7 @@ pipeline {
         }
         success {
             archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'MC-front-end/target/MC-front-end-*.tgz', fingerprint: true
         }
     }
 }

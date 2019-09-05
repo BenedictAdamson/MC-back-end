@@ -24,7 +24,7 @@ Feature: Player
     And not logged in
     And not presenting a CSRF token
     When getting the players
-    # The path of the players resource is /player
+    # The path of the players resource is /api/player
     Then MC serves the resource
     # And there is only one player, the administrator, with the default name
     And the response message is a list of players

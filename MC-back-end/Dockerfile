@@ -1,4 +1,4 @@
-# Dockerfile for the MC project,
+# Dockerfile for the MC-back-end project,
 # to produce the MC server in a container.
 
 # © Copyright Benedict Adamson 2018-19.
@@ -22,7 +22,7 @@
 FROM openjdk:11
 ARG VERSION
 LABEL version="${VERSION}"
-LABEL description="The Mission Command game server."
+LABEL description="The Mission Command game back-end server."
 LABEL maintainer="badamson@spamcop.net"
 EXPOSE 8080
 RUN groupadd -g 1024 mc

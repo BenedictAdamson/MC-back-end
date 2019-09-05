@@ -37,14 +37,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for MC, testing it operating alone without any needed
- * servers.
+ * Basic system test for the MC back-end, testing it operating alone without any
+ * needed servers.
  * </p>
  * <p>
- * MC expects and needs a database server to be present, so this tests that it
- * provides useful diagnostic messages if the database is missing or
- * misbehaving. The test builds the Docker image using the real Dockerfile, so
- * this also tests that Dockerfile.
+ * The MC back-end expects and needs a database server to be present, so this
+ * tests that it provides useful diagnostic messages if the database is missing
+ * or misbehaving. The test builds the Docker image using the real Dockerfile,
+ * so this also tests that Dockerfile.
  * </p>
  */
 @Testcontainers

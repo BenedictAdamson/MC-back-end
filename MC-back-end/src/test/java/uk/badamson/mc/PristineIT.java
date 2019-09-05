@@ -44,8 +44,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for MC, testing it operating as a pristine (fresh)
- * installation.
+ * Basic system test for the MC back-end, testing it operating as a pristine
+ * (fresh) installation.
  * </p>
  */
 @Testcontainers
@@ -120,7 +120,7 @@ public class PristineIT {
    @Test
    public void getPlayerDirectory() {
       waitUntilStarted();
-      final var response = getJson("/player", null, null);
+      final var response = getJson("/api/player", null, null);
 
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
       response.expectStatus().isOk();

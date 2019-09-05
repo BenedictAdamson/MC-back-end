@@ -41,9 +41,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import reactor.core.publisher.Hooks;
 import uk.badamson.mc.repository.PlayerRepository;
 import uk.badamson.mc.service.Service;
@@ -97,12 +97,12 @@ public class WebSteps {
    public void adding_a_player_named(final String name, final String password) {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
-      postResource("/player", new Player(name, password, Set.of()));
+      postResource("/api/player", new Player(name, password, Set.of()));
    }
 
    @Then("can get the list of players")
    public void can_get_the_list_of_players() {
-      getJson("/player");
+      getJson("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
    }
@@ -125,7 +125,7 @@ public class WebSteps {
 
    @When("getting the players")
    public void getting_the_players() {
-      getJson("/player");
+      getJson("/api/player");
    }
 
    @When("getting the unknown resource at {string}")
