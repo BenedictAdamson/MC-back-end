@@ -58,7 +58,7 @@ pipeline {
         	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true clean package'
+                    sh 'mvn -s $MAVEN_SETTINGS package install test verify'
                 }
             }
         }
@@ -66,13 +66,6 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){  
                     sh 'mvn -s $MAVEN_SETTINGS spotbugs:spotbugs'
-                }
-            }
-        }
-        stage('Test') { 
-            steps {
-                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS test verify'
                 }
             }
         }
