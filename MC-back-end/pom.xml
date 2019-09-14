@@ -20,6 +20,7 @@
 						<goals>
 							<goal>spotbugs</goal>
 						</goals>
+						<phase>validate</phase>
 					</execution>
 				</executions>
 			</plugin>
