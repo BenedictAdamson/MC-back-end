@@ -54,18 +54,11 @@ pipeline {
                 }
             }
         }
-        stage('Build') {
+        stage('Build and verify') {
         	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS package install test verify'
-                }
-            }
-        }
-        stage('Check') { 
-            steps {
-                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){  
-                    sh 'mvn -s $MAVEN_SETTINGS spotbugs:spotbugs'
                 }
             }
         }
@@ -81,8 +74,13 @@ pipeline {
     post {
         always {// We ESPECIALLY want the reports on failure
             script {
-                def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'MC-back-end/target/spotbugsXml.xml'
-                publishIssues issues:[spotbugs]
+                recordIssues tools: [
+                	java(),
+                	javaDoc(),
+                	mavenConsole(),
+                	pmdParser(pattern: '**/target/pmd.xml'),
+					spotBugs(pattern: '**/target/spotbugsXml.xml')
+					]
             }
             junit 'MC-back-end/target/surefire-reports/**/*.xml'
             junit 'MC-back-end/target/failsafe-reports/**/*.xml'
