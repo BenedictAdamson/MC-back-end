@@ -74,7 +74,13 @@ pipeline {
     post {
         always {// We ESPECIALLY want the reports on failure
             script {
-                recordIssues tool: spotBugs(pattern: '**/target/spotbugsXml.xml')
+                recordIssues tools: [
+                	java(),
+                	javaDoc(),
+                	mavenConsole(),
+                	pmdParser(pattern: '**/target/pmd.xml'),
+					spotBugs(pattern: '**/target/spotbugsXml.xml')
+					]
             }
             junit 'MC-back-end/target/surefire-reports/**/*.xml'
             junit 'MC-back-end/target/failsafe-reports/**/*.xml'
