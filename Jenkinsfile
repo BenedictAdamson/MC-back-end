@@ -74,8 +74,7 @@ pipeline {
     post {
         always {// We ESPECIALLY want the reports on failure
             script {
-                def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'MC-back-end/target/spotbugsXml.xml'
-                publishIssues issues:[spotbugs]
+                recordIssues tool: [$class: 'SpotBugs'], pattern: 'MC-back-end/target/spotbugsXml.xml'
             }
             junit 'MC-back-end/target/surefire-reports/**/*.xml'
             junit 'MC-back-end/target/failsafe-reports/**/*.xml'
