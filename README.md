@@ -65,3 +65,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [Spring Framework](https://spring.io/projects/spring-framework)
         * [Spring Security](https://spring.io/projects/spring-security)
         * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
+* Deployment:
+    * [Docker Hub](https://hub.docker.com/)
+    * [Kubernetes](https://kubernetes.io/)
+ 
