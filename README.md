@@ -25,7 +25,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
 
 * Languages:
     * [Java 11](https://docs.oracle.com/javase/11/)
-    * [Typescript](https://docs.oracle.com/javase/11/)
+    * [Typescript](https://www.typescriptlang.org/)
 * Java Annotations:
     * [JCIP annotations](http://jcip.net/annotations/doc/net/jcip/annotations/package-summary.html)
     * [SpotBugs annotations](https://javadoc.io/doc/com.github.spotbugs/spotbugs-annotations/3.1.8)
