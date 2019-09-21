@@ -19,9 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -76,18 +74,17 @@ public class SolitaryIT {
       final var consumer = new WaitingConsumer();
       container.followOutput(consumer);
       try {
-         consumer.waitUntil(
-                  frame -> frame.getUtf8String()
-                           .contains(EXPECTED_STARTED_MESSAGE),
-                  7000, TimeUnit.MILLISECONDS);
+         consumer.waitUntil(frame -> {
+            final String text = frame.getUtf8String();
+            return text.contains(EXPECTED_STARTED_MESSAGE)
+                     || text.contains(EXPECTED_ERROR_MESSAGE);
+         }, 11000, TimeUnit.MILLISECONDS);
       } catch (final TimeoutException e) {
          // Fall through to the assertion check (which will fail)
       }
 
       final var logs = container.getLogs();
-      assertAll("Log suitable messages",
-               () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
-               () -> assertThat(logs, containsString(EXPECTED_ERROR_MESSAGE)),
-               () -> assertThat(logs, not(containsString("Unable to start"))));
+      assertThat("Logged error message", logs,
+               containsString(EXPECTED_ERROR_MESSAGE));
    }
 }

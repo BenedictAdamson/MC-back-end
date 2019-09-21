@@ -111,6 +111,13 @@ public class PristineIT {
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
    }
 
+   @Test
+   public void getHealthCheck() {
+      waitUntilStarted();
+      getJson("/actuator/health", null, null).expectStatus().isOk();
+      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+   }
+
    private ResponseSpec getJson(final String path, final String query,
             final String fragment) {
       return connectWebTestClient(path, query, fragment).get()
