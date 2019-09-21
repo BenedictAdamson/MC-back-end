@@ -57,6 +57,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)
     * [Karma](https://karma-runner.github.io/latest/index.html)
     * [Open Test Alliance for the JVM](https://github.com/ota4j-team/opentest4j)
+    * [PMD](https://pmd.github.io/)
     * [SpotBugs](https://spotbugs.github.io/)
 * Frameworks:
     * [Angular](https://angular.io/)
