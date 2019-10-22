@@ -37,6 +37,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [Eclipse Natural Plugin](http://marketplace.eclipse.org/content/natural)
     * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
     * [Eclipse Yaml Editor](https://marketplace.eclipse.org/content/yaml-editor)
+    * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
      * [Git](https://git-scm.com/)
      * [GitHub](https://github.com)
