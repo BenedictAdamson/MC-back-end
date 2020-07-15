@@ -51,16 +51,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>3.1.12.2</version>
-					<dependencies>
-						<!-- overwrite dependency on spotbugs if you want to specify the version 
-							of spotbugs -->
-						<dependency>
-							<groupId>com.github.spotbugs</groupId>
-							<artifactId>spotbugs</artifactId>
-							<version>3.1.12</version>
-						</dependency>
-					</dependencies>
+					<version>4.0.4</version>
 				</plugin>
 				<plugin>
 					<groupId>com.spotify</groupId>
