@@ -18,7 +18,7 @@
 					<executions>
 						<execution>
 							<goals>
-								<goal>spotbugs</goal>
+								<goal>check</goal>
 							</goals>
 							<phase>validate</phase>
 						</execution>
