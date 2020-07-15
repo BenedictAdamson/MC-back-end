@@ -23,6 +23,9 @@
 							<phase>validate</phase>
 						</execution>
 					</executions>
+					<configuration>
+						<xmlOutput>true</xmlOutput>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
