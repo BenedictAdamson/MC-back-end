@@ -58,7 +58,7 @@ pipeline {
         	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS package install test verify'
+                    sh 'mvn -s $MAVEN_SETTINGS package install test verify spotbugs:check'
                 }
             }
         }

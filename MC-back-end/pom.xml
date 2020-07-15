@@ -20,10 +20,11 @@
 							<goals>
 								<goal>check</goal>
 							</goals>
-							<phase>validate</phase>
 						</execution>
 					</executions>
 					<configuration>
+						<effort>Max</effort>
+						<threshold>Low</threshold>
 						<xmlOutput>true</xmlOutput>
 					</configuration>
 				</plugin>
