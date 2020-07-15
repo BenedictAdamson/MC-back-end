@@ -30,7 +30,6 @@ RUN apt-get -y update && apt-get -y install \
    curl \
    firefox-esr \
    gnupg-agent \
-   golang-go \
    maven \
    openjdk-11-jdk-headless \
    software-properties-common
@@ -41,10 +40,4 @@ RUN apt-get -y update && apt-get -y install \
    containerd.io \
    docker-ce \
    docker-ce-cli
-RUN cd /tmp && \
-   curl -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl
-RUN cd /tmp && \
-   curl -o helm.tar.gz https://get.helm.sh/helm-v2.15.1-linux-amd64.tar.gz && \
-   tar -xf helm.tar.gz linux-amd64/helm && \
-   mv linux-amd64/helm /usr/bin
    
