@@ -161,6 +161,7 @@
 							<arg value="cucumber" />
 							<arg value="--scan-classpath" />
 							<arg value="${project.build.testOutputDirectory}" />
+							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
 						</java>
 					</target>
 				</configuration>
