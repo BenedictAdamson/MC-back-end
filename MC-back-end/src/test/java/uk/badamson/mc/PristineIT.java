@@ -107,16 +107,16 @@ public class PristineIT {
    }
 
    @Test
-   public void getHomePage() {
+   public void getHealthCheck() {
       waitUntilStarted();
-      getJson("/", null, null).expectStatus().isOk();
+      getJson("/actuator/health", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
    }
 
    @Test
-   public void getHealthCheck() {
+   public void getHomePage() {
       waitUntilStarted();
-      getJson("/actuator/health", null, null).expectStatus().isOk();
+      getJson("/", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
    }
 
