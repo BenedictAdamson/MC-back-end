@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import reactor.core.publisher.Flux;
@@ -45,7 +43,6 @@ import uk.badamson.mc.UserDetailsTest;
  * Auxiliary test code for classes that implement the {@link Service} interface.
  * </p>
  */
-@RunWith(JUnitPlatform.class)
 public class ServiceTest {
 
    public static Mono<Void> add(final Service service, final Player player) {

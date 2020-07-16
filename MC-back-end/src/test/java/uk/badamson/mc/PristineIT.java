@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -49,6 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Testcontainers
+@Tag("IT")
 public class PristineIT {
 
    public static final int MC_LISTENING_PORT = 8080;

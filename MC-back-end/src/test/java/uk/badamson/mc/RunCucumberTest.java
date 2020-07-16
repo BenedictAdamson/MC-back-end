@@ -18,18 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.runner.RunWith;
-
-import io.cucumber.junit.CucumberOptions;
-import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.platform.engine.Cucumber;
 
 /**
  * <p>
  * Glue to run the Cucumber BDD tests using JUnit.
  * </p>
  */
-@RunWith(Cucumber.class)
-@CucumberOptions(features = "src/test/resources/features")
+@Cucumber
 public class RunCucumberTest {
 
 }
