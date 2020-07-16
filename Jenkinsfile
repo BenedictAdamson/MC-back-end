@@ -82,8 +82,7 @@ pipeline {
 					spotBugs(pattern: '**/target/spotbugsXml.xml')
 					]
             }
-            junit 'MC-back-end/target/surefire-reports/**/*.xml'
-            junit 'MC-back-end/target/failsafe-reports/**/*.xml'
+            junit 'MC-back-end/target/*-reports/**/TEST-*.xml'
             junit 'MC-front-end/target/karma-reports/*.xml'  
         }
         success {
