@@ -96,6 +96,8 @@
 						</execution>
 						<execution>
 							<id>JUnit-integration-test</id>
+							<!-- This MUST be after spring-boot-maven-plugin, so it can use the 
+								repackaged JAR -->
 							<phase>integration-test</phase>
 							<goals>
 								<goal>test</goal>
@@ -116,17 +118,6 @@
 									<sutVersion>${project.version}</sutVersion>
 								</systemPropertyVariables>
 							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<executions>
-						<execution>
-							<goals>
-								<goal>repackage</goal>
-							</goals>
 						</execution>
 					</executions>
 				</plugin>
@@ -183,6 +174,17 @@
 						</java>
 					</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
