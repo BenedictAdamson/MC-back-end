@@ -71,34 +71,53 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<!-- For running tests that do not need external (Maven controlled) 
+						setup and tear-down steps. This project uses the plugin to run both unit 
+						tests and the integration tests that use Testcontainers. -->
 					<executions>
 						<execution>
+							<id>JUnit-unit-test</id>
+							<phase>test</phase>
 							<goals>
-								<goal>integration-test</goal>
-								<goal>verify</goal>
+								<goal>test</goal>
 							</goals>
+							<configuration>
+								<includes>
+									<include>**/*Test.java</include>
+								</includes>
+								<!-- Ensure uses static inner test classes. -->
+								<excludes>
+									<exclude />
+								</excludes>
+								<!-- Work around OpenJDK bug: -->
+								<useSystemClassLoader>false</useSystemClassLoader>
+							</configuration>
+						</execution>
+						<execution>
+							<id>JUnit-integration-test</id>
+							<phase>integration-test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<includes>
+									<include>**/*IT.java</include>
+								</includes>
+								<!-- Ensure uses static inner test classes. -->
+								<excludes>
+									<exclude />
+								</excludes>
+								<!-- Work around OpenJDK bug: -->
+								<useSystemClassLoader>false</useSystemClassLoader>
+								<!-- The Testcontainers tests need to know the version ID of the 
+									Docker image. -->
+								<systemPropertyVariables>
+									<sutVersion>${project.version}</sutVersion>
+								</systemPropertyVariables>
+							</configuration>
 						</execution>
 					</executions>
-					<configuration>
-						<systemPropertyVariables>
-							<sutVersion>${project.version}</sutVersion>
-						</systemPropertyVariables>
-					</configuration>
-					<!-- For running integration tests. -->
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<configuration>
-						<!-- Ensure uses static inner test classes. -->
-						<excludes>
-							<exclude />
-						</excludes>
-						<!-- Work around OpenJDK bug: -->
-						<useSystemClassLoader>false</useSystemClassLoader>
-					</configuration>
-					<!-- For running unit tests. -->
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
