@@ -218,7 +218,7 @@ public class WebSteps {
       Objects.requireNonNull(client, "client");
       setRequestUri(path);
       final var request = client.post().uri(requestUri.getPath())
-               .contentType(MediaType.APPLICATION_JSON).syncBody(body)
+               .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
                .accept(MediaType.APPLICATION_JSON);
       response = request.exchange();
    }
