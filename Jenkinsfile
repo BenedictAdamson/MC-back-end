@@ -54,19 +54,11 @@ pipeline {
                 }
             }
         }
-        stage('Build and verify') {
-        	/* Includes building Docker images. */ 
+        stage('Build, verify and deploy') {
+        	/* Includes building and pushing Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS package install test verify spotbugs:check'
-                }
-            }
-        }
-        stage('Deploy') {
-        	/* Includes pushing Docker images. */ 
-            steps {
-                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
+                    sh 'mvn -s $MAVEN_SETTINGS deploy'
                 }
             }
         }
