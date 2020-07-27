@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019.
+ * © Copyright Benedict Adamson 2019-20.
  *
  * This file is part of MC.
  *
@@ -26,8 +26,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -48,7 +46,6 @@ import uk.badamson.mc.repository.PlayerRepository;
  */
 @SpringBootTest(classes = ApplicationTest.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@RunWith(JUnitPlatform.class)
 public class ReactiveAuthenticationManagerTest {
 
    @Nested

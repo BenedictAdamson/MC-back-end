@@ -1,7 +1,7 @@
 // Jenkinsfile for the MC project
 
 /* 
- * © Copyright Benedict Adamson 2018-19.
+ * © Copyright Benedict Adamson 2018-20.
  * 
  * This file is part of MC.
  *
@@ -58,7 +58,7 @@ pipeline {
         	/* Includes building Docker images. */ 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS package install test verify'
+                    sh 'mvn -s $MAVEN_SETTINGS package install test verify spotbugs:check'
                 }
             }
         }
@@ -82,8 +82,7 @@ pipeline {
 					spotBugs(pattern: '**/target/spotbugsXml.xml')
 					]
             }
-            junit 'MC-back-end/target/surefire-reports/**/*.xml'
-            junit 'MC-back-end/target/failsafe-reports/**/*.xml'
+            junit 'MC-back-end/target/*-reports/**/TEST-*.xml'
             junit 'MC-front-end/target/karma-reports/*.xml'  
         }
         success {

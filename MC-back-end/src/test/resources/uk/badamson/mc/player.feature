@@ -1,4 +1,4 @@
-# © Copyright Benedict Adamson 2019.
+# © Copyright Benedict Adamson 2019-20.
 #
 # This file is part of MC.
 #

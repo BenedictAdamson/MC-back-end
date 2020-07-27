@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019.
+ * © Copyright Benedict Adamson 2019-20.
  *
  * This file is part of MC.
  *
@@ -33,8 +33,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,7 +51,6 @@ import uk.badamson.mc.repository.PlayerRepositoryTest;
  * Unit tests and auxiliary test code for the {@link ServiceImpl} class.
  * </p>
  */
-@RunWith(JUnitPlatform.class)
 public class ServiceImplTest {
 
    @Nested

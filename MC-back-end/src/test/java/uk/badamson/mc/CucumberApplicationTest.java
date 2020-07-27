@@ -18,28 +18,19 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Import;
 
-import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
-import uk.badamson.mc.repository.PlayerRepository;
-import uk.badamson.mc.repository.PlayerRepositoryTest;
-import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
+import io.cucumber.spring.CucumberContextConfiguration;
 
 /**
  * <p>
- * The Spring Boot configuration for tests of the Mission Command game.
+ * The Spring Cucumber configuration for tests of the Mission Command game.
  * </p>
  */
-@Configuration
-@Import(value = { PresentationLayerSpringConfiguration.class,
-         ServiceLayerSpringConfiguration.class })
-public class ApplicationTest {
-
-   @Bean
-   PlayerRepository getPlayerRepository() {
-      return new PlayerRepositoryTest.Fake();
-   }
+@CucumberContextConfiguration
+@Import(value = { ApplicationTest.class })
+@AutoConfigureWebTestClient
+public class CucumberApplicationTest {
 
 }

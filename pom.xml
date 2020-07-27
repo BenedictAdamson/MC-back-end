@@ -13,7 +13,7 @@
 		for the server index.docker.io. -->
 	<groupId>uk.badamson.mc</groupId>
 	<artifactId>MC</artifactId>
-	<version>2.4.0</version>
+	<version>2.4.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<organization>
 		<name>Benedict Adamson</name>
@@ -32,8 +32,11 @@
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<MC.cucumber.version>4.7.1</MC.cucumber.version>
-		<MC.spring-boot.version>2.1.7.RELEASE</MC.spring-boot.version>
+		<MC.cucumber.version>6.2.2</MC.cucumber.version>
+		<MC.node.version>v14.6.0</MC.node.version>
+		<MC.npm.version>6.14.5</MC.npm.version>
+		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
+		<MC.spring-boot.version>2.3.1.RELEASE</MC.spring-boot.version>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -41,7 +44,7 @@
 				<plugin>
 					<groupId>com.github.eirslett</groupId>
 					<artifactId>frontend-maven-plugin</artifactId>
-					<version>1.8.0</version>
+					<version>1.10.0</version>
 					<configuration>
 						<nodeVersion>v10.16.3</nodeVersion>
 						<npmVersion>6.9.0</npmVersion>
@@ -51,26 +54,22 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>3.1.12.2</version>
-					<dependencies>
-						<!-- overwrite dependency on spotbugs if you want to specify the version 
-							of spotbugs -->
-						<dependency>
-							<groupId>com.github.spotbugs</groupId>
-							<artifactId>spotbugs</artifactId>
-							<version>3.1.12</version>
-						</dependency>
-					</dependencies>
+					<version>${MC.spotbugs.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>com.spotify</groupId>
 					<artifactId>dockerfile-maven-plugin</artifactId>
-					<version>1.4.10</version>
+					<version>1.4.13</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.1</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -86,12 +85,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M5</version>
+					<!-- For running integration tests. -->
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.1.1</version>
+					<version>3.2.0</version>
 					<configuration>
 						<additionalJOptions>
 							<additionalJOption>-html5</additionalJOption>
@@ -106,7 +106,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-pmd-plugin</artifactId>
-					<version>3.12.0</version>
+					<version>3.13.0</version>
 					<configuration>
 						<targetJdk>11</targetJdk>
 						<failurePriority>2</failurePriority>
@@ -118,20 +118,19 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<!-- Ensure uses static inner test classes. -->
 						<excludes>
 							<exclude />
 						</excludes>
-						<!-- Work around OpenJDK bug: -->
-						<useSystemClassLoader>false</useSystemClassLoader>
 					</configuration>
+					<!-- For running unit tests. -->
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
@@ -169,7 +168,7 @@
 			</dependency>
 			<dependency>
 				<groupId>io.cucumber</groupId>
-				<artifactId>cucumber-junit</artifactId>
+				<artifactId>cucumber-junit-platform-engine</artifactId>
 				<version>${MC.cucumber.version}</version>
 				<scope>test</scope>
 			</dependency>
@@ -183,12 +182,12 @@
 				<groupId>io.projectreactor</groupId>
 				<artifactId>reactor-test</artifactId>
 				<scope>test</scope>
-				<version>3.2.11.RELEASE</version> <!-- Should be compatible with spring-boot -->
+				<version>3.3.6.RELEASE</version> <!-- Should be compatible with spring-boot -->
 			</dependency>
 			<dependency>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-annotations</artifactId>
-				<version>3.1.12</version>
+				<version>${MC.spotbugs.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.icroco</groupId>
@@ -198,13 +197,13 @@
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest</artifactId>
-				<version>2.1</version>
+				<version>2.2</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
-				<version>5.5.1</version>
+				<version>5.7.0-M1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -225,7 +224,7 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-bom</artifactId>
-				<version>1.12.0</version>
+				<version>1.14.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

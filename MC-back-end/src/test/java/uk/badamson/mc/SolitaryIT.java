@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019.
+ * © Copyright Benedict Adamson 2019-20.
  *
  * This file is part of MC.
  *
@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
@@ -46,6 +47,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Testcontainers
+@Tag("IT")
 public class SolitaryIT {
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";

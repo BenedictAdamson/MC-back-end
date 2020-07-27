@@ -3,7 +3,7 @@ The Mission Command game.
 
 ## License
 
-© Copyright Benedict Adamson 2018-19.
+© Copyright Benedict Adamson 2018-20.
  
 ![AGPLV3](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)
 
@@ -31,12 +31,10 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [SpotBugs annotations](https://javadoc.io/doc/com.github.spotbugs/spotbugs-annotations/3.1.8)
 * Development environment:
     * [Eclipse IDE](https://www.eclipse.org/ide/)
-    * [Eclipse Angular Plugin](https://marketplace.eclipse.org/content/angular-ide)
     * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
+    * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
-    * [Eclipse Natural Plugin](http://marketplace.eclipse.org/content/natural)
     * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
-    * [Eclipse Yaml Editor](https://marketplace.eclipse.org/content/yaml-editor)
     * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
      * [Git](https://git-scm.com/)

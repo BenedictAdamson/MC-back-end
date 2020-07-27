@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019.
+ * © Copyright Benedict Adamson 2019-20.
  *
  * This file is part of MC.
  *
@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -49,6 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Testcontainers
+@Tag("IT")
 public class PristineIT {
 
    public static final int MC_LISTENING_PORT = 8080;
@@ -105,16 +107,16 @@ public class PristineIT {
    }
 
    @Test
-   public void getHomePage() {
+   public void getHealthCheck() {
       waitUntilStarted();
-      getJson("/", null, null).expectStatus().isOk();
+      getJson("/actuator/health", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
    }
 
    @Test
-   public void getHealthCheck() {
+   public void getHomePage() {
       waitUntilStarted();
-      getJson("/actuator/health", null, null).expectStatus().isOk();
+      getJson("/", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(mcContainer.getLogs());
    }
 

@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019.
+ * © Copyright Benedict Adamson 2019-20.
  *
  * This file is part of MC.
  *
@@ -27,15 +27,12 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.springframework.lang.NonNull;
 
 /**
  * <p>
  * Unit tests and auxiliary test code for the {@link Player} class
  */
-@RunWith(JUnitPlatform.class)
 public class PlayerTest {
 
    @Nested
