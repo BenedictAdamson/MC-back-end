@@ -30,8 +30,11 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
@@ -49,6 +52,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * (fresh) installation.
  * </p>
  */
+@TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
 public class PristineIT {
@@ -106,6 +110,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(2)
    public void getHealthCheck() {
       waitUntilStarted();
       getJson("/actuator/health", null, null).expectStatus().isOk();
@@ -113,6 +118,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(2)
    public void getHomePage() {
       waitUntilStarted();
       getJson("/", null, null).expectStatus().isOk();
@@ -126,6 +132,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(2)
    public void getPlayerDirectory() {
       waitUntilStarted();
       final var response = getJson("/api/player", null, null);
@@ -135,6 +142,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(1)
    public void start() {
       waitUntilStarted();
 
