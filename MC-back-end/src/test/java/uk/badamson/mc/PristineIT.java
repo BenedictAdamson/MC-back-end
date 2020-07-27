@@ -36,9 +36,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.WaitingConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -74,9 +74,8 @@ public class PristineIT {
    private final Network containersNetwork = Network.newNetwork();
 
    @Container
-   private final GenericContainer<?> dbContainer = new GenericContainer<>(
-            "mongo:4").withNetwork(containersNetwork).withNetworkAliases("db")
-                     .waitingFor(Wait.forListeningPort());
+   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
+            .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
    private final GenericContainer<?> mcContainer = new GenericContainer<>(
