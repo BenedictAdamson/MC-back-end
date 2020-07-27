@@ -128,7 +128,7 @@ public class PristineIT {
    private ResponseSpec getJson(final String path, final String query,
             final String fragment) {
       return connectWebTestClient(path, query, fragment).get()
-               .accept(MediaType.APPLICATION_JSON_UTF8).exchange();
+               .accept(MediaType.APPLICATION_JSON).exchange();
    }
 
    @Test
