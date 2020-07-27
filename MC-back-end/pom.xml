@@ -140,8 +140,6 @@
 							<excludes>
 								<exclude />
 							</excludes>
-							<!-- Work around OpenJDK bug: -->
-							<useSystemClassLoader>false</useSystemClassLoader>
 						</configuration>
 					</execution>
 					<execution>
