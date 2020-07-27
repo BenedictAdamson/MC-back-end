@@ -1,7 +1,7 @@
 // Jenkinsfile for the MC project
 
 /* 
- * © Copyright Benedict Adamson 2018-19.
+ * © Copyright Benedict Adamson 2018-20.
  * 
  * This file is part of MC.
  *
