@@ -110,7 +110,7 @@ public class WebSteps {
    }
 
    private void getJson(final String path) {
-      getResource(path, MediaType.APPLICATION_JSON_UTF8);
+      getResource(path, MediaType.APPLICATION_JSON);
    }
 
    private void getResource(final String path, final MediaType mediaType) {
@@ -198,7 +198,7 @@ public class WebSteps {
       final HttpMethod method = HttpMethod.valueOf(verb);
       assert method != null;
       response = client.method(method).uri(requestUri.getPath())
-               .contentType(MediaType.APPLICATION_JSON_UTF8).exchange();
+               .contentType(MediaType.APPLICATION_JSON).exchange();
    }
 
    @Given("not logged in")
@@ -218,8 +218,8 @@ public class WebSteps {
       Objects.requireNonNull(client, "client");
       setRequestUri(path);
       final var request = client.post().uri(requestUri.getPath())
-               .contentType(MediaType.APPLICATION_JSON_UTF8).syncBody(body)
-               .accept(MediaType.APPLICATION_JSON_UTF8);
+               .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
+               .accept(MediaType.APPLICATION_JSON);
       response = request.exchange();
    }
 

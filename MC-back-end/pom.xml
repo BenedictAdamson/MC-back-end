@@ -5,111 +5,57 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC</artifactId>
-		<version>2.4.1</version>
+		<version>2.4.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-back-end</artifactId>
 	<packaging>jar</packaging>
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>com.github.spotbugs</groupId>
-					<artifactId>spotbugs-maven-plugin</artifactId>
-					<executions>
-						<execution>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<effort>Max</effort>
-						<threshold>Low</threshold>
-						<xmlOutput>true</xmlOutput>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<!-- For running tests that do not need external (Maven controlled) 
-						setup and tear-down steps. This project uses the plugin to run both unit 
-						tests and the integration tests that use Testcontainers. -->
-					<executions>
-						<execution>
-							<id>JUnit-unit-test</id>
-							<phase>test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<configuration>
-								<includes>
-									<include>**/*Test.java</include>
-								</includes>
-								<!-- Ensure uses static inner test classes. -->
-								<excludes>
-									<exclude />
-								</excludes>
-								<!-- Work around OpenJDK bug: -->
-								<useSystemClassLoader>false</useSystemClassLoader>
-							</configuration>
-						</execution>
-						<execution>
-							<id>JUnit-integration-test</id>
-							<!-- This MUST be after spring-boot-maven-plugin, so it can use the 
-								repackaged JAR -->
-							<phase>integration-test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<configuration>
-								<includes>
-									<include>**/*IT.java</include>
-								</includes>
-								<!-- Ensure uses static inner test classes. -->
-								<excludes>
-									<exclude />
-								</excludes>
-								<!-- Work around OpenJDK bug: -->
-								<useSystemClassLoader>false</useSystemClassLoader>
-								<!-- The Testcontainers tests need to know the version ID of the 
-									Docker image. -->
-								<systemPropertyVariables>
-									<sutVersion>${project.version}</sutVersion>
-								</systemPropertyVariables>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<!-- This MUST be after spring-boot-maven-plugin, so it can use the 
-						repackaged JAR -->
-					<groupId>com.spotify</groupId>
-					<artifactId>dockerfile-maven-plugin</artifactId>
-					<executions>
-						<execution>
-							<id>default</id>
-							<goals>
-								<goal>build</goal>
-								<goal>push</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<repository>index.docker.io/benedictadamson/mc-back-end</repository>
-						<tag>${project.version}</tag>
-						<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-						<buildArgs>
-							<VERSION>${project.version}</VERSION>
-						</buildArgs>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<xmlOutput>true</xmlOutput>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
+					JAR -->
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>index.docker.io/benedictadamson/mc-back-end</repository>
+					<tag>${project.version}</tag>
+					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+					<buildArgs>
+						<VERSION>${project.version}</VERSION>
+					</buildArgs>
+				</configuration>
+			</plugin>
 			<plugin>
 				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
 					functionality of JUnit 5 -->
@@ -140,6 +86,10 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<executions>
 					<execution>
@@ -161,6 +111,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<rulesets>
+						<ruleset>src/test/resources/pmd-ruleset.xml</ruleset>
+					</rulesets>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -172,6 +127,50 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- For running tests that do not need external (Maven controlled) setup 
+					and tear-down steps. This project uses the plugin to run both unit tests 
+					and the integration tests that use Testcontainers. -->
+				<executions>
+					<execution>
+						<id>JUnit-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*Test.java</include>
+							</includes>
+							<!-- Ensure uses static inner test classes. -->
+							<excludes>
+								<exclude />
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>JUnit-integration-test</id>
+						<!-- This MUST be after spring-boot-maven-plugin, so it can use the 
+							repackaged JAR -->
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+							<excludes>
+								<include>**/Abstract*.java</include>
+							</excludes>
+							<!-- Work around OpenJDK bug: -->
+							<useSystemClassLoader>false</useSystemClassLoader>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -265,6 +264,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mongodb</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

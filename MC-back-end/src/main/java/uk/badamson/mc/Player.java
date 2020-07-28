@@ -120,18 +120,18 @@ public final class Player implements UserDetails {
    }
 
    @Override
-   public final Set<Authority> getAuthorities() {
+   public Set<Authority> getAuthorities() {
       return authorities;
    }
 
    @Override
-   public final String getPassword() {
+   public String getPassword() {
       return password;
    }
 
    @Override
    @NonNull
-   public final String getUsername() {
+   public String getUsername() {
       return username;
    }
 
@@ -144,25 +144,25 @@ public final class Player implements UserDetails {
    }
 
    @Override
-   public final boolean isAccountNonExpired() {
+   public boolean isAccountNonExpired() {
       // TODO player accounts can expire
       return true;
    }
 
    @Override
-   public final boolean isAccountNonLocked() {
+   public boolean isAccountNonLocked() {
       // TODO player acccounts can be locked
       return true;
    }
 
    @Override
-   public final boolean isCredentialsNonExpired() {
+   public boolean isCredentialsNonExpired() {
       // TODO player credentials can expire
       return true;
    }
 
    @Override
-   public final boolean isEnabled() {
+   public boolean isEnabled() {
       // TODO players can be disabled
       return true;
    }

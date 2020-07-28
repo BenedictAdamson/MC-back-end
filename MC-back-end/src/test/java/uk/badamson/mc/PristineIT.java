@@ -22,24 +22,25 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.WaitingConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -49,39 +50,23 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * (fresh) installation.
  * </p>
  */
+@TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT {
+public class PristineIT extends AbstractTestcontainersIT {
 
    public static final int MC_LISTENING_PORT = 8080;
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
 
-   public static final Path TARGET_DIR = Paths.get("target");
-
-   public static final Path DOCKERFILE = Paths.get("Dockerfile");
-
-   private static final String SUT_VERSION;
-   static {
-      SUT_VERSION = System.getProperty("sutVersion", "");
-      if (SUT_VERSION == null || SUT_VERSION.isEmpty()) {
-         throw new IllegalStateException("setVersion property not set");
-      }
-   }
-   private static final Path JAR = TARGET_DIR
-            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
-
    private final Network containersNetwork = Network.newNetwork();
 
    @Container
-   private final GenericContainer<?> dbContainer = new GenericContainer<>(
-            "mongo:4").withNetwork(containersNetwork).withNetworkAliases("db")
-                     .waitingFor(Wait.forListeningPort());
+   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
+            .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
-   private final GenericContainer<?> mcContainer = new GenericContainer<>(
-            new ImageFromDockerfile().withFileFromPath("Dockerfile", DOCKERFILE)
-                     .withFileFromPath("target/MC-back-end-.jar", JAR))
+   private final GenericContainer<?> mcContainer = createBasicContainer()
                               .withNetwork(containersNetwork)
                               .withNetworkAliases("mc")
                               .withCommand("--spring.data.mongodb.host=db")
@@ -107,6 +92,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(2)
    public void getHealthCheck() {
       waitUntilStarted();
       getJson("/actuator/health", null, null).expectStatus().isOk();
@@ -114,6 +100,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(2)
    public void getHomePage() {
       waitUntilStarted();
       getJson("/", null, null).expectStatus().isOk();
@@ -123,10 +110,11 @@ public class PristineIT {
    private ResponseSpec getJson(final String path, final String query,
             final String fragment) {
       return connectWebTestClient(path, query, fragment).get()
-               .accept(MediaType.APPLICATION_JSON_UTF8).exchange();
+               .accept(MediaType.APPLICATION_JSON).exchange();
    }
 
    @Test
+   @Order(2)
    public void getPlayerDirectory() {
       waitUntilStarted();
       final var response = getJson("/api/player", null, null);
@@ -136,6 +124,7 @@ public class PristineIT {
    }
 
    @Test
+   @Order(1)
    public void start() {
       waitUntilStarted();
 
@@ -149,6 +138,7 @@ public class PristineIT {
    }
 
    private void waitUntilStarted() {
+      assertTrue(dbContainer.isRunning(), "DB running");
       final var consumer = new WaitingConsumer();
       mcContainer.followOutput(consumer);
       try {
@@ -157,7 +147,7 @@ public class PristineIT {
                            .contains(EXPECTED_STARTED_MESSAGE),
                   30, TimeUnit.SECONDS);
       } catch (final TimeoutException e) {
-         // Fall through to the assertion check (which will fail)
+         throw new AssertionError(e);
       }
    }
 }
