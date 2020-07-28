@@ -105,6 +105,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<rulesets>
+						<ruleset>src/test/resources/pmd-ruleset.xml</ruleset>
+					</rulesets>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
