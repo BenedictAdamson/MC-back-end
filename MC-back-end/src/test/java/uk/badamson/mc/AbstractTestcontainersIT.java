@@ -51,14 +51,13 @@ abstract class AbstractTestcontainersIT {
       return new GenericContainer<>(createImage());
    }
 
-   private static final ImageFromDockerfile createImage() {
+   private static ImageFromDockerfile createImage() {
       return new ImageFromDockerfile()
                .withFileFromPath("Dockerfile", DOCKERFILE)
                .withFileFromPath("target/MC-back-end-.jar", getJarPath());
    }
 
-   private static final Properties getApplicationProperties()
-            throws IOException {
+   private static Properties getApplicationProperties() throws IOException {
       final InputStream stream = Thread.currentThread().getContextClassLoader()
                .getResourceAsStream("application.properties");
       if (stream == null) {
@@ -70,11 +69,11 @@ abstract class AbstractTestcontainersIT {
       return properties;
    }
 
-   private static final Path getJarPath() {
+   private static Path getJarPath() {
       return TARGET_DIR.resolve("MC-back-end-" + getSutVersion() + ".jar");
    }
 
-   private static final String getSutVersion() {
+   private static String getSutVersion() {
       String version;
       try {
          version = getApplicationProperties().getProperty("build.version");
