@@ -18,8 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -37,31 +41,52 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 abstract class AbstractTestcontainersIT {
 
    private static final Path TARGET_DIR = Paths.get("target");
-   private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
-   private static final String SUT_VERSION;
-   static {
-      SUT_VERSION = System.getProperty("sutVersion", "");
-      if (SUT_VERSION == null || SUT_VERSION.isEmpty()) {
-         throw new IllegalStateException("setVersion property not set");
-      }
-   }
-   private static final Path JAR = TARGET_DIR
-            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
+   private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
    /**
     * Use to initialise a @Container annotated GenericContainer value.
     */
-   protected final 
-   GenericContainer<?> createBasicContainer()
-   {
+   protected static final GenericContainer<?> createBasicContainer() {
       return new GenericContainer<>(createImage());
    }
-   
-   private final ImageFromDockerfile createImage() {
+
+   private static final ImageFromDockerfile createImage() {
       return new ImageFromDockerfile()
                .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withFileFromPath("target/MC-back-end-.jar", JAR);
+               .withFileFromPath("target/MC-back-end-.jar", getJarPath());
+   }
+
+   private static final Properties getApplicationProperties()
+            throws IOException {
+      final InputStream stream = Thread.currentThread().getContextClassLoader()
+               .getResourceAsStream("application.properties");
+      if (stream == null) {
+         throw new FileNotFoundException(
+                  "resource application.properties not found");
+      }
+      final Properties properties = new Properties();
+      properties.load(stream);
+      return properties;
+   }
+
+   private static final Path getJarPath() {
+      return TARGET_DIR.resolve("MC-back-end-" + getSutVersion() + ".jar");
+   }
+
+   private static final String getSutVersion() {
+      String version;
+      try {
+         version = getApplicationProperties().getProperty("build.version");
+      } catch (IOException e) {
+         throw new IllegalStateException(
+                  "unable to read application.properties resource", e);
+      }
+      if (version == null || version.isEmpty()) {
+         throw new IllegalStateException(
+                  "missing build.version property in application.properties resource");
+      }
+      return version;
    }
 
 }

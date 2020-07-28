@@ -10,6 +10,12 @@
 	<artifactId>MC-back-end</artifactId>
 	<packaging>jar</packaging>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
@@ -164,11 +170,6 @@
 							</excludes>
 							<!-- Work around OpenJDK bug: -->
 							<useSystemClassLoader>false</useSystemClassLoader>
-							<!-- The Testcontainers tests need to know the version ID of the Docker 
-								image. -->
-							<systemPropertyVariables>
-								<sutVersion>${project.version}</sutVersion>
-							</systemPropertyVariables>
 						</configuration>
 					</execution>
 				</executions>
