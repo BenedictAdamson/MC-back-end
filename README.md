@@ -32,9 +32,10 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
 * Development environment:
     * [Eclipse IDE](https://www.eclipse.org/ide/)
     * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
-    * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
+    * [Eclipse-PMD plugin](https://marketplace.eclipse.org/content/eclipse-pmd)
     * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
+    * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
      * [Git](https://git-scm.com/)
