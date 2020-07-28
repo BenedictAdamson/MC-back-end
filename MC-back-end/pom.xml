@@ -159,9 +159,8 @@
 							<includes>
 								<include>**/*IT.java</include>
 							</includes>
-							<!-- Ensure uses static inner test classes. -->
 							<excludes>
-								<exclude />
+								<include>**/Abstract*.java</include>
 							</excludes>
 							<!-- Work around OpenJDK bug: -->
 							<useSystemClassLoader>false</useSystemClassLoader>

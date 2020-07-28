@@ -56,25 +56,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT {
+public class PristineIT extends AbstractTestcontainersIT {
 
    public static final int MC_LISTENING_PORT = 8080;
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
-
-   public static final Path TARGET_DIR = Paths.get("target");
-
-   public static final Path DOCKERFILE = Paths.get("Dockerfile");
-
-   private static final String SUT_VERSION;
-   static {
-      SUT_VERSION = System.getProperty("sutVersion", "");
-      if (SUT_VERSION == null || SUT_VERSION.isEmpty()) {
-         throw new IllegalStateException("setVersion property not set");
-      }
-   }
-   private static final Path JAR = TARGET_DIR
-            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
 
    private final Network containersNetwork = Network.newNetwork();
 
@@ -83,9 +69,7 @@ public class PristineIT {
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
-   private final GenericContainer<?> mcContainer = new GenericContainer<>(
-            new ImageFromDockerfile().withFileFromPath("Dockerfile", DOCKERFILE)
-                     .withFileFromPath("target/MC-back-end-.jar", JAR))
+   private final GenericContainer<?> mcContainer = createBasicContainer()
                               .withNetwork(containersNetwork)
                               .withNetworkAliases("mc")
                               .withCommand("--spring.data.mongodb.host=db")
