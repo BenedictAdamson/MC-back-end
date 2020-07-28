@@ -73,7 +73,7 @@ public interface Service extends ReactiveUserDetailsService {
     *            {@linkplain Player#ADMINISTRATOR_USERNAME administrator}.
     */
    @Secured("ROLE_ADMIN")
-   public Mono<Void> add(final Player player);
+   Mono<Void> add(final Player player);
 
    /**
     * {@inheritDoc}
@@ -87,7 +87,7 @@ public interface Service extends ReactiveUserDetailsService {
     * </ul>
     */
    @Override
-   public Mono<UserDetails> findByUsername(String username);
+   Mono<UserDetails> findByUsername(String username);
 
    /**
     * <p>
@@ -99,7 +99,7 @@ public interface Service extends ReactiveUserDetailsService {
     *
     * @return the encoder.
     */
-   public PasswordEncoder getPasswordEncoder();
+   PasswordEncoder getPasswordEncoder();
 
    /**
     * <p>
@@ -120,6 +120,6 @@ public interface Service extends ReactiveUserDetailsService {
     *
     * @return a {@linkplain Publisher publisher} of the players.
     */
-   public Flux<Player> getPlayers();
+   Flux<Player> getPlayers();
 
 }

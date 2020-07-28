@@ -82,7 +82,7 @@ public class SolitaryIT {
                      || text.contains(EXPECTED_ERROR_MESSAGE);
          }, 11000, TimeUnit.MILLISECONDS);
       } catch (final TimeoutException e) {
-         // Fall through to the assertion check (which will fail)
+         throw new AssertionError(e);
       }
 
       final var logs = container.getLogs();

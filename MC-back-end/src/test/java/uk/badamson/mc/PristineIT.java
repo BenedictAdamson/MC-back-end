@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -156,6 +157,7 @@ public class PristineIT {
    }
 
    private void waitUntilStarted() {
+      assertTrue(dbContainer.isRunning(), "DB running");
       final var consumer = new WaitingConsumer();
       mcContainer.followOutput(consumer);
       try {
@@ -164,7 +166,7 @@ public class PristineIT {
                            .contains(EXPECTED_STARTED_MESSAGE),
                   30, TimeUnit.SECONDS);
       } catch (final TimeoutException e) {
-         // Fall through to the assertion check (which will fail)
+         throw new AssertionError(e);
       }
    }
 }
