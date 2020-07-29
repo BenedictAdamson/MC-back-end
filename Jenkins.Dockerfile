@@ -38,8 +38,8 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository -y \
    "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
 # Add Helm repository
-RUN curl https://helm.baltorepo.com/organization/signing.asc | sudo apt-key add -
-RUN echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+RUN curl https://helm.baltorepo.com/organization/signing.asc | apt-key add -
+RUN echo "deb https://baltocdn.com/helm/stable/debian/ all main" > /etc/apt/sources.list.d/helm-stable-debian.list
 # Install Docker and Helm
 RUN apt-get -y update && apt-get -y install \
    containerd.io \
