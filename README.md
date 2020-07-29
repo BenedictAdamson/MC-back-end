@@ -41,6 +41,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
 * Software configuration management:
      * [Git](https://git-scm.com/)
      * [GitHub](https://github.com)
+     * [Sonatype Nexus Repository Manager OSS](https://www.sonatype.com/nexus-repository-oss)
 * Building:
     * [Docker](https://www.docker.com/)
     * [Jenkins](https://jenkins.io/)
