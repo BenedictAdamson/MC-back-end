@@ -21,6 +21,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with MC.  If not, see <https://www.gnu.org/licenses/>.
 
+## Public Repositories
+
+MC is available from these public repositories:
+* Source code: [https://github.com/BenedictAdamson/MC](https://github.com/BenedictAdamson/MC)
+* Docker images:
+    * [https://hub.docker.com/r/benedictadamson/mc-front-end](https://hub.docker.com/r/benedictadamson/mc-front-end)
+    * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
+
 ## Technologies Used
 
 * Languages:
