@@ -54,7 +54,9 @@ MC is available from these public repositories:
 * Building:
     * [Docker](https://www.docker.com/)
     * [Jenkins](https://jenkins.io/)
-    * [Maven](https://maven.apache.org/)
+    * [Maven](https://maven.apache.org/), including various Maven plugins provided by the Maven project
+        * Spotify [Dockerfile Maven Plugin](https://github.com/spotify/dockerfile-maven)
+        * [Maven Frontend Plugin](https://github.com/eirslett/frontend-maven-plugin)
         * [Spring Boot Maven Plugin](https://docs.spring.io/spring-boot/docs/2.1.3.RELEASE/maven-plugin/)
         * [SpotBugs Maven Plugin](https://spotbugs.github.io/spotbugs-maven-plugin/index.html)
     * [Ubuntu 18.04](http://releases.ubuntu.com/18.04/)
