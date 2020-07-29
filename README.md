@@ -39,6 +39,7 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
+     * [Chartmuseum](https://github.com/helm/chartmuseum)
      * [Git](https://git-scm.com/)
      * [GitHub](https://github.com)
      * [Sonatype Nexus Repository Manager OSS](https://www.sonatype.com/nexus-repository-oss)
