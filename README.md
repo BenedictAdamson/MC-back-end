@@ -78,5 +78,6 @@ MC is available from these public repositories:
         * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
 * Deployment:
     * [Docker Hub](https://hub.docker.com/)
+    * [Helm](https://helm.sh/)
     * [Kubernetes](https://kubernetes.io/)
  
