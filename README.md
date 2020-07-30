@@ -21,6 +21,22 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with MC.  If not, see <https://www.gnu.org/licenses/>.
 
+## Components
+
+MC provides a web interface: you play it using a web browser, using a URL that indicates the installation (server) of MC that you wish to play. An installation of MC has several components that together provide the information used by your browser:
+* A *front end*, which runs in the browser.
+* A *front end HTTPD server*, which communicates with the browser. It provides your browser with the code for the front end. It forwards requests from the browser (or front end) that require complicated processing to the *back end*.
+* A *back end HTTPD server*, which does the complicated processing.
+* A *database server*, which records long term information.
+
+## Public Repositories
+
+MC is available from these public repositories:
+* Source code: [https://github.com/BenedictAdamson/MC](https://github.com/BenedictAdamson/MC)
+* Docker images:
+    * [https://hub.docker.com/r/benedictadamson/mc-front-end](https://hub.docker.com/r/benedictadamson/mc-front-end)
+    * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
+
 ## Technologies Used
 
 * Languages:
@@ -39,14 +55,19 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
     * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
+     * [Chartmuseum](https://github.com/helm/chartmuseum)
      * [Git](https://git-scm.com/)
      * [GitHub](https://github.com)
+     * [Sonatype Nexus Repository Manager OSS](https://www.sonatype.com/nexus-repository-oss)
 * Building:
     * [Docker](https://www.docker.com/)
     * [Jenkins](https://jenkins.io/)
-    * [Maven](https://maven.apache.org/)
+    * [Maven](https://maven.apache.org/), including various Maven plugins provided by the Maven project
+        * [Helm Maven Plugin](https://github.com/kiwigrid/helm-maven-plugin)
+        * [Maven Frontend Plugin](https://github.com/eirslett/frontend-maven-plugin)
         * [Spring Boot Maven Plugin](https://docs.spring.io/spring-boot/docs/2.1.3.RELEASE/maven-plugin/)
         * [SpotBugs Maven Plugin](https://spotbugs.github.io/spotbugs-maven-plugin/index.html)
+        * Spotify [Dockerfile Maven Plugin](https://github.com/spotify/dockerfile-maven)
     * [Ubuntu 18.04](http://releases.ubuntu.com/18.04/)
     * [Debian Backports](https://backports.debian.org/)
 * Static analysis and testing:
@@ -68,5 +89,6 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
         * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
 * Deployment:
     * [Docker Hub](https://hub.docker.com/)
+    * [Helm](https://helm.sh/)
     * [Kubernetes](https://kubernetes.io/)
  

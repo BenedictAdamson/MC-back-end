@@ -80,6 +80,7 @@ pipeline {
         success {
             archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
             archiveArtifacts artifacts: 'MC-front-end/target/MC-front-end-*.tgz', fingerprint: true
+            archiveArtifacts artifacts: 'MC-integration/target/helm/repo/mc-*.tgz', fingerprint: true
         }
     }
 }

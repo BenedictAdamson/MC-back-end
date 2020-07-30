@@ -30,31 +30,33 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * <p>
- * Abstract base class for system tests of the MC back-end, using
- * Testcontainers.
+ * A Testcontainers Docker container for the MC-back-end.
  * </p>
  * <p>
- * These tests build the Docker image using the real Dockerfile, so they also
- * tests that Dockerfile.
+ * This class builds the Docker image for the container using the real
+ * Dockerfile, so it also tests that Dockerfile.
  * </p>
  */
-abstract class AbstractTestcontainersIT {
+final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
+
+   public static final String VERSION = getVersion();
 
    private static final Path TARGET_DIR = Paths.get("target");
 
    private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
-   /**
-    * Use to initialise a @Container annotated GenericContainer value.
-    */
-   protected static final GenericContainer<?> createBasicContainer() {
-      return new GenericContainer<>(createImage());
+   private static final ImageFromDockerfile IMAGE = createImage(VERSION);
+
+   McBackEndContainer() {
+      super(IMAGE);
    }
 
-   private static ImageFromDockerfile createImage() {
+   private static ImageFromDockerfile createImage(final String version) {
+      final var jarPath = getJarPath(version);
       return new ImageFromDockerfile()
                .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withFileFromPath("target/MC-back-end-.jar", getJarPath());
+               .withFileFromPath(jarPath.toString(), jarPath)
+               .withBuildArg("VERSION", version);
    }
 
    private static Properties getApplicationProperties() throws IOException {
@@ -69,11 +71,11 @@ abstract class AbstractTestcontainersIT {
       return properties;
    }
 
-   private static Path getJarPath() {
-      return TARGET_DIR.resolve("MC-back-end-" + getSutVersion() + ".jar");
+   private static Path getJarPath(final String version) {
+      return TARGET_DIR.resolve("MC-back-end-" + version + ".jar");
    }
 
-   private static String getSutVersion() {
+   private static String getVersion() {
       String version;
       try {
          version = getApplicationProperties().getProperty("build.version");

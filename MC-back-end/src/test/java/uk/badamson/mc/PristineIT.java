@@ -53,7 +53,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT extends AbstractTestcontainersIT {
+public class PristineIT {
 
    public static final int MC_LISTENING_PORT = 8080;
 
@@ -66,11 +66,10 @@ public class PristineIT extends AbstractTestcontainersIT {
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
-   private final GenericContainer<?> mcContainer = createBasicContainer()
-                              .withNetwork(containersNetwork)
-                              .withNetworkAliases("mc")
-                              .withCommand("--spring.data.mongodb.host=db")
-                              .withExposedPorts(MC_LISTENING_PORT);
+   private final McBackEndContainer mcContainer = new McBackEndContainer()
+            .withNetwork(containersNetwork).withNetworkAliases("mc")
+            .withCommand("--spring.data.mongodb.host=db")
+            .withExposedPorts(MC_LISTENING_PORT);
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
