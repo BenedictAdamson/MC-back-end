@@ -30,25 +30,21 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * <p>
- * Abstract base class for system tests of the MC back-end, using
- * Testcontainers.
+ * A Testcontainers Docker container for the MC-back-end.
  * </p>
  * <p>
- * These tests build the Docker image using the real Dockerfile, so they also
- * tests that Dockerfile.
+ * This class builds the Docker image for the container using the real
+ * Dockerfile, so it also tests that Dockerfile.
  * </p>
  */
-abstract class AbstractTestcontainersIT {
+final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final Path TARGET_DIR = Paths.get("target");
 
    private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
-   /**
-    * Use to initialise a @Container annotated GenericContainer value.
-    */
-   protected static final GenericContainer<?> createBasicContainer() {
-      return new GenericContainer<>(createImage(getSutVersion()));
+   McBackEndContainer() {
+      super(createImage(getSutVersion()));
    }
 
    private static ImageFromDockerfile createImage(final String version) {

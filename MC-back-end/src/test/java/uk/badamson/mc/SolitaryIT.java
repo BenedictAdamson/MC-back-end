@@ -45,13 +45,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers
 @Tag("IT")
-public class SolitaryIT extends AbstractTestcontainersIT {
+public class SolitaryIT {
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
    public static final String EXPECTED_ERROR_MESSAGE = "Connection refused";
 
    @Container
-   private final GenericContainer<?> container = createBasicContainer();
+   private final McBackEndContainer container = new McBackEndContainer();
 
    @Test
    public void start() {
