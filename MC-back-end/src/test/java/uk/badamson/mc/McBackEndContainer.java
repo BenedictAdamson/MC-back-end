@@ -43,8 +43,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
+   private static final ImageFromDockerfile IMAGE = createImage(getVersion());
+
    McBackEndContainer() {
-      super(createImage(getSutVersion()));
+      super(IMAGE);
    }
 
    private static ImageFromDockerfile createImage(final String version) {
@@ -71,7 +73,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return TARGET_DIR.resolve("MC-back-end-" + version + ".jar");
    }
 
-   private static String getSutVersion() {
+   private static String getVersion() {
       String version;
       try {
          version = getApplicationProperties().getProperty("build.version");
