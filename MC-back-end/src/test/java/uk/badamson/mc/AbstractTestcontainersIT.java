@@ -48,13 +48,13 @@ abstract class AbstractTestcontainersIT {
     * Use to initialise a @Container annotated GenericContainer value.
     */
    protected static final GenericContainer<?> createBasicContainer() {
-      return new GenericContainer<>(createImage());
+      return new GenericContainer<>(createImage(getSutVersion()));
    }
 
-   private static ImageFromDockerfile createImage() {
+   private static ImageFromDockerfile createImage(final String version) {
       return new ImageFromDockerfile()
-               .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withFileFromPath("target/MC-back-end-.jar", getJarPath());
+               .withFileFromPath("Dockerfile", DOCKERFILE).withFileFromPath(
+                        "target/MC-back-end-.jar", getJarPath(version));
    }
 
    private static Properties getApplicationProperties() throws IOException {
@@ -69,8 +69,8 @@ abstract class AbstractTestcontainersIT {
       return properties;
    }
 
-   private static Path getJarPath() {
-      return TARGET_DIR.resolve("MC-back-end-" + getSutVersion() + ".jar");
+   private static Path getJarPath(final String version) {
+      return TARGET_DIR.resolve("MC-back-end-" + version + ".jar");
    }
 
    private static String getSutVersion() {
