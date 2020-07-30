@@ -39,11 +39,13 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
  */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
+   public static final String VERSION = getVersion();
+
    private static final Path TARGET_DIR = Paths.get("target");
 
    private static final Path DOCKERFILE = Paths.get("Dockerfile");
 
-   private static final ImageFromDockerfile IMAGE = createImage(getVersion());
+   private static final ImageFromDockerfile IMAGE = createImage(VERSION);
 
    McBackEndContainer() {
       super(IMAGE);
