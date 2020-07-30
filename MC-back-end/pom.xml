@@ -9,6 +9,9 @@
 	</parent>
 	<artifactId>MC-back-end</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<docker.buildArg.VERSION>${project.version}</docker.buildArg.VERSION>
+	</properties>
 	<build>
 		<resources>
 			<resource>
@@ -49,24 +52,37 @@
 					JAR. Otherwise the JAR will not be an executable JAR, and attempting to run 
 					the Docker image will result in an error message such as "no main manifest 
 					attribute". -->
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>default</id>
+						<id>Docker-build</id>
+						<!-- The plugin binds the docker:build goal to the install phase by 
+							default, but we need it to run in the package phase so the subsequent Helm 
+							packaging, in MC-integration, can make use of the Docker image built here. -->
+						<phase>package</phase>
 						<goals>
 							<goal>build</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>Docker-push</id>
+						<goals>
 							<goal>push</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<repository>index.docker.io/benedictadamson/mc-back-end</repository>
-					<tag>${project.version}</tag>
-					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-					<buildArgs>
-						<VERSION>${project.version}</VERSION>
-					</buildArgs>
+					<image>
+						<registry>index.docker.io</registry>
+						<name>benedictadamson/mc-back-end</name>
+						<build>
+							<tags>
+								<tag>${project.version}</tag>
+							</tags>
+							<dockerFile>Dockerfile</dockerFile>
+						</build>
+					</image>
 				</configuration>
 			</plugin>
 			<plugin>
