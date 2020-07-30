@@ -52,9 +52,11 @@ abstract class AbstractTestcontainersIT {
    }
 
    private static ImageFromDockerfile createImage(final String version) {
+      final var jarPath = getJarPath(version);
       return new ImageFromDockerfile()
-               .withFileFromPath("Dockerfile", DOCKERFILE).withFileFromPath(
-                        "target/MC-back-end-.jar", getJarPath(version));
+               .withFileFromPath("Dockerfile", DOCKERFILE)
+               .withFileFromPath(jarPath.toString(), jarPath)
+               .withBuildArg("VERSION", version);
    }
 
    private static Properties getApplicationProperties() throws IOException {
