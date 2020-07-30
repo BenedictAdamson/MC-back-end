@@ -21,6 +21,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with MC.  If not, see <https://www.gnu.org/licenses/>.
 
+## Components
+
+MC provides a web interface: you play it using a web browser, using a URL that indicates the installation (server) of MC that you wish to play. An installation of MC has several components that together provide the information used by your browser:
+* A *front end*, which runs in the browser.
+* A *front end HTTPD server*, which communicates with the browser. It provides your browser with the code for the front end. It forwards requests from the browser (or front end) that require complicated processing to the *back end*.
+* A *back end HTTPD server*, which does the complicated processing.
+* A *database server*, which records long term information.
+
 ## Public Repositories
 
 MC is available from these public repositories:
