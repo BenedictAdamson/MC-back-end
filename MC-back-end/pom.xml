@@ -74,8 +74,12 @@
 				</executions>
 				<configuration>
 					<image>
-						<name>benedictadamson/mc-back-end:${project.version}</name>
+						<registry>index.docker.io</registry>
+						<name>benedictadamson/mc-back-end</name>
 						<build>
+							<tags>
+								<tag>${project.version}</tag>
+							</tags>
 							<dockerFile>Dockerfile</dockerFile>
 						</build>
 					</image>
