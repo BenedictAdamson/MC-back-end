@@ -61,6 +61,9 @@ public class PristineIT {
 
    private final Network containersNetwork = Network.newNetwork();
 
+   /**
+    * By default the MongoDB instance starts without authentication enabled.
+    */
    @Container
    private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
             .withNetwork(containersNetwork).withNetworkAliases("db");
