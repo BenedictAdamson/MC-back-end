@@ -37,7 +37,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.WaitingConsumer;
@@ -61,6 +60,9 @@ public class PristineIT {
 
    private final Network containersNetwork = Network.newNetwork();
 
+   /**
+    * By default the MongoDB instance starts without authentication enabled.
+    */
    @Container
    private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
             .withNetwork(containersNetwork).withNetworkAliases("db");
