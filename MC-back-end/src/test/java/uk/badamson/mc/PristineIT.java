@@ -64,7 +64,7 @@ public class PristineIT {
     * By default the MongoDB instance starts without authentication enabled.
     */
    @Container
-   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
+   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4.2")
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
