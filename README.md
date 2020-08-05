@@ -34,8 +34,9 @@ MC provides a web interface: you play it using a web browser, using a URL that i
 MC is available from these public repositories:
 * Source code: [https://github.com/BenedictAdamson/MC](https://github.com/BenedictAdamson/MC)
 * Docker images:
-    * [https://hub.docker.com/r/benedictadamson/mc-front-end](https://hub.docker.com/r/benedictadamson/mc-front-end)
     * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
+    * [https://hub.docker.com/r/benedictadamson/mc-database](https://hub.docker.com/r/benedictadamson/mc-database)
+    * [https://hub.docker.com/r/benedictadamson/mc-front-end-srv](https://hub.docker.com/r/benedictadamson/mc-front-end-srv)
 
 ## Technologies Used
 
