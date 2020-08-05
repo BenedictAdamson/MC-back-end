@@ -44,7 +44,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers
 @Tag("IT")
-public class SolitaryIT {
+public class SolitaryBackEndIT {
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
    public static final String EXPECTED_ERROR_MESSAGE = "Connection refused";
