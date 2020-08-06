@@ -36,7 +36,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.UserDetailsTest;
 
 /**
  * <p>
@@ -101,7 +100,6 @@ public class ServiceTest {
       assertTrue(!(administrator && userDetails == null),
                "Always have user details for the administrator.");
       if (userDetails != null) {
-         UserDetailsTest.assertInvariants(userDetails);
          assertThat("The administrator has a complete set of authorities.",
                   userDetails.getAuthorities(),
                   administrator ? is(Authority.ALL) : anything());
