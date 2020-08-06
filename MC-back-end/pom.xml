@@ -199,6 +199,12 @@
 	</reporting>
 	<dependencies>
 		<dependency>
+			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-model</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<!-- Third-party dependencies: -->
+		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
