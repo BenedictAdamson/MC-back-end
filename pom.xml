@@ -251,5 +251,6 @@
 		<module>MC-database</module>
 		<module>MC-front-end</module>
 		<module>MC-integration</module>
+		<module>MC-model</module>
 	</modules>
 </project>
