@@ -29,7 +29,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.PlayerTest;
 
 /**
  * <p>
@@ -185,7 +184,6 @@ public class PlayerRepositoryTest {
       assertNotNull(publisher, "result");
       final var player = publisher.block();
       if (player != null) {
-         PlayerTest.assertInvariants(player);
          assertEquals(username, player.getUsername(),
                   "Found the player with the given ID");
       }
@@ -198,7 +196,6 @@ public class PlayerRepositoryTest {
       final var publisher = repository.save(player);
 
       assertInvariants(repository);
-      PlayerTest.assertInvariants(player);
       assertNotNull(publisher, "result");
 
       return publisher;

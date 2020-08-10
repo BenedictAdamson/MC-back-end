@@ -29,6 +29,8 @@ MC provides a web interface: you play it using a web browser, using a URL that i
 * A *back end HTTPD server*, which does the complicated processing.
 * A *database server*, which records long term information.
 
+The back end HTTPD server makes use of code in the *model* component.
+
 ## Public Repositories
 
 MC is available from these public repositories:
@@ -43,6 +45,8 @@ MC is available from these public repositories:
 * Languages:
     * [Java 11](https://docs.oracle.com/javase/11/)
     * [Typescript](https://www.typescriptlang.org/)
+* Servers:
+    * [mongoDB](https://www.mongodb.com/)
 * Java Annotations:
     * [JCIP annotations](http://jcip.net/annotations/doc/net/jcip/annotations/package-summary.html)
     * [SpotBugs annotations](https://javadoc.io/doc/com.github.spotbugs/spotbugs-annotations/3.1.8)

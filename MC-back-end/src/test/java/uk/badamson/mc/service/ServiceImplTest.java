@@ -42,7 +42,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.PlayerTest;
 import uk.badamson.mc.repository.PlayerRepository;
 import uk.badamson.mc.repository.PlayerRepositoryTest;
 
@@ -144,7 +143,6 @@ public class ServiceImplTest {
          final List<Player> playersList = new ArrayList<>(1);
          players.subscribe(p -> playersList.add(p));
          playersList.forEach(Assertions::assertNotNull);
-         playersList.forEach(PlayerTest::assertInvariants);
          assertThat(
                   "the list of players includes a player named \"Administrator\"",
                   playersList,
