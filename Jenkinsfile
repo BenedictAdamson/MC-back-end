@@ -82,6 +82,7 @@ pipeline {
             archiveArtifacts artifacts: 'MC-front-end/target/MC-front-end-*.tgz', fingerprint: true
             archiveArtifacts artifacts: 'MC-integration/target/helm/repo/mc-*.tgz', fingerprint: true
             archiveArtifacts artifacts: 'MC-model/target/MC-model-*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'MC-spec/target/MC-spec-*.jar', fingerprint: true
         }
     }
 }
