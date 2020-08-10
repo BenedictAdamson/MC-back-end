@@ -90,8 +90,7 @@
 							maxmemory="512m" classpathref="maven.test.classpath">
 							<arg value="--include-engine" />
 							<arg value="cucumber" />
-							<arg value="--scan-classpath" />
-							<arg value="${project.build.testOutputDirectory}" />
+							<arg value="--select-package=uk.badamson.mc" />
 							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
 						</java>
 					</target>
