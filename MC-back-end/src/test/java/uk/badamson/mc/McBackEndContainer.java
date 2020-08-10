@@ -47,10 +47,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final ImageFromDockerfile IMAGE = createImage(VERSION);
 
-   McBackEndContainer() {
-      super(IMAGE);
-   }
-
    private static ImageFromDockerfile createImage(final String version) {
       final var jarPath = getJarPath(version);
       return new ImageFromDockerfile()
@@ -79,7 +75,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       String version;
       try {
          version = getApplicationProperties().getProperty("build.version");
-      } catch (IOException e) {
+      } catch (final IOException e) {
          throw new IllegalStateException(
                   "unable to read application.properties resource", e);
       }
@@ -88,6 +84,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                   "missing build.version property in application.properties resource");
       }
       return version;
+   }
+
+   McBackEndContainer() {
+      super(IMAGE);
    }
 
 }
