@@ -24,12 +24,19 @@ along with MC.  If not, see <https://www.gnu.org/licenses/>.
 ## Components
 
 MC provides a web interface: you play it using a web browser, using a URL that indicates the installation (server) of MC that you wish to play. An installation of MC has several components that together provide the information used by your browser:
-* A *front end*, which runs in the browser.
-* A *front end HTTPD server*, which communicates with the browser. It provides your browser with the code for the front end. It forwards requests from the browser (or front end) that require complicated processing to the *back end*.
-* A *back end HTTPD server*, which does the complicated processing.
+* A *front-end*, which runs in the browser.
+* An *HTTP reverse proxy* (also call the *ingress*), which communicates with the browser. It forwards requests from the browser (or front-end) to the *front-end HTTP server* and to the *back end HTTP server*, as appropriate for each request.
+* A *front-end HTTP server*, which provides your browser with the code for the front-end.
+* A *back end HTTP server*, which does the complicated processing.
 * A *database server*, which records long term information.
 
-The back end HTTPD server makes use of code in the *model* component.
+The back end HTTP server makes use of code in the *model* component.
+
+The system has separate front-end and back-end HTTP servers because of the technical difficulty of combining them.
+The front-end HTTP serving must provide identical static front-end code at multiple URLs,
+because of the [Angular](https://angular.io/) *routing* of the front-end.
+The back-end HTTP serving, by [Spring Boot](http://spring.io/projects/spring-boot),
+is more suitable for fixed routing of static resources, with each resource having only one URL.
 
 ## Public Repositories
 
