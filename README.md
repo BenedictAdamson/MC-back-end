@@ -47,6 +47,7 @@ MC is available from these public repositories:
     * [Typescript](https://www.typescriptlang.org/)
 * Servers:
     * [mongoDB](https://www.mongodb.com/)
+    * [NGINX](https://www.nginx.com/)
 * Java Annotations:
     * [JCIP annotations](http://jcip.net/annotations/doc/net/jcip/annotations/package-summary.html)
     * [SpotBugs annotations](https://javadoc.io/doc/com.github.spotbugs/spotbugs-annotations/3.1.8)
