@@ -113,6 +113,17 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<additionalClasspathElements>
+						<!-- By the time the integration test run we have a packed JAR, so 
+							failsafe will put that on the classpath, rather than the directory holding 
+							the unpacked JARs. Unfortunately, the JAR is a Spring Boot JAR, so the content 
+							of that JAR does not have the normal layout, preventing failsafe from finding 
+							resources in it. So must explicitly tell failsafe to look in the directory 
+							of unpacked resources. -->
+						<additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+					</additionalClasspathElements>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
