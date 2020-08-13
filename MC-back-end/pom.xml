@@ -105,6 +105,14 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
 					JAR -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
