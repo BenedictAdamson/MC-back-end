@@ -40,6 +40,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -82,15 +83,8 @@ public class WebSteps {
    private PasswordEncoder passwordEncoder;
    
    private URI requestUri;
-   private Boolean csrfTokenSet;
-   private Boolean userSet;
    private WebTestClient.ResponseSpec response;
    ListBodySpec<Player> responsePlayerList;
-
-   @Given("a fresh instance of MC")
-   public void a_fresh_instance_of_MC() {
-      // Do nothing
-   }
 
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {
@@ -149,8 +143,6 @@ public class WebSteps {
 
    @Given("logged in as {string}")
    public void logged_in_as(final String name) {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
       client = client.mutateWith(mockUser(name));
    }
 
@@ -197,16 +189,10 @@ public class WebSteps {
                .contentType(MediaType.APPLICATION_JSON).exchange();
    }
 
-   @Given("not logged in")
-   public void not_logged_in() {
-      requireUnspecifiedUser();
-      userSet = Boolean.FALSE;
-   }
-
-   @Given("not presenting a CSRF token")
-   public void not_presenting_a_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.FALSE;
+   
+   @Before
+   public void beginScenario() 
+   {
    }
 
    private void postResource(final String path, final Object body) {
@@ -221,21 +207,7 @@ public class WebSteps {
 
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.TRUE;
       client = client.mutateWith(csrf());
-   }
-
-   private void requireUnspecifiedCsrfToken() {
-      if (csrfTokenSet != null) {
-         throw new IllegalStateException("Contradictory CSRF settings");
-      }
-   }
-
-   private void requireUnspecifiedUser() {
-      if (userSet != null) {
-         throw new IllegalStateException("Contradictory user settings");
-      }
    }
 
    private void responseIsOk() {
@@ -298,8 +270,6 @@ public class WebSteps {
 
    @Given("user authenticated as Administrator")
    public void user_authenticated_as_Administrator() {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
       final UserDetails administrator = service
                .findByUsername(Player.ADMINISTRATOR_USERNAME).block();
       assert administrator != null;
