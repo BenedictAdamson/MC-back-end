@@ -58,6 +58,10 @@ import uk.badamson.mc.service.Service;
 @DirtiesContext
 public class WebSteps {
 
+   private static final String SCHEME = "http";
+
+   private static final String HOST = "example.com";
+
    static {
       Hooks.onOperatorDebug();
    }
@@ -76,10 +80,7 @@ public class WebSteps {
 
    @Autowired
    private PasswordEncoder passwordEncoder;
-
-   private final String scheme = "http";
-
-   private String dnsName;
+   
    private URI requestUri;
    private Boolean csrfTokenSet;
    private Boolean userSet;
@@ -184,11 +185,6 @@ public class WebSteps {
       responseIsOk();
    }
 
-   @Then("MC serves the web page")
-   public void mc_serves_the_web_page() {
-      responseIsOk();
-   }
-
    @When("modifying the unknown resource with a {string} at {string}")
    public void modifying_the_unknown_resource_with_a(final String verb,
             final String path) {
@@ -247,11 +243,11 @@ public class WebSteps {
    }
 
    private void setRequestUri(final String path) {
-      final String authority = dnsName;
+      final String authority = HOST;
       final String query = null;
       final String fragment = null;
       try {
-         requestUri = new URI(scheme, authority, path, query, fragment);
+         requestUri = new URI(SCHEME, authority, path, query, fragment);
       } catch (final URISyntaxException e) {
          throw new IllegalArgumentException(e);
       }
@@ -266,11 +262,6 @@ public class WebSteps {
       playerRepository.save(
                new Player(player, passwordEncoder.encode(password), Set.of()))
                .block();
-   }
-
-   @Given("the DNS name, example.com, of an MC server")
-   public void the_DNS_name_of_an_MC_server() {
-      dnsName = "example.com";
    }
 
    @Then("the list of players has one player")
@@ -298,11 +289,6 @@ public class WebSteps {
    public void the_potential_player_gives_the_DNS_name_to_a_web_browser() {
       final String path = null;
       getHtml(path);
-   }
-
-   @When("the potential player gives the obvious URL http://example.com/ to a web browser")
-   public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      getHtml("/");
    }
 
    @Then("the response message is a list of players")
