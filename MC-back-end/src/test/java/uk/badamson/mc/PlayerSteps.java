@@ -56,7 +56,7 @@ import uk.badamson.mc.service.Service;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DirtiesContext
-public class WebSteps {
+public class PlayerSteps {
 
    private static final String SCHEME = "http";
 
