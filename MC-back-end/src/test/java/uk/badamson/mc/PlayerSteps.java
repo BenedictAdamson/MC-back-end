@@ -23,14 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,10 +54,6 @@ import uk.badamson.mc.service.Service;
 @DirtiesContext
 public class PlayerSteps {
 
-   private static final String SCHEME = "http";
-
-   private static final String HOST = "example.com";
-
    static {
       Hooks.onOperatorDebug();
    }
@@ -80,7 +73,6 @@ public class PlayerSteps {
    @Autowired
    private PasswordEncoder passwordEncoder;
 
-   private URI requestUri;
    private WebTestClient.ResponseSpec response;
    ListBodySpec<Player> responsePlayerList;
 
@@ -112,9 +104,7 @@ public class PlayerSteps {
 
    private void getResource(final String path, final MediaType mediaType) {
       Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      response = client.get().uri(requestUri.getPath()).accept(mediaType)
-               .exchange();
+      response = client.get().uri(path).accept(mediaType).exchange();
    }
 
    @When("getting the players")
@@ -164,8 +154,7 @@ public class PlayerSteps {
 
    private void postResource(final String path, final Object body) {
       Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      final var request = client.post().uri(requestUri.getPath())
+      final var request = client.post().uri(path)
                .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
                .accept(MediaType.APPLICATION_JSON);
       response = request.exchange();
@@ -178,17 +167,6 @@ public class PlayerSteps {
 
    private void responseIsOk() {
       response.expectStatus().isOk();
-   }
-
-   private void setRequestUri(final String path) {
-      final String authority = HOST;
-      final String query = null;
-      final String fragment = null;
-      try {
-         requestUri = new URI(SCHEME, authority, path, query, fragment);
-      } catch (final URISyntaxException e) {
-         throw new IllegalArgumentException(e);
-      }
    }
 
    @Given("that player {string} exists with  password {string}")
