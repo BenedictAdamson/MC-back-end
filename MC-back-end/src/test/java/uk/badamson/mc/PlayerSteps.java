@@ -123,7 +123,7 @@ public class PlayerSteps {
 
    @When("getting the players")
    public void getting_the_players() {
-      getJson("/api/player");
+      worldCore.getJson("/api/player");
    }
 
    @When("log in as {string} using password {string}")
@@ -164,7 +164,7 @@ public class PlayerSteps {
 
    @Then("MC serves the resource")
    public void mc_serves_the_players_resource() {
-      responseIsOk();
+      worldCore.responseIsOk();
    }
 
    private void postResource(final String path, final Object body) {
@@ -237,7 +237,7 @@ public class PlayerSteps {
 
    @Then("the response message is a list of players")
    public void the_response_message_is_a_list_of_players() {
-      responsePlayerList = response.expectBodyList(Player.class);
+      responsePlayerList = worldCore.getResponse().expectBodyList(Player.class);
    }
 
    @Given("user authenticated as Administrator")
