@@ -31,7 +31,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,7 +80,7 @@ public class WebSteps {
 
    @Autowired
    private PasswordEncoder passwordEncoder;
-   
+
    private URI requestUri;
    private WebTestClient.ResponseSpec response;
    ListBodySpec<Player> responsePlayerList;
@@ -91,6 +90,10 @@ public class WebSteps {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
       postResource("/api/player", new Player(name, password, Set.of()));
+   }
+
+   @Before
+   public void beginScenario() {
    }
 
    @Then("can get the list of players")
@@ -119,11 +122,6 @@ public class WebSteps {
    @When("getting the players")
    public void getting_the_players() {
       getJson("/api/player");
-   }
-
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
-      getJson(path);
    }
 
    @When("log in as {string} using password {string}")
@@ -162,37 +160,9 @@ public class WebSteps {
       response.expectStatus().isForbidden();
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      response.expectStatus().isForbidden();
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      response.expectStatus().isNotFound();
-   }
-
    @Then("MC serves the resource")
    public void mc_serves_the_players_resource() {
       responseIsOk();
-   }
-
-   @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      final HttpMethod method = HttpMethod.valueOf(verb);
-      assert method != null;
-      response = client.method(method).uri(requestUri.getPath())
-               .contentType(MediaType.APPLICATION_JSON).exchange();
-   }
-
-   
-   @Before
-   public void beginScenario() 
-   {
    }
 
    private void postResource(final String path, final Object body) {
