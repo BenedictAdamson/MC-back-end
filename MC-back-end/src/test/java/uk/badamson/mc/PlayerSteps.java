@@ -49,8 +49,7 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * Definitions of BDD steps for the Cucumber-JVM BDD testing tool, for features
- * about the basic operation of an MC server.
+ * Definitions of BDD steps, for features about players.
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
