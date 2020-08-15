@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 
+import io.cucumber.java.Before;
 import io.cucumber.spring.ScenarioScope;
 
 /*
@@ -42,7 +42,6 @@ import io.cucumber.spring.ScenarioScope;
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Component
 @ScenarioScope
 public class WorldCore {
 
@@ -64,7 +63,6 @@ public class WorldCore {
    @Autowired
    private ApplicationContext context;
 
-   @Autowired
    private WebTestClient client;
 
    private WebTestClient.ResponseSpec response;
@@ -108,6 +106,11 @@ public class WorldCore {
                .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
                .accept(MediaType.APPLICATION_JSON);
       exchange(request);
+   }
+
+   @Before
+   public void prepareScenario() {
+      client = WebTestClient.bindToApplicationContext(context).build();
    }
 
    public void responseIsOk() {

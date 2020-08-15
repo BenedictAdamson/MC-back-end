@@ -18,14 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CucumberBeansConfiguration {
 
-   @Bean
-   WorldCore worldCore() {
-      return new WorldCore();
-   }
 }
