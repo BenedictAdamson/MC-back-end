@@ -179,7 +179,7 @@ public class PlayerSteps {
             final String password) {
       Objects.requireNonNull(player, "player");
       Objects.requireNonNull(password, "password");
-      Objects.requireNonNull(service, "service");
+      Objects.requireNonNull(playerRepository, "playerRepository");
       playerRepository.save(
                new Player(player, passwordEncoder.encode(password), Set.of()))
                .block();
