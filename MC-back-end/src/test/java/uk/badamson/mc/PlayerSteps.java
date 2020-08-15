@@ -34,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import io.cucumber.java.Before;
@@ -128,7 +129,7 @@ public class PlayerSteps {
 
    @Given("logged in as {string}")
    public void logged_in_as(final String name) {
-      client = client.mutateWith(mockUser(name));
+      mutateClientWith(mockUser(name));
    }
 
    @Then("MC accepts the addition")
@@ -152,6 +153,10 @@ public class PlayerSteps {
       worldCore.responseIsOk();
    }
 
+   private void mutateClientWith(final WebTestClientConfigurer configurer) {
+      client = client.mutateWith(configurer);
+   }
+
    private void postResource(final String path, final Object body) {
       Objects.requireNonNull(client, "client");
       final var request = client.post().uri(path)
@@ -162,7 +167,7 @@ public class PlayerSteps {
 
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      client = client.mutateWith(csrf());
+      mutateClientWith(csrf());
    }
 
    private void responseIsOk() {
@@ -217,7 +222,7 @@ public class PlayerSteps {
       final UserDetails administrator = service
                .findByUsername(Player.ADMINISTRATOR_USERNAME).block();
       assert administrator != null;
-      client = client.mutateWith(mockUser(administrator));
+      mutateClientWith(mockUser(administrator));
    }
 
 }
