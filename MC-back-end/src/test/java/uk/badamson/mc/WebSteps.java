@@ -67,6 +67,9 @@ public class WebSteps {
    }
 
    @Autowired
+   private WorldCore worldCore;
+
+   @Autowired
    private ApplicationContext context;
 
    @Autowired

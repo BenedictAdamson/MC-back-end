@@ -54,6 +54,9 @@ public class UnknownPageSteps {
    }
 
    @Autowired
+   private WorldCore worldCore;
+
+   @Autowired
    private ApplicationContext context;
 
    @Autowired
