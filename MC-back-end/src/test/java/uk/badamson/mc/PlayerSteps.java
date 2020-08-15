@@ -69,9 +69,6 @@ public class PlayerSteps {
    private WorldCore worldCore;
 
    @Autowired
-   private ApplicationContext context;
-
-   @Autowired
    private WebTestClient client;
 
    @Autowired
@@ -114,7 +111,6 @@ public class PlayerSteps {
    }
 
    private void getResource(final String path, final MediaType mediaType) {
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
       setRequestUri(path);
       response = client.get().uri(requestUri.getPath()).accept(mediaType)
@@ -131,7 +127,6 @@ public class PlayerSteps {
             final String password) {
       Objects.requireNonNull(player, "player");
       Objects.requireNonNull(password, "password");
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
 
       response = client.post().uri("/login")
@@ -168,7 +163,6 @@ public class PlayerSteps {
    }
 
    private void postResource(final String path, final Object body) {
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
       setRequestUri(path);
       final var request = client.post().uri(requestUri.getPath())
