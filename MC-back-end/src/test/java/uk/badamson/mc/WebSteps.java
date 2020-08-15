@@ -54,7 +54,7 @@ import uk.badamson.mc.service.Service;
  * about the basic operation of an MC server.
  * </p>
  */
-@SpringBootTest(classes = ApplicationTest.class,
+@SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DirtiesContext
 public class WebSteps {
