@@ -34,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -95,6 +96,10 @@ public class PlayerSteps {
       responsePlayerList = response.expectBodyList(Player.class);
    }
 
+   public void exchange(final RequestHeadersSpec<?> request) {
+      response = request.exchange();
+   }
+
    private void getHtml(final String path) {
       getResource(path, MediaType.TEXT_HTML);
    }
@@ -105,7 +110,7 @@ public class PlayerSteps {
 
    private void getResource(final String path, final MediaType mediaType) {
       Objects.requireNonNull(client, "client");
-      response = client.get().uri(path).accept(mediaType).exchange();
+      exchange(client.get().uri(path).accept(mediaType));
    }
 
    @When("getting the players")
@@ -120,11 +125,10 @@ public class PlayerSteps {
       Objects.requireNonNull(password, "password");
       Objects.requireNonNull(client, "client");
 
-      response = client.post().uri("/login")
+      exchange(client.post().uri("/login")
                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                .body(BodyInserters.fromFormData("username", player)
-                        .with("password", password))
-               .exchange();
+                        .with("password", password)));
    }
 
    @Given("logged in as {string}")
@@ -162,7 +166,7 @@ public class PlayerSteps {
       final var request = client.post().uri(path)
                .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
                .accept(MediaType.APPLICATION_JSON);
-      response = request.exchange();
+      exchange(request);
    }
 
    @Given("presenting a valid CSRF token")
