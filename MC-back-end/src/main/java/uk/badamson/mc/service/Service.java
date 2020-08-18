@@ -28,7 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 
 /**
  * <p>

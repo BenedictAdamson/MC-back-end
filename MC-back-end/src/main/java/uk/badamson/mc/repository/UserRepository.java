@@ -20,7 +20,7 @@ package uk.badamson.mc.repository;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 
 /**
  * <p>
