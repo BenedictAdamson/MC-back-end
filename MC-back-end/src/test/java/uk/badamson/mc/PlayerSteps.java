@@ -23,23 +23,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -49,21 +48,20 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * Definitions of BDD steps for the Cucumber-JVM BDD testing tool, for features
- * about the basic operation of an MC server.
+ * Definitions of BDD steps, for features about players.
  * </p>
  */
-@SpringBootTest(classes = ApplicationTest.class,
+@SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DirtiesContext
-public class WebSteps {
+public class PlayerSteps {
 
    static {
       Hooks.onOperatorDebug();
    }
 
    @Autowired
-   private ApplicationContext context;
+   private WorldCore worldCore;
 
    @Autowired
    private WebTestClient client;
@@ -77,19 +75,8 @@ public class WebSteps {
    @Autowired
    private PasswordEncoder passwordEncoder;
 
-   private final String scheme = "http";
-
-   private String dnsName;
-   private URI requestUri;
-   private Boolean csrfTokenSet;
-   private Boolean userSet;
    private WebTestClient.ResponseSpec response;
    ListBodySpec<Player> responsePlayerList;
-
-   @Given("a fresh instance of MC")
-   public void a_fresh_instance_of_MC() {
-      // Do nothing
-   }
 
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {
@@ -98,11 +85,19 @@ public class WebSteps {
       postResource("/api/player", new Player(name, password, Set.of()));
    }
 
+   @Before
+   public void beginScenario() {
+   }
+
    @Then("can get the list of players")
    public void can_get_the_list_of_players() {
       getJson("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
+   }
+
+   public void exchange(final RequestHeadersSpec<?> request) {
+      response = request.exchange();
    }
 
    private void getHtml(final String path) {
@@ -114,21 +109,13 @@ public class WebSteps {
    }
 
    private void getResource(final String path, final MediaType mediaType) {
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      response = client.get().uri(requestUri.getPath()).accept(mediaType)
-               .exchange();
+      exchange(client.get().uri(path).accept(mediaType));
    }
 
    @When("getting the players")
    public void getting_the_players() {
-      getJson("/api/player");
-   }
-
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
-      getJson(path);
+      worldCore.getJson("/api/player");
    }
 
    @When("log in as {string} using password {string}")
@@ -136,21 +123,17 @@ public class WebSteps {
             final String password) {
       Objects.requireNonNull(player, "player");
       Objects.requireNonNull(password, "password");
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
 
-      response = client.post().uri("/login")
+      exchange(client.post().uri("/login")
                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                .body(BodyInserters.fromFormData("username", player)
-                        .with("password", password))
-               .exchange();
+                        .with("password", password)));
    }
 
    @Given("logged in as {string}")
    public void logged_in_as(final String name) {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
-      client = client.mutateWith(mockUser(name));
+      mutateClientWith(mockUser(name));
    }
 
    @Then("MC accepts the addition")
@@ -169,92 +152,30 @@ public class WebSteps {
       response.expectStatus().isForbidden();
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      response.expectStatus().isForbidden();
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      response.expectStatus().isNotFound();
-   }
-
    @Then("MC serves the resource")
    public void mc_serves_the_players_resource() {
-      responseIsOk();
+      worldCore.responseIsOk();
    }
 
-   @Then("MC serves the web page")
-   public void mc_serves_the_web_page() {
-      responseIsOk();
-   }
-
-   @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      final HttpMethod method = HttpMethod.valueOf(verb);
-      assert method != null;
-      response = client.method(method).uri(requestUri.getPath())
-               .contentType(MediaType.APPLICATION_JSON).exchange();
-   }
-
-   @Given("not logged in")
-   public void not_logged_in() {
-      requireUnspecifiedUser();
-      userSet = Boolean.FALSE;
-   }
-
-   @Given("not presenting a CSRF token")
-   public void not_presenting_a_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.FALSE;
+   private void mutateClientWith(final WebTestClientConfigurer configurer) {
+      client = client.mutateWith(configurer);
    }
 
    private void postResource(final String path, final Object body) {
-      Objects.requireNonNull(context, "context");
       Objects.requireNonNull(client, "client");
-      setRequestUri(path);
-      final var request = client.post().uri(requestUri.getPath())
+      final var request = client.post().uri(path)
                .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
                .accept(MediaType.APPLICATION_JSON);
-      response = request.exchange();
+      exchange(request);
    }
 
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.TRUE;
-      client = client.mutateWith(csrf());
-   }
-
-   private void requireUnspecifiedCsrfToken() {
-      if (csrfTokenSet != null) {
-         throw new IllegalStateException("Contradictory CSRF settings");
-      }
-   }
-
-   private void requireUnspecifiedUser() {
-      if (userSet != null) {
-         throw new IllegalStateException("Contradictory user settings");
-      }
+      mutateClientWith(csrf());
    }
 
    private void responseIsOk() {
       response.expectStatus().isOk();
-   }
-
-   private void setRequestUri(final String path) {
-      final String authority = dnsName;
-      final String query = null;
-      final String fragment = null;
-      try {
-         requestUri = new URI(scheme, authority, path, query, fragment);
-      } catch (final URISyntaxException e) {
-         throw new IllegalArgumentException(e);
-      }
    }
 
    @Given("that player {string} exists with  password {string}")
@@ -262,15 +183,10 @@ public class WebSteps {
             final String password) {
       Objects.requireNonNull(player, "player");
       Objects.requireNonNull(password, "password");
-      Objects.requireNonNull(service, "service");
+      Objects.requireNonNull(playerRepository, "playerRepository");
       playerRepository.save(
                new Player(player, passwordEncoder.encode(password), Set.of()))
                .block();
-   }
-
-   @Given("the DNS name, example.com, of an MC server")
-   public void the_DNS_name_of_an_MC_server() {
-      dnsName = "example.com";
    }
 
    @Then("the list of players has one player")
@@ -300,24 +216,17 @@ public class WebSteps {
       getHtml(path);
    }
 
-   @When("the potential player gives the obvious URL http://example.com/ to a web browser")
-   public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      getHtml("/");
-   }
-
    @Then("the response message is a list of players")
    public void the_response_message_is_a_list_of_players() {
-      responsePlayerList = response.expectBodyList(Player.class);
+      responsePlayerList = worldCore.getResponse().expectBodyList(Player.class);
    }
 
    @Given("user authenticated as Administrator")
    public void user_authenticated_as_Administrator() {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
       final UserDetails administrator = service
                .findByUsername(Player.ADMINISTRATOR_USERNAME).block();
       assert administrator != null;
-      client = client.mutateWith(mockUser(administrator));
+      mutateClientWith(mockUser(administrator));
    }
 
 }

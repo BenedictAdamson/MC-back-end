@@ -29,8 +29,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
  * </p>
  */
 @CucumberContextConfiguration
-@Import(value = { ApplicationTest.class })
+@Import(value = { TestConfiguration.class, CucumberBeansConfiguration.class })
 @AutoConfigureWebTestClient
-public class CucumberApplicationTest {
-
+public class CucumberTestConfiguration {
 }

@@ -44,7 +44,7 @@ import uk.badamson.mc.repository.PlayerRepository;
  * collaborators.
  * </p>
  */
-@SpringBootTest(classes = ApplicationTest.class,
+@SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ReactiveAuthenticationManagerTest {
 
