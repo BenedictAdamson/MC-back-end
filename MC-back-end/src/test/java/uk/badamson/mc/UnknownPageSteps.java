@@ -20,8 +20,6 @@ package uk.badamson.mc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 
 import io.cucumber.java.en.Then;
@@ -50,23 +48,9 @@ public class UnknownPageSteps {
       worldCore.getJson(path);
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      worldCore.getResponse().expectStatus().isForbidden();
-   }
-
    @Then("MC replies with Not Found")
    public void mc_replies_with_not_found() {
       worldCore.getResponse().expectStatus().isNotFound();
-   }
-
-   @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) {
-      final HttpMethod method = HttpMethod.valueOf(verb);
-      assert method != null;
-      worldCore.exchange(worldCore.getClient().method(method).uri(path)
-               .contentType(MediaType.APPLICATION_JSON));
    }
 
 }
