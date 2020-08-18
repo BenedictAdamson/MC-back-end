@@ -43,7 +43,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import reactor.core.publisher.Hooks;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.service.Service;
 
 /**
@@ -70,7 +70,7 @@ public class PlayerSteps {
    private Service service;
 
    @Autowired
-   private PlayerRepository playerRepository;
+   private UserRepository playerRepository;
 
    @Autowired
    private PasswordEncoder passwordEncoder;

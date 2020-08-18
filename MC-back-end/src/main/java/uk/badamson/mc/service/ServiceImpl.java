@@ -28,7 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ import uk.badamson.mc.repository.PlayerRepository;
 public class ServiceImpl implements Service {
 
    private final PasswordEncoder passwordEncoder;
-   private final PlayerRepository playerRepository;
+   private final UserRepository playerRepository;
    private final Player administrator;
 
    /**
@@ -73,7 +73,7 @@ public class ServiceImpl implements Service {
     *            </ul>
     */
    public ServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final PlayerRepository playerRepository,
+            @NonNull final UserRepository playerRepository,
             @NonNull final String administratorPassword) {
       this.playerRepository = Objects.requireNonNull(playerRepository,
                "playerRepository");
@@ -121,7 +121,7 @@ public class ServiceImpl implements Service {
     *
     * @return the repository.
     */
-   public final PlayerRepository getPlayerRepository() {
+   public final UserRepository getPlayerRepository() {
       return playerRepository;
    }
 

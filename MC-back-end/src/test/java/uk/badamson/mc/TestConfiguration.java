@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.PlayerRepositoryTest;
 import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
 
@@ -38,7 +38,7 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
 public class TestConfiguration {
 
    @Bean
-   PlayerRepository getPlayerRepository() {
+   UserRepository getPlayerRepository() {
       return new PlayerRepositoryTest.Fake();
    }
 

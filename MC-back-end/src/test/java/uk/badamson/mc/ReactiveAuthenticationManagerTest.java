@@ -36,7 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -135,7 +135,7 @@ public class ReactiveAuthenticationManagerTest {
    }
 
    @Autowired
-   private PlayerRepository playerRepository;
+   private UserRepository playerRepository;
 
    @Autowired
    private ReactiveAuthenticationManager authenticationManager;

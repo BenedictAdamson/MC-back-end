@@ -28,7 +28,7 @@ import uk.badamson.mc.Player;
  * objects.
  * </p>
  */
-public interface PlayerRepository
+public interface UserRepository
          extends ReactiveCrudRepository<Player, String> {
 
 }

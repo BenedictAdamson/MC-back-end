@@ -38,7 +38,7 @@ import uk.badamson.mc.service.Service;
  * </p>
  */
 @RestController
-public class PlayerController {
+public class UserController {
 
    private final Service service;
 
@@ -58,7 +58,7 @@ public class PlayerController {
     *            If {@code service} is null
     */
    @Autowired
-   public PlayerController(final Service service) {
+   public UserController(final Service service) {
       this.service = Objects.requireNonNull(service, "service");
    }
 
