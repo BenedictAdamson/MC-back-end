@@ -43,7 +43,7 @@ import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
 import uk.badamson.mc.repository.UserRepository;
-import uk.badamson.mc.repository.PlayerRepositoryTest;
+import uk.badamson.mc.repository.UserRepositoryTest;
 
 /**
  * <p>
@@ -173,7 +173,7 @@ public class ServiceImplTest {
       final UserRepository playerRepository = service.getPlayerRepository();
       assertNotNull(playerRepository,
                "Always have a (non null) player repository.");
-      PlayerRepositoryTest.assertInvariants(playerRepository);
+      UserRepositoryTest.assertInvariants(playerRepository);
    }
 
    private static ServiceImpl constructor(final PasswordEncoder passwordEncoder,
@@ -254,7 +254,7 @@ public class ServiceImplTest {
 
    @BeforeEach
    public void setUpRepositories() {
-      playerRepositoryA = new PlayerRepositoryTest.Fake();
-      playerRepositoryB = new PlayerRepositoryTest.Fake();
+      playerRepositoryA = new UserRepositoryTest.Fake();
+      playerRepositoryB = new UserRepositoryTest.Fake();
    }
 }

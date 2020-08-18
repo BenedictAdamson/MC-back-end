@@ -34,7 +34,7 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * End-points for the players and player pages.
+ * End-points for the users and user pages.
  * </p>
  */
 @RestController
@@ -64,28 +64,28 @@ public class UserController {
 
    /**
     * <p>
-    * Behaviour of the POST verb for the players list.
+    * Behaviour of the POST verb for the users list.
     * </p>
     *
-    * @param player
+    * @param user
     *           The body of the request
     * @return The response.
     */
-   @PostMapping("/api/player")
+   @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
-   public Flux<Player> add(@RequestBody final Player player) {
-      service.add(player).block();
+   public Flux<Player> add(@RequestBody final Player user) {
+      service.add(user).block();
       return getAll();
    }
 
    /**
     * <p>
-    * Behaviour of the GET verb for the players list.
+    * Behaviour of the GET verb for the users list.
     * </p>
     *
     * @return The response.
     */
-   @GetMapping("/api/player")
+   @GetMapping("/api/user")
    public Flux<Player> getAll() {
       return service.getPlayers();
    }

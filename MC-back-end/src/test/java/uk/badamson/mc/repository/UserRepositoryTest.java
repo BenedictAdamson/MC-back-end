@@ -35,7 +35,7 @@ import uk.badamson.mc.Player;
  * Auxiliary test code for classes that implement the {@link UserRepository}
  * interface.
  */
-public class PlayerRepositoryTest {
+public class UserRepositoryTest {
 
    public static final class Fake implements UserRepository {
 
@@ -46,51 +46,51 @@ public class PlayerRepositoryTest {
          }
       }
 
-      private final Map<String, Player> players = new ConcurrentHashMap<>();
+      private final Map<String, User> users = new ConcurrentHashMap<>();
 
       @Override
       public Mono<Long> count() {
-         return Mono.fromSupplier(() -> Long.valueOf(players.size()));
+         return Mono.fromSupplier(() -> Long.valueOf(users.size()));
       }
 
       @Override
-      public Mono<Void> delete(final Player player) {
-         requireNonNull(player, "player");
-         return deleteById(player.getUsername());
+      public Mono<Void> delete(final User user) {
+         requireNonNull(user, "user");
+         return deleteById(user.getUsername());
       }
 
       @Override
       public Mono<Void> deleteAll() {
-         return Mono.fromRunnable(() -> players.clear());
+         return Mono.fromRunnable(() -> users.clear());
       }
 
       @Override
-      public Mono<Void> deleteAll(final Iterable<? extends Player> players) {
-         requireNonNull(players, "players");
-         return deleteAllOfFlux(Flux.fromIterable(players));
+      public Mono<Void> deleteAll(final Iterable<? extends User> users) {
+         requireNonNull(users, "users");
+         return deleteAllOfFlux(Flux.fromIterable(users));
       }
 
       @Override
-      public Mono<Void> deleteAll(final Publisher<? extends Player> players) {
-         requireNonNull(players, "players");
-         return deleteAllOfFlux(Flux.from(players));
+      public Mono<Void> deleteAll(final Publisher<? extends User> users) {
+         requireNonNull(users, "users");
+         return deleteAllOfFlux(Flux.from(users));
       }
 
-      private Mono<Void> deleteAllOfFlux(final Flux<? extends Player> players) {
-         return players.map(player -> this.players.remove(player.getUsername()))
+      private Mono<Void> deleteAllOfFlux(final Flux<? extends User> users) {
+         return users.map(user -> this.users.remove(user.getUsername()))
                   .then();
       }
 
       @Override
       public Mono<Void> deleteById(final Publisher<String> username) {
          requireNonNull(username, "username");
-         return Mono.from(username).map(u -> players.remove(u)).then();
+         return Mono.from(username).map(u -> users.remove(u)).then();
       }
 
       @Override
       public Mono<Void> deleteById(final String username) {
          requireNonNull(username, "username");
-         return Mono.fromRunnable(() -> players.remove(username));
+         return Mono.fromRunnable(() -> users.remove(username));
       }
 
       @Override
@@ -102,71 +102,71 @@ public class PlayerRepositoryTest {
       @Override
       public Mono<Boolean> existsById(final String username) {
          requireNonNull(username, "username");
-         return Mono.fromSupplier(() -> players.containsKey(username));
+         return Mono.fromSupplier(() -> users.containsKey(username));
       }
 
       @Override
-      public Flux<Player> findAll() {
-         return Mono.fromSupplier(() -> players.values())
+      public Flux<User> findAll() {
+         return Mono.fromSupplier(() -> users.values())
                   .flatMapIterable(c -> c);
       }
 
-      private Flux<Player> findAllByFluxOfUsernames(
+      private Flux<User> findAllByFluxOfUsernames(
                final Flux<String> usernames) {
-         return usernames.map(username -> players.get(username))
-                  .filter(player -> player != null);
+         return usernames.map(username -> users.get(username))
+                  .filter(user -> user != null);
       }
 
       @Override
-      public Flux<Player> findAllById(final Iterable<String> usernames) {
+      public Flux<User> findAllById(final Iterable<String> usernames) {
          requireNonNull(usernames, "usernames");
          return findAllByFluxOfUsernames(Flux.fromIterable(usernames));
       }
 
       @Override
-      public Flux<Player> findAllById(final Publisher<String> usernames) {
+      public Flux<User> findAllById(final Publisher<String> usernames) {
          requireNonNull(usernames, "usernames");
          return findAllByFluxOfUsernames(Flux.from(usernames));
       }
 
       @Override
-      public Mono<Player> findById(final Publisher<String> username) {
+      public Mono<User> findById(final Publisher<String> username) {
          requireNonNull(username, "username");
          return Mono.from(username).flatMap(u -> findById(u));
       }
 
       @Override
-      public Mono<Player> findById(final String username) {
+      public Mono<User> findById(final String username) {
          requireNonNull(username, "username");
-         return Mono.fromSupplier(() -> players.get(username))
+         return Mono.fromSupplier(() -> users.get(username))
                   .filter(p -> p != null);
       }
 
       @Override
-      public Mono<Player> save(final Player player) {
-         requireNonNull(player, "player");
+      public Mono<User> save(final User user) {
+         requireNonNull(user, "user");
          return Mono.fromSupplier(() -> {
-            players.put(player.getUsername(), player);
-            return player;
+            users.put(user.getUsername(), user);
+            return user;
          });
       }
 
       @Override
-      public <P extends Player> Flux<P> saveAll(final Iterable<P> players) {
-         requireNonNull(players, "players");
-         return saveAllOfFlux(Flux.fromIterable(players));
+      public <P extends User> Flux<P> saveAll(final Iterable<P> users) {
+         requireNonNull(users, "users");
+         return saveAllOfFlux(Flux.fromIterable(users));
       }
 
       @Override
-      public <S extends Player> Flux<S> saveAll(final Publisher<S> players) {
-         requireNonNull(players, "players");
-         return saveAllOfFlux(Flux.from(players));
+      public <S extends User> Flux<S> saveAll(final Publisher<S> users) {
+         requireNonNull(users, "users");
+         return saveAllOfFlux(Flux.from(users));
       }
 
-      private <P extends Player> Flux<P> saveAllOfFlux(final Flux<P> players) {
-         return players.map(player -> {
-            this.players.put(player.getUsername(), player);
-            return player;
+      private <P extends User> Flux<P> saveAllOfFlux(final Flux<P> users) {
+         return users.map(user -> {
+            this.users.put(user.getUsername(), user);
+            return user;
          });
       }
 
@@ -176,24 +176,24 @@ public class PlayerRepositoryTest {
       // Do nothing
    }
 
-   public static Mono<Player> findById(final UserRepository repository,
+   public static Mono<User> findById(final UserRepository repository,
             final String username) {
       final var publisher = repository.findById(username);
 
       assertInvariants(repository);
       assertNotNull(publisher, "result");
-      final var player = publisher.block();
-      if (player != null) {
-         assertEquals(username, player.getUsername(),
-                  "Found the player with the given ID");
+      final var user = publisher.block();
+      if (user != null) {
+         assertEquals(username, user.getUsername(),
+                  "Found the user with the given ID");
       }
 
       return publisher;
    }
 
-   public static Mono<Player> save(final UserRepository repository,
-            final Player player) {
-      final var publisher = repository.save(player);
+   public static Mono<User> save(final UserRepository repository,
+            final User user) {
+      final var publisher = repository.save(user);
 
       assertInvariants(repository);
       assertNotNull(publisher, "result");

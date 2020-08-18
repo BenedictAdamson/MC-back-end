@@ -39,49 +39,49 @@ public interface Service extends ReactiveUserDetailsService {
 
    /**
     * <p>
-    * Add a player to the {@linkplain #getPlayers() list of players}.
+    * Add a user to the {@linkplain #getUsers() list of users}.
     * </p>
     * <ul>
     * <li>Always returns a (non null) publisher.</li>
     * <li>As for all publishers, the returned publisher will not
     * {@linkplain Subscriber#onNext(Object) provide} a null element to a
     * subscriber.</li>
-    * <li>A subsequently retrieved {@linkplain #getPlayers() sequence of the
-    * players} will include a {@linkplain Player player}
-    * {@linkplain Player#equals(Object) equivalent to} the given player.</li>
+    * <li>A subsequently retrieved {@linkplain #getUsers() sequence of the
+    * users} will include a {@linkplain User user}
+    * {@linkplain User#equals(Object) equivalent to} the given user.</li>
     * <li>Subsequently {@linkplain #findByUsername(String) finding user details}
-    * using the {@linkplain Player#getUsername() username} of the given player
+    * using the {@linkplain User#getUsername() username} of the given user
     * will retrieve {@linkplain UserDetails user details} equivalent to the user
-    * details of the given player. However, the
+    * details of the given user. However, the
     * {@linkplain UserDetails#getPassword() password} will have been encrypted
     * using the {@linkplain #getPasswordEncoder() password encoder} of this
     * service.</li>
     * </ul>
     *
-    * @param player
-    *           The player to add, with an unencrypted
-    *           {@linkplain Player#getPassword() password}.
+    * @param user
+    *           The user to add, with an unencrypted
+    *           {@linkplain User#getPassword() password}.
     * @return a {@linkplain Publisher publisher} that
     *         {@linkplain Subscriber#onComplete() completes} on addition of the
-    *         player or {@linkplain Subscriber#onError(Throwable) publishes an
+    *         user or {@linkplain Subscriber#onError(Throwable) publishes an
     *         error condition} if the addition fails.
     * @throws NullPointerException
-    *            If {@code player} is null
+    *            If {@code user} is null
     * @throws IllegalArgumentException
-    *            If the {@linkplain Player#getUsername() username} of
-    *            {@code player} indicates it is the
-    *            {@linkplain Player#ADMINISTRATOR_USERNAME administrator}.
+    *            If the {@linkplain User#getUsername() username} of
+    *            {@code user} indicates it is the
+    *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.
     */
    @Secured("ROLE_ADMIN")
-   Mono<Void> add(final Player player);
+   Mono<Void> add(final User user);
 
    /**
     * {@inheritDoc}
     *
     * <ul>
     * <li>Always have user details for the
-    * {@linkplain Player#ADMINISTRATOR_USERNAME administrator}.</li>
-    * <li>The {@linkplain Player#ADMINISTRATOR_USERNAME administrator} has a
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+    * <li>The {@linkplain User#ADMINISTRATOR_USERNAME administrator} has a
     * complete {@linkplain Authority set} of
     * {@linkplain UserDetails#getAuthorities() authorities}.</li>
     * </ul>
@@ -103,7 +103,7 @@ public interface Service extends ReactiveUserDetailsService {
 
    /**
     * <p>
-    * Retrieve a publisher of the list of the current players of this instance
+    * Retrieve a publisher of the list of the current users of this instance
     * of the Mission Command game.
     * </p>
     * <ul>
@@ -111,15 +111,15 @@ public interface Service extends ReactiveUserDetailsService {
     * <li>As for all publishers, the returned publisher will not
     * {@linkplain Subscriber#onNext(Object) provide} a null element to a
     * subscriber.</li>
-    * <li>The list of players always {@linkplain Flux#hasElement(Object) has a}
-    * player with the {@linkplain Player#ADMINISTRATOR_USERNAME administrator
-    * username} as its {@linkplain Player#getUsername() username}.</li>
-    * <li>Does not contain players with duplicate
-    * {@linkplain Player#getUsername() usernames}.</li>
+    * <li>The list of users always {@linkplain Flux#hasElement(Object) has a}
+    * user with the {@linkplain User#ADMINISTRATOR_USERNAME administrator
+    * username} as its {@linkplain User#getUsername() username}.</li>
+    * <li>Does not contain users with duplicate
+    * {@linkplain User#getUsername() usernames}.</li>
     * </ul>
     *
-    * @return a {@linkplain Publisher publisher} of the players.
+    * @return a {@linkplain Publisher publisher} of the users.
     */
-   Flux<Player> getPlayers();
+   Flux<User> getUsers();
 
 }
