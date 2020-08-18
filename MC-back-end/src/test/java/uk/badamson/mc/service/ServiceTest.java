@@ -35,7 +35,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 
 /**
  * <p>
@@ -44,8 +44,8 @@ import uk.badamson.mc.Player;
  */
 public class ServiceTest {
 
-   public static Mono<Void> add(final Service service, final Player player) {
-      final var publisher = service.add(player);
+   public static Mono<Void> add(final Service service, final User user) {
+      final var publisher = service.add(user);
 
       assertInvariants(service);
       assertNotNull(publisher, "Always returns a (non null) publisher.");
@@ -53,32 +53,32 @@ public class ServiceTest {
       return publisher;
    }
 
-   public static void add_1(final Service service, final Player player) {
-      add(service, player).block();
-      final Flux<Player> players = service.getPlayers();
+   public static void add_1(final Service service, final User user) {
+      add(service, user).block();
+      final Flux<User> users = service.getUsers();
       final UserDetails userDetails = findByUsername(service,
-               player.getUsername()).block();
-      StepVerifier.create(players.filter(p -> player.equals(p)))
-               .expectNext(player)
-               .as("A subsequently retrieved sequence of the players will include a player equivalent to the given player.")
+               user.getUsername()).block();
+      StepVerifier.create(users.filter(p -> user.equals(p)))
+               .expectNext(user)
+               .as("A subsequently retrieved sequence of the users will include a user equivalent to the given user.")
                .verifyComplete();
-      assertEquals(player, userDetails,
-               "Subsequently finding user details using the username of the given player will retrieve user details equivalent to the user details of the given player.");
+      assertEquals(user, userDetails,
+               "Subsequently finding user details using the username of the given user will retrieve user details equivalent to the user details of the given user.");
       assertTrue(
-               service.getPasswordEncoder().matches(player.getPassword(),
+               service.getPasswordEncoder().matches(user.getPassword(),
                         userDetails.getPassword()),
                "Recorded password has been encrypted using the pasword encoder of this service.");
    }
 
-   public static void add_2(final Service service, final Player player1,
-            final Player player2) {
-      add(service, player1).block();
-      add(service, player2).block();
-      final Flux<Player> players = service.getPlayers();
-      assertTrue(players.hasElement(player1).block(),
-               "A subsequently retrieved sequence of the players will include a player equivalent to the given player [1].");
-      assertTrue(players.hasElement(player2).block(),
-               "A subsequently retrieved sequence of the players will include a player equivalent to the given player [2].");
+   public static void add_2(final Service service, final User user1,
+            final User user2) {
+      add(service, user1).block();
+      add(service, user2).block();
+      final Flux<User> users = service.getUsers();
+      assertTrue(users.hasElement(user1).block(),
+               "A subsequently retrieved sequence of the users will include a user equivalent to the given user [1].");
+      assertTrue(users.hasElement(user2).block(),
+               "A subsequently retrieved sequence of the users will include a user equivalent to the given user [2].");
    }
 
    public static void assertInvariants(final Service service) {
@@ -87,7 +87,7 @@ public class ServiceTest {
 
    public static Mono<UserDetails> findByUsername(final Service service,
             final String username) {
-      final var administrator = Player.ADMINISTRATOR_USERNAME.equals(username);
+      final var administrator = User.ADMINISTRATOR_USERNAME.equals(username);
 
       final var publisher = service.findByUsername(username);
 
@@ -108,21 +108,21 @@ public class ServiceTest {
       return publisher;
    }
 
-   public static Flux<Player> getPlayers(final Service service) {
-      final Flux<Player> players = service.getPlayers();
+   public static Flux<User> getUsers(final Service service) {
+      final Flux<User> users = service.getUsers();
 
       assertInvariants(service);
-      assertNotNull(players, "Always returns a (non null) publisher.");
-      assertTrue(players
-               .any(p -> Player.ADMINISTRATOR_USERNAME.equals(p.getUsername()))
-               .block(), "The list of players always has an administrator.");
-      final List<Player> playersList = players.collectList().block();
-      final Set<String> userNames = playersList.stream()
-               .map(player -> player.getUsername())
+      assertNotNull(users, "Always returns a (non null) publisher.");
+      assertTrue(users
+               .any(p -> User.ADMINISTRATOR_USERNAME.equals(p.getUsername()))
+               .block(), "The list of users always has an administrator.");
+      final List<User> usersList = users.collectList().block();
+      final Set<String> userNames = usersList.stream()
+               .map(user -> user.getUsername())
                .collect(Collectors.toUnmodifiableSet());
-      assertEquals(userNames.size(), playersList.size(),
-               "Does not contain players with duplicate usernames.");
+      assertEquals(userNames.size(), usersList.size(),
+               "Does not contain users with duplicate usernames.");
 
-      return players;
+      return users;
    }
 }

@@ -63,7 +63,7 @@ public class ReactiveAuthenticationManagerTest {
 
       private void test(final String username, final String password,
                final Set<Authority> authorities) {
-         final Player player = new Player(username,
+         final User player = new User(username,
                   passwordEncoder.encode(password), authorities);
          playerRepository.save(player).block();
 
@@ -94,7 +94,7 @@ public class ReactiveAuthenticationManagerTest {
                final String givenPassword) {
          assert !password.equals(givenPassword);
 
-         final Player player = new Player(username,
+         final User player = new User(username,
                   passwordEncoder.encode(password), Set.of());
          playerRepository.save(player).block();
 
