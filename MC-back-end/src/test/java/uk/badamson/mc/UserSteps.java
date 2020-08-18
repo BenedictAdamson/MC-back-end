@@ -48,7 +48,7 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * Definitions of BDD steps, for features about players.
+ * Definitions of BDD steps, for features about users.
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
@@ -70,30 +70,30 @@ public class UserSteps {
    private Service service;
 
    @Autowired
-   private UserRepository playerRepository;
+   private UserRepository userRepository;
 
    @Autowired
    private PasswordEncoder passwordEncoder;
 
    private WebTestClient.ResponseSpec response;
-   ListBodySpec<Player> responsePlayerList;
+   ListBodySpec<User> responseUserList;
 
-   @When("adding a player named {string} with  password {string}")
-   public void adding_a_player_named(final String name, final String password) {
+   @When("adding a user named {string} with  password {string}")
+   public void adding_a_user_named(final String name, final String password) {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
-      postResource("/api/player", new Player(name, password, Set.of()));
+      postResource("/api/user", new User(name, password, Set.of()));
    }
 
    @Before
    public void beginScenario() {
    }
 
-   @Then("can get the list of players")
-   public void can_get_the_list_of_players() {
-      getJson("/api/player");
+   @Then("can get the list of users")
+   public void can_get_the_list_of_users() {
+      getJson("/api/user");
       responseIsOk();
-      responsePlayerList = response.expectBodyList(Player.class);
+      responseUserList = response.expectBodyList(User.class);
    }
 
    public void exchange(final RequestHeadersSpec<?> request) {
@@ -113,21 +113,21 @@ public class UserSteps {
       exchange(client.get().uri(path).accept(mediaType));
    }
 
-   @When("getting the players")
-   public void getting_the_players() {
-      worldCore.getJson("/api/player");
+   @When("getting the users")
+   public void getting_the_users() {
+      worldCore.getJson("/api/user");
    }
 
    @When("log in as {string} using password {string}")
-   public void log_in_as_using_password(final String player,
+   public void log_in_as_using_password(final String user,
             final String password) {
-      Objects.requireNonNull(player, "player");
+      Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
       Objects.requireNonNull(client, "client");
 
       exchange(client.post().uri("/login")
                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-               .body(BodyInserters.fromFormData("username", player)
+               .body(BodyInserters.fromFormData("username", user)
                         .with("password", password)));
    }
 
@@ -153,7 +153,7 @@ public class UserSteps {
    }
 
    @Then("MC serves the resource")
-   public void mc_serves_the_players_resource() {
+   public void mc_serves_the_users_resource() {
       worldCore.responseIsOk();
    }
 
@@ -178,53 +178,53 @@ public class UserSteps {
       response.expectStatus().isOk();
    }
 
-   @Given("that player {string} exists with  password {string}")
-   public void that_player_exists_with_password(final String player,
+   @Given("that user {string} exists with  password {string}")
+   public void that_user_exists_with_password(final String user,
             final String password) {
-      Objects.requireNonNull(player, "player");
+      Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
-      Objects.requireNonNull(playerRepository, "playerRepository");
-      playerRepository.save(
-               new Player(player, passwordEncoder.encode(password), Set.of()))
+      Objects.requireNonNull(userRepository, "userRepository");
+      userRepository.save(
+               new User(user, passwordEncoder.encode(password), Set.of()))
                .block();
    }
 
-   @Then("the list of players has one player")
-   public void the_list_of_players_has_one_player() {
-      responsePlayerList.hasSize(1);
+   @Then("the list of users has one user")
+   public void the_list_of_users_has_one_user() {
+      responseUserList.hasSize(1);
    }
 
-   @Then("the list of players includes a player named {string}")
-   public void the_list_of_players_includes_a_player_named(final String name) {
-      assertNotNull(responsePlayerList, "player list");
-      responsePlayerList.contains(new Player(name, null, Set.of()));
+   @Then("the list of users includes a user named {string}")
+   public void the_list_of_users_includes_a_user_named(final String name) {
+      assertNotNull(responseUserList, "user list");
+      responseUserList.contains(new User(name, null, Set.of()));
    }
 
-   @Then("the list of players includes the administrator")
-   public void the_list_of_players_includes_the_administrator() {
-      responsePlayerList.value(
-               players -> players.stream()
-                        .filter(player -> Player.ADMINISTRATOR_USERNAME
-                                 .equals(player.getUsername()))
+   @Then("the list of users includes the administrator")
+   public void the_list_of_users_includes_the_administrator() {
+      responseUserList.value(
+               users -> users.stream()
+                        .filter(user -> user.ADMINISTRATOR_USERNAME
+                                 .equals(user.getUsername()))
                         .count(),
                is(1L));
    }
 
-   @When("the potential player gives the DNS name to a web browser")
-   public void the_potential_player_gives_the_DNS_name_to_a_web_browser() {
+   @When("the potential user gives the DNS name to a web browser")
+   public void the_potential_user_gives_the_DNS_name_to_a_web_browser() {
       final String path = null;
       getHtml(path);
    }
 
-   @Then("the response message is a list of players")
-   public void the_response_message_is_a_list_of_players() {
-      responsePlayerList = worldCore.getResponse().expectBodyList(Player.class);
+   @Then("the response message is a list of users")
+   public void the_response_message_is_a_list_of_users() {
+      responseUserList = worldCore.getResponse().expectBodyList(User.class);
    }
 
    @Given("user authenticated as Administrator")
    public void user_authenticated_as_Administrator() {
       final UserDetails administrator = service
-               .findByUsername(Player.ADMINISTRATOR_USERNAME).block();
+               .findByUsername(user.ADMINISTRATOR_USERNAME).block();
       assert administrator != null;
       mutateClientWith(mockUser(administrator));
    }
