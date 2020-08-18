@@ -224,6 +224,13 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>11.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.opentest4j</groupId>
 				<artifactId>opentest4j</artifactId>
 				<version>1.2.0</version>
@@ -247,6 +254,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<modules>
+		<module>MC-auth</module>
 		<module>MC-back-end</module>
 		<module>MC-database</module>
 		<module>MC-front-end</module>
