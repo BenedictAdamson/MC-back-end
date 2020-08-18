@@ -204,7 +204,7 @@ public class UserSteps {
    public void the_list_of_users_includes_the_administrator() {
       responseUserList.value(
                users -> users.stream()
-                        .filter(user -> user.ADMINISTRATOR_USERNAME
+                        .filter(user -> User.ADMINISTRATOR_USERNAME
                                  .equals(user.getUsername()))
                         .count(),
                is(1L));
@@ -224,7 +224,7 @@ public class UserSteps {
    @Given("user authenticated as Administrator")
    public void user_authenticated_as_Administrator() {
       final UserDetails administrator = service
-               .findByUsername(user.ADMINISTRATOR_USERNAME).block();
+               .findByUsername(User.ADMINISTRATOR_USERNAME).block();
       assert administrator != null;
       mutateClientWith(mockUser(administrator));
    }
