@@ -28,7 +28,9 @@ MC provides a web interface: you play it using a web browser, using a URL that i
 * An *HTTP reverse proxy* (also call the *ingress*), which communicates with the browser. It forwards requests from the browser (or front-end) to the *front-end HTTP server* and to the *back end HTTP server*, as appropriate for each request.
 * A *front-end HTTP server*, which provides your browser with the code for the front-end.
 * A *back end HTTP server*, which does the complicated processing.
-* A *database server*, which records long term information.
+* A *game database server*, which records long term information for the back end HTTP server.
+* An *authentication server*, which handles logins.
+* An *authentication database server*, which records long term information authentication server.
 
 The back end HTTP server makes use of code in the *model* component.
 
@@ -38,11 +40,14 @@ because of the [Angular](https://angular.io/) *routing* of the front-end.
 The back-end HTTP serving, by [Spring Boot](http://spring.io/projects/spring-boot),
 is more suitable for fixed routing of static resources, with each resource having only one URL.
 
+The system has separate game and authentication database servers because the (third party) authentication server does support the kind of database server that is suitable for the game itself.
+
 ## Public Repositories
 
 MC is available from these public repositories:
 * Source code: [https://github.com/BenedictAdamson/MC](https://github.com/BenedictAdamson/MC)
 * Docker images:
+    * [https://hub.docker.com/r/benedictadamson/mc-auth](https://hub.docker.com/r/benedictadamson/mc-auth)
     * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
     * [https://hub.docker.com/r/benedictadamson/mc-database](https://hub.docker.com/r/benedictadamson/mc-database)
     * [https://hub.docker.com/r/benedictadamson/mc-front-end-srv](https://hub.docker.com/r/benedictadamson/mc-front-end-srv)
@@ -54,6 +59,7 @@ MC is available from these public repositories:
     * [Typescript](https://www.typescriptlang.org/)
 * Servers:
     * [Keycloak](https://www.keycloak.org/)
+    * [MariaDB](https://mariadb.com/)
     * [mongoDB](https://www.mongodb.com/)
     * [NGINX](https://www.nginx.com/)
 * Java Annotations:
