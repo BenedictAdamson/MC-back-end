@@ -19,7 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * <p>
@@ -27,8 +27,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
  * Command game.
  * </p>
  */
-@EnableWebFlux
-//FIXME @EnableWebFluxSecurity
+@EnableWebMvc
 @ComponentScan("uk.badamson.mc.presentation")
 public class PresentationLayerSpringConfiguration {
 

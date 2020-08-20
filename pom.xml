@@ -195,12 +195,6 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-test</artifactId>
-				<scope>test</scope>
-				<version>3.3.6.RELEASE</version> <!-- Should be compatible with spring-boot -->
-			</dependency>
-			<dependency>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-annotations</artifactId>
 				<version>${MC.spotbugs.version}</version>
