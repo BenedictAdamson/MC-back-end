@@ -25,6 +25,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -38,53 +43,12 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
  * </p>
  */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
+   public static final int PORT = 8080;
 
-   public static final String VERSION = getVersion();
+   public static final String VERSION = Version.VERSION;
 
-   private static final Path TARGET_DIR = Paths.get("target");
-
-   private static final Path DOCKERFILE = Paths.get("Dockerfile");
-
-   private static final ImageFromDockerfile IMAGE = createImage(VERSION);
-
-   private static ImageFromDockerfile createImage(final String version) {
-      final var jarPath = getJarPath(version);
-      return new ImageFromDockerfile()
-               .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withFileFromPath(jarPath.toString(), jarPath)
-               .withBuildArg("VERSION", version);
-   }
-
-   private static Properties getApplicationProperties() throws IOException {
-      final InputStream stream = Thread.currentThread().getContextClassLoader()
-               .getResourceAsStream("application.properties");
-      if (stream == null) {
-         throw new FileNotFoundException(
-                  "resource application.properties not found");
-      }
-      final Properties properties = new Properties();
-      properties.load(stream);
-      return properties;
-   }
-
-   private static Path getJarPath(final String version) {
-      return TARGET_DIR.resolve("MC-back-end-" + version + ".jar");
-   }
-
-   private static String getVersion() {
-      String version;
-      try {
-         version = getApplicationProperties().getProperty("build.version");
-      } catch (final IOException e) {
-         throw new IllegalStateException(
-                  "unable to read application.properties resource", e);
-      }
-      if (version == null || version.isEmpty()) {
-         throw new IllegalStateException(
-                  "missing build.version property in application.properties resource");
-      }
-      return version;
-   }
+   public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
+            + VERSION;
 
    McBackEndContainer() {
       super(IMAGE);
