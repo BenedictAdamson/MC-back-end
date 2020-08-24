@@ -48,7 +48,7 @@ import io.cucumber.spring.ScenarioScope;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ScenarioScope
-public class WorldCore {
+public class BackEndWorldCore {
 
    private static final String SCHEME = "http";
 
