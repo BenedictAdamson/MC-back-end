@@ -13,7 +13,7 @@
 		for the server index.docker.io. -->
 	<groupId>uk.badamson.mc</groupId>
 	<artifactId>MC</artifactId>
-	<version>2.5.2</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<organization>
 		<name>Benedict Adamson</name>
@@ -32,11 +32,11 @@
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<MC.cucumber.version>6.2.2</MC.cucumber.version>
-		<MC.node.version>v14.6.0</MC.node.version>
-		<MC.npm.version>6.14.5</MC.npm.version>
+		<MC.cucumber.version>6.5.1</MC.cucumber.version>
+		<MC.node.version>v14.8.0</MC.node.version>
+		<MC.npm.version>6.14.8</MC.npm.version>
 		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
-		<MC.spring-boot.version>2.3.1.RELEASE</MC.spring-boot.version>
+		<MC.spring-boot.version>2.3.3.RELEASE</MC.spring-boot.version>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -52,8 +52,8 @@
 					<artifactId>frontend-maven-plugin</artifactId>
 					<version>1.10.0</version>
 					<configuration>
-						<nodeVersion>v10.16.3</nodeVersion>
-						<npmVersion>6.9.0</npmVersion>
+						<nodeVersion>${MC.node.version}</nodeVersion>
+						<npmVersion>${MC.npm.version}</npmVersion>
 						<workingDirectory>src/main/web/</workingDirectory>
 					</configuration>
 				</plugin>
@@ -124,7 +124,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -195,12 +195,6 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-test</artifactId>
-				<scope>test</scope>
-				<version>3.3.6.RELEASE</version> <!-- Should be compatible with spring-boot -->
-			</dependency>
-			<dependency>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-annotations</artifactId>
 				<version>${MC.spotbugs.version}</version>
@@ -222,6 +216,19 @@
 				<version>5.7.0-M1</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>11.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>2.6.2</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.opentest4j</groupId>
@@ -247,11 +254,13 @@
 		</dependencies>
 	</dependencyManagement>
 	<modules>
+		<module>MC-auth</module>
 		<module>MC-back-end</module>
 		<module>MC-database</module>
 		<module>MC-front-end</module>
 		<module>MC-integration</module>
 		<module>MC-model</module>
 		<module>MC-spec</module>
+		<module>MC-auth-db</module>
 	</modules>
 </project>

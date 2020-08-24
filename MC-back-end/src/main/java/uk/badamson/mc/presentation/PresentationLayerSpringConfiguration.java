@@ -18,15 +18,8 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.web.reactive.config.EnableWebFlux;
-
-import uk.badamson.mc.Authority;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * <p>
@@ -34,32 +27,8 @@ import uk.badamson.mc.Authority;
  * Command game.
  * </p>
  */
-@EnableWebFlux
-@EnableWebFluxSecurity
+@EnableWebMvc
 @ComponentScan("uk.badamson.mc.presentation")
 public class PresentationLayerSpringConfiguration {
 
-   private void authorizeAdministration(final ServerHttpSecurity http) {
-      http.authorizeExchange().pathMatchers(HttpMethod.POST, "/api/player")
-               .hasAuthority(Authority.ROLE_ADMIN.getAuthority());
-   }
-
-   private void authorizePublic(final ServerHttpSecurity http) {
-      http.authorizeExchange().pathMatchers(HttpMethod.GET, "/", "/login",
-               "/logout", "/actuator/health", "/api/player").permitAll();
-      http.authorizeExchange()
-               .pathMatchers(HttpMethod.POST, "/login", "/logout").permitAll();
-   }
-
-   @Bean
-   public SecurityWebFilterChain securityWebFilterChain(
-            final ServerHttpSecurity http) {
-      http.formLogin();
-      authorizeAdministration(http);
-      authorizePublic(http);
-      // All other POSTs, PUTs and DELETEs will be Forbidden.
-      // Ensure Not Found response for GET unknown resources:
-      http.authorizeExchange().anyExchange().permitAll();
-      return http.build();
-   }
 }
