@@ -261,5 +261,7 @@
 		<module>MC-integration</module>
 		<module>MC-model</module>
 		<module>MC-spec</module>
+		<module>MA-auth-db</module>
+		<module>MC-auth-db</module>
 	</modules>
 </project>
