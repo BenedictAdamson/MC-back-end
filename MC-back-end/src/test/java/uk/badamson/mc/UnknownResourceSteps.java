@@ -34,7 +34,7 @@ import io.cucumber.java.en.When;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DirtiesContext
-public class UnknownPageSteps {
+public class UnknownResourceSteps {
 
    @Autowired
    private BackEndWorldCore worldCore;
