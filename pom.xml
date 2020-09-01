@@ -33,6 +33,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<MC.cucumber.version>6.5.1</MC.cucumber.version>
+		<MC.keycloak.version>11.0.0</MC.keycloak.version>
 		<MC.node.version>v14.8.0</MC.node.version>
 		<MC.npm.version>6.14.8</MC.npm.version>
 		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
@@ -220,9 +221,14 @@
 			<dependency>
 				<groupId>org.keycloak.bom</groupId>
 				<artifactId>keycloak-adapter-bom</artifactId>
-				<version>11.0.0</version>
+				<version>${MC.keycloak.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-admin-client</artifactId>
+				<version>${MC.keycloak.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
