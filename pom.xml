@@ -261,12 +261,13 @@
 	</dependencyManagement>
 	<modules>
 		<module>MC-auth</module>
+		<module>MC-auth-db</module>
+		<module>MC-auth-init</module>
 		<module>MC-back-end</module>
 		<module>MC-database</module>
 		<module>MC-front-end</module>
 		<module>MC-integration</module>
 		<module>MC-model</module>
 		<module>MC-spec</module>
-		<module>MC-auth-db</module>
 	</modules>
 </project>
