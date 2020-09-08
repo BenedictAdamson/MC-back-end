@@ -33,6 +33,7 @@ MC provides a web interface: you play it using a web browser, using a URL that i
 * An *authentication database server*, which records long term information authentication server.
 
 The back end HTTP server makes use of code in the *model* component.
+An *authentication initialisation job* sets up basic authentication information.
 
 The system has separate front-end and back-end HTTP servers because of the technical difficulty of combining them.
 The front-end HTTP serving must provide identical static front-end code at multiple URLs,
@@ -49,6 +50,7 @@ MC is available from these public repositories:
 * Docker images:
     * [https://hub.docker.com/r/benedictadamson/mc-auth](https://hub.docker.com/r/benedictadamson/mc-auth)
     * [https://hub.docker.com/r/benedictadamson/mc-auth-db](https://hub.docker.com/r/benedictadamson/mc-auth-db)
+    * [https://hub.docker.com/r/benedictadamson/mc-auth-init](https://hub.docker.com/r/benedictadamson/mc-auth-inint)
     * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
     * [https://hub.docker.com/r/benedictadamson/mc-database](https://hub.docker.com/r/benedictadamson/mc-database)
     * [https://hub.docker.com/r/benedictadamson/mc-front-end-srv](https://hub.docker.com/r/benedictadamson/mc-front-end-srv)
