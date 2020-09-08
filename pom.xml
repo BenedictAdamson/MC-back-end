@@ -262,7 +262,6 @@
 	<modules>
 		<module>MC-auth</module>
 		<module>MC-auth-db</module>
-		<module>MC-auth-init</module>
 		<module>MC-back-end</module>
 		<module>MC-database</module>
 		<module>MC-front-end</module>
