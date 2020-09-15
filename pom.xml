@@ -13,7 +13,7 @@
 		for the server index.docker.io. -->
 	<groupId>uk.badamson.mc</groupId>
 	<artifactId>MC</artifactId>
-	<version>3.0.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<organization>
 		<name>Benedict Adamson</name>
@@ -33,6 +33,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<MC.cucumber.version>6.5.1</MC.cucumber.version>
+		<MC.keycloak.version>11.0.2</MC.keycloak.version>
 		<MC.node.version>v14.8.0</MC.node.version>
 		<MC.npm.version>6.14.8</MC.npm.version>
 		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
@@ -220,15 +221,14 @@
 			<dependency>
 				<groupId>org.keycloak.bom</groupId>
 				<artifactId>keycloak-adapter-bom</artifactId>
-				<version>11.0.0</version>
+				<version>${MC.keycloak.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mariadb.jdbc</groupId>
-				<artifactId>mariadb-java-client</artifactId>
-				<version>2.6.2</version>
-				<scope>test</scope>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-admin-client</artifactId>
+				<version>${MC.keycloak.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.opentest4j</groupId>
@@ -251,16 +251,21 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.2.16</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<modules>
 		<module>MC-auth</module>
+		<module>MC-auth-init</module>
 		<module>MC-back-end</module>
 		<module>MC-database</module>
 		<module>MC-front-end</module>
 		<module>MC-integration</module>
 		<module>MC-model</module>
 		<module>MC-spec</module>
-		<module>MC-auth-db</module>
 	</modules>
 </project>

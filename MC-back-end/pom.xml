@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC</artifactId>
-		<version>3.0.0</version>
+		<version>3.1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-back-end</artifactId>
 	<packaging>jar</packaging>
@@ -91,8 +91,8 @@
 							<arg value="--include-engine" />
 							<arg value="cucumber" />
 							<arg value="--select-package=uk.badamson.mc" />
-							<arg value="--exclude-tag" />
-							<arg value="front-end" />
+							<arg value="--include-tag" />
+							<arg value="back-end" />
 							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
 						</java>
 					</target>
@@ -101,31 +101,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
-					JAR -->
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<additionalClasspathElements>
-						<!-- By the time the integration test run we have a packed JAR, so 
-							failsafe will put that on the classpath, rather than the directory holding 
-							the unpacked JARs. Unfortunately, the JAR is a Spring Boot JAR, so the content 
-							of that JAR does not have the normal layout, preventing failsafe from finding 
-							resources in it. So must explicitly tell failsafe to look in the directory 
-							of unpacked resources. -->
-						<additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
-					</additionalClasspathElements>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -268,16 +243,6 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>mongodb</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.cucumber</groupId>

@@ -1,5 +1,5 @@
-# Dockerfile for the MC-back-end project,
-# to produce the MC server in a container.
+# Dockerfile for the MC project,
+# to produce the MC back-end server in a container.
 
 # © Copyright Benedict Adamson 2018-20.
 # 
@@ -16,7 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
+# along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 FROM openjdk:11

@@ -54,8 +54,30 @@ pipeline {
                 }
             }
         }
+        stage('Build and verify') {
+        	/* Includes building Docker images, which will be in the local repository,
+        	 * but does not push the Docker images. Pushing images of development ("SNAPSHOT") versions can be
+        	 * troublesome because it can result in situations when the remote and local repositories hold different
+        	 * versions with the same tag, leading to confusion about which version is actually used,
+        	 * and inconsistencies for environments (such as minikube and Kubernetes in general) that do not use the
+        	 * local Docker registry.
+        	 */
+            when{
+                not{
+                    tag "*.*.*"
+                }
+            } 
+            steps {
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                    sh 'mvn -s $MAVEN_SETTINGS verify'
+                }
+            }
+        }
         stage('Build, verify and deploy') {
-        	/* Includes building and pushing Docker images. */ 
+        	/* Includes pushing Docker images. */
+            when{
+                tag "*.*.*"
+            } 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
