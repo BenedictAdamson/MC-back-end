@@ -64,7 +64,7 @@ pipeline {
         	 */
             when{
                 not{
-                    tag "*.*.*"
+                    tag "*"
                 }
             } 
             steps {
@@ -76,7 +76,7 @@ pipeline {
         stage('Build, verify and deploy') {
         	/* Includes pushing Docker images. */
             when{
-                tag "*.*.*"
+                tag "*"
             } 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
