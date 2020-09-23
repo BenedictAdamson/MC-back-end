@@ -48,7 +48,6 @@ The system has separate game and authentication database servers because the (th
 MC is available from these public repositories:
 * Source code: [https://github.com/BenedictAdamson/MC](https://github.com/BenedictAdamson/MC)
 * Docker images:
-    * [https://hub.docker.com/r/benedictadamson/mc-auth](https://hub.docker.com/r/benedictadamson/mc-auth)
     * [https://hub.docker.com/r/benedictadamson/mc-auth-init](https://hub.docker.com/r/benedictadamson/mc-auth-inint)
     * [https://hub.docker.com/r/benedictadamson/mc-back-end](https://hub.docker.com/r/benedictadamson/mc-back-end)
     * [https://hub.docker.com/r/benedictadamson/mc-database](https://hub.docker.com/r/benedictadamson/mc-database)
