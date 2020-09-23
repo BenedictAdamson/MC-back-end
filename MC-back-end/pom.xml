@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC</artifactId>
-		<version>2.5.2</version>
+		<version>3.0.0</version>
 	</parent>
 	<artifactId>MC-back-end</artifactId>
 	<packaging>jar</packaging>
@@ -216,6 +216,10 @@
 			<artifactId>junit-platform-console</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+		</dependency>
 		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
 			it is in the classpath, the Surefire plugin will think we want to run onlt 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
@@ -235,15 +239,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-json</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-reactor-netty</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -263,7 +263,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -292,11 +292,6 @@
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-spring</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
