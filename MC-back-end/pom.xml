@@ -216,10 +216,6 @@
 			<artifactId>junit-platform-console</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-boot-starter</artifactId>
-		</dependency>
 		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
 			it is in the classpath, the Surefire plugin will think we want to run onlt 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->

@@ -58,8 +58,6 @@ MC is available from these public repositories:
     * [Java 11](https://docs.oracle.com/javase/11/)
     * [Typescript](https://www.typescriptlang.org/)
 * Servers:
-    * [Keycloak](https://www.keycloak.org/)
-    * [MariaDB](https://mariadb.com/)
     * [mongoDB](https://www.mongodb.com/)
     * [NGINX](https://www.nginx.com/)
 * Java Annotations:
