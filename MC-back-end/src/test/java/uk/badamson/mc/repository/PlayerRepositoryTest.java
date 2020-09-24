@@ -32,12 +32,12 @@ import uk.badamson.mc.Player;
 
 /**
  * <p>
- * Auxiliary test code for classes that implement the {@link PlayerRepository}
+ * Auxiliary test code for classes that implement the {@link UserRepository}
  * interface.
  */
 public class PlayerRepositoryTest {
 
-   public static final class Fake implements PlayerRepository {
+   public static final class Fake implements UserRepository {
 
       private static void requireNonNull(final Object object,
                final String message) {
@@ -172,11 +172,11 @@ public class PlayerRepositoryTest {
 
    }
 
-   public static void assertInvariants(final PlayerRepository repository) {
+   public static void assertInvariants(final UserRepository repository) {
       // Do nothing
    }
 
-   public static Mono<Player> findById(final PlayerRepository repository,
+   public static Mono<Player> findById(final UserRepository repository,
             final String username) {
       final var publisher = repository.findById(username);
 
@@ -191,7 +191,7 @@ public class PlayerRepositoryTest {
       return publisher;
    }
 
-   public static Mono<Player> save(final PlayerRepository repository,
+   public static Mono<Player> save(final UserRepository repository,
             final Player player) {
       final var publisher = repository.save(player);
 

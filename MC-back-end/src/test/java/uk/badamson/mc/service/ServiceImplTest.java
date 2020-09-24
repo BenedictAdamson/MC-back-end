@@ -42,7 +42,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.PlayerRepositoryTest;
 
 /**
@@ -170,14 +170,14 @@ public class ServiceImplTest {
    public static void assertInvariants(final ServiceImpl service) {
       ServiceTest.assertInvariants(service);// inherited
 
-      final PlayerRepository playerRepository = service.getPlayerRepository();
+      final UserRepository playerRepository = service.getPlayerRepository();
       assertNotNull(playerRepository,
                "Always have a (non null) player repository.");
       PlayerRepositoryTest.assertInvariants(playerRepository);
    }
 
    private static ServiceImpl constructor(final PasswordEncoder passwordEncoder,
-            final PlayerRepository playerRepository,
+            final UserRepository playerRepository,
             final String administratorPassword) {
       final var service = new ServiceImpl(passwordEncoder, playerRepository,
                administratorPassword);
@@ -221,9 +221,9 @@ public class ServiceImplTest {
    private final PasswordEncoder passwordEncoderB = new BCryptPasswordEncoder(
             5);
 
-   private PlayerRepository playerRepositoryA;
+   private UserRepository playerRepositoryA;
 
-   private PlayerRepository playerRepositoryB;
+   private UserRepository playerRepositoryB;
 
    private Player playerA;
 

@@ -28,7 +28,7 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -62,7 +62,7 @@ public class ServiceLayerSpringConfiguration {
     */
    @Bean
    public Service service(@NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final PlayerRepository playerRepository,
+            @NonNull final UserRepository playerRepository,
             @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       return new ServiceImpl(passwordEncoder, playerRepository,
                administratorPassword);

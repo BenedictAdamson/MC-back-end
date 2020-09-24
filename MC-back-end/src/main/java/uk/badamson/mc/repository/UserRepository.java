@@ -28,7 +28,7 @@ import uk.badamson.mc.User;
  * objects.
  * </p>
  */
-public interface PlayerRepository
+public interface UserRepository
          extends CrudRepository<User, String> {
 
 }
