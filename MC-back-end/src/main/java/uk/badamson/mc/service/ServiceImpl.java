@@ -18,15 +18,12 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -101,21 +98,6 @@ public class ServiceImpl implements Service {
    }
 
    @Override
-   public User loadUserByUsername(final String username)
-            throws UsernameNotFoundException {
-      Objects.requireNonNull(username, "username");
-      if (User.ADMINISTRATOR_USERNAME.equals(username)) {
-         return administrator;
-      } else {
-         try {
-            return userRepository.findById(username).get();
-         } catch (final NoSuchElementException e) {
-            throw new UsernameNotFoundException("No such user, " + username, e);
-         }
-      }
-   }
-
-   @Override
    public final PasswordEncoder getPasswordEncoder() {
       return passwordEncoder;
    }
@@ -138,8 +120,25 @@ public class ServiceImpl implements Service {
    public Stream<User> getUsers() {
       final var repositoryIterable = userRepository.findAll();
       final Stream<User> adminUses = Stream.of(administrator);
-      final Stream<User> normalUsers = StreamSupport.stream(repositoryIterable.spliterator(), false);
-      return Stream.concat(adminUses, normalUsers).
+      final Stream<User> normalUsers = StreamSupport
+               .stream(repositoryIterable.spliterator(), false).filter(u -> !u
+                        .getUsername().equals(User.ADMINISTRATOR_USERNAME));
+      return Stream.concat(adminUses, normalUsers);
+   }
+
+   @Override
+   public User loadUserByUsername(final String username)
+            throws UsernameNotFoundException {
+      Objects.requireNonNull(username, "username");
+      if (User.ADMINISTRATOR_USERNAME.equals(username)) {
+         return administrator;
+      } else {
+         try {
+            return userRepository.findById(username).get();
+         } catch (final NoSuchElementException e) {
+            throw new UsernameNotFoundException("No such user, " + username, e);
+         }
+      }
    }
 
 }
