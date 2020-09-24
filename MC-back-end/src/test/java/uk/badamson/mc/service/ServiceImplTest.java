@@ -42,8 +42,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Player;
-import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.PlayerRepositoryTest;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>

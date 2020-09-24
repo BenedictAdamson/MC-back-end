@@ -23,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

@@ -24,11 +24,10 @@ import uk.badamson.mc.User;
 
 /**
  * <p>
- * Interface for generic CRUD operations on a repository for {@link Player}
+ * Interface for generic CRUD operations on a repository for {@link User}
  * objects.
  * </p>
  */
-public interface UserRepository
-         extends CrudRepository<User, String> {
+public interface UserRepository extends CrudRepository<User, String> {
 
 }

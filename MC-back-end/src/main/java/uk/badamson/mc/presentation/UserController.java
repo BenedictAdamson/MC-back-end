@@ -19,6 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * End-points for the players and player pages.
+ * End-points for the user and users pages.
  * </p>
  */
 @RestController
@@ -63,29 +64,27 @@ public class UserController {
 
    /**
     * <p>
-    * Behaviour of the POST verb for the players list.
+    * Behaviour of the POST verb for the user list.
     * </p>
     *
     * @param player
     *           The body of the request
-    * @return The response.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
-   public User add(@RequestBody final User player) {
+   public void add(@RequestBody final User player) {
       service.add(player);
-      return getAll();
    }
 
    /**
     * <p>
-    * Behaviour of the GET verb for the players list.
+    * Behaviour of the GET verb for the users list.
     * </p>
     *
     * @return The response.
     */
    @GetMapping("/api/user")
-   public User getAll() {
+   public Stream<User> getAll() {
       return service.getUsers();
    }
 

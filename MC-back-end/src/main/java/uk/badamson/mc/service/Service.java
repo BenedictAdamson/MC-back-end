@@ -18,7 +18,6 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.springframework.security.access.annotation.Secured;
@@ -39,47 +38,33 @@ public interface Service extends UserDetailsService {
 
    /**
     * <p>
-    * Add a player to the {@linkplain #getUsers() list of players}.
+    * Add a user to the {@linkplain #getUsers() list of users}.
     * </p>
     * <ul>
     * <li>A subsequently retrieved {@linkplain #getUsers() sequence of the
-    * players} will include a {@linkplain User player}
-    * {@linkplain User#equals(Object) equivalent to} the given player.</li>
-    * <li>Subsequently {@linkplain #findByUsername(String) finding user details}
-    * using the {@linkplain User#getUsername() username} of the given player
-    * will retrieve {@linkplain UserDetails user details} equivalent to the user
-    * details of the given player. However, the
+    * users} will include a {@linkplain User user}
+    * {@linkplain User#equals(Object) equivalent to} the given user.</li>
+    * <li>Subsequently {@linkplain #loadUserByUsername(String) finding user
+    * details} using the {@linkplain User#getUsername() username} of the given
+    * user will retrieve {@linkplain UserDetails user details} equivalent to the
+    * user details of the given user. However, the
     * {@linkplain UserDetails#getPassword() password} will have been encrypted
     * using the {@linkplain #getPasswordEncoder() password encoder} of this
     * service.</li>
     * </ul>
     *
     * @param user
-    *           The player to add, with an unencrypted
+    *           The user to add, with an unencrypted
     *           {@linkplain User#getPassword() password}.
     * @throws NullPointerException
-    *            If {@code player} is null
+    *            If {@code user} is null
     * @throws IllegalArgumentException
-    *            If the {@linkplain User#getUsername() username} of
-    *            {@code player} indicates it is the
-    *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.
+    *            If the {@linkplain User#getUsername() username} of {@code user}
+    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
+    *            administrator}.
     */
    @Secured("ROLE_ADMIN")
    void add(final User user);
-
-   /**
-    * {@inheritDoc}
-    *
-    * <ul>
-    * <li>Always have user details for the
-    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
-    * <li>The {@linkplain User#ADMINISTRATOR_USERNAME administrator} has a
-    * complete {@linkplain Authority set} of
-    * {@linkplain UserDetails#getAuthorities() authorities}.</li>
-    * </ul>
-    */
-   @Override
-   UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
    /**
     * <p>
@@ -95,22 +80,36 @@ public interface Service extends UserDetailsService {
 
    /**
     * <p>
-    * Retrieve a collection of the current players of this instance
-    * of the Mission Command game.
+    * Retrieve a stream of the current users of this instance of the Mission
+    * Command game.
     * </p>
     * <ul>
-    * <li>Always returns a (non null) collection.</li>
-    * <li>The returned collection will not
-    * include a null element</li>
-    * <li>The collection of players always {@linkplain Collection#contains(Object) contains}
-    * player with the {@linkplain User#ADMINISTRATOR_USERNAME administrator
-    * username} as its {@linkplain User#getUsername() username}.</li>
-    * <li>Does not contain players with duplicate
-    * {@linkplain User#getUsername() usernames}.</li>
+    * <li>Always returns a (non null) stream.</li>
+    * <li>The returned stream will not include a null element</li>
+    * <li>The stream of users always contains a user with the
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator username} as its
+    * {@linkplain User#getUsername() username}.</li>
+    * <li>Does not contain users with duplicate {@linkplain User#getUsername()
+    * usernames}.</li>
     * </ul>
     *
-    * @return a {@linkplain Stream stream} of the players.
+    * @return a {@linkplain Stream stream} of the users.
     */
    Stream<User> getUsers();
+
+   /**
+    * {@inheritDoc}
+    *
+    * <ul>
+    * <li>Always have user details for the
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+    * <li>The {@linkplain User#ADMINISTRATOR_USERNAME administrator} has a
+    * complete {@linkplain Authority set} of
+    * {@linkplain UserDetails#getAuthorities() authorities}.</li>
+    * </ul>
+    */
+   @Override
+   UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException;
 
 }
