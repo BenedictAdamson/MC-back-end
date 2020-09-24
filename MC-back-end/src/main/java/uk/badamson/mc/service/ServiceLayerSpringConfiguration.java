@@ -18,8 +18,17 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import uk.badamson.mc.repository.PlayerRepository;
 
 /**
  * <p>
@@ -29,6 +38,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServiceLayerSpringConfiguration {
 
+   @Bean
+   public PasswordEncoder passwordEncoder() {
+      return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+   }
+
+   @Bean
+   public ReactiveAuthenticationManager reactiveAuthenticationManager(
+            @NonNull final PasswordEncoder passwordEncoder,
+            @NonNull final ReactiveUserDetailsService userDetailsService) {
+      final var provider = new UserDetailsRepositoryReactiveAuthenticationManager(
+               userDetailsService);
+      provider.setPasswordEncoder(passwordEncoder);
+      return provider;
+   }
+
    /**
     * <p>
     * Create the the service layer.
@@ -37,7 +61,10 @@ public class ServiceLayerSpringConfiguration {
     * @return the service layer.
     */
    @Bean
-   public Service service() {
-      return new ServiceImpl();
+   public Service service(@NonNull final PasswordEncoder passwordEncoder,
+            @NonNull final PlayerRepository playerRepository,
+            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+      return new ServiceImpl(passwordEncoder, playerRepository,
+               administratorPassword);
    }
 }
