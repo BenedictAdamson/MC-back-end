@@ -18,9 +18,9 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.repository.CrudRepository;
 
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 
 /**
  * <p>
@@ -29,6 +29,6 @@ import uk.badamson.mc.Player;
  * </p>
  */
 public interface PlayerRepository
-         extends ReactiveCrudRepository<Player, String> {
+         extends CrudRepository<User, String> {
 
 }

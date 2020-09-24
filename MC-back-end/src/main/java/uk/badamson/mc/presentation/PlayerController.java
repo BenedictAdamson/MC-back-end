@@ -28,8 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import reactor.core.publisher.Flux;
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 import uk.badamson.mc.service.Service;
 
 /**
@@ -71,10 +70,10 @@ public class PlayerController {
     *           The body of the request
     * @return The response.
     */
-   @PostMapping("/api/player")
+   @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
-   public Flux<Player> add(@RequestBody final Player player) {
-      service.add(player).block();
+   public User add(@RequestBody final User player) {
+      service.add(player);
       return getAll();
    }
 
@@ -85,9 +84,9 @@ public class PlayerController {
     *
     * @return The response.
     */
-   @GetMapping("/api/player")
-   public Flux<Player> getAll() {
-      return service.getPlayers();
+   @GetMapping("/api/user")
+   public User getAll() {
+      return service.getUsers();
    }
 
    /**
