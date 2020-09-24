@@ -6,11 +6,16 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
-import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.Before;
 import io.cucumber.spring.ScenarioScope;
@@ -43,11 +48,19 @@ import io.cucumber.spring.ScenarioScope;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ScenarioScope
-public class WorldCore {
+public class BackEndWorldCore {
 
    private static final String SCHEME = "http";
 
    private static final String HOST = "example.com";
+
+   private static String asJsonString(final Object obj) {
+      try {
+         return new ObjectMapper().writeValueAsString(obj);
+      } catch (final Exception e) {
+         throw new RuntimeException(e);
+      }
+   }
 
    public static URI createRequestUri(final String path) {
       final String authority = HOST;
@@ -61,59 +74,51 @@ public class WorldCore {
    }
 
    @Autowired
-   private ApplicationContext context;
+   private WebApplicationContext context;
 
-   private WebTestClient client;
+   private MockMvc mockMvc;
 
-   private WebTestClient.ResponseSpec response;
+   private ResultActions response;
 
-   public void exchange(final RequestHeadersSpec<?> request) {
-      response = request.exchange();
+   public void exchange(final RequestBuilder request) throws Exception {
+      response = mockMvc.perform(request);
    }
 
-   public WebTestClient getClient() {
-      return client;
-   }
-
-   public void getHtml(final String path) {
+   public void getHtml(final String path) throws Exception {
       getResource(path, MediaType.TEXT_HTML);
    }
 
-   public void getJson(final String path) {
+   public void getJson(final String path) throws Exception {
       getResource(path, MediaType.APPLICATION_JSON);
    }
 
-   void getResource(final String path, final MediaType mediaType) {
+   void getResource(final String path, final MediaType mediaType)
+            throws Exception {
       Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(client, "client");
       final var uri = createRequestUri(path);
-      response = client.get().uri(uri.getPath()).accept(mediaType).exchange();
+      exchange(MockMvcRequestBuilders.get(uri).accept(mediaType));
    }
 
-   public WebTestClient.ResponseSpec getResponse() {
+   public ResultActions getResponse() {
       return response;
    }
 
-   public void mutateClientWith(final WebTestClientConfigurer configurer) {
-      client = client.mutateWith(configurer);
-   }
-
-   public void postResource(final String path, final Object body) {
+   public void postResource(final String path, final Object body)
+            throws Exception {
       Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(client, "client");
       final var uri = createRequestUri(path);
-      final var request = client.post().uri(uri.getPath())
-               .contentType(MediaType.APPLICATION_JSON).bodyValue(body)
-               .accept(MediaType.APPLICATION_JSON);
+      final var request = MockMvcRequestBuilders.post(uri.getPath())
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).content(asJsonString(body));
       exchange(request);
    }
 
    @Before
    public void prepareScenario() {
-      client = WebTestClient.bindToApplicationContext(context).build();
+      mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
    }
 
-   public void responseIsOk() {
-      response.expectStatus().isOk();
+   public void responseIsOk() throws Exception {
+      response.andExpect(MockMvcResultMatchers.status().isOk());
    }
 }

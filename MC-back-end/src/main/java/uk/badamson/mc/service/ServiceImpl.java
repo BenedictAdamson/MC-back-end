@@ -18,17 +18,18 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.Player;
-import uk.badamson.mc.repository.PlayerRepository;
+import uk.badamson.mc.User;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -39,71 +40,61 @@ import uk.badamson.mc.repository.PlayerRepository;
 public class ServiceImpl implements Service {
 
    private final PasswordEncoder passwordEncoder;
-   private final PlayerRepository playerRepository;
-   private final Player administrator;
+   private final UserRepository userRepository;
+   private final User administrator;
 
    /**
     * <p>
     * Construct a service layer instance that uses a given repository.
     * </p>
     * <ul>
-    * <li>The {@linkplain #getPlayerRepository() player repository} of this
-    * service is the given player repository.</li>
+    * <li>The {@linkplain #getUserRepository() user repository} of this service
+    * is the given user repository.</li>
     * <li>The {@linkplain #getPasswordEncoder() password encoder} of this
     * service is the given password encoder.</li>
-    * <li>The {@linkplain Player#getPassword() password} of the
-    * {@linkplain Player#ADMINISTRATOR_USERNAME administrator}
-    * {@linkplain #findByUsername(String) user details found through this
+    * <li>The {@linkplain User#getPassword() password} of the
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}
+    * {@linkplain #loadUserByUsername(String) user details found through this
     * service} is {@linkplain String#equals(Object) equal to} the given
     * administrator password encrypted by the given password encoder.</li>
     * </ul>
     *
     * @param passwordEncoder
     *           The encoder that this service uses to encrypt passwords.
-    * @param playerRepository
-    *           The {@link Player} repository that this service layer instance
+    * @param userRepository
+    *           The {@link User} repository that this service layer instance
     *           uses.
     * @param administratorPassword
-    *           The (unencrypted) {@linkplain Player#getPassword() password} of
-    *           the {@linkplain Player#ADMINISTRATOR_USERNAME administrator}
+    *           The (unencrypted) {@linkplain User#getPassword() password} of
+    *           the {@linkplain User#ADMINISTRATOR_USERNAME administrator}
     * @throws NullPointerException
     *            <ul>
-    *            <li>If {@code playerRepository} is null.</li>
+    *            <li>If {@code userRepository} is null.</li>
     *            <li>If {@code administratorPasword} is null.</li>
     *            </ul>
     */
    public ServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final PlayerRepository playerRepository,
+            @NonNull final UserRepository userRepository,
             @NonNull final String administratorPassword) {
-      this.playerRepository = Objects.requireNonNull(playerRepository,
-               "playerRepository");
+      this.userRepository = Objects.requireNonNull(userRepository,
+               "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");
       this.passwordEncoder = Objects.requireNonNull(passwordEncoder,
                "passwordEncoder");
-      administrator = new Player(Player.ADMINISTRATOR_USERNAME,
+      administrator = new User(User.ADMINISTRATOR_USERNAME,
                passwordEncoder.encode(administratorPassword), Authority.ALL);
    }
 
    @Override
-   public Mono<Void> add(Player player) {
-      Objects.requireNonNull(player, "player");
-      if (Player.ADMINISTRATOR_USERNAME.equals(player.getUsername())) {
-         throw new IllegalArgumentException("Player is administrator");
+   public void add(User user) {
+      Objects.requireNonNull(user, "user");
+      if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
+         throw new IllegalArgumentException("User is administrator");
       }
-      player = new Player(player.getUsername(),
-               passwordEncoder.encode(player.getPassword()),
-               player.getAuthorities());
-      return playerRepository.save(player).then();
-   }
-
-   @Override
-   public Mono<UserDetails> findByUsername(final String username) {
-      Objects.requireNonNull(username, "username");
-      if (Player.ADMINISTRATOR_USERNAME.equals(username)) {
-         return Mono.just(administrator);
-      } else {
-         return playerRepository.findById(username).cast(UserDetails.class);
-      }
+      user = new User(user.getUsername(),
+               passwordEncoder.encode(user.getPassword()),
+               user.getAuthorities());
+      userRepository.save(user);
    }
 
    @Override
@@ -113,24 +104,41 @@ public class ServiceImpl implements Service {
 
    /**
     * <p>
-    * The {@link Player} repository that this service layer instance uses.
+    * The {@link User} repository that this service layer instance uses.
     * </p>
     * <ul>
-    * <li>Always have a (non null) player repository.</li>
+    * <li>Always have a (non null) user repository.</li>
     * </ul>
     *
     * @return the repository.
     */
-   public final PlayerRepository getPlayerRepository() {
-      return playerRepository;
+   public final UserRepository getUserRepository() {
+      return userRepository;
    }
 
    @Override
-   public Flux<Player> getPlayers() {
-      return Flux.concat(Mono.just(administrator),
-               playerRepository.findAll()
-                        .filter(player -> !Player.ADMINISTRATOR_USERNAME
-                                 .equals(player.getUsername())));
+   public Stream<User> getUsers() {
+      final var repositoryIterable = userRepository.findAll();
+      final Stream<User> adminUses = Stream.of(administrator);
+      final Stream<User> normalUsers = StreamSupport
+               .stream(repositoryIterable.spliterator(), false).filter(u -> !u
+                        .getUsername().equals(User.ADMINISTRATOR_USERNAME));
+      return Stream.concat(adminUses, normalUsers);
+   }
+
+   @Override
+   public User loadUserByUsername(final String username)
+            throws UsernameNotFoundException {
+      Objects.requireNonNull(username, "username");
+      if (User.ADMINISTRATOR_USERNAME.equals(username)) {
+         return administrator;
+      } else {
+         try {
+            return userRepository.findById(username).get();
+         } catch (final NoSuchElementException e) {
+            throw new UsernameNotFoundException("No such user, " + username, e);
+         }
+      }
    }
 
 }
