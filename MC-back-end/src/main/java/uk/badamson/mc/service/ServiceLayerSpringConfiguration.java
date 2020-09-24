@@ -22,9 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -41,16 +38,6 @@ public class ServiceLayerSpringConfiguration {
    @Bean
    public PasswordEncoder passwordEncoder() {
       return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-   }
-
-   @Bean
-   public ReactiveAuthenticationManager reactiveAuthenticationManager(
-            @NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final ReactiveUserDetailsService userDetailsService) {
-      final var provider = new UserDetailsRepositoryReactiveAuthenticationManager(
-               userDetailsService);
-      provider.setPasswordEncoder(passwordEncoder);
-      return provider;
    }
 
    /**
