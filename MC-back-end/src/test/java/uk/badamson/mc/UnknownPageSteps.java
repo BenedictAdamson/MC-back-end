@@ -22,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import reactor.core.publisher.Hooks;
 
 /**
  * <p>
@@ -35,12 +33,7 @@ import reactor.core.publisher.Hooks;
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@DirtiesContext
 public class UnknownPageSteps {
-
-   static {
-      Hooks.onOperatorDebug();
-   }
 
    @Autowired
    private WorldCore worldCore;
