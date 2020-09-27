@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Objects;
 
@@ -32,7 +33,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -53,7 +56,7 @@ import io.cucumber.spring.ScenarioScope;
 @AutoConfigureMockMvc
 public class WorldCore {
 
-   private static String encodeAsJson(final Object obj) {
+   public static String encodeAsJson(final Object obj) {
       try {
          final ObjectMapper mapper = new ObjectMapper();
          final String jsonContent = mapper.writeValueAsString(obj);
@@ -76,7 +79,12 @@ public class WorldCore {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
       final var uri = URI.create(path);
-      response = mockMvc.perform(request(method, uri));
+      performRequest(request(method, uri));
+   }
+
+   public void expectResponse(final ResultMatcher expectation)
+            throws Exception {
+      response.andExpect(expectation);
    }
 
    public void getHtml(final String path) throws Exception {
@@ -87,15 +95,24 @@ public class WorldCore {
       getResource(path, MediaType.APPLICATION_JSON);
    }
 
-   void getResource(final String path, final MediaType mediaType)
+   private void getResource(final String path, final MediaType mediaType)
             throws Exception {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
-      response = mockMvc.perform(get(path).accept(mediaType));
+      performRequest(get(path).accept(mediaType));
    }
 
    public ResultActions getResponse() {
       return response;
+   }
+
+   public String getResponseBodyAsString() throws UnsupportedEncodingException {
+      return response.andReturn().getResponse().getContentAsString();
+   }
+
+   public void performRequest(final RequestBuilder requestBuilder)
+            throws Exception {
+      response = mockMvc.perform(requestBuilder);
    }
 
    public void postResource(final String path, final Object body)
@@ -103,13 +120,12 @@ public class WorldCore {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
       final var encodedBody = encodeAsJson(body);
-      response = mockMvc.perform(post(path)
-               .contentType(MediaType.APPLICATION_JSON)
+      performRequest(post(path).contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).content(encodedBody));
    }
 
    public void responseIsOk() throws Exception {
-      response.andExpect(status().isOk());
+      expectResponse(status().isOk());
    }
 
    @Before
