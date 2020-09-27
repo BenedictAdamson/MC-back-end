@@ -54,7 +54,7 @@ import uk.badamson.mc.service.Service;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @DirtiesContext
-public class PlayerSteps {
+public class UserSteps {
 
    static {
       Hooks.onOperatorDebug();
