@@ -18,10 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
+import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserRepositoryTest;
 import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
 
 /**
@@ -33,5 +36,10 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
 @Import(value = { PresentationLayerSpringConfiguration.class,
          ServiceLayerSpringConfiguration.class })
 public class TestConfiguration {
+
+   @Bean
+   UserRepository getUserRepository() {
+      return new UserRepositoryTest.Fake();
+   }
 
 }

@@ -18,10 +18,11 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -39,27 +40,27 @@ public class UnknownPageSteps {
    private WorldCore worldCore;
 
    @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
+   public void getting_the_unknown_resource_at(final String path)
+            throws Exception {
       worldCore.getJson(path);
    }
 
    @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      worldCore.getResponse().expectStatus().isForbidden();
+   public void mc_replies_with_forbidden() throws Exception {
+      worldCore.getResponse().andExpect(status().isForbidden());
    }
 
    @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      worldCore.getResponse().expectStatus().isNotFound();
+   public void mc_replies_with_not_found() throws Exception {
+      worldCore.getResponse().andExpect(status().isNotFound());
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
    public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) {
+            final String path) throws Exception {
       final HttpMethod method = HttpMethod.valueOf(verb);
       assert method != null;
-      worldCore.exchange(worldCore.getClient().method(method).uri(path)
-               .contentType(MediaType.APPLICATION_JSON));
+      worldCore.exchangeJson(method, path);
    }
 
 }
