@@ -21,6 +21,8 @@ package uk.badamson.mc.presentation;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,6 +74,7 @@ public class UserController {
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
+   @RolesAllowed("ROLE_MANAGE_USERS")
    public void add(@RequestBody final User player) {
       service.add(player);
    }

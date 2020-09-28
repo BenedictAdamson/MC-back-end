@@ -76,7 +76,8 @@ public class UserSteps {
    public void adding_a_user_named(final String name, final String password)
             throws Exception {
       Objects.requireNonNull(loggedInUser, "loggedInUser");
-      final var addedUser = new User(name, password, Set.of(), true, true, true, true);
+      final var addedUser = new User(name, password, Set.of(), true, true, true,
+               true);
       worldCore.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser))
@@ -126,7 +127,8 @@ public class UserSteps {
    @Then("the list of users includes a user named {string}")
    public void the_list_of_users_includes_a_user_named(final String name) {
       assertNotNull(responseUserList, "user list");
-      responseUserList.contains(new User(name, null, Set.of(), true, true, true, true));
+      responseUserList.contains(
+               new User(name, null, Set.of(), true, true, true, true));
       assertTrue(responseUserList.stream()
                .filter(u -> u.getUsername().equals(name)).count() == 1);
    }

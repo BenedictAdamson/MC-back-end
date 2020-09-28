@@ -34,7 +34,8 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
  */
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@Import(value = { PresentationLayerSpringConfiguration.class,
+@Import(value = { MethodSecurityConfiguration.class,
+         PresentationLayerSpringConfiguration.class,
          RepositoryLayerSpringConfiguration.class,
          ServiceLayerSpringConfiguration.class })
 public class Application {

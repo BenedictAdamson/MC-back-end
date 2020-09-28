@@ -1,6 +1,10 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2020.
  *
  * This file is part of MC.
  *
@@ -18,19 +22,14 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
 /**
  * <p>
- * The Spring Boot configuration for the presentation layer of the Mission
- * Command game.
+ * Spring configuration for Spring Security using method security.
  * </p>
  */
-@ComponentScan("uk.badamson.mc.presentation")
-@EnableWebMvc
-@Import(value = { WebSecurityConfig.class })
-public class PresentationLayerSpringConfiguration {
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true,
+         jsr250Enabled = true)
+public class MethodSecurityConfiguration {
 
 }

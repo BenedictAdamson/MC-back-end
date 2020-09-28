@@ -33,7 +33,8 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
  * </p>
  */
 @Configuration
-@Import(value = { PresentationLayerSpringConfiguration.class,
+@Import(value = { MethodSecurityConfiguration.class,
+         PresentationLayerSpringConfiguration.class,
          ServiceLayerSpringConfiguration.class })
 public class TestConfiguration {
 

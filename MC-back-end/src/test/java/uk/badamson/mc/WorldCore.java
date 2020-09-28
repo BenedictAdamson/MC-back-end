@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -130,6 +131,7 @@ public class WorldCore {
 
    @Before
    public void setUp() {
-      mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+      mockMvc = MockMvcBuilders.webAppContextSetup(context)
+               .apply(springSecurity()).build();
    }
 }
