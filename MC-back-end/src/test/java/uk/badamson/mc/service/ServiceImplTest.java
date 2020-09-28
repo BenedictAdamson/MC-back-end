@@ -227,7 +227,7 @@ public class ServiceImplTest {
       final var service = new ServiceImpl(passwordEncoder, repository,
                PASSWORD_A);
       repository.save(new User(User.ADMINISTRATOR_USERNAME,
-               passwordEncoder.encode(PASSWORD_B), Authority.ALL));
+               passwordEncoder.encode(PASSWORD_B), Authority.ALL, true, true, true, true));
 
       getUsers(service);
    }
@@ -240,8 +240,8 @@ public class ServiceImplTest {
 
    @BeforeEach
    public void setUpUsers() {
-      userA = new User("John", PASSWORD_A, Set.of());
-      userB = new User("Alan", PASSWORD_B, Authority.ALL);
-      userC = new User("Gweezer", PASSWORD_C, Set.of());
+      userA = new User("John", PASSWORD_A, Set.of(), true, true, true, true);
+      userB = new User("Alan", PASSWORD_B, Authority.ALL, true, true, true, true);
+      userC = new User("Gweezer", PASSWORD_C, Set.of(), true, true, true, true);
    }
 }
