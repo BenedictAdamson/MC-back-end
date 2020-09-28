@@ -1,7 +1,7 @@
 package uk.badamson.mc.presentation;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,30 +53,27 @@ public class UserControllerTest {
 
    @Autowired
    private UserController controller;
-   
+
    @Autowired
    private Service service;
-   
+
    @Autowired
    private MockMvc mockMvc;
 
    @Test
    public void addPermitted() throws Exception {
-      final var user = new User("jeff", "letmein", Authority.ALL, true, true, true, true);
-      final var addedUser = new User("allan", "password1", Set.of(Authority.PLAYER), true, true, true, true);
+      final var user = new User("jeff", "letmein", Authority.ALL, true, true,
+               true, true);
+      final var addedUser = new User("allan", "password1",
+               Set.of(Authority.PLAYER), true, true, true, true);
       service.add(user);
-      
-      var response = mockMvc.perform(post("/api/user")
+      final var request = post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(user))
-               .content(WorldCore.encodeAsJson(addedUser)));
+               .accept(MediaType.APPLICATION_JSON).with(user(user)).with(csrf())
+               .content(WorldCore.encodeAsJson(addedUser));
+
+      final var response = mockMvc.perform(request);
+
       response.andExpect(status().isCreated());
    }
-   
-
-   private void add(final User player) {
-      Objects.requireNonNull(controller, "controller");
-      Objects.requireNonNull(player, "player");
-      controller.add(player);
-   }   
 }

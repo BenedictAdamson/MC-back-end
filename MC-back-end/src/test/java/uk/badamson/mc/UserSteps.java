@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -81,7 +81,7 @@ public class UserSteps {
       worldCore.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser))
-               .content(WorldCore.encodeAsJson(addedUser)));
+               .with(csrf()).content(WorldCore.encodeAsJson(addedUser)));
    }
 
    @Then("can get the list of users")
@@ -93,8 +93,9 @@ public class UserSteps {
    @When("getting the users")
    public void getting_the_users() throws Exception {
       Objects.requireNonNull(loggedInUser, "loggedInUser");
-      worldCore.performRequest(get("/api/user")
-               .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser)));
+      worldCore.performRequest(
+               get("/api/user").accept(MediaType.APPLICATION_JSON)
+                        .with(user(loggedInUser)).with(csrf()));
    }
 
    @Given("logged in")
