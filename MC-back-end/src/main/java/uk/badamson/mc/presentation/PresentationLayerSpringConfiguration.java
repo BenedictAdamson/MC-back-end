@@ -30,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  */
 @ComponentScan("uk.badamson.mc.presentation")
 @EnableWebMvc
-@Import(value = { WebSecurityConfig.class })
+@Import(value = { WebSecurityConfiguration.class })
 public class PresentationLayerSpringConfiguration {
 
 }
