@@ -1,11 +1,10 @@
 package uk.badamson.mc.presentation;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.TestConfiguration;
@@ -22,9 +20,9 @@ import uk.badamson.mc.User;
 import uk.badamson.mc.WorldCore;
 import uk.badamson.mc.service.Service;
 
-/* 
+/*
  * © Copyright Benedict Adamson 2020.
- * 
+ *
  * This file is part of MC.
  *
  * MC is free software: you can redistribute it and/or modify
@@ -50,9 +48,6 @@ import uk.badamson.mc.service.Service;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 public class UserControllerTest {
-
-   @Autowired
-   private UserController controller;
 
    @Autowired
    private Service service;
