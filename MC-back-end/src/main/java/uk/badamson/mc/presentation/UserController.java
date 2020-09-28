@@ -74,7 +74,7 @@ public class UserController {
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
-   @RolesAllowed("ROLE_MANAGE_USERS")
+   @RolesAllowed("MANAGE_USERS")
    public void add(@RequestBody final User player) {
       service.add(player);
    }

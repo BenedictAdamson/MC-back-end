@@ -65,7 +65,7 @@ public class UserControllerTest {
       final var user = new User("jeff", "letmein", Authority.ALL, true, true,
                true, true);
       final var addedUser = new User("allan", "password1",
-               Set.of(Authority.PLAYER), true, true, true, true);
+               Set.of(Authority.ROLE_PLAYER), true, true, true, true);
       service.add(user);
       final var request = post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
