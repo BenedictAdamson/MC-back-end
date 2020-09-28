@@ -32,15 +32,15 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+   private static void configureAuthorizedRequests(final HttpSecurity http)
+            throws Exception {
+      http.authorizeRequests();// TODO
+   }
+
    private static void configureLoginAndLogout(final HttpSecurity http)
             throws Exception {
       http.formLogin().loginPage("/login").permitAll().and().logout()
                .permitAll();
-   }
-
-   private static void configureAuthorizedRequests(final HttpSecurity http)
-            throws Exception {
-      http.authorizeRequests();//TODO
    }
 
    @Override
