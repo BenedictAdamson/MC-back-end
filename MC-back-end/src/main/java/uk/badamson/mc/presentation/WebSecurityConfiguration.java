@@ -37,6 +37,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.authorizeRequests();// TODO
    }
 
+   private static void configureHttpBasic(final HttpSecurity http)
+            throws Exception {
+      http.httpBasic();
+   }
+
    private static void configureLoginAndLogout(final HttpSecurity http)
             throws Exception {
       http.formLogin().loginPage("/login").permitAll().and().logout()
@@ -45,6 +50,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
+      configureHttpBasic(http);
       configureAuthorizedRequests(http);
       configureLoginAndLogout(http);
    }
