@@ -49,3 +49,4 @@ like other Spring Boot applications.
 * It uses the MongoDB drivers, so the `spring.data.mongodb.*` properties are available.
   In particular, `spring.data.mongodb.host` and `spring.data.mongodb.password`
   should be set to enable connection to the database server.
+* The `administrator.password` property is the (unencrypted) password of the special administrator user of the system.
