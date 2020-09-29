@@ -34,7 +34,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
-      http.authorizeRequests();// TODO
+      http.authorizeRequests().anyRequest().permitAll();// TODO
    }
 
    private static void configureHttpBasic(final HttpSecurity http)
@@ -50,6 +50,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
+      http.csrf().disable();// FIXME
       configureHttpBasic(http);
       configureAuthorizedRequests(http);
       configureLoginAndLogout(http);
