@@ -37,7 +37,7 @@ import io.cucumber.java.en.When;
 public class UnknownPageSteps {
 
    @Autowired
-   private WorldCore worldCore;
+   private BackEndWorldCore worldCore;
 
    @When("getting the unknown resource at {string}")
    public void getting_the_unknown_resource_at(final String path)

@@ -15,9 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.BackEndWorldCore;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
-import uk.badamson.mc.WorldCore;
 import uk.badamson.mc.service.Service;
 
 /*
@@ -65,7 +65,7 @@ public class UserControllerTest {
       final var request = post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(user)).with(csrf())
-               .content(WorldCore.encodeAsJson(addedUser));
+               .content(BackEndWorldCore.encodeAsJson(addedUser));
 
       final var response = mockMvc.perform(request);
 

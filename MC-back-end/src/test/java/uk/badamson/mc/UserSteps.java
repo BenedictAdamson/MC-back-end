@@ -56,7 +56,7 @@ import uk.badamson.mc.service.Service;
 public class UserSteps {
 
    @Autowired
-   private WorldCore worldCore;
+   private BackEndWorldCore worldCore;
 
    @Autowired
    private Service service;
@@ -82,7 +82,7 @@ public class UserSteps {
       worldCore.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser))
-               .with(csrf()).content(WorldCore.encodeAsJson(addedUser)));
+               .with(csrf()).content(BackEndWorldCore.encodeAsJson(addedUser)));
    }
 
    @Then("can get the list of users")
