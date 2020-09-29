@@ -94,7 +94,9 @@ public class ServiceImpl implements Service {
       }
       user = new User(user.getUsername(),
                passwordEncoder.encode(user.getPassword()),
-               user.getAuthorities(), true, true, true, true);// FIXME
+               user.getAuthorities(), user.isAccountNonExpired(),
+               user.isAccountNonLocked(), user.isCredentialsNonExpired(),
+               user.isEnabled());
       userRepository.save(user);
    }
 
