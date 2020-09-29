@@ -69,7 +69,6 @@ MC is available from these public repositories:
     * [Cucumber Eclipse Plugin](https://marketplace.eclipse.org/content/cucumber-eclipse-plugin)
     * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
     * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
-    * [Eclipse-PMD plugin](https://marketplace.eclipse.org/content/eclipse-pmd)
     * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
     * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Minikube](https://github.com/kubernetes/minikube)
