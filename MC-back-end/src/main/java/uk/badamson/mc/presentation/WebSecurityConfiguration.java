@@ -34,7 +34,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
-      http.authorizeRequests().anyRequest().permitAll();// TODO
+      http.authorizeRequests().antMatchers("/api/user/**").authenticated();
+      http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
    }
 
    private static void configureHttpBasic(final HttpSecurity http)
