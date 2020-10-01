@@ -36,7 +36,7 @@ import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * End-points for the user and users pages.
+ * End-points for the user and users HTTP resources.
  * </p>
  */
 @RestController
@@ -68,20 +68,26 @@ public class UserController {
     * <p>
     * Behaviour of the POST verb for the user list.
     * </p>
+    * <p>
+    * Adds the given user to the list of users.
+    * </p>
     *
-    * @param player
+    * @param user
     *           The body of the request
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
    @RolesAllowed("MANAGE_USERS")
-   public void add(@RequestBody final User player) {
-      service.add(player);
+   public void add(@RequestBody final User user) {
+      service.add(user);
    }
 
    /**
     * <p>
     * Behaviour of the GET verb for the users list.
+    * </p>
+    * <p>
+    * Returns a list of all the users.
     * </p>
     *
     * @return The response.
