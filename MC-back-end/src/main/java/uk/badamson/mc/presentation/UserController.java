@@ -74,6 +74,12 @@ public class UserController {
     *
     * @param user
     *           The body of the request
+    * @throws NullPointerException
+    *            If {@code user} is null
+    * @throws IllegalArgumentException
+    *            If the {@linkplain User#getUsername() username} of {@code user}
+    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
+    *            administrator}.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
