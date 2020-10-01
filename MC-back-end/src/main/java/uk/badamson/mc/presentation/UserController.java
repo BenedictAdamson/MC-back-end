@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.security.Principal;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -109,6 +110,24 @@ public class UserController {
    @GetMapping("/api/user")
    public Stream<User> getAll() {
       return service.getUsers();
+   }
+
+   /**
+    * <p>
+    * Behaviour of the GET verb for the self resource.
+    * </p>
+    *
+    * @param id
+    *           The authenticated identity of the current user
+    * @return The user object for the current user.
+    * @throws NullPointerException
+    *            If {@code id} is null
+    */
+   @GetMapping("/api/self")
+   public User getSelf(final Principal id) {
+      return service.getUsers()
+               .filter(u -> u.getUsername().equals(id.getName())).findAny()
+               .get();
    }
 
    /**

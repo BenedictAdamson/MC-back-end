@@ -1,25 +1,4 @@
 package uk.badamson.mc.presentation;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.BackEndWorldCore;
-import uk.badamson.mc.TestConfiguration;
-import uk.badamson.mc.User;
-import uk.badamson.mc.service.Service;
-
 /*
  * © Copyright Benedict Adamson 2020.
  *
@@ -39,6 +18,32 @@ import uk.badamson.mc.service.Service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import java.util.Set;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import uk.badamson.mc.Authority;
+import uk.badamson.mc.BackEndWorldCore;
+import uk.badamson.mc.TestConfiguration;
+import uk.badamson.mc.User;
+import uk.badamson.mc.service.Service;
+
 /**
  * <p>
  * Unit tests of the {@link UserController} class.
@@ -49,6 +54,11 @@ import uk.badamson.mc.service.Service;
 @AutoConfigureMockMvc
 public class UserControllerTest {
 
+   private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
+            true, true, true, true);
+   private static final User USER_B = new User("allan", "password1",
+            Set.of(Authority.ROLE_PLAYER), false, false, false, false);
+
    @Autowired
    private Service service;
 
@@ -57,8 +67,7 @@ public class UserControllerTest {
 
    @Test
    public void addAdministrator() throws Exception {
-      final var user = new User("jeff", "letmein", Authority.ALL, true, true,
-               true, true);
+      final var user = USER_A;
       final var addedUser = new User(User.ADMINISTRATOR_USERNAME, "password1",
                Set.of(Authority.ROLE_PLAYER), true, true, true, true);
       service.add(user);
@@ -74,10 +83,8 @@ public class UserControllerTest {
 
    @Test
    public void addPermitted() throws Exception {
-      final var user = new User("jeff", "letmein", Authority.ALL, true, true,
-               true, true);
-      final var addedUser = new User("allan", "password1",
-               Set.of(Authority.ROLE_PLAYER), true, true, true, true);
+      final var user = USER_A;
+      final var addedUser = USER_B;
       service.add(user);
       final var request = post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
@@ -88,4 +95,60 @@ public class UserControllerTest {
 
       response.andExpect(status().isCreated());
    }
+
+   @Nested
+   public class GetSelf {
+
+      @Test
+      public void a() throws Exception {
+         test(USER_A);
+      }
+
+      @Test
+      public void b() throws Exception {
+         test(USER_B);
+      }
+
+      private void test(final User user) throws Exception {
+         service.add(user);
+         final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+                  .with(user(user)).with(csrf());
+
+         final var response = mockMvc.perform(request);
+
+         response.andExpect(status().isOk());
+         /*
+          * We can not check the response body for equivalence to a JSON
+          * encoding of the user object, because the returned object has an
+          * encoded password with a random salt. Checking the decoded response
+          * body for equivalence to the user object is a weak test because User
+          * objects have only entity semantics.
+          */
+         final var jsonResponse = response.andReturn().getResponse()
+                  .getContentAsString();
+         final var mapper = new ObjectMapper();
+         final var decodedResponse = mapper.readValue(jsonResponse, User.class);
+         assertAll("Response is the authenticated user",
+                  () -> assertThat("username", decodedResponse.getUsername(),
+                           is(user.getUsername())),
+                  () -> assertThat("authorities",
+                           decodedResponse.getAuthorities(),
+                           is(user.getAuthorities())),
+                  () -> assertThat("password",
+                           service.getPasswordEncoder().matches(
+                                    user.getPassword(),
+                                    decodedResponse.getPassword())),
+                  () -> assertThat("accountNonExpired",
+                           decodedResponse.isAccountNonExpired(),
+                           is(user.isAccountNonExpired())),
+                  () -> assertThat("accountNonLocked",
+                           decodedResponse.isAccountNonLocked(),
+                           is(user.isAccountNonLocked())),
+                  () -> assertThat("credentialsNonExpired",
+                           decodedResponse.isCredentialsNonExpired(),
+                           is(user.isCredentialsNonExpired())),
+                  () -> assertThat("enabled", decodedResponse.isEnabled(),
+                           is(user.isEnabled())));
+      }
+   }// class
 }
