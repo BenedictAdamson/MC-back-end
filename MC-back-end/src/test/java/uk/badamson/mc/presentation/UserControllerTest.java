@@ -56,6 +56,23 @@ public class UserControllerTest {
    private MockMvc mockMvc;
 
    @Test
+   public void addAdministrator() throws Exception {
+      final var user = new User("jeff", "letmein", Authority.ALL, true, true,
+               true, true);
+      final var addedUser = new User(User.ADMINISTRATOR_USERNAME, "password1",
+               Set.of(Authority.ROLE_PLAYER), true, true, true, true);
+      service.add(user);
+      final var request = post("/api/user")
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).with(user(user)).with(csrf())
+               .content(BackEndWorldCore.encodeAsJson(addedUser));
+
+      final var response = mockMvc.perform(request);
+
+      response.andExpect(status().isBadRequest());
+   }
+
+   @Test
    public void addPermitted() throws Exception {
       final var user = new User("jeff", "letmein", Authority.ALL, true, true,
                true, true);

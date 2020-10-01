@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.Service;
@@ -76,8 +77,10 @@ public class UserController {
     *           The body of the request
     * @throws NullPointerException
     *            If {@code user} is null
-    * @throws IllegalArgumentException
-    *            If the {@linkplain User#getUsername() username} of {@code user}
+    * @throws ResponseStatusException
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad Request)} If the
+    *            {@linkplain User#getUsername() username} of {@code user}
     *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
     *            administrator}.
     */
@@ -85,7 +88,12 @@ public class UserController {
    @ResponseStatus(HttpStatus.CREATED)
    @RolesAllowed("MANAGE_USERS")
    public void add(@RequestBody final User user) {
-      service.add(user);
+      try {
+         service.add(user);
+      } catch (final IllegalArgumentException e) {
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  e.getMessage(), e);
+      }
    }
 
    /**
