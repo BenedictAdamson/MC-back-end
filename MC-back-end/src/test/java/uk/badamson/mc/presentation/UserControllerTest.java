@@ -18,13 +18,14 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Set;
 
@@ -35,6 +36,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,47 +56,44 @@ import uk.badamson.mc.service.Service;
 @AutoConfigureMockMvc
 public class UserControllerTest {
 
-   private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
-            true, true, true, true);
-   private static final User USER_B = new User("allan", "password1",
-            Set.of(Authority.ROLE_PLAYER), false, false, false, false);
+   @Nested
+   public class Add {
 
-   @Autowired
-   private Service service;
+      @Test
+      public void a() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
 
-   @Autowired
-   private MockMvc mockMvc;
+         final ResultActions response = test(performingUser, addedUser);
 
-   @Test
-   public void addAdministrator() throws Exception {
-      final var user = USER_A;
-      final var addedUser = new User(User.ADMINISTRATOR_USERNAME, "password1",
-               Set.of(Authority.ROLE_PLAYER), true, true, true, true);
-      service.add(user);
-      final var request = post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(user)).with(csrf())
-               .content(BackEndWorldCore.encodeAsJson(addedUser));
+         response.andExpect(status().isCreated());
+      }
 
-      final var response = mockMvc.perform(request);
+      @Test
+      public void administrator() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = new User(User.ADMINISTRATOR_USERNAME,
+                  "password1", Set.of(Authority.ROLE_PLAYER), true, true, true,
+                  true);
 
-      response.andExpect(status().isBadRequest());
-   }
+         final ResultActions response = test(performingUser, addedUser);
 
-   @Test
-   public void addPermitted() throws Exception {
-      final var user = USER_A;
-      final var addedUser = USER_B;
-      service.add(user);
-      final var request = post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(user)).with(csrf())
-               .content(BackEndWorldCore.encodeAsJson(addedUser));
+         response.andExpect(status().isBadRequest());
+      }
 
-      final var response = mockMvc.perform(request);
+      private ResultActions test(final User performingUser,
+               final User addedUser) throws Exception {
+         service.add(performingUser);
+         final var request = post("/api/user")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+                  .with(csrf())
+                  .content(BackEndWorldCore.encodeAsJson(addedUser));
 
-      response.andExpect(status().isCreated());
-   }
+         return mockMvc.perform(request);
+      }
+
+   }// class
 
    @Nested
    public class GetSelf {
@@ -151,4 +150,16 @@ public class UserControllerTest {
                            is(user.isEnabled())));
       }
    }// class
+
+   private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
+            true, true, true, true);
+
+   private static final User USER_B = new User("allan", "password1",
+            Set.of(Authority.ROLE_PLAYER), false, false, false, false);
+
+   @Autowired
+   private Service service;
+
+   @Autowired
+   private MockMvc mockMvc;
 }
