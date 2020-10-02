@@ -67,6 +67,9 @@ public class UserControllerTest {
          final ResultActions response = test(performingUser, addedUser);
 
          response.andExpect(status().isCreated());
+         assertThat("List of users includes the added user",
+                  service.getUsers().anyMatch(u -> u.getUsername()
+                           .equals(addedUser.getUsername())));
       }
 
       @Test
