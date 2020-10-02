@@ -35,6 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -60,6 +63,7 @@ public class UserControllerTest {
    public class Add {
 
       @Test
+      @DirtiesContext
       public void a() throws Exception {
          final var performingUser = USER_A;
          final var addedUser = USER_B;
@@ -73,6 +77,7 @@ public class UserControllerTest {
       }
 
       @Test
+      @DirtiesContext
       public void administrator() throws Exception {
          final var performingUser = USER_A;
          final var addedUser = new User(User.ADMINISTRATOR_USERNAME,
@@ -82,6 +87,18 @@ public class UserControllerTest {
          final ResultActions response = test(performingUser, addedUser);
 
          response.andExpect(status().isBadRequest());
+      }
+
+      @Test
+      @DirtiesContext
+      public void duplicate() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
+
+         service.add(addedUser);
+         final ResultActions response = test(performingUser, addedUser);
+
+         response.andExpect(status().isConflict());
       }
 
       private ResultActions test(final User performingUser,
@@ -102,11 +119,13 @@ public class UserControllerTest {
    public class GetSelf {
 
       @Test
+      @DirtiesContext
       public void a() throws Exception {
          test(USER_A);
       }
 
       @Test
+      @DirtiesContext
       public void b() throws Exception {
          test(USER_B);
       }
