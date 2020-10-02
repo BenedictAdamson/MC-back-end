@@ -18,8 +18,11 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.security.Principal;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,13 +31,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.Service;
 
 /**
  * <p>
- * End-points for the user and users pages.
+ * End-points for the user and users HTTP resources.
  * </p>
  */
 @RestController
@@ -66,19 +70,39 @@ public class UserController {
     * <p>
     * Behaviour of the POST verb for the user list.
     * </p>
+    * <p>
+    * Adds the given user to the list of users.
+    * </p>
     *
-    * @param player
+    * @param user
     *           The body of the request
+    * @throws NullPointerException
+    *            If {@code user} is null
+    * @throws ResponseStatusException
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad Request)} If the
+    *            {@linkplain User#getUsername() username} of {@code user}
+    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
+    *            administrator}.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
-   public void add(@RequestBody final User player) {
-      service.add(player);
+   @RolesAllowed("MANAGE_USERS")
+   public void add(@RequestBody final User user) {
+      try {
+         service.add(user);
+      } catch (final IllegalArgumentException e) {
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  e.getMessage(), e);
+      }
    }
 
    /**
     * <p>
     * Behaviour of the GET verb for the users list.
+    * </p>
+    * <p>
+    * Returns a list of all the users.
     * </p>
     *
     * @return The response.
@@ -86,6 +110,24 @@ public class UserController {
    @GetMapping("/api/user")
    public Stream<User> getAll() {
       return service.getUsers();
+   }
+
+   /**
+    * <p>
+    * Behaviour of the GET verb for the self resource.
+    * </p>
+    *
+    * @param id
+    *           The authenticated identity of the current user
+    * @return The user object for the current user.
+    * @throws NullPointerException
+    *            If {@code id} is null
+    */
+   @GetMapping("/api/self")
+   public User getSelf(final Principal id) {
+      return service.getUsers()
+               .filter(u -> u.getUsername().equals(id.getName())).findAny()
+               .get();
    }
 
    /**

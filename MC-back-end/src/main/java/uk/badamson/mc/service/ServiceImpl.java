@@ -82,7 +82,8 @@ public class ServiceImpl implements Service {
       this.passwordEncoder = Objects.requireNonNull(passwordEncoder,
                "passwordEncoder");
       administrator = new User(User.ADMINISTRATOR_USERNAME,
-               passwordEncoder.encode(administratorPassword), Authority.ALL);
+               passwordEncoder.encode(administratorPassword), Authority.ALL,
+               true, true, true, true);
    }
 
    @Override
@@ -93,7 +94,9 @@ public class ServiceImpl implements Service {
       }
       user = new User(user.getUsername(),
                passwordEncoder.encode(user.getPassword()),
-               user.getAuthorities());
+               user.getAuthorities(), user.isAccountNonExpired(),
+               user.isAccountNonLocked(), user.isCredentialsNonExpired(),
+               user.isEnabled());
       userRepository.save(user);
    }
 

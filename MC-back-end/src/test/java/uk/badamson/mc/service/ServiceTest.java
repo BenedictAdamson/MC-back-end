@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,6 +52,7 @@ public class ServiceTest {
 
    public static void add_1(final Service service, final User user) {
       add(service, user);
+
       final Stream<User> users = service.getUsers();
       final UserDetails userDetails = loadUserByUsername(service,
                user.getUsername());
@@ -58,12 +60,28 @@ public class ServiceTest {
       assertThat(
                "A subsequently retrieved sequence of the users will include a user equivalent to the given user.",
                usersList, hasItem(user));
-      assertEquals(user, userDetails,
-               "Subsequently finding user details using the username of the given user will retrieve user details equivalent to the user details of the given user.");
-      assertTrue(
-               service.getPasswordEncoder().matches(user.getPassword(),
-                        userDetails.getPassword()),
-               "Recorded password has been encrypted using the pasword encoder of this service.");
+      assertAll(
+               "Subsequently finding user details using the username of the given user will retrieve user details "
+                        + "equivalent to the user details of the given user.",
+               () -> assertThat("authorities", userDetails.getAuthorities(),
+                        is(user.getAuthorities())),
+               () -> assertThat("username", userDetails.getUsername(),
+                        is(user.getUsername())),
+               () -> assertThat("accountNonExpired",
+                        userDetails.isAccountNonExpired(),
+                        is(user.isAccountNonExpired())),
+               () -> assertThat("accountNonLocked",
+                        userDetails.isAccountNonLocked(),
+                        is(user.isAccountNonLocked())),
+               () -> assertThat("credentialsNonExpired",
+                        userDetails.isCredentialsNonExpired(),
+                        is(user.isCredentialsNonExpired())),
+               () -> assertThat("enabled", userDetails.isEnabled(),
+                        is(user.isEnabled())),
+               () -> assertTrue(
+                        service.getPasswordEncoder().matches(user.getPassword(),
+                                 userDetails.getPassword()),
+                        "Recorded password has been encrypted using the pasword encoder of this service."));
    }
 
    public static void add_2(final Service service, final User user1,

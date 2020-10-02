@@ -20,7 +20,6 @@ package uk.badamson.mc.service;
 
 import java.util.stream.Stream;
 
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,7 +62,6 @@ public interface Service extends UserDetailsService {
     *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
     *            administrator}.
     */
-   @Secured("ROLE_ADMIN")
    void add(final User user);
 
    /**
