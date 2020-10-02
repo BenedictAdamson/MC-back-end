@@ -21,7 +21,7 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -30,10 +30,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -69,12 +71,17 @@ public class UserSteps {
 
    @Then("MC does not present adding a user as an option")
    public void add_user_not_permitted() throws Exception {
-      adding_a_user_named("Allan", "letmein");
+      addUser("Allan", "letmein");
       worldCore.expectResponse(status().isForbidden());
    }
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user_named(final String name, final String password)
+            throws Exception {
+      addUser(name, password);
+   }
+
+   private void addUser(final String name, final String password)
             throws Exception {
       Objects.requireNonNull(loggedInUser, "loggedInUser");
       final var addedUser = new User(name, password, Set.of(), true, true, true,
@@ -86,13 +93,32 @@ public class UserSteps {
    }
 
    @Then("can get the list of users")
-   public void can_get_the_list_of_users() throws Exception {
-      getting_the_users();
-      the_response_message_is_a_list_of_users();
+   public void can_get_the_list_of_users() {
+      try {
+         getUsers();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can request users resource", e);
+      }
+      try {
+         getResponseAsUserList();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
+   }
+
+   private void getResponseAsUserList() throws IOException {
+      final var response = worldCore.getResponseBodyAsString();
+      responseUserList = new ObjectMapper().readValue(response,
+               new TypeReference<List<User>>() {
+               });
    }
 
    @When("getting the users")
    public void getting_the_users() throws Exception {
+      getUsers();
+   }
+
+   private void getUsers() throws Exception {
       Objects.requireNonNull(loggedInUser, "loggedInUser");
       worldCore.performRequest(
                get("/api/user").accept(MediaType.APPLICATION_JSON)
@@ -112,8 +138,9 @@ public class UserSteps {
 
    @Then("MC accepts the login")
    public void mc_accepts_the_login() throws Exception {
-      worldCore.expectResponse(status().isFound());
-      worldCore.expectResponse(header().string("Location", "/"));
+      assertAll(() -> worldCore.expectResponse(status().isFound()),
+               () -> worldCore
+                        .expectResponse(header().string("Location", "/")));
    }
 
    @Then("MC serves the users page")
@@ -128,19 +155,18 @@ public class UserSteps {
 
    @Then("the list of users includes a user named {string}")
    public void the_list_of_users_includes_a_user_named(final String name) {
-      assertNotNull(responseUserList, "user list");
-      responseUserList.contains(
-               new User(name, null, Set.of(), true, true, true, true));
+      Objects.requireNonNull(responseUserList, "user list");
       assertTrue(responseUserList.stream()
                .filter(u -> u.getUsername().equals(name)).count() == 1);
    }
 
    @Then("the response is a list of users")
-   public void the_response_message_is_a_list_of_users() throws Exception {
-      final var response = worldCore.getResponseBodyAsString();
-      responseUserList = new ObjectMapper().readValue(response,
-               new TypeReference<List<User>>() {
-               });
+   public void the_response_message_is_a_list_of_users() {
+      try {
+         getResponseAsUserList();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
    }
 
    @When("user does not have the {string} role")
