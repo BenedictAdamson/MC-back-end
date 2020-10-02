@@ -18,76 +18,53 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
+import java.util.stream.Stream;
+
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.Player;
+import uk.badamson.mc.User;
 
 /**
  * <p>
  * The service layer of the Mission Command game.
  * </p>
  */
-public interface Service extends ReactiveUserDetailsService {
+public interface Service extends UserDetailsService {
 
    /**
     * <p>
-    * Add a player to the {@linkplain #getPlayers() list of players}.
+    * Add a user to the {@linkplain #getUsers() list of users}.
     * </p>
     * <ul>
-    * <li>Always returns a (non null) publisher.</li>
-    * <li>As for all publishers, the returned publisher will not
-    * {@linkplain Subscriber#onNext(Object) provide} a null element to a
-    * subscriber.</li>
-    * <li>A subsequently retrieved {@linkplain #getPlayers() sequence of the
-    * players} will include a {@linkplain Player player}
-    * {@linkplain Player#equals(Object) equivalent to} the given player.</li>
-    * <li>Subsequently {@linkplain #findByUsername(String) finding user details}
-    * using the {@linkplain Player#getUsername() username} of the given player
-    * will retrieve {@linkplain UserDetails user details} equivalent to the user
-    * details of the given player. However, the
+    * <li>A subsequently retrieved {@linkplain #getUsers() sequence of the
+    * users} will include a {@linkplain User user}
+    * {@linkplain User#equals(Object) equivalent to} the given user.</li>
+    * <li>Subsequently {@linkplain #loadUserByUsername(String) finding user
+    * details} using the {@linkplain User#getUsername() username} of the given
+    * user will retrieve {@linkplain UserDetails user details} equivalent to the
+    * user details of the given user. However, the
     * {@linkplain UserDetails#getPassword() password} will have been encrypted
     * using the {@linkplain #getPasswordEncoder() password encoder} of this
     * service.</li>
     * </ul>
     *
-    * @param player
-    *           The player to add, with an unencrypted
-    *           {@linkplain Player#getPassword() password}.
-    * @return a {@linkplain Publisher publisher} that
-    *         {@linkplain Subscriber#onComplete() completes} on addition of the
-    *         player or {@linkplain Subscriber#onError(Throwable) publishes an
-    *         error condition} if the addition fails.
+    * @param user
+    *           The user to add, with an unencrypted
+    *           {@linkplain User#getPassword() password}.
     * @throws NullPointerException
-    *            If {@code player} is null
+    *            If {@code user} is null
     * @throws IllegalArgumentException
-    *            If the {@linkplain Player#getUsername() username} of
-    *            {@code player} indicates it is the
-    *            {@linkplain Player#ADMINISTRATOR_USERNAME administrator}.
+    *            If the {@linkplain User#getUsername() username} of {@code user}
+    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
+    *            administrator}.
     */
    @Secured("ROLE_ADMIN")
-   Mono<Void> add(final Player player);
-
-   /**
-    * {@inheritDoc}
-    *
-    * <ul>
-    * <li>Always have user details for the
-    * {@linkplain Player#ADMINISTRATOR_USERNAME administrator}.</li>
-    * <li>The {@linkplain Player#ADMINISTRATOR_USERNAME administrator} has a
-    * complete {@linkplain Authority set} of
-    * {@linkplain UserDetails#getAuthorities() authorities}.</li>
-    * </ul>
-    */
-   @Override
-   Mono<UserDetails> findByUsername(String username);
+   void add(final User user);
 
    /**
     * <p>
@@ -103,23 +80,36 @@ public interface Service extends ReactiveUserDetailsService {
 
    /**
     * <p>
-    * Retrieve a publisher of the list of the current players of this instance
-    * of the Mission Command game.
+    * Retrieve a stream of the current users of this instance of the Mission
+    * Command game.
     * </p>
     * <ul>
-    * <li>Always returns a (non null) publisher.</li>
-    * <li>As for all publishers, the returned publisher will not
-    * {@linkplain Subscriber#onNext(Object) provide} a null element to a
-    * subscriber.</li>
-    * <li>The list of players always {@linkplain Flux#hasElement(Object) has a}
-    * player with the {@linkplain Player#ADMINISTRATOR_USERNAME administrator
-    * username} as its {@linkplain Player#getUsername() username}.</li>
-    * <li>Does not contain players with duplicate
-    * {@linkplain Player#getUsername() usernames}.</li>
+    * <li>Always returns a (non null) stream.</li>
+    * <li>The returned stream will not include a null element</li>
+    * <li>The stream of users always contains a user with the
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator username} as its
+    * {@linkplain User#getUsername() username}.</li>
+    * <li>Does not contain users with duplicate {@linkplain User#getUsername()
+    * usernames}.</li>
     * </ul>
     *
-    * @return a {@linkplain Publisher publisher} of the players.
+    * @return a {@linkplain Stream stream} of the users.
     */
-   Flux<Player> getPlayers();
+   Stream<User> getUsers();
+
+   /**
+    * {@inheritDoc}
+    *
+    * <ul>
+    * <li>Always have user details for the
+    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+    * <li>The {@linkplain User#ADMINISTRATOR_USERNAME administrator} has a
+    * complete {@linkplain Authority set} of
+    * {@linkplain UserDetails#getAuthorities() authorities}.</li>
+    * </ul>
+    */
+   @Override
+   UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException;
 
 }

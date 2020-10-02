@@ -21,39 +21,19 @@ package uk.badamson.mc;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
-
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * <p>
- * A Testcontainers Docker container for the MC-back-end.
- * </p>
- * <p>
- * This class builds the Docker image for the container using the real
- * Dockerfile, so it also tests that Dockerfile.
+ * The version ofthe SUT
  * </p>
  */
-final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
+public final class Version {
 
    public static final String VERSION = getVersion();
 
-   private static final Path TARGET_DIR = Paths.get("target");
-
-   private static final Path DOCKERFILE = Paths.get("Dockerfile");
-
-   private static final ImageFromDockerfile IMAGE = createImage(VERSION);
-
-   private static ImageFromDockerfile createImage(final String version) {
-      final var jarPath = getJarPath(version);
-      return new ImageFromDockerfile()
-               .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withFileFromPath(jarPath.toString(), jarPath)
-               .withBuildArg("VERSION", version);
-   }
+   public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
+            + VERSION;
 
    private static Properties getApplicationProperties() throws IOException {
       final InputStream stream = Thread.currentThread().getContextClassLoader()
@@ -65,10 +45,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       final Properties properties = new Properties();
       properties.load(stream);
       return properties;
-   }
-
-   private static Path getJarPath(final String version) {
-      return TARGET_DIR.resolve("MC-back-end-" + version + ".jar");
    }
 
    private static String getVersion() {
@@ -84,10 +60,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                   "missing build.version property in application.properties resource");
       }
       return version;
-   }
-
-   McBackEndContainer() {
-      super(IMAGE);
    }
 
 }
