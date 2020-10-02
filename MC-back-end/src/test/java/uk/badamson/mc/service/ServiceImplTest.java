@@ -59,13 +59,94 @@ public class ServiceImplTest {
       public class One {
 
          @Test
-         public void a() {
-            test(userA, passwordEncoderA);
+         public void accountNonExpired() {
+            final boolean accountNonExpired = false;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
          }
 
          @Test
-         public void b() {
-            test(userB, passwordEncoderB);
+         public void accountNonLocked() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = false;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void authorities() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_A,
+                     Set.of(Authority.ROLE_PLAYER), accountNonExpired,
+                     accountNonLocked, credentialsNonExpired, enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void base() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void credentialsNonExpired() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = false;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void enabled() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = false;
+            final var user = new User(USERNAME_A, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void password() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_A, PASSWORD_B, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
          }
 
          private void test(final User user,
@@ -73,7 +154,25 @@ public class ServiceImplTest {
             final var service = new ServiceImpl(passwordEncoder,
                      userRepositoryA, PASSWORD_A);
             ServiceTest.add_1(service, user);
-            assertThat("Added user", service.getUsers().count(), is(2L));
+            assertThat("Added a user", service.getUsers().count(), is(2L));
+         }
+
+         @Test
+         public void username() {
+            final boolean accountNonExpired = true;
+            final boolean accountNonLocked = true;
+            final boolean credentialsNonExpired = true;
+            final boolean enabled = true;
+            final var user = new User(USERNAME_B, PASSWORD_A, Authority.ALL,
+                     accountNonExpired, accountNonLocked, credentialsNonExpired,
+                     enabled);
+
+            test(user, passwordEncoderA);
+         }
+
+         @Test
+         public void usesPasswordEncoder() {
+            test(userA, passwordEncoderB);
          }
       }// class
 
@@ -148,6 +247,12 @@ public class ServiceImplTest {
          users = getUsers(service).collect(toList());
       }
    }// class
+
+   private static final String USERNAME_C = "Gweezer";
+
+   private static final String USERNAME_B = "Alan";
+
+   private static final String USERNAME_A = "John";
 
    private static final String PASSWORD_A = "letmein";
 
@@ -227,7 +332,8 @@ public class ServiceImplTest {
       final var service = new ServiceImpl(passwordEncoder, repository,
                PASSWORD_A);
       repository.save(new User(User.ADMINISTRATOR_USERNAME,
-               passwordEncoder.encode(PASSWORD_B), Authority.ALL));
+               passwordEncoder.encode(PASSWORD_B), Authority.ALL, true, true,
+               true, true));
 
       getUsers(service);
    }
@@ -240,8 +346,11 @@ public class ServiceImplTest {
 
    @BeforeEach
    public void setUpUsers() {
-      userA = new User("John", PASSWORD_A, Set.of());
-      userB = new User("Alan", PASSWORD_B, Authority.ALL);
-      userC = new User("Gweezer", PASSWORD_C, Set.of());
+      userA = new User(USERNAME_A, PASSWORD_A, Set.of(), true, true, true,
+               true);
+      userB = new User(USERNAME_B, PASSWORD_B, Authority.ALL, true, true, true,
+               true);
+      userC = new User(USERNAME_C, PASSWORD_C, Set.of(), true, true, true,
+               true);
    }
 }

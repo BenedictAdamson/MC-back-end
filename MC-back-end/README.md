@@ -39,3 +39,14 @@ Because a Spring Boot executable JAR can not also be used as a library JAR,
 code that might be shared with other Java components of MC
 (and in particular, is used by integration test code)
 is in the *model* component rather than this component.
+
+## Configuration
+
+The back end HTTPD server of Mission Command is a Spring Boot application,
+and so can be configured by setting Spring properties
+(using environment variables, Java properties, YAML properties and command-line arguments)
+like other Spring Boot applications.
+* It uses the MongoDB drivers, so the `spring.data.mongodb.*` properties are available.
+  In particular, `spring.data.mongodb.host` and `spring.data.mongodb.password`
+  should be set to enable connection to the database server.
+* The `administrator.password` property is the (unencrypted) password of the special administrator user of the system.
