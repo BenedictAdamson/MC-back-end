@@ -97,6 +97,9 @@ public class UserController {
    public void add(@RequestBody final User user) {
       try {
          service.add(user);
+      } catch (final IllegalStateException e) {
+         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                  e);
       } catch (final IllegalArgumentException e) {
          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                   e.getMessage(), e);
