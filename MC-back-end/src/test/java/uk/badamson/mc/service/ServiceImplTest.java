@@ -57,7 +57,7 @@ public class ServiceImplTest {
    public class Add_User {
 
       @Nested
-      public class Duplicate {
+      public class AlreadyExists {
 
          @Test
          public void a() {
@@ -73,7 +73,7 @@ public class ServiceImplTest {
             final var service = new ServiceImpl(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
             service.add(user);
-            assertThrows(IllegalStateException.class,
+            assertThrows(UserExistsException.class,
                      () -> ServiceTest.add(service, user));
          }
 

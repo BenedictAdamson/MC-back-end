@@ -61,7 +61,7 @@ public interface Service extends UserDetailsService {
     *            If the {@linkplain User#getUsername() username} of {@code user}
     *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
     *            administrator}.
-    * @throws IllegalStateException
+    * @throws UserExistsException
     *            If the {@linkplain User#getUsername() username} of {@code user}
     *            is already the username of a user, and is not the
     *            administrator.
