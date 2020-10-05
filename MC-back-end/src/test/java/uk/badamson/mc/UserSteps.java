@@ -176,7 +176,7 @@ public class UserSteps {
    }
 
    private void user_has_authorities(final Set<Authority> authorities) {
-      user = new User("Jeff", "password1", authorities, true, true, true, true);
+      user = new User("Zoe", "password1", authorities, true, true, true, true);
       service.add(user);
    }
 
