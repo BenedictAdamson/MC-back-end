@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.Before;
 import io.cucumber.spring.ScenarioScope;
+import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -70,6 +71,9 @@ public class BackEndWorldCore {
 
    @Autowired
    private WebApplicationContext context;
+
+   @Autowired
+   private UserRepository userRepository;
 
    private MockMvc mockMvc;
 
@@ -133,5 +137,6 @@ public class BackEndWorldCore {
    public void setUp() {
       mockMvc = MockMvcBuilders.webAppContextSetup(context)
                .apply(springSecurity()).build();
+      userRepository.deleteAll();
    }
 }
