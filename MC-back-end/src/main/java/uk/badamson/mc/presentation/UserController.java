@@ -35,6 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.Service;
+import uk.badamson.mc.service.UserExistsException;
 
 /**
  * <p>
@@ -97,7 +98,7 @@ public class UserController {
    public void add(@RequestBody final User user) {
       try {
          service.add(user);
-      } catch (final IllegalStateException e) {
+      } catch (final UserExistsException e) {
          throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
                   e);
       } catch (final IllegalArgumentException e) {
