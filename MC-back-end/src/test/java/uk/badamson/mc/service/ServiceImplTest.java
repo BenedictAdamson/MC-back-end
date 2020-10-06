@@ -27,6 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
@@ -54,6 +55,29 @@ public class ServiceImplTest {
 
    @Nested
    public class Add_User {
+
+      @Nested
+      public class AlreadyExists {
+
+         @Test
+         public void a() {
+            test(userA);
+         }
+
+         @Test
+         public void b() {
+            test(userB);
+         }
+
+         private void test(final User user) {
+            final var service = new ServiceImpl(passwordEncoderA,
+                     userRepositoryA, PASSWORD_A);
+            service.add(user);
+            assertThrows(UserExistsException.class,
+                     () -> ServiceTest.add(service, user));
+         }
+
+      }// class
 
       @Nested
       public class One {

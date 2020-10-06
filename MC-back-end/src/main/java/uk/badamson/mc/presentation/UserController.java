@@ -79,11 +79,17 @@ public class UserController {
     * @throws NullPointerException
     *            If {@code user} is null
     * @throws ResponseStatusException
-    *            With a {@linkplain ResponseStatusException#getStatus() status}
-    *            of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad Request)} If the
-    *            {@linkplain User#getUsername() username} of {@code user}
-    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
-    *            administrator}.
+    *            <ul>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
+    *            Request)} If the {@linkplain User#getUsername() username} of
+    *            {@code user} indicates it is the
+    *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
+    *            the {@linkplain User#getUsername() username} of {@code user} is
+    *            already the username of a user.</li>
+    *            </ul>
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
@@ -91,6 +97,9 @@ public class UserController {
    public void add(@RequestBody final User user) {
       try {
          service.add(user);
+      } catch (final IllegalStateException e) {
+         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                  e);
       } catch (final IllegalArgumentException e) {
          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                   e.getMessage(), e);

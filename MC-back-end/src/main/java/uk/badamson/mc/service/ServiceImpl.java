@@ -91,6 +91,8 @@ public class ServiceImpl implements Service {
       Objects.requireNonNull(user, "user");
       if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
          throw new IllegalArgumentException("User is administrator");
+      } else if (userRepository.existsById(user.getUsername())) {
+         throw new UserExistsException();
       }
       user = new User(user.getUsername(),
                passwordEncoder.encode(user.getPassword()),
