@@ -26,6 +26,7 @@ import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.Service;
+import uk.badamson.mc.service.UserExistsException;
 
 /**
  * <p>
@@ -97,7 +99,7 @@ public class UserController {
    public void add(@RequestBody final User user) {
       try {
          service.add(user);
-      } catch (final IllegalStateException e) {
+      } catch (final UserExistsException e) {
          throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
                   e);
       } catch (final IllegalArgumentException e) {
@@ -133,6 +135,7 @@ public class UserController {
     *            If {@code id} is null
     */
    @GetMapping("/api/self")
+   @PreAuthorize("isAuthenticated()")
    public User getSelf(final Principal id) {
       return service.getUsers()
                .filter(u -> u.getUsername().equals(id.getName())).findAny()
