@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -169,5 +170,33 @@ public class UserControllerTest {
    @Test
    public void getSelf_b() throws Exception {
       getSelf(USER_B);
+   }
+
+   @Test
+   public void getSelf_unknownUser() throws Exception {
+      final var user = USER_A;
+      final var headers = new HttpHeaders();
+      headers.setBasicAuth(user.getUsername(), user.getPassword());
+      final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+               .headers(headers).with(csrf());
+
+      final var response = mockMvc.perform(request);
+
+      response.andExpect(status().isUnauthorized());
+   }
+
+   @Test
+   public void getSelf_wrongPassword() throws Exception {
+      final var user = USER_A;
+      final var wrongPassword = "****";
+      final var headers = new HttpHeaders();
+      headers.setBasicAuth(user.getUsername(), wrongPassword);
+      service.add(user);
+      final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+               .headers(headers).with(csrf());
+
+      final var response = mockMvc.perform(request);
+
+      response.andExpect(status().isUnauthorized());
    }
 }
