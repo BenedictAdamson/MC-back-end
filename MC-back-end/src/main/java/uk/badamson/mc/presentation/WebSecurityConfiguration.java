@@ -41,6 +41,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
       http.httpBasic();
+      /*
+       * If we use HTTP basic authentication for everything, CSRF is impossible.
+       */
+      http.csrf().disable();
    }
 
    private static void configureLoginAndLogout(final HttpSecurity http)
@@ -51,7 +55,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
-      http.csrf().disable();// FIXME
       configureHttpBasic(http);
       configureAuthorizedRequests(http);
       configureLoginAndLogout(http);
