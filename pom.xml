@@ -35,7 +35,7 @@
 		<MC.cucumber.version>6.8.1</MC.cucumber.version>
 		<MC.node.version>v14.13.1</MC.node.version>
 		<MC.npm.version>6.14.8</MC.npm.version>
-		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
+		<MC.spotbugs.version>4.1.3</MC.spotbugs.version>
 		<MC.spring-boot.version>2.3.4.RELEASE</MC.spring-boot.version>
 	</properties>
 	<build>
