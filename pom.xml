@@ -36,7 +36,7 @@
 		<MC.node.version>v14.8.0</MC.node.version>
 		<MC.npm.version>6.14.8</MC.npm.version>
 		<MC.spotbugs.version>4.0.4</MC.spotbugs.version>
-		<MC.spring-boot.version>2.3.3.RELEASE</MC.spring-boot.version>
+		<MC.spring-boot.version>2.3.4.RELEASE</MC.spring-boot.version>
 	</properties>
 	<build>
 		<pluginManagement>
