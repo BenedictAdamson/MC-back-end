@@ -19,7 +19,7 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Need Docker, Helm, Java 11 and Maven.
+# Need Chrome, Docker, Helm, Java 11 and Maven.
 # Also need nodejs, npm and Angular,
 # but the frontend-maven-plugin installs those.
 
@@ -28,11 +28,14 @@ RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
    curl \
-   firefox-esr \
    gnupg-agent \
    maven \
    openjdk-11-jdk-headless \
    software-properties-common
+# Add Chrome repository
+RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN add-apt-repository -y \
+   "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
 # Add Docker repository
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository -y \
@@ -40,9 +43,10 @@ RUN add-apt-repository -y \
 # Add Helm repository
 RUN curl https://helm.baltorepo.com/organization/signing.asc | apt-key add -
 RUN echo "deb https://baltocdn.com/helm/stable/debian/ all main" > /etc/apt/sources.list.d/helm-stable-debian.list
-# Install Docker and Helm
+# Install Chrome, Docker and Helm
 RUN apt-get -y update && apt-get -y install \
    containerd.io \
    docker-ce \
    docker-ce-cli \
+   google-chrome-stable \
    helm
