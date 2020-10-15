@@ -18,8 +18,18 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -37,17 +47,33 @@ public class ScenarioSteps {
    private BackEndWorldCore worldCore;
 
    @When("getting the scenarios")
-   public void getting_scenarios() {
-      throw new UnsupportedOperationException();
+   public void getting_scenarios() throws Exception {
+      getScenarios();
+   }
+
+   private void getScenarios() throws Exception {
+      worldCore.performRequest(
+               get("/api/scenario").accept(MediaType.APPLICATION_JSON));
    }
 
    @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() {
-      throw new UnsupportedOperationException();
+   public void mc_serves_scenarios_page() throws Exception {
+      worldCore.responseIsOk();
    }
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      throw new UnsupportedOperationException();
+      try {
+         getResponseAsScenarioIdentifierList();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
+   }
+
+   private void getResponseAsScenarioIdentifierList() throws IOException {
+      final var response = worldCore.getResponseBodyAsString();
+      new ObjectMapper().readValue(response,
+               new TypeReference<List<Scenario.Identifier>>() {
+               });
    }
 }
