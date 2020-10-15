@@ -42,10 +42,24 @@ public class ServiceLayerSpringConfiguration {
 
    /**
     * <p>
-    * Create the the service layer.
+    * Create the part of the service layer pertaining to scenarios of the
+    * Mission Command game.
     * </p>
     *
-    * @return the service layer.
+    * @return the part of the service layer.
+    */
+   @Bean
+   public ScenarioService scenarioService() {
+      return new ScenarioServiceImpl();
+   }
+
+   /**
+    * <p>
+    * Create the part of the service layer pertaining to users of the Mission
+    * Command game.
+    * </p>
+    *
+    * @return the part of the service layer.
     */
    @Bean
    public UserService userService(
