@@ -48,10 +48,11 @@ public class ServiceLayerSpringConfiguration {
     * @return the service layer.
     */
    @Bean
-   public Service service(@NonNull final PasswordEncoder passwordEncoder,
+   public UserService userService(
+            @NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository playerRepository,
             @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
-      return new ServiceImpl(passwordEncoder, playerRepository,
+      return new UserServiceImpl(passwordEncoder, playerRepository,
                administratorPassword);
    }
 }

@@ -30,10 +30,10 @@ import uk.badamson.mc.User;
 
 /**
  * <p>
- * The service layer of the Mission Command game.
+ * The part of the service layer pertainig to users of the Missino Command game.
  * </p>
  */
-public interface Service extends UserDetailsService {
+public interface UserService extends UserDetailsService {
 
    /**
     * <p>

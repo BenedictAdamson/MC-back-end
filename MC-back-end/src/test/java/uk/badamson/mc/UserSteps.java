@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import uk.badamson.mc.service.Service;
+import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -61,7 +61,7 @@ public class UserSteps {
    private BackEndWorldCore worldCore;
 
    @Autowired
-   private Service service;
+   private UserService service;
 
    private User user;
 

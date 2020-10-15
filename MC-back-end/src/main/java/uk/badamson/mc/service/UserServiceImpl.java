@@ -26,6 +26,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.User;
@@ -36,8 +37,8 @@ import uk.badamson.mc.repository.UserRepository;
  * The concrete implementation of the service layer of the Mission Command game.
  * </p>
  */
-@org.springframework.stereotype.Service
-public class ServiceImpl implements Service {
+@Service
+public class UserServiceImpl implements UserService {
 
    private final PasswordEncoder passwordEncoder;
    private final UserRepository userRepository;
@@ -73,7 +74,7 @@ public class ServiceImpl implements Service {
     *            <li>If {@code administratorPasword} is null.</li>
     *            </ul>
     */
-   public ServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
+   public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository userRepository,
             @NonNull final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
