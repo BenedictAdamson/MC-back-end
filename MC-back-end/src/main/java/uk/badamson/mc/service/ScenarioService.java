@@ -21,6 +21,7 @@ package uk.badamson.mc.service;
 import java.util.stream.Stream;
 
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.Scenario.Identifier;;
 
 /**
  * <p>
@@ -38,8 +39,8 @@ public interface ScenarioService {
     * <ul>
     * <li>Always returns a (non null) stream.</li>
     * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain Scenario.Identifier#equals(Object)
-    * duplicate} identifiers.</li>
+    * <li>Does not contain {@linkplain Identifier#equals(Object) duplicate}
+    * identifiers.</li>
     * </ul>
     *
     * @return a {@linkplain Stream stream} of the scenario identifiers.
