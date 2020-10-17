@@ -35,8 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.User;
-import uk.badamson.mc.service.Service;
 import uk.badamson.mc.service.UserExistsException;
+import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -46,7 +46,7 @@ import uk.badamson.mc.service.UserExistsException;
 @RestController
 public class UserController {
 
-   private final Service service;
+   private final UserService service;
 
    /**
     * <p>
@@ -64,7 +64,7 @@ public class UserController {
     *            If {@code service} is null
     */
    @Autowired
-   public UserController(final Service service) {
+   public UserController(final UserService service) {
       this.service = Objects.requireNonNull(service, "service");
    }
 
@@ -152,7 +152,7 @@ public class UserController {
     *
     * @return the service
     */
-   public final Service getService() {
+   public final UserService getService() {
       return service;
    }
 }

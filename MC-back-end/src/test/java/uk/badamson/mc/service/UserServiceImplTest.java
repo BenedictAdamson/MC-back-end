@@ -48,10 +48,10 @@ import uk.badamson.mc.repository.UserRepositoryTest;
 
 /**
  * <p>
- * Unit tests and auxiliary test code for the {@link ServiceImpl} class.
+ * Unit tests and auxiliary test code for the {@link UserServiceImpl} class.
  * </p>
  */
-public class ServiceImplTest {
+public class UserServiceImplTest {
 
    @Nested
    public class Add_User {
@@ -70,11 +70,11 @@ public class ServiceImplTest {
          }
 
          private void test(final User user) {
-            final var service = new ServiceImpl(passwordEncoderA,
+            final var service = new UserServiceImpl(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
             service.add(user);
             assertThrows(UserExistsException.class,
-                     () -> ServiceTest.add(service, user));
+                     () -> UserServiceTest.add(service, user));
          }
 
       }// class
@@ -175,9 +175,9 @@ public class ServiceImplTest {
 
          private void test(final User user,
                   final PasswordEncoder passwordEncoder) {
-            final var service = new ServiceImpl(passwordEncoder,
+            final var service = new UserServiceImpl(passwordEncoder,
                      userRepositoryA, PASSWORD_A);
-            ServiceTest.add_1(service, user);
+            UserServiceTest.add_1(service, user);
             assertThat("Added a user", service.getUsers().count(), is(2L));
          }
 
@@ -214,9 +214,9 @@ public class ServiceImplTest {
          }
 
          private void test(final User user1, final User user2) {
-            final var service = new ServiceImpl(passwordEncoderA,
+            final var service = new UserServiceImpl(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
-            ServiceTest.add_2(service, user1, user2);
+            UserServiceTest.add_2(service, user1, user2);
             assertThat("Added user", service.getUsers().count(), is(3L));
          }
       }// class
@@ -239,7 +239,7 @@ public class ServiceImplTest {
    @Nested
    public class Scenario {
 
-      private ServiceImpl service;
+      private UserServiceImpl service;
       private Collection<User> users;
 
       @Test
@@ -251,7 +251,7 @@ public class ServiceImplTest {
       }
 
       private void given_a_fresh_instance_of_MC() {
-         service = new ServiceImpl(passwordEncoderA, userRepositoryA,
+         service = new UserServiceImpl(passwordEncoderA, userRepositoryA,
                   PASSWORD_A);
       }
 
@@ -284,8 +284,8 @@ public class ServiceImplTest {
 
    private static final String PASSWORD_C = "secret";
 
-   public static void assertInvariants(final ServiceImpl service) {
-      ServiceTest.assertInvariants(service);// inherited
+   public static void assertInvariants(final UserServiceImpl service) {
+      UserServiceTest.assertInvariants(service);// inherited
 
       final UserRepository userRepository = service.getUserRepository();
       assertNotNull(userRepository,
@@ -293,10 +293,10 @@ public class ServiceImplTest {
       UserRepositoryTest.assertInvariants(userRepository);
    }
 
-   private static ServiceImpl constructor(final PasswordEncoder passwordEncoder,
+   private static UserServiceImpl constructor(final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
             final String administratorPassword) {
-      final var service = new ServiceImpl(passwordEncoder, userRepository,
+      final var service = new UserServiceImpl(passwordEncoder, userRepository,
                administratorPassword);
 
       assertInvariants(service);
@@ -315,17 +315,17 @@ public class ServiceImplTest {
       return service;
    }
 
-   public static Stream<User> getUsers(final ServiceImpl service) {
-      final var users = ServiceTest.getUsers(service);// inherited
+   public static Stream<User> getUsers(final UserServiceImpl service) {
+      final var users = UserServiceTest.getUsers(service);// inherited
 
       assertInvariants(service);
 
       return users;
    }
 
-   public static UserDetails loadUserByUsername(final ServiceImpl service,
+   public static UserDetails loadUserByUsername(final UserServiceImpl service,
             final String username) {
-      final UserDetails user = ServiceTest.loadUserByUsername(service,
+      final UserDetails user = UserServiceTest.loadUserByUsername(service,
                username);
 
       assertInvariants(service);
@@ -353,7 +353,7 @@ public class ServiceImplTest {
    public void administratorInRepository() {
       final var passwordEncoder = passwordEncoderA;
       final var repository = userRepositoryA;
-      final var service = new ServiceImpl(passwordEncoder, repository,
+      final var service = new UserServiceImpl(passwordEncoder, repository,
                PASSWORD_A);
       repository.save(new User(User.ADMINISTRATOR_USERNAME,
                passwordEncoder.encode(PASSWORD_B), Authority.ALL, true, true,

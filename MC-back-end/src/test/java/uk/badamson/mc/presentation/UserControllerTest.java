@@ -47,7 +47,7 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.BackEndWorldCore;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
-import uk.badamson.mc.service.Service;
+import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -72,7 +72,7 @@ public class UserControllerTest {
             Set.of(Authority.ROLE_PLAYER), false, false, false, false);
 
    @Autowired
-   private Service service;
+   private UserService service;
 
    @Autowired
    private MockMvc mockMvc;

@@ -42,16 +42,31 @@ public class ServiceLayerSpringConfiguration {
 
    /**
     * <p>
-    * Create the the service layer.
+    * Create the part of the service layer pertaining to scenarios of the
+    * Mission Command game.
     * </p>
     *
-    * @return the service layer.
+    * @return the part of the service layer.
     */
    @Bean
-   public Service service(@NonNull final PasswordEncoder passwordEncoder,
+   public ScenarioService scenarioService() {
+      return new ScenarioServiceImpl();
+   }
+
+   /**
+    * <p>
+    * Create the part of the service layer pertaining to users of the Mission
+    * Command game.
+    * </p>
+    *
+    * @return the part of the service layer.
+    */
+   @Bean
+   public UserService userService(
+            @NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository playerRepository,
             @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
-      return new ServiceImpl(passwordEncoder, playerRepository,
+      return new UserServiceImpl(passwordEncoder, playerRepository,
                administratorPassword);
    }
 }

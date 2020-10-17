@@ -39,18 +39,18 @@ import uk.badamson.mc.User;
 
 /**
  * <p>
- * Auxiliary test code for classes that implement the {@link Service} interface.
+ * Auxiliary test code for classes that implement the {@link UserService} interface.
  * </p>
  */
-public class ServiceTest {
+public class UserServiceTest {
 
-   public static void add(final Service service, final User user) {
+   public static void add(final UserService service, final User user) {
       service.add(user);
 
       assertInvariants(service);
    }
 
-   public static void add_1(final Service service, final User user) {
+   public static void add_1(final UserService service, final User user) {
       add(service, user);
 
       final Stream<User> users = service.getUsers();
@@ -84,7 +84,7 @@ public class ServiceTest {
                         "Recorded password has been encrypted using the pasword encoder of this service."));
    }
 
-   public static void add_2(final Service service, final User user1,
+   public static void add_2(final UserService service, final User user1,
             final User user2) {
       add(service, user1);
       add(service, user2);
@@ -98,11 +98,11 @@ public class ServiceTest {
                usersList, hasItem(user2));
    }
 
-   public static void assertInvariants(final Service service) {
+   public static void assertInvariants(final UserService service) {
       // Do nothing
    }
 
-   public static Stream<User> getUsers(final Service service) {
+   public static Stream<User> getUsers(final UserService service) {
       final Stream<User> users = service.getUsers();
 
       assertInvariants(service);
@@ -118,7 +118,7 @@ public class ServiceTest {
       return usersList.stream();
    }
 
-   public static UserDetails loadUserByUsername(final Service service,
+   public static UserDetails loadUserByUsername(final UserService service,
             final String username) {
       final boolean administrator = User.ADMINISTRATOR_USERNAME
                .equals(username);
