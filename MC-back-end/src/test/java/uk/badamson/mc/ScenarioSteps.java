@@ -46,9 +46,11 @@ public class ScenarioSteps {
    @Autowired
    private BackEndWorldCore worldCore;
 
-   @When("getting the scenarios")
-   public void getting_scenarios() throws Exception {
-      getScenarios();
+   private void getResponseAsScenarioIdentifierList() throws IOException {
+      final var response = worldCore.getResponseBodyAsString();
+      new ObjectMapper().readValue(response,
+               new TypeReference<List<Scenario.Identifier>>() {
+               });
    }
 
    private void getScenarios() throws Exception {
@@ -56,9 +58,24 @@ public class ScenarioSteps {
                get("/api/scenario").accept(MediaType.APPLICATION_JSON));
    }
 
+   @When("getting the scenarios")
+   public void getting_scenarios() throws Exception {
+      getScenarios();
+   }
+
+   @When("MC serves the scenario page")
+   public void mc_serves_scenario_page() {
+      throw new UnsupportedOperationException();
+   }
+
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() throws Exception {
       worldCore.responseIsOk();
+   }
+
+   @When("Navigate to one scenario")
+   public void navigate_to_one_scenario() {
+      throw new UnsupportedOperationException();
    }
 
    @Then("the response is a list of scenarios")
@@ -70,10 +87,8 @@ public class ScenarioSteps {
       }
    }
 
-   private void getResponseAsScenarioIdentifierList() throws IOException {
-      final var response = worldCore.getResponseBodyAsString();
-      new ObjectMapper().readValue(response,
-               new TypeReference<List<Scenario.Identifier>>() {
-               });
+   @When("Viewing the scenarios")
+   public void viewing_scenarios() {
+      throw new UnsupportedOperationException();
    }
 }
