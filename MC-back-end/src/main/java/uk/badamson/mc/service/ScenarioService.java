@@ -21,7 +21,7 @@ package uk.badamson.mc.service;
 import java.util.stream.Stream;
 
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.Scenario.Identifier;;
+import uk.badamson.mc.Scenario.Identifier;
 
 /**
  * <p>
