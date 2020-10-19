@@ -19,13 +19,16 @@ package uk.badamson.mc.service;
  */
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
-   private static final Set<Scenario.Identifier> DUMMY_IDENTIFIERS = Set.of();
+   private static final Set<Scenario.Identifier> DUMMY_IDENTIFIERS = Set
+            .of(new Scenario.Identifier(UUID.randomUUID(), "Section assault",
+                     "Basic fire and movement tactics."));
 
    @Override
    public Stream<Scenario.Identifier> getScenarioIdentifiers() {
