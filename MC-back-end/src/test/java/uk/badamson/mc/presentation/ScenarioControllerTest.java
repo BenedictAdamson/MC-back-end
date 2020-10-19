@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.TestConfiguration;
+import uk.badamson.mc.service.ScenarioService;
 
 /**
  * <p>
@@ -58,6 +60,9 @@ public class ScenarioControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
+   @Autowired
+   private ScenarioService service;
+
    @Test
    public void getAll() throws Exception {
       final var request = get("/api/scenario")
@@ -71,5 +76,23 @@ public class ScenarioControllerTest {
       new ObjectMapper().readValue(jsonResponse,
                new TypeReference<List<Scenario.Identifier>>() {
                });
+   }
+
+   @Test
+   public void getScenario() throws Exception {
+      final var id = service.getScenarioIdentifiers().map(si -> si.getId())
+               .findAny().get();
+      final var request = get("/api/scenario/" + id)
+               .accept(MediaType.APPLICATION_JSON);
+
+      final var response = mockMvc.perform(request);
+
+      response.andExpect(status().isOk());
+      final var jsonResponse = response.andReturn().getResponse()
+               .getContentAsString();
+      final Scenario scenario = new ObjectMapper().readValue(jsonResponse,
+               Scenario.class);
+      assertEquals(id, scenario.getIdentifier().getId(),
+               "scenario has the requested ID");
    }
 }

@@ -19,13 +19,20 @@ package uk.badamson.mc.presentation;
  */
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.Scenario.Identifier;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -54,7 +61,7 @@ public class ScenarioController {
     *            If {@code service} is null
     */
    @Autowired
-   public ScenarioController(final ScenarioService service) {
+   public ScenarioController(@Nonnull final ScenarioService service) {
       this.service = Objects.requireNonNull(service, "service");
    }
 
@@ -69,8 +76,44 @@ public class ScenarioController {
     * @return The response.
     */
    @GetMapping("/api/scenario")
+   @Nonnull
    public Stream<Scenario.Identifier> getAll() {
       return service.getScenarioIdentifiers();
+   }
+
+   /**
+    * <p>
+    * Behaviour of the GET verb for a scenario resource.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) scenario.</li>
+    * <li>The {@linkplain Identifier#getId() unique identifier} of the
+    * {@linkplain Scenario#getIdentifier() identification information} of the
+    * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
+    * ID</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the wanted scenario.
+    * @return The response.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    * @throws ResponseStatusException
+    *            <ul>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+    *            there is no scenario with the given {@code id}
+    *            {@linkplain UUID#equals(Object) is equivalent to} the
+    *            {@linkplain Identifier#getId() unique identifier} of the
+    *            {@linkplain Scenario#getIdentifier() identification
+    *            information}.</li>
+    *            </ul>
+    */
+   @GetMapping("/api/scenario/{id}")
+   @Nonnull
+   public Scenario.Identifier getScenario(
+            @Nonnull @PathVariable final UUID id) {
+      return null;// FIXME
    }
 
    /**
