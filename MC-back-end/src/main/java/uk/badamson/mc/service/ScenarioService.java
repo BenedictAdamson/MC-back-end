@@ -18,7 +18,11 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.Scenario.Identifier;
@@ -30,6 +34,28 @@ import uk.badamson.mc.Scenario.Identifier;
  * </p>
  */
 public interface ScenarioService {
+
+   /**
+    * <p>
+    * Retrieve the scenario that has a given unique ID.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns an {@linkplain Optional#isEmpty() empty} value, or a value for
+    * which the {@linkplain Identifier#getId() unique identifier} of the
+    * {@linkplain Scenario#getIdentifier() identification information} of the
+    * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
+    * ID</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the wanted scenario.
+    * @return The scenario.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<Scenario> getScenario(@Nonnull final UUID id);
 
    /**
     * <p>
@@ -45,6 +71,7 @@ public interface ScenarioService {
     *
     * @return a {@linkplain Stream stream} of the scenario identifiers.
     */
+   @Nonnull
    Stream<Scenario.Identifier> getScenarioIdentifiers();
 
 }

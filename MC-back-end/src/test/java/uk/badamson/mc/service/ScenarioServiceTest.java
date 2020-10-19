@@ -23,6 +23,8 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import uk.badamson.mc.Scenario;
@@ -39,10 +41,22 @@ public class ScenarioServiceTest {
       // Do nothing
    }
 
+   public static Optional<Scenario> getScenario(final ScenarioService service,
+            final UUID id) {
+      final var result = service.getScenario(id);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      if (result.isPresent()) {
+         assertEquals(id, result.get().getIdentifier().getId(),
+                  "identifier.id");
+      }
+      return result;
+   }
+
    public static Stream<Scenario.Identifier> getScenarioIdentifiers(
             final ScenarioService service) {
-      final Stream<Scenario.Identifier> scenarios = service
-               .getScenarioIdentifiers();
+      final var scenarios = service.getScenarioIdentifiers();
 
       assertInvariants(service);
       assertNotNull(scenarios, "Always returns a (non null) stream.");// guard
@@ -54,5 +68,4 @@ public class ScenarioServiceTest {
 
       return scenariosList.stream();
    }
-
 }

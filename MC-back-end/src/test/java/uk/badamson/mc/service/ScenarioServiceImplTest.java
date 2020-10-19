@@ -18,8 +18,15 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import uk.badamson.mc.Scenario;
@@ -31,8 +38,49 @@ import uk.badamson.mc.Scenario;
  */
 public class ScenarioServiceImplTest {
 
+   @Nested
+   public class GetScenario {
+
+      @Test
+      public void absent() {
+         final var service = new ScenarioServiceImpl();
+         final var ids = getIds(service);
+         var id = UUID.randomUUID();
+         while (ids.contains(id)) {
+            id = UUID.randomUUID();
+         }
+
+         final var result = getScenario(service, id);
+
+         assertTrue(result.isEmpty(), "absent");
+      }
+
+      private Set<UUID> getIds(final ScenarioService service) {
+         return service.getScenarioIdentifiers().map(si -> si.getId())
+                  .collect(toUnmodifiableSet());
+      }
+
+      @Test
+      public void present() {
+         final var service = new ScenarioServiceImpl();
+         final var id = getIds(service).stream().findAny().get();
+
+         final var result = getScenario(service, id);
+
+         assertTrue(result.isPresent(), "present");
+      }
+   }// class
+
    public static void assertInvariants(final ScenarioServiceImpl service) {
       ScenarioServiceTest.assertInvariants(service);// inherited
+   }
+
+   public static Optional<Scenario> getScenario(
+            final ScenarioServiceImpl service, final UUID id) {
+      final var result = ScenarioServiceTest.getScenario(service, id);
+
+      assertInvariants(service);
+      return result;
    }
 
    public static Stream<Scenario.Identifier> getScenarioIdentifiers(

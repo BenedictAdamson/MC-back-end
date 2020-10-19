@@ -18,9 +18,13 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Scenario;
 
@@ -31,6 +35,15 @@ public class ScenarioServiceImpl implements ScenarioService {
                      "Basic fire and movement tactics."));
 
    @Override
+   @Nonnull
+   public Optional<Scenario> getScenario(@Nonnull final UUID id) {
+      Objects.requireNonNull(id, "id");
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   @Nonnull
    public Stream<Scenario.Identifier> getScenarioIdentifiers() {
       // TODO have useful scenarios.
       return DUMMY_IDENTIFIERS.stream();

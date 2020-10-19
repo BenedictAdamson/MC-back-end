@@ -106,7 +106,7 @@ public class ScenarioController {
     *            {@linkplain UUID#equals(Object) is equivalent to} the
     *            {@linkplain Identifier#getId() unique identifier} of the
     *            {@linkplain Scenario#getIdentifier() identification
-    *            information}.</li>
+    *            information} of the scenario.</li>
     *            </ul>
     */
    @GetMapping("/api/scenario/{id}")
