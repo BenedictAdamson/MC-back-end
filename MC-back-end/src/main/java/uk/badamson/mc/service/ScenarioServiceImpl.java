@@ -32,8 +32,8 @@ public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
    private static final Scenario SCENARIO = new Scenario(
-            new Scenario.Identifier(UUID.randomUUID(), "Section assault",
-                     "Basic fire and movement tactics.")) {
+            new Scenario.Identifier(UUID.randomUUID(), "Section assault"),
+            "Basic fire and movement tactics.") {
    };
    private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);
