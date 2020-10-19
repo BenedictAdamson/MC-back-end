@@ -111,8 +111,7 @@ public class ScenarioController {
     */
    @GetMapping("/api/scenario/{id}")
    @Nonnull
-   public Scenario.Identifier getScenario(
-            @Nonnull @PathVariable final UUID id) {
+   public Scenario getScenario(@Nonnull @PathVariable final UUID id) {
       return null;// FIXME
    }
 
