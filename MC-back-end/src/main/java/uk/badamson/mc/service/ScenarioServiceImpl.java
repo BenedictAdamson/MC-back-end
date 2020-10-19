@@ -26,13 +26,12 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import uk.badamson.mc.AbstractScenario;
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
-   private static final Scenario SCENARIO = new AbstractScenario(
+   private static final Scenario SCENARIO = new Scenario(
             new Scenario.Identifier(UUID.randomUUID(), "Section assault",
                      "Basic fire and movement tactics.")) {
    };
