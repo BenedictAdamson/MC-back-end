@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -112,7 +113,12 @@ public class ScenarioController {
    @GetMapping("/api/scenario/{id}")
    @Nonnull
    public Scenario getScenario(@Nonnull @PathVariable final UUID id) {
-      return service.getScenario(id).get();// FIXME
+      try {
+         return service.getScenario(id).get();
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized ID", e);
+      }
    }
 
    /**

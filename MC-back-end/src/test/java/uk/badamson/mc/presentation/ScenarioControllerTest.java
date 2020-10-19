@@ -18,11 +18,13 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,19 +81,39 @@ public class ScenarioControllerTest {
                });
    }
 
-   @Test
-   public void getScenario() throws Exception {
-      final var id = service.getScenarioIdentifiers().map(si -> si.getId())
-               .findAny().get();
+   private ResultActions getScenario(final UUID id) throws Exception {
       final var request = get("/api/scenario/" + id)
                .accept(MediaType.APPLICATION_JSON);
 
       final var response = mockMvc.perform(request);
+      return response;
+   }
+
+   @Test
+   public void getScenario_absent() throws Exception {
+      final var ids = service.getScenarioIdentifiers().map(si -> si.getId())
+               .collect(toUnmodifiableSet());
+      var id = UUID.randomUUID();
+      while (ids.contains(id)) {
+         id = UUID.randomUUID();
+      }
+
+      final var response = getScenario(id);
+
+      response.andExpect(status().isNotFound());
+   }
+
+   @Test
+   public void getScenario_present() throws Exception {
+      final var id = service.getScenarioIdentifiers().map(si -> si.getId())
+               .findAny().get();
+
+      final var response = getScenario(id);
 
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
-      final Scenario scenario = new ObjectMapper().readValue(jsonResponse,
+      final var scenario = new ObjectMapper().readValue(jsonResponse,
                Scenario.class);
       assertEquals(id, scenario.getIdentifier().getId(),
                "scenario has the requested ID");
