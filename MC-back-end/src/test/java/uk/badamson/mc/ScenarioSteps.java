@@ -18,10 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.service.ScenarioService;
 
 /**
  * <p>
@@ -45,6 +50,13 @@ public class ScenarioSteps {
 
    @Autowired
    private BackEndWorldCore worldCore;
+
+   @Autowired
+   private ScenarioService service;
+
+   private Set<UUID> ids = Set.of();
+
+   private UUID id;
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
@@ -64,8 +76,12 @@ public class ScenarioSteps {
    }
 
    @When("MC serves the scenario page")
-   public void mc_serves_scenario_page() {
-      throw new UnsupportedOperationException();
+   public void mc_serves_scenario_page() throws Exception {
+      final var responseText = worldCore.getResponseBodyAsString();
+      final var mapper = new ObjectMapper();
+      final var scenario = mapper.readValue(responseText, Scenario.class);
+      assertEquals(id, scenario.getIdentifier().getId(),
+               "scenario has the requested ID");
    }
 
    @Then("MC serves the scenarios page")
@@ -74,8 +90,10 @@ public class ScenarioSteps {
    }
 
    @When("Navigate to one scenario")
-   public void navigate_to_one_scenario() {
-      throw new UnsupportedOperationException();
+   public void navigate_to_one_scenario() throws Exception {
+      id = ids.stream().findAny().get();
+      worldCore.performRequest(
+               get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
    }
 
    @Then("the response is a list of scenarios")
@@ -89,6 +107,7 @@ public class ScenarioSteps {
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      throw new UnsupportedOperationException();
+      ids = service.getScenarioIdentifiers().map(id -> id.getId())
+               .collect(toUnmodifiableSet());
    }
 }
