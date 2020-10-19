@@ -112,7 +112,7 @@ public class ScenarioController {
    @GetMapping("/api/scenario/{id}")
    @Nonnull
    public Scenario getScenario(@Nonnull @PathVariable final UUID id) {
-      return null;// FIXME
+      return service.getScenario(id).get();// FIXME
    }
 
    /**
