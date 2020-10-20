@@ -19,11 +19,14 @@ package uk.badamson.mc;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -58,6 +61,8 @@ public class ScenarioSteps {
 
    private UUID id;
 
+   private Scenario responseScenario;
+
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
       new ObjectMapper().readValue(response,
@@ -79,8 +84,8 @@ public class ScenarioSteps {
    public void mc_serves_scenario_page() throws Exception {
       final var responseText = worldCore.getResponseBodyAsString();
       final var mapper = new ObjectMapper();
-      final var scenario = mapper.readValue(responseText, Scenario.class);
-      assertEquals(id, scenario.getIdentifier().getId(),
+      responseScenario = mapper.readValue(responseText, Scenario.class);
+      assertEquals(id, responseScenario.getIdentifier().getId(),
                "scenario has the requested ID");
    }
 
@@ -103,6 +108,17 @@ public class ScenarioSteps {
       } catch (final IOException e) {
          throw new AssertionFailedError("Can decode response", e);
       }
+   }
+
+   @Then("The scenario page includes the scenario description")
+   public void scenario_page_includes_scenario_description() {
+      Objects.requireNonNull(service, "service");
+      Objects.requireNonNull(id, "id");
+      Objects.requireNonNull(responseScenario, "responseScenario");
+
+      final var expectedScenario = service.getScenario(id).get();
+      assertThat("description", responseScenario.getDescription(),
+               is(expectedScenario.getDescription()));
    }
 
    @When("Viewing the scenarios")
