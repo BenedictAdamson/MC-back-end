@@ -18,19 +18,38 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Set;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
-   private static final Set<Scenario.Identifier> DUMMY_IDENTIFIERS = Set.of();
+   // TODO have useful scenarios.
+   private static final Scenario SCENARIO = new Scenario(
+            new Scenario.Identifier(UUID.randomUUID(), "Section assault"),
+            "Basic fire and movement tactics.") {
+   };
+   private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
+            .of(SCENARIO.getIdentifier(), SCENARIO);
 
    @Override
+   @Nonnull
+   public Optional<Scenario> getScenario(@Nonnull final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return SCENARIOS.values().stream()
+               .filter(s -> id.equals(s.getIdentifier().getId())).findAny();
+   }
+
+   @Override
+   @Nonnull
    public Stream<Scenario.Identifier> getScenarioIdentifiers() {
-      // TODO have useful scenarios.
-      return DUMMY_IDENTIFIERS.stream();
+      return SCENARIOS.keySet().stream();
    }
 
 }
