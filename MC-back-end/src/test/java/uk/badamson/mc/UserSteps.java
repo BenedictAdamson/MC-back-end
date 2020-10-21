@@ -63,6 +63,9 @@ public class UserSteps {
    @Autowired
    private UserService service;
 
+   @Autowired
+   private ObjectMapper objectMapper;
+
    private User user;
 
    private User loggedInUser;
@@ -86,10 +89,11 @@ public class UserSteps {
       Objects.requireNonNull(loggedInUser, "loggedInUser");
       final var addedUser = new User(name, password, Set.of(), true, true, true,
                true);
+      final var encoded = objectMapper.writeValueAsString(addedUser);
       worldCore.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser))
-               .with(csrf()).content(BackEndWorldCore.encodeAsJson(addedUser)));
+               .with(csrf()).content(encoded));
    }
 
    @Then("can get the list of users")
@@ -108,7 +112,7 @@ public class UserSteps {
 
    private void getResponseAsUserList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
-      responseUserList = new ObjectMapper().readValue(response,
+      responseUserList = objectMapper.readValue(response,
                new TypeReference<List<User>>() {
                });
    }

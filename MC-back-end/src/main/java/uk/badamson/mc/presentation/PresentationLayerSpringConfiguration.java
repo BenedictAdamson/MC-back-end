@@ -18,9 +18,13 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>
@@ -32,5 +36,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @Import(value = { WebSecurityConfiguration.class })
 public class PresentationLayerSpringConfiguration {
+
+   @Bean
+   public ObjectMapper objectMapper() {
+      return Jackson2ObjectMapperBuilder.json().build();
+   }
 
 }

@@ -18,6 +18,7 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,14 +28,18 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import uk.badamson.mc.Game;
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
+   private static final UUID ID = UUID.randomUUID();
+   private static final Game GAME = new Game(
+            new Game.Identifier(ID, Instant.now()));
    private static final Scenario SCENARIO = new Scenario(
-            new Scenario.Identifier(UUID.randomUUID(), "Section assault"),
-            "Basic fire and movement tactics.", List.of()) {
+            new Scenario.Identifier(ID, "Section assault"),
+            "Basic fire and movement tactics.", List.of(GAME)) {
    };
    private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);

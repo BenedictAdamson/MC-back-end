@@ -44,7 +44,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.BackEndWorldCore;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserService;
@@ -77,13 +76,17 @@ public class UserControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
+   @Autowired
+   private ObjectMapper objectMapper;
+
    private ResultActions add(final User performingUser, final User addedUser)
             throws Exception {
       service.add(performingUser);
+      final var encoded = objectMapper.writeValueAsString(addedUser);
       final var request = post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
-               .with(csrf()).content(BackEndWorldCore.encodeAsJson(addedUser));
+               .with(csrf()).content(encoded);
 
       return mockMvc.perform(request);
    }
@@ -93,7 +96,7 @@ public class UserControllerTest {
       final var performingUser = USER_A;
       final var addedUser = USER_B;
 
-      final ResultActions response = add(performingUser, addedUser);
+      final var response = add(performingUser, addedUser);
 
       response.andExpect(status().isCreated());
       assertThat("List of users includes the added user", service.getUsers()
@@ -106,7 +109,7 @@ public class UserControllerTest {
       final var addedUser = new User(User.ADMINISTRATOR_USERNAME, "password1",
                Set.of(Authority.ROLE_PLAYER), true, true, true, true);
 
-      final ResultActions response = add(performingUser, addedUser);
+      final var response = add(performingUser, addedUser);
 
       response.andExpect(status().isBadRequest());
    }
@@ -117,7 +120,7 @@ public class UserControllerTest {
       final var addedUser = USER_B;
 
       service.add(addedUser);
-      final ResultActions response = add(performingUser, addedUser);
+      final var response = add(performingUser, addedUser);
 
       response.andExpect(status().isConflict());
    }
@@ -139,8 +142,8 @@ public class UserControllerTest {
        */
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
-      final var mapper = new ObjectMapper();
-      final var decodedResponse = mapper.readValue(jsonResponse, User.class);
+      final var decodedResponse = objectMapper.readValue(jsonResponse,
+               User.class);
       assertAll("Response is the authenticated user",
                () -> assertThat("username", decodedResponse.getUsername(),
                         is(user.getUsername())),

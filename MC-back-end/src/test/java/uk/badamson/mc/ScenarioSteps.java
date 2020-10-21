@@ -56,6 +56,9 @@ public class ScenarioSteps {
 
    @Autowired
    private ScenarioService service;
+   
+   @Autowired
+   private ObjectMapper objectMapper;
 
    private Set<UUID> ids = Set.of();
 
@@ -65,7 +68,7 @@ public class ScenarioSteps {
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
-      new ObjectMapper().readValue(response,
+      objectMapper.readValue(response,
                new TypeReference<List<Scenario.Identifier>>() {
                });
    }
@@ -83,8 +86,7 @@ public class ScenarioSteps {
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() throws Exception {
       final var responseText = worldCore.getResponseBodyAsString();
-      final var mapper = new ObjectMapper();
-      responseScenario = mapper.readValue(responseText, Scenario.class);
+      responseScenario = objectMapper.readValue(responseText, Scenario.class);
       assertEquals(id, responseScenario.getIdentifier().getId(),
                "scenario has the requested ID");
    }

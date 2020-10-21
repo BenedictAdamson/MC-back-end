@@ -65,6 +65,9 @@ public class ScenarioControllerTest {
 
    @Autowired
    private ScenarioService service;
+   
+   @Autowired
+   private ObjectMapper objectMapper;
 
    @Test
    public void getAll() throws Exception {
@@ -76,7 +79,7 @@ public class ScenarioControllerTest {
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
-      new ObjectMapper().readValue(jsonResponse,
+      objectMapper.readValue(jsonResponse,
                new TypeReference<List<Scenario.Identifier>>() {
                });
    }
@@ -113,7 +116,7 @@ public class ScenarioControllerTest {
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
-      final var scenario = new ObjectMapper().readValue(jsonResponse,
+      final var scenario = objectMapper.readValue(jsonResponse,
                Scenario.class);
       assertEquals(id, scenario.getIdentifier().getId(),
                "scenario has the requested ID");
