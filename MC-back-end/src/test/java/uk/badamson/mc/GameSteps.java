@@ -65,8 +65,10 @@ public class GameSteps {
    }
 
    @When("Navigate to one game of the scenario")
-   public void navigate_to_game_of_scecnario() {
-      throw new UnsupportedOperationException();
+   public void navigate_to_game_of_scecnario() throws Exception {
+      final var identifier = expectedGame.getIdentifier();
+      worldCore.getJson("/api/scenario/" + identifier.getScenario() + "/"
+               + identifier.getCreated());
    }
 
    @When("Viewing the games of a scenario")
