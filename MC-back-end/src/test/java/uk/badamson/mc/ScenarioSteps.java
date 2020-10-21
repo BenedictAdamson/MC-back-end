@@ -110,6 +110,12 @@ public class ScenarioSteps {
       }
    }
 
+   @Then("The scenario page includes the list of games of that scenario")
+   public void scenario_page_includes_games() {
+      Objects.requireNonNull(responseScenario, "responseScenario");
+      responseScenario.getGames();
+   }
+
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       Objects.requireNonNull(service, "service");
