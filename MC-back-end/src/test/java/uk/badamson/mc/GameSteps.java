@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.service.ScenarioService;
 
 /**
  * <p>
@@ -35,6 +36,13 @@ public class GameSteps {
 
    @Autowired
    private BackEndWorldCore worldCore;
+
+   @Autowired
+   private ScenarioService scenarioService;
+
+   private Scenario scenario;
+
+   private Game expectedGame;
 
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
@@ -63,7 +71,10 @@ public class GameSteps {
 
    @When("Viewing the games of a scenario")
    public void viewing_games_of_scenario() {
-      throw new UnsupportedOperationException();
+      final var scenarioId = scenarioService.getScenarioIdentifiers()
+               .map(si -> si.getId()).findAny().get();
+      scenario = scenarioService.getScenario(scenarioId).get();
+      expectedGame = scenario.getGames().stream().findAny().get();
    }
 
 }
