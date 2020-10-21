@@ -18,6 +18,7 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +34,7 @@ public class ScenarioServiceImpl implements ScenarioService {
    // TODO have useful scenarios.
    private static final Scenario SCENARIO = new Scenario(
             new Scenario.Identifier(UUID.randomUUID(), "Section assault"),
-            "Basic fire and movement tactics.") {
+            "Basic fire and movement tactics.", List.of()) {
    };
    private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);
