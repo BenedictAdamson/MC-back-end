@@ -19,6 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,7 +27,6 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.service.ScenarioService;
 
 /**
  * <p>
@@ -44,13 +45,47 @@ import uk.badamson.mc.Game.Identifier;
 @RestController
 public class GameController {
 
+   private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
+
+   /**
+    * <p>
+    * Create a valid path for a game resource for a game that has a given
+    * identifier.
+    * </p>
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #getGame(UUID, Instant)}.
+    * </p>
+    *
+    *
+    * @param id
+    *           The identifier of the game
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   static String createPathFor(final Game.Identifier id) {
+      Objects.requireNonNull(id, "id");
+      return "/api/scenario/" + id.getScenario() + "/game/"
+               + URI_DATETIME_FORMATTER.format(id.getCreated());
+   }
+
+   private final ScenarioService scenarioService;
+
    /**
     * <p>
     * Construct a controller.
     * </p>
+    *
+    * @param scenarioService
+    *           The part of the service layer instance that this uses.
+    * @throws NullPointerException
+    *            If {@code scenarioService} is null.
     */
    @Autowired
-   public GameController() {
+   public GameController(@Nonnull final ScenarioService scenarioService) {
+      this.scenarioService = Objects.requireNonNull(scenarioService,
+               "scenarioService");
    }
 
    /**
@@ -81,19 +116,35 @@ public class GameController {
     *            identification information} equivalent to the given
     *            {@code scenario} and {@code created}.
     */
-   @GetMapping("/api/scenario/{scenario}/game/{created}")
+   @GetMapping("/api/scenario/{scenario}/game/{created:.+}")
    @Nonnull
    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") @DateTimeFormat(
-                     iso = DateTimeFormat.ISO.DATE_TIME) final Instant created) {
+            @Nonnull @PathVariable("created") final Instant created) {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(created, "created");
       try {
-         return null;// FIXME
+         return scenarioService.getScenario(scenario).get().getGames().stream()
+                  .filter(g -> g.getIdentifier().getCreated().equals(created))
+                  .findAny().get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
       }
+   }
+
+   /**
+    * <p>
+    * The part of the service layer instance that this uses.
+    * </p>
+    * <ul>
+    * <li>Always associates with a (non null) service.</li>
+    * </ul>
+    *
+    * @return the service
+    */
+   @Nonnull
+   public final ScenarioService getScenarioService() {
+      return scenarioService;
    }
 
 }

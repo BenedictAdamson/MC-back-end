@@ -68,9 +68,8 @@ public class GameControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
-   private ResultActions getGame(final UUID scenario, final Instant created)
-            throws Exception {
-      final var request = get("/api/scenario/" + scenario + "/game/" + created)
+   private ResultActions getGame(final Game.Identifier id) throws Exception {
+      final var request = get(GameController.createPathFor(id))
                .accept(MediaType.APPLICATION_JSON);
 
       final var response = mockMvc.perform(request);
@@ -81,12 +80,13 @@ public class GameControllerTest {
    public void getGame_absent() throws Exception {
       final var scenarios = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).collect(toUnmodifiableSet());
-      var id = UUID.randomUUID();
-      while (scenarios.contains(id)) {
-         id = UUID.randomUUID();
+      var scenario = UUID.randomUUID();
+      while (scenarios.contains(scenario)) {
+         scenario = UUID.randomUUID();
       }
+      final var id = new Game.Identifier(scenario, Instant.now());
 
-      final var response = getGame(id, Instant.now());
+      final var response = getGame(id);
 
       response.andExpect(status().isNotFound());
    }
@@ -99,7 +99,7 @@ public class GameControllerTest {
       final var gameId = scenario.getGames().stream().findAny().get()
                .getIdentifier();
 
-      final var response = getGame(gameId.getScenario(), gameId.getCreated());
+      final var response = getGame(gameId);
 
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
