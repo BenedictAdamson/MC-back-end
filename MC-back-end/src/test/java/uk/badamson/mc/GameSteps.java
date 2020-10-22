@@ -18,8 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -34,15 +39,25 @@ import uk.badamson.mc.service.ScenarioService;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class GameSteps {
 
+   private static String createGamePath(final Game.Identifier identifier) {
+      return "/api/scenario/" + identifier.getScenario() + "/game/"
+               + identifier.getCreated();
+   }
+
    @Autowired
    private BackEndWorldCore worldCore;
 
    @Autowired
    private ScenarioService scenarioService;
 
+   @Autowired
+   private ObjectMapper objectMapper;
+
    private Scenario scenario;
 
    private Game expectedGame;
+
+   private Game responseGame;
 
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
@@ -61,14 +76,20 @@ public class GameSteps {
 
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
-      throw new UnsupportedOperationException();
+      final var response = worldCore.getResponse();
+      try {
+         response.andExpect(status().isOk());
+         final var responseText = worldCore.getResponseBodyAsString();
+         responseGame = objectMapper.readValue(responseText, Game.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("HTTP response provides a game", e);
+      }
    }
 
    @When("Navigate to one game of the scenario")
    public void navigate_to_game_of_scecnario() throws Exception {
       final var identifier = expectedGame.getIdentifier();
-      worldCore.getJson("/api/scenario/" + identifier.getScenario() + "/"
-               + identifier.getCreated());
+      worldCore.getJson(createGamePath(identifier));
    }
 
    @When("Viewing the games of a scenario")
