@@ -131,6 +131,7 @@ public class ScenarioController {
     *
     * @return the service
     */
+   @Nonnull
    public final ScenarioService getService() {
       return service;
    }
