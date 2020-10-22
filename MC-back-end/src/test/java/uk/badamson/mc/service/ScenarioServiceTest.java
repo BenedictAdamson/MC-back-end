@@ -49,8 +49,7 @@ public class ScenarioServiceTest {
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard
       if (result.isPresent()) {
-         assertEquals(id, result.get().getIdentifier().getId(),
-                  "identifier.id");
+         assertEquals(id, result.get().getIdentifier(), "identifier");
       }
       return result;
    }

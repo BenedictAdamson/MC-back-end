@@ -38,19 +38,18 @@ public class ScenarioServiceImpl implements ScenarioService {
    private static final UUID ID = UUID.randomUUID();
    private static final Game GAME = new Game(
             new Game.Identifier(ID, Instant.now()));
-   private static final Scenario SCENARIO = new Scenario(
-            new NamedUUID(ID, "Section assault"),
+   private static final Scenario SCENARIO = new Scenario(ID, "Section assault",
             "Basic fire and movement tactics.", List.of(GAME)) {
    };
    private static final Map<NamedUUID, Scenario> SCENARIOS = Map
-            .of(SCENARIO.getIdentifier(), SCENARIO);
+            .of(SCENARIO.getNamedUUID(), SCENARIO);
 
    @Override
    @Nonnull
    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
       Objects.requireNonNull(id, "id");
       return SCENARIOS.values().stream()
-               .filter(s -> id.equals(s.getIdentifier().getId())).findAny();
+               .filter(s -> id.equals(s.getIdentifier())).findAny();
    }
 
    @Override

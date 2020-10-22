@@ -86,7 +86,7 @@ public class ScenarioSteps {
    public void mc_serves_scenario_page() throws Exception {
       final var responseText = worldCore.getResponseBodyAsString();
       responseScenario = objectMapper.readValue(responseText, Scenario.class);
-      assertEquals(id, responseScenario.getIdentifier().getId(),
+      assertEquals(id, responseScenario.getIdentifier(),
                "scenario has the requested ID");
    }
 

@@ -118,7 +118,7 @@ public class ScenarioControllerTest {
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
       final var scenario = objectMapper.readValue(jsonResponse, Scenario.class);
-      assertEquals(id, scenario.getIdentifier().getId(),
+      assertEquals(id, scenario.getIdentifier(),
                "scenario has the requested ID");
    }
 }
