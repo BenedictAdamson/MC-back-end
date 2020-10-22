@@ -40,6 +40,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.ScenarioService;
@@ -65,7 +66,7 @@ public class ScenarioControllerTest {
 
    @Autowired
    private ScenarioService service;
-   
+
    @Autowired
    private ObjectMapper objectMapper;
 
@@ -80,7 +81,7 @@ public class ScenarioControllerTest {
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
       objectMapper.readValue(jsonResponse,
-               new TypeReference<List<Scenario.Identifier>>() {
+               new TypeReference<List<NamedUUID>>() {
                });
    }
 
@@ -116,8 +117,7 @@ public class ScenarioControllerTest {
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
-      final var scenario = objectMapper.readValue(jsonResponse,
-               Scenario.class);
+      final var scenario = objectMapper.readValue(jsonResponse, Scenario.class);
       assertEquals(id, scenario.getIdentifier().getId(),
                "scenario has the requested ID");
    }

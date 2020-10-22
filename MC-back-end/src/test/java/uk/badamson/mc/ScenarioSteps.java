@@ -56,7 +56,7 @@ public class ScenarioSteps {
 
    @Autowired
    private ScenarioService service;
-   
+
    @Autowired
    private ObjectMapper objectMapper;
 
@@ -68,9 +68,8 @@ public class ScenarioSteps {
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
-      objectMapper.readValue(response,
-               new TypeReference<List<Scenario.Identifier>>() {
-               });
+      objectMapper.readValue(response, new TypeReference<List<NamedUUID>>() {
+      });
    }
 
    private void getScenarios() throws Exception {

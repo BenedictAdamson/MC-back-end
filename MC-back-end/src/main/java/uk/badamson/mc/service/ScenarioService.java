@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.Scenario.Identifier;
 
 /**
  * <p>
@@ -42,7 +42,7 @@ public interface ScenarioService {
     * <ul>
     * <li>Returns a (non null) optional value.</li>
     * <li>Returns an {@linkplain Optional#isEmpty() empty} value, or a value for
-    * which the {@linkplain Identifier#getId() unique identifier} of the
+    * which the {@linkplain NamedUUID#getId() unique identifier} of the
     * {@linkplain Scenario#getIdentifier() identification information} of the
     * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
     * ID</li>
@@ -65,13 +65,13 @@ public interface ScenarioService {
     * <ul>
     * <li>Always returns a (non null) stream.</li>
     * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain Identifier#equals(Object) duplicate}
+    * <li>Does not contain {@linkplain NamedUUID#equals(Object) duplicate}
     * identifiers.</li>
     * </ul>
     *
     * @return a {@linkplain Stream stream} of the scenario identifiers.
     */
    @Nonnull
-   Stream<Scenario.Identifier> getScenarioIdentifiers();
+   Stream<NamedUUID> getScenarioIdentifiers();
 
 }

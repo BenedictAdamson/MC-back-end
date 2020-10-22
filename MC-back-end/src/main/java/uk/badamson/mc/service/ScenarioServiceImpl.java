@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Game;
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
@@ -38,10 +39,10 @@ public class ScenarioServiceImpl implements ScenarioService {
    private static final Game GAME = new Game(
             new Game.Identifier(ID, Instant.now()));
    private static final Scenario SCENARIO = new Scenario(
-            new Scenario.Identifier(ID, "Section assault"),
+            new NamedUUID(ID, "Section assault"),
             "Basic fire and movement tactics.", List.of(GAME)) {
    };
-   private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
+   private static final Map<NamedUUID, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);
 
    @Override
@@ -54,7 +55,7 @@ public class ScenarioServiceImpl implements ScenarioService {
 
    @Override
    @Nonnull
-   public Stream<Scenario.Identifier> getScenarioIdentifiers() {
+   public Stream<NamedUUID> getScenarioIdentifiers() {
       return SCENARIOS.keySet().stream();
    }
 

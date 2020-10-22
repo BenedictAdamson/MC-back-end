@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 /**
@@ -83,7 +84,7 @@ public class ScenarioServiceImplTest {
       return result;
    }
 
-   public static Stream<Scenario.Identifier> getScenarioIdentifiers(
+   public static Stream<NamedUUID> getScenarioIdentifiers(
             final ScenarioServiceImpl service) {
       final var scenarios = ScenarioServiceTest.getScenarioIdentifiers(service);// inherited
 

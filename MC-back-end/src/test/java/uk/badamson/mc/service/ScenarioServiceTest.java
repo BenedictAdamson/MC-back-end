@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 /**
@@ -54,7 +55,7 @@ public class ScenarioServiceTest {
       return result;
    }
 
-   public static Stream<Scenario.Identifier> getScenarioIdentifiers(
+   public static Stream<NamedUUID> getScenarioIdentifiers(
             final ScenarioService service) {
       final var scenarios = service.getScenarioIdentifiers();
 

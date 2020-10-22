@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.Scenario.Identifier;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -78,7 +78,7 @@ public class ScenarioController {
     */
    @GetMapping("/api/scenario")
    @Nonnull
-   public Stream<Scenario.Identifier> getAll() {
+   public Stream<NamedUUID> getAll() {
       return service.getScenarioIdentifiers();
    }
 
@@ -88,7 +88,7 @@ public class ScenarioController {
     * </p>
     * <ul>
     * <li>Returns a (non null) scenario.</li>
-    * <li>The {@linkplain Identifier#getId() unique identifier} of the
+    * <li>The {@linkplain NamedUUID#getId() unique identifier} of the
     * {@linkplain Scenario#getIdentifier() identification information} of the
     * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
     * ID</li>
@@ -105,7 +105,7 @@ public class ScenarioController {
     *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
     *            there is no scenario with the given {@code id}
     *            {@linkplain UUID#equals(Object) is equivalent to} the
-    *            {@linkplain Identifier#getId() unique identifier} of the
+    *            {@linkplain NamedUUID#getId() unique identifier} of the
     *            {@linkplain Scenario#getIdentifier() identification
     *            information} of the scenario.</li>
     *            </ul>
