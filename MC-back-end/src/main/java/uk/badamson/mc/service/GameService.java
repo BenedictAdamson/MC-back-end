@@ -1,0 +1,55 @@
+package uk.badamson.mc.service;
+/*
+ * © Copyright Benedict Adamson 2019-20.
+ *
+ * This file is part of MC.
+ *
+ * MC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * MC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with MC.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+
+import uk.badamson.mc.Game;
+import uk.badamson.mc.Game.Identifier;
+
+/**
+ * <p>
+ * The part of the service layer pertaining to games of Mission Command.
+ * </p>
+ */
+public interface GameService {
+
+   /**
+    * <p>
+    * Retrieve the game that has a given unique ID.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns an {@linkplain Optional#isEmpty() empty} value, or a value for
+    * which the {@linkplain Game#getIdentifier() identifier}
+    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the wanted game.
+    * @return The game.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<Game> getGame(@Nonnull final Game.Identifier id);
+
+}
