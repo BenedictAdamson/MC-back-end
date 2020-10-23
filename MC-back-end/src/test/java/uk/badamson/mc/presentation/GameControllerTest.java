@@ -18,7 +18,6 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,7 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
-import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.repository.GameRepository;
+import uk.badamson.mc.service.GameService;
 
 /**
  * <p>
@@ -60,7 +60,10 @@ import uk.badamson.mc.service.ScenarioService;
 public class GameControllerTest {
 
    @Autowired
-   ScenarioService scenarioService;
+   GameRepository gameRepository;
+
+   @Autowired
+   GameService gameService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -78,13 +81,7 @@ public class GameControllerTest {
 
    @Test
    public void getGame_absent() throws Exception {
-      final var scenarios = scenarioService.getScenarioIdentifiers()
-               .map(si -> si.getId()).collect(toUnmodifiableSet());
-      var scenario = UUID.randomUUID();
-      while (scenarios.contains(scenario)) {
-         scenario = UUID.randomUUID();
-      }
-      final var id = new Game.Identifier(scenario, Instant.now());
+      final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
 
       final var response = getGame(id);
 
@@ -93,18 +90,15 @@ public class GameControllerTest {
 
    @Test
    public void getGame_present() throws Exception {
-      final var scenarioId = scenarioService.getScenarioIdentifiers()
-               .map(si -> si.getId()).findAny().get();
-      final var scenario = scenarioService.getScenario(scenarioId).get();
-      final var created = scenario.getGameCreationTimes().stream().findAny().get();
-      final var gameId = new Game.Identifier(scenarioId, created);
+      final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
+      gameRepository.save(new Game(id));
 
-      final var response = getGame(gameId);
+      final var response = getGame(id);
 
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
       final var game = objectMapper.readValue(jsonResponse, Game.class);
-      assertEquals(gameId, game.getIdentifier(), "game has the requested ID");
+      assertEquals(id, game.getIdentifier(), "game has the requested ID");
    }
 }

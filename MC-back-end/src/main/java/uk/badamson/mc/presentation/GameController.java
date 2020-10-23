@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.GameService;
 
 /**
  * <p>
@@ -70,22 +70,21 @@ public class GameController {
                + URI_DATETIME_FORMATTER.format(id.getCreated());
    }
 
-   private final ScenarioService scenarioService;
+   private final GameService gameService;
 
    /**
     * <p>
     * Construct a controller.
     * </p>
     *
-    * @param scenarioService
+    * @param gameService
     *           The part of the service layer instance that this uses.
     * @throws NullPointerException
     *            If {@code scenarioService} is null.
     */
    @Autowired
-   public GameController(@Nonnull final ScenarioService scenarioService) {
-      this.scenarioService = Objects.requireNonNull(scenarioService,
-               "scenarioService");
+   public GameController(@Nonnull final GameService gameService) {
+      this.gameService = Objects.requireNonNull(gameService, "gameService");
    }
 
    /**
@@ -120,10 +119,9 @@ public class GameController {
    @Nonnull
    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(created, "created");
+      final var id = new Game.Identifier(scenario, created);
       try {
-         return null;// FIXME
+         return gameService.getGame(id).get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
@@ -141,8 +139,8 @@ public class GameController {
     * @return the service
     */
    @Nonnull
-   public final ScenarioService getScenarioService() {
-      return scenarioService;
+   public final GameService getGameService() {
+      return gameService;
    }
 
 }

@@ -25,6 +25,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.repository.UserRepository;
 
 /**
@@ -34,6 +35,20 @@ import uk.badamson.mc.repository.UserRepository;
  */
 @Configuration
 public class ServiceLayerSpringConfiguration {
+
+   /**
+    * <p>
+    * Create the part of the service layer pertaining to games (plays) of the
+    * Mission Command game.
+    * </p>
+    *
+    * @return the part of the service layer.
+    */
+   @Bean
+   public GameService gameService(
+            @NonNull final GameRepository gameRepository) {
+      return new GameServiceImpl(gameRepository);
+   }
 
    @Bean
    public PasswordEncoder passwordEncoder() {
