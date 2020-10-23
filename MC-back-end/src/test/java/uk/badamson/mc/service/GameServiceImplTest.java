@@ -18,6 +18,12 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -25,10 +31,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import uk.badamson.mc.Game;
+import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.repository.GameRepository;
+import uk.badamson.mc.repository.GameRepositoryTest;
 
 /**
  * <p>
@@ -36,14 +46,34 @@ import uk.badamson.mc.Game;
  * </p>
  */
 public class GameServiceImplTest {
+   @Nested
+   public class Constructor {
+
+      @Test
+      public void a() {
+         test(repositoryA);
+      }
+
+      @Test
+      public void b() {
+         test(repositoryB);
+      }
+
+      private void test(final GameRepository repository) {
+         final var service = new GameServiceImpl(repository);
+
+         assertInvariants(service);
+         assertSame(repository, service.getRepository(), "repository");
+      }
+   }// class
 
    @Nested
    public class GetGame {
 
       @Test
       public void absent() {
-         final var service = new GameServiceImpl();
-         final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
+         final var service = new GameServiceImpl(repositoryA);
+         final var id = IDENTIFIER_A;
 
          final var result = getGame(service, id);
 
@@ -52,14 +82,46 @@ public class GameServiceImplTest {
 
       @Test
       public void present() {
-         final var service = new GameServiceImpl();
-         final var id = service.getGameIdentifiers().findAny().get();
+         final var id = IDENTIFIER_A;
+         final var game = new Game(id);
+         repositoryA.save(game);
+         final var service = new GameServiceImpl(repositoryA);
 
          final var result = getGame(service, id);
 
-         assertTrue(result.isPresent(), "present");
+         assertTrue(result.isPresent(), "present");// guard
+         assertEquals(game, result.get(), "game");
       }
    }// class
+
+   @Nested
+   public class GetGameIdentifiers {
+
+      @Test
+      public void empty() {
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var result = getGameIdentifiers(service);
+
+         assertEquals(0L, result.count(), "empty");
+      }
+
+      @Test
+      public void one() {
+         final var id = IDENTIFIER_A;
+         repositoryA.save(new Game(id));
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var result = getGameIdentifiers(service);
+
+         final var list = result.collect(toList());
+         assertAll(() -> assertEquals(1L, list.size(), "count"),
+                  () -> assertThat("has ID", list, hasItem(id)));
+      }
+   }// class
+
+   private static final Identifier IDENTIFIER_A = new Game.Identifier(
+            UUID.randomUUID(), Instant.now());
 
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
@@ -82,16 +144,13 @@ public class GameServiceImplTest {
       return games;
    }
 
-   @Test
-   public void constructor() {
-      final var service = new GameServiceImpl();
+   private GameRepositoryTest.Fake repositoryA;
 
-      assertInvariants(service);
-   }
+   private GameRepositoryTest.Fake repositoryB;
 
-   @Test
-   public void getGameIdentifiers() {
-      final var service = new GameServiceImpl();
-      getGameIdentifiers(service);
+   @BeforeEach
+   public void createRepositories() {
+      repositoryA = new GameRepositoryTest.Fake();
+      repositoryB = new GameRepositoryTest.Fake();
    }
 }

@@ -18,26 +18,67 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.repository.GameRepository;
 
 public class GameServiceImpl implements GameService {
+
+   private final GameRepository repository;
+
+   /**
+    * <p>
+    * Construct a service that uses a give repository.
+    * </p>
+    * <ul>
+    * <li>The created service has the given {@code repository} as its
+    * {@linkplain #getRepository() repository}.</li>
+    * </ul>
+    *
+    * @param repository
+    *           The repository that this service uses for persistent storage.
+    * @throws NullPointerException
+    *            If {@code repository} is null.
+    */
+   public GameServiceImpl(final GameRepository repository) {
+      this.repository = Objects.requireNonNull(repository, "repository");
+   }
 
    @Override
    @Nonnull
    public Optional<Game> getGame(@Nonnull final Game.Identifier id) {
-      return null;// FIXME
+      return repository.findById(id);
    }
 
    @Override
    @Nonnull
    public Stream<Identifier> getGameIdentifiers() {
-      // TODO Auto-generated method stub
-      return null;
+      return getGames().map(game -> game.getIdentifier());
+   }
+
+   private Stream<Game> getGames() {
+      return StreamSupport.stream(repository.findAll().spliterator(), false);
+   }
+
+   /**
+    * <p>
+    * The repository that this service uses for persistent storage.
+    * </p>
+    * <ul>
+    * <li>Always have a (non null) repository.</li>
+    * </ul>
+    *
+    * @return the repository
+    */
+   @Nonnull
+   public final GameRepository getRepository() {
+      return repository;
    }
 }
