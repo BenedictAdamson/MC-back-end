@@ -123,9 +123,7 @@ public class GameController {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(created, "created");
       try {
-         return scenarioService.getScenario(scenario).get().getGames().stream()
-                  .filter(g -> g.getIdentifier().getCreated().equals(created))
-                  .findAny().get();
+         return null;// FIXME
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);

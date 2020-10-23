@@ -96,8 +96,8 @@ public class GameControllerTest {
       final var scenarioId = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).findAny().get();
       final var scenario = scenarioService.getScenario(scenarioId).get();
-      final var gameId = scenario.getGames().stream().findAny().get()
-               .getIdentifier();
+      final var created = scenario.getGameCreationTimes().stream().findAny().get();
+      final var gameId = new Game.Identifier(scenarioId, created);
 
       final var response = getGame(gameId);
 

@@ -97,7 +97,8 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).findAny().get();
       scenario = scenarioService.getScenario(scenarioId).get();
-      expectedGame = scenario.getGames().stream().findAny().get();
+      scenario.getGameCreationTimes().stream().findAny().get();
+      expectedGame = null;// FIXME
    }
 
 }
