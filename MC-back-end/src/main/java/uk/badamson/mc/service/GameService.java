@@ -19,6 +19,7 @@ package uk.badamson.mc.service;
  */
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -51,5 +52,22 @@ public interface GameService {
     */
    @Nonnull
    Optional<Game> getGame(@Nonnull final Game.Identifier id);
+
+   /**
+    * <p>
+    * Retrieve a stream of the identifiers of the games of this instance of the
+    * Mission Command game.
+    * </p>
+    * <ul>
+    * <li>Always returns a (non null) stream.</li>
+    * <li>The returned stream will not include a null element</li>
+    * <li>Does not contain {@linkplain Identifier#equals(Object) duplicate}
+    * identifiers.</li>
+    * </ul>
+    *
+    * @return a {@linkplain Stream stream} of the game identifiers.
+    */
+   @Nonnull
+   Stream<Game.Identifier> getGameIdentifiers();
 
 }
