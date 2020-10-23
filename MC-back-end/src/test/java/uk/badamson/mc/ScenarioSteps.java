@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -55,7 +57,10 @@ public class ScenarioSteps {
    private BackEndWorldCore worldCore;
 
    @Autowired
-   private ScenarioService service;
+   private GameService gameService;
+
+   @Autowired
+   private ScenarioService scenarioService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -113,24 +118,24 @@ public class ScenarioSteps {
 
    @Then("The scenario page includes the list of games of that scenario")
    public void scenario_page_includes_games() {
-      Objects.requireNonNull(responseScenario, "responseScenario");
-      responseScenario.getGameCreationTimes();
+      Objects.requireNonNull(id, "id");
+      assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
    }
 
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
-      Objects.requireNonNull(service, "service");
+      Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
 
-      final var expectedScenario = service.getScenario(id).get();
+      final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
    }
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      ids = service.getScenarioIdentifiers().map(id -> id.getId())
+      ids = scenarioService.getScenarioIdentifiers().map(id -> id.getId())
                .collect(toUnmodifiableSet());
    }
 }

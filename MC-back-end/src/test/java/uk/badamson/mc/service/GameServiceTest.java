@@ -23,7 +23,9 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import uk.badamson.mc.Game;
@@ -38,6 +40,20 @@ public class GameServiceTest {
 
    public static void assertInvariants(final GameService service) {
       // Do nothing
+   }
+
+   public static Stream<Instant> getCreationTimesOfGamesOfScenario(
+            final GameService service, final UUID scenario) {
+      final var times = service.getCreationTimesOfGamesOfScenario(scenario);
+
+      assertInvariants(service);
+      assertNotNull(times, "Always returns a (non null) stream.");// guard
+      final var timesList = times.collect(toList());
+      final var timesSet = timesList.stream().collect(toUnmodifiableSet());
+      assertEquals(timesSet.size(), timesList.size(),
+               "Does not contain duplicates.");
+
+      return timesList.stream();
    }
 
    public static Optional<Game> getGame(final GameService service,

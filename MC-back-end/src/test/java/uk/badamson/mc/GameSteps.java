@@ -18,7 +18,11 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.Set;
 
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -48,6 +53,9 @@ public class GameSteps {
    private BackEndWorldCore worldCore;
 
    @Autowired
+   private GameService gameService;
+
+   @Autowired
    private ScenarioService scenarioService;
 
    @Autowired
@@ -55,7 +63,7 @@ public class GameSteps {
 
    private Scenario scenario;
 
-   private Game expectedGame;
+   private Set<Instant> gameCreationTimes;
 
    private Game responseGame;
 
@@ -87,8 +95,11 @@ public class GameSteps {
    }
 
    @When("Navigate to one game of the scenario")
-   public void navigate_to_game_of_scecnario() throws Exception {
-      final var identifier = expectedGame.getIdentifier();
+   public void navigate_to_game_of_scenario() throws Exception {
+      final var scenarioId = scenario.getIdentifier();
+      final var created = gameCreationTimes.stream().findAny().get();
+      final var identifier = new Game.Identifier(scenarioId, created);
+
       worldCore.getJson(createGamePath(identifier));
    }
 
@@ -97,8 +108,9 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).findAny().get();
       scenario = scenarioService.getScenario(scenarioId).get();
-      scenario.getGameCreationTimes().stream().findAny().get();
-      expectedGame = null;// FIXME
+      gameCreationTimes = gameService
+               .getCreationTimesOfGamesOfScenario(scenarioId)
+               .collect(toUnmodifiableSet());
    }
 
 }

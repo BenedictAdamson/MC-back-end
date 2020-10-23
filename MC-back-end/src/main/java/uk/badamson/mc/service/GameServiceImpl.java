@@ -18,8 +18,10 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -52,6 +54,14 @@ public class GameServiceImpl implements GameService {
    }
 
    @Override
+   public Stream<Instant> getCreationTimesOfGamesOfScenario(
+            final UUID scenario) {
+      return getGameIdentifiers()
+               .filter(id -> scenario.equals(id.getScenario()))
+               .map(gameId -> gameId.getCreated());
+   }
+
+   @Override
    @Nonnull
    public Optional<Game> getGame(@Nonnull final Game.Identifier id) {
       return repository.findById(id);
@@ -81,4 +91,5 @@ public class GameServiceImpl implements GameService {
    public final GameRepository getRepository() {
       return repository;
    }
+
 }

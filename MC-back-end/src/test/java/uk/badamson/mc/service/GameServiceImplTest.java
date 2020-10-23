@@ -68,6 +68,49 @@ public class GameServiceImplTest {
    }// class
 
    @Nested
+   public class GetCreationTimesOfGamesOfScenario {
+
+      @Test
+      public void none() {
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var result = getCreationTimesOfGamesOfScenario(service,
+                  SCENARIO_ID_A);
+
+         assertEquals(0L, result.count(), "empty");
+      }
+
+      @Test
+      public void one() {
+         final var id = IDENTIFIER_A;
+         final var scenarioId = id.getScenario();
+         final var created = id.getCreated();
+         repositoryA.save(new Game(id));
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var result = getCreationTimesOfGamesOfScenario(service,
+                  scenarioId);
+
+         final var list = result.collect(toList());
+         assertAll(() -> assertEquals(1L, list.size(), "count"),
+                  () -> assertThat("has creation time", list,
+                           hasItem(created)));
+      }
+
+      @Test
+      public void otherScenarioHasOne() {
+         final var scenarioId = SCENARIO_ID_B;
+         repositoryA.save(new Game(IDENTIFIER_A));
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var result = getCreationTimesOfGamesOfScenario(service,
+                  scenarioId);
+
+         assertEquals(0L, result.count(), "empty");
+      }
+   }// class
+
+   @Nested
    public class GetGame {
 
       @Test
@@ -98,7 +141,7 @@ public class GameServiceImplTest {
    public class GetGameIdentifiers {
 
       @Test
-      public void empty() {
+      public void none() {
          final var service = new GameServiceImpl(repositoryA);
 
          final var result = getGameIdentifiers(service);
@@ -120,11 +163,25 @@ public class GameServiceImplTest {
       }
    }// class
 
+   private static final UUID SCENARIO_ID_A = UUID.randomUUID();
+
+   private static final UUID SCENARIO_ID_B = UUID.randomUUID();
+
    private static final Identifier IDENTIFIER_A = new Game.Identifier(
-            UUID.randomUUID(), Instant.now());
+            SCENARIO_ID_A, Instant.now());
 
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
+   }
+
+   public static Stream<Instant> getCreationTimesOfGamesOfScenario(
+            final GameServiceImpl service, final UUID scenario) {
+      final var times = GameServiceTest
+               .getCreationTimesOfGamesOfScenario(service, scenario);
+
+      assertInvariants(service);
+
+      return times;
    }
 
    public static Optional<Game> getGame(final GameServiceImpl service,

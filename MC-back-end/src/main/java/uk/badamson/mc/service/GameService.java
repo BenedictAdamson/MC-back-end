@@ -18,7 +18,9 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -32,6 +34,32 @@ import uk.badamson.mc.Game.Identifier;
  * </p>
  */
 public interface GameService {
+
+   /**
+    * <p>
+    * Retrieve a stream of the creation times of the games that are for a given
+    * scenario.
+    * </p>
+    * <p>
+    * The given {@code scenario} ID could be combined with the returned creation
+    * times to create the {@linkplain Identifier identifiers} of the games for
+    * the given scenario.
+    * </p>
+    * <ul>
+    * <li>Always returns a (non null) stream.</li>
+    * <li>The returned stream will not include a null element</li>
+    * <li>Does not contain {@linkplain Instant#equals(Object) duplicate}
+    * identifiers.</li>
+    * </ul>
+    *
+    * @param scenario
+    *           The unique ID of the scenario of interest.
+    * @return The creation times
+    * @throws NullPointerException
+    *            If {@code scenario} is null.
+    */
+   @Nonnull
+   Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull UUID scenario);
 
    /**
     * <p>

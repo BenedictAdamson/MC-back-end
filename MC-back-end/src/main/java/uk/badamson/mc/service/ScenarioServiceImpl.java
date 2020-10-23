@@ -18,12 +18,9 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -34,12 +31,10 @@ import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
-   private static final Instant GAME_CREATION_TIME = Instant.now();
    // TODO have useful scenarios.
    private static final UUID ID = UUID.randomUUID();
    private static final Scenario SCENARIO = new Scenario(ID, "Section assault",
-            "Basic fire and movement tactics.",
-            new TreeSet<>(Arrays.asList(GAME_CREATION_TIME))) {
+            "Basic fire and movement tactics.") {
    };
    private static final Map<NamedUUID, Scenario> SCENARIOS = Map
             .of(SCENARIO.getNamedUUID(), SCENARIO);
