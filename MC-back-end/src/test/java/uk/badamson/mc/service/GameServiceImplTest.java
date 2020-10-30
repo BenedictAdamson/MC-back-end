@@ -28,7 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -53,19 +56,22 @@ public class GameServiceImplTest {
 
       @Test
       public void a() {
-         test(repositoryA);
+         test(repositoryA, CLOCK_A);
       }
 
       @Test
       public void b() {
-         test(repositoryB);
+         test(repositoryB, CLOCK_B);
       }
 
-      private void test(final GameRepository repository) {
-         final var service = new GameServiceImpl(repository);
+      private void test(final GameRepository repository, final Clock clock) {
+         final var service = new GameServiceImpl(repository, clock);
 
          assertInvariants(service);
-         assertSame(repository, service.getRepository(), "repository");
+         assertAll("Has the given assoications",
+                  () -> assertSame(repository, service.getRepository(),
+                           "repository"),
+                  () -> assertSame(clock, service.getClock(), "clock"));
       }
    }// class
 
@@ -74,16 +80,17 @@ public class GameServiceImplTest {
 
       @Test
       public void a() {
-         test(SCENARIO_ID_A);
+         test(SCENARIO_ID_A, Instant.EPOCH);
       }
 
       @Test
       public void b() {
-         test(SCENARIO_ID_B);
+         test(SCENARIO_ID_B, Instant.now());
       }
 
-      private void test(final UUID scenario) {
-         final var service = new GameServiceImpl(repositoryA);
+      private void test(final UUID scenario, final Instant now) {
+         final var clock = Clock.fixed(now, UTC);
+         final var service = new GameServiceImpl(repositoryA, clock);
 
          final var game = create(service, scenario);
 
@@ -104,7 +111,7 @@ public class GameServiceImplTest {
 
       @Test
       public void none() {
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getCreationTimesOfGamesOfScenario(service,
                   SCENARIO_ID_A);
@@ -118,7 +125,7 @@ public class GameServiceImplTest {
          final var scenarioId = id.getScenario();
          final var created = id.getCreated();
          repositoryA.save(new Game(id));
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getCreationTimesOfGamesOfScenario(service,
                   scenarioId);
@@ -133,7 +140,7 @@ public class GameServiceImplTest {
       public void otherScenarioHasOne() {
          final var scenarioId = SCENARIO_ID_B;
          repositoryA.save(new Game(IDENTIFIER_A));
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getCreationTimesOfGamesOfScenario(service,
                   scenarioId);
@@ -147,7 +154,7 @@ public class GameServiceImplTest {
 
       @Test
       public void absent() {
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
          final var id = IDENTIFIER_A;
 
          final var result = getGame(service, id);
@@ -160,7 +167,7 @@ public class GameServiceImplTest {
          final var id = IDENTIFIER_A;
          final var game = new Game(id);
          repositoryA.save(game);
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getGame(service, id);
 
@@ -174,7 +181,7 @@ public class GameServiceImplTest {
 
       @Test
       public void none() {
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getGameIdentifiers(service);
 
@@ -185,7 +192,7 @@ public class GameServiceImplTest {
       public void one() {
          final var id = IDENTIFIER_A;
          repositoryA.save(new Game(id));
-         final var service = new GameServiceImpl(repositoryA);
+         final var service = new GameServiceImpl(repositoryA, CLOCK_A);
 
          final var result = getGameIdentifiers(service);
 
@@ -194,6 +201,12 @@ public class GameServiceImplTest {
                   () -> assertThat("has ID", list, hasItem(id)));
       }
    }// class
+
+   private static final ZoneId UTC = ZoneId.from(ZoneOffset.UTC);
+
+   private static final Clock CLOCK_A = Clock.systemUTC();
+
+   private static final Clock CLOCK_B = Clock.fixed(Instant.EPOCH, UTC);
 
    private static final UUID SCENARIO_ID_A = UUID.randomUUID();
 
@@ -204,6 +217,10 @@ public class GameServiceImplTest {
 
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
+
+      assertAll("Non null associations",
+               () -> assertNotNull(service.getRepository(), "repository"),
+               () -> assertNotNull(service.getClock(), "clock"));
    }
 
    public static Game create(final GameServiceImpl service,

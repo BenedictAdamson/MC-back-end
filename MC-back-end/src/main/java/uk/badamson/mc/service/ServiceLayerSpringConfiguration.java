@@ -18,6 +18,8 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Clock;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +49,7 @@ public class ServiceLayerSpringConfiguration {
    @Bean
    public GameService gameService(
             @NonNull final GameRepository gameRepository) {
-      return new GameServiceImpl(gameRepository);
+      return new GameServiceImpl(gameRepository, Clock.systemUTC());
    }
 
    @Bean

@@ -18,6 +18,7 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,6 +36,8 @@ public class GameServiceImpl implements GameService {
 
    private final GameRepository repository;
 
+   private final Clock clock;
+
    /**
     * <p>
     * Construct a service that uses a give repository.
@@ -42,15 +45,25 @@ public class GameServiceImpl implements GameService {
     * <ul>
     * <li>The created service has the given {@code repository} as its
     * {@linkplain #getRepository() repository}.</li>
+    * <li>The created service has the given {@code clock} as its
+    * {@linkplain #getClock() clock}.</li>
     * </ul>
     *
     * @param repository
     *           The repository that this service uses for persistent storage.
+    * @param clock
+    *           The clock that this service uses to access to the current
+    *           {@linkplain Instant instant} (point in time).
     * @throws NullPointerException
-    *            If {@code repository} is null.
+    *            <ul>
+    *            <li>If {@code repository} is null.</li>
+    *            <li>If {@code clock} is null.</li>
+    *            </ul>
     */
-   public GameServiceImpl(final GameRepository repository) {
+   public GameServiceImpl(@Nonnull final GameRepository repository,
+            @Nonnull final Clock clock) {
       this.repository = Objects.requireNonNull(repository, "repository");
+      this.clock = Objects.requireNonNull(clock, "clock");
    }
 
    @Override
@@ -59,6 +72,22 @@ public class GameServiceImpl implements GameService {
       final var identifier = new Game.Identifier(scenario, Instant.EPOCH);// FIXME
       final var game = new Game(identifier);
       return repository.save(game);
+   }
+
+   /**
+    * <p>
+    * The clock that this service uses to access to the current
+    * {@linkplain Instant instant} (point in time).
+    * </p>
+    * <ul>
+    * <li>Not null.</li>
+    * </ul>
+    *
+    * @return the clock
+    */
+   @Nonnull
+   public final Clock getClock() {
+      return clock;
    }
 
    @Override
