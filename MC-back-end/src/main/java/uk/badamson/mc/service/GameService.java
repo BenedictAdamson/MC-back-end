@@ -19,11 +19,14 @@ package uk.badamson.mc.service;
  */
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+
+import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
@@ -34,6 +37,38 @@ import uk.badamson.mc.Game.Identifier;
  * </p>
  */
 public interface GameService {
+
+   /**
+    * <p>
+    * Create a new game for a given scenario.
+    * </p>
+    *
+    * <h2>Post Conditions</h2>
+    * <ul>
+    * <li>Always return a (non null) game.</li>
+    * <li>The returned game has the given {@code scenario} as the
+    * {@linkplain Identifier#getScenario() scenario} of its
+    * {@linkplain Game#getIdentifier() identifier}.</li>
+    * <li>The returned game has the current time as the
+    * {@linkplain Identifier#getCreated() creation time} of its
+    * {@linkplain Game#getIdentifier() identifier}.</li>
+    * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
+    * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
+    * </ul>
+    *
+    * @param scenario
+    *           The unique ID of the scenario of interest.
+    * @return The created game.
+    * @throws NullPointerException
+    *            If {@code scenario} is null.
+    * @throws NoSuchElementException
+    *            If {@code scenario} is not the ID of a recognised scenario.
+    * @throws DataAccessException
+    *            If the service could not create the game because of a problem
+    *            accessing a repository.
+    */
+   @Nonnull
+   Game create(@Nonnull UUID scenario);
 
    /**
     * <p>

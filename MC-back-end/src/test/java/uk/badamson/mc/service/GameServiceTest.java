@@ -42,6 +42,17 @@ public class GameServiceTest {
       // Do nothing
    }
 
+   public static Game create(final GameService service, final UUID scenario) {
+      final var game = service.create(scenario);
+
+      assertInvariants(service);
+      assertNotNull(game, "Always returns a (non null) game.");// guard
+      assertEquals(scenario, game.getIdentifier().getScenario(),
+               "The returned game has the given scenario as the scenario of its identifier");
+
+      return game;
+   }
+
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
             final GameService service, final UUID scenario) {
       final var times = service.getCreationTimesOfGamesOfScenario(scenario);

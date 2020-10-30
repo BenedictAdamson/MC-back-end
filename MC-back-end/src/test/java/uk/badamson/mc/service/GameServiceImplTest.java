@@ -21,8 +21,10 @@ package uk.badamson.mc.service;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,6 +66,36 @@ public class GameServiceImplTest {
 
          assertInvariants(service);
          assertSame(repository, service.getRepository(), "repository");
+      }
+   }// class
+
+   @Nested
+   public class Create {
+
+      @Test
+      public void a() {
+         test(SCENARIO_ID_A);
+      }
+
+      @Test
+      public void b() {
+         test(SCENARIO_ID_B);
+      }
+
+      private void test(final UUID scenario) {
+         final var service = new GameServiceImpl(repositoryA);
+
+         final var game = create(service, scenario);
+
+         final var identifier = game.getIdentifier();
+         final var retrievedGame = service.getGame(identifier);
+         assertNotNull(retrievedGame,
+                  "can retrieve something using the ID (not null)");// guard
+         assertTrue(retrievedGame.isPresent(),
+                  "can retrieve something using the ID");// guard
+         final var retrievedIdentifier = retrievedGame.get().getIdentifier();
+         assertThat("scenario ID", retrievedIdentifier.getScenario(),
+                  is(scenario));
       }
    }// class
 
@@ -172,6 +204,15 @@ public class GameServiceImplTest {
 
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
+   }
+
+   public static Game create(final GameServiceImpl service,
+            final UUID scenario) {
+      final var game = GameServiceTest.create(service, scenario);// inherited
+
+      assertInvariants(service);
+
+      return game;
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
