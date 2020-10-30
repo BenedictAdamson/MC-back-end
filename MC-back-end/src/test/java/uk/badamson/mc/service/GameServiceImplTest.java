@@ -95,14 +95,20 @@ public class GameServiceImplTest {
          final var game = create(service, scenario);
 
          final var identifier = game.getIdentifier();
+         assertThat(
+                  "The returned game has the current time as the creation time of its identifier.",
+                  identifier.getCreated(), is(now));
          final var retrievedGame = service.getGame(identifier);
          assertNotNull(retrievedGame,
                   "can retrieve something using the ID (not null)");// guard
          assertTrue(retrievedGame.isPresent(),
                   "can retrieve something using the ID");// guard
          final var retrievedIdentifier = retrievedGame.get().getIdentifier();
-         assertThat("scenario ID", retrievedIdentifier.getScenario(),
-                  is(scenario));
+         assertAll("can retrieve the created game using the ID",
+                  () -> assertThat("scenario",
+                           retrievedIdentifier.getScenario(), is(scenario)),
+                  () -> assertThat("created", retrievedIdentifier.getCreated(),
+                           is(now)));
       }
    }// class
 

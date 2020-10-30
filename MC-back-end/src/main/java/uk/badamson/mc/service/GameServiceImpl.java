@@ -69,7 +69,7 @@ public class GameServiceImpl implements GameService {
    @Override
    @Nonnull
    public Game create(@Nonnull final UUID scenario) {
-      final var identifier = new Game.Identifier(scenario, Instant.EPOCH);// FIXME
+      final var identifier = new Game.Identifier(scenario, clock.instant());
       final var game = new Game(identifier);
       return repository.save(game);
    }
