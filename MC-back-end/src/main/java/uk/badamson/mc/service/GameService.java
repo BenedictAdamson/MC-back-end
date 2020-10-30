@@ -18,6 +18,7 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -49,8 +50,9 @@ public interface GameService {
     * <li>The returned game has the given {@code scenario} as the
     * {@linkplain Identifier#getScenario() scenario} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game has the current time as the
-    * {@linkplain Identifier#getCreated() creation time} of its
+    * <li>The returned game has the {@linkplain Clock#instant() current time}
+    * (as given by the {@linkplain #getClock() associated clock} of this
+    * service) as the {@linkplain Identifier#getCreated() creation time} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
     * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
     * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
@@ -69,6 +71,20 @@ public interface GameService {
     */
    @Nonnull
    Game create(@Nonnull UUID scenario);
+
+   /**
+    * <p>
+    * The clock that this service uses to access to the current
+    * {@linkplain Instant instant} (point in time).
+    * </p>
+    * <ul>
+    * <li>Not null.</li>
+    * </ul>
+    *
+    * @return the clock
+    */
+   @Nonnull
+   Clock getClock();
 
    /**
     * <p>
@@ -132,5 +148,4 @@ public interface GameService {
     */
    @Nonnull
    Stream<Game.Identifier> getGameIdentifiers();
-
 }

@@ -218,9 +218,7 @@ public class GameServiceImplTest {
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
 
-      assertAll("Non null associations",
-               () -> assertNotNull(service.getRepository(), "repository"),
-               () -> assertNotNull(service.getClock(), "clock"));
+      assertNotNull(service.getRepository(), "Not null, repository");
    }
 
    public static Game create(final GameServiceImpl service,

@@ -39,7 +39,7 @@ import uk.badamson.mc.Game;
 public class GameServiceTest {
 
    public static void assertInvariants(final GameService service) {
-      // Do nothing
+      assertNotNull(service.getClock(), "Not null, clock");
    }
 
    public static Game create(final GameService service, final UUID scenario) {

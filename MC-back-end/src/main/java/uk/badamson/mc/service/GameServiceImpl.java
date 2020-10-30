@@ -86,6 +86,7 @@ public class GameServiceImpl implements GameService {
     * @return the clock
     */
    @Nonnull
+   @Override
    public final Clock getClock() {
       return clock;
    }
