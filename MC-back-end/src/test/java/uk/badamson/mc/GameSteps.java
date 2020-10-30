@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Set;
 
 import org.opentest4j.AssertionFailedError;
@@ -103,13 +104,19 @@ public class GameSteps {
       worldCore.getJson(createGamePath(identifier));
    }
 
-   @When("Viewing the games of a scenario")
-   public void viewing_games_of_scenario() {
+   @When("A scenario has games")
+   public void scenario_has_games() {
       final var scenarioId = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).findAny().get();
       scenario = scenarioService.getScenario(scenarioId).get();
+      // FIXME
+   }
+
+   @When("Viewing the games of the scenario")
+   public void viewing_games_of_scenario() {
+      Objects.requireNonNull(scenario, "scenario");
       gameCreationTimes = gameService
-               .getCreationTimesOfGamesOfScenario(scenarioId)
+               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
                .collect(toUnmodifiableSet());
    }
 
