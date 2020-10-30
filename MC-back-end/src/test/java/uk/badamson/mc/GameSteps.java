@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -66,21 +67,25 @@ public class GameSteps {
 
    private Set<Instant> gameCreationTimes;
 
+   private Game.Identifier gameId;
+
    private Game responseGame;
 
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
-      throw new UnsupportedOperationException();
+      // Do nothing
    }
 
    @Then("The game page includes the scenario title")
    public void game_page_includes_scenario_title() {
-      throw new UnsupportedOperationException();
+      assertEquals(scenario.getIdentifier(),
+               responseGame.getIdentifier().getScenario(), "scenario ID");
    }
 
    @Then("The game page includes the date and time that the game was set up")
    public void game_page_includes_timestamp() {
-      throw new UnsupportedOperationException();
+      assertEquals(gameId.getCreated(),
+               responseGame.getIdentifier().getCreated());
    }
 
    @Then("MC serves the game page")
@@ -99,9 +104,9 @@ public class GameSteps {
    public void navigate_to_game_of_scenario() throws Exception {
       final var scenarioId = scenario.getIdentifier();
       final var created = gameCreationTimes.stream().findAny().get();
-      final var identifier = new Game.Identifier(scenarioId, created);
+      gameId = new Game.Identifier(scenarioId, created);
 
-      worldCore.getJson(createGamePath(identifier));
+      worldCore.getJson(createGamePath(gameId));
    }
 
    @When("A scenario has games")
