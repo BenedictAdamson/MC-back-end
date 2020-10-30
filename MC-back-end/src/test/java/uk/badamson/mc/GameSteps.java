@@ -109,7 +109,7 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers()
                .map(si -> si.getId()).findAny().get();
       scenario = scenarioService.getScenario(scenarioId).get();
-      // FIXME
+      gameService.create(scenarioId);
    }
 
    @When("Viewing the games of the scenario")
