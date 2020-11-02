@@ -19,7 +19,9 @@ package uk.badamson.mc.presentation;
  */
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -42,6 +44,7 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.service.GameService;
+import uk.badamson.mc.service.ScenarioService;
 
 /**
  * <p>
@@ -63,6 +66,9 @@ public class GameControllerTest {
    GameRepository gameRepository;
 
    @Autowired
+   ScenarioService scenarioService;
+
+   @Autowired
    GameService gameService;
 
    @Autowired
@@ -70,6 +76,39 @@ public class GameControllerTest {
 
    @Autowired
    private MockMvc mockMvc;
+
+   private ResultActions createGame(final UUID scenario) throws Exception {
+      final var request = post(ScenarioController.createPathFor(scenario));
+
+      final var response = mockMvc.perform(request);
+      return response;
+   }
+
+   @Test
+   public void createGame_knowScenario() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+
+      final var response = createGame(scenario);
+
+      final var id = gameService.getGameIdentifiers()
+               .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+      assertTrue(id.isPresent(), "created a game for the scenario");
+      response.andExpect(status().isFound());
+      final var location = response.andReturn().getResponse()
+               .getHeaderValue("Location");
+      assertEquals(GameController.createPathFor(id.get()), location,
+               "redirection location");
+   }
+
+   @Test
+   public void createGame_unknowScenario() throws Exception {
+      final var scenario = UUID.randomUUID();
+
+      final var response = createGame(scenario);
+
+      response.andExpect(status().isNotFound());
+   }
 
    private ResultActions getGame(final Game.Identifier id) throws Exception {
       final var request = get(GameController.createPathFor(id))

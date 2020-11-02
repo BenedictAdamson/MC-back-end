@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
@@ -27,14 +28,19 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.Scenario;
 import uk.badamson.mc.service.GameService;
 
 /**
@@ -64,7 +70,7 @@ public class GameController {
     * @throws NullPointerException
     *            If {@code id} is null.
     */
-   static String createPathFor(final Game.Identifier id) {
+   public static String createPathFor(final Game.Identifier id) {
       Objects.requireNonNull(id, "id");
       return "/api/scenario/" + id.getScenario() + "/game/"
                + URI_DATETIME_FORMATTER.format(id.getCreated());
@@ -85,6 +91,66 @@ public class GameController {
    @Autowired
    public GameController(@Nonnull final GameService gameService) {
       this.gameService = Objects.requireNonNull(gameService, "gameService");
+   }
+
+   /**
+    * <p>
+    * Create a game for a given scenario.
+    * </p>
+    * <p>
+    * The behaviour of the POST verb for a scenario resource.
+    * </p>
+    * <ul>
+    * <li>Creates a new game for the given scenario.</li>
+    * <li>Returns a redirect to the newly created game. That is, a response with
+    * <ul>
+    * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
+    * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
+    * <li>A {@linkplain HttpHeaders#getLocation()
+    * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+    * {@linkplain #createPathFor(Identifier) path} of the cew game.</li>
+    * </ul>
+    * </li>
+    * <li>The scenario ID part of the identifier of the newly created game is
+    * equal to the given scenario identifier.</li>
+    * </ul>
+    *
+    * @param scenario
+    *           The unique ID of the scenario for which to create a game.
+    * @return The response.
+    * @throws NullPointerException
+    *            If {@code scenario} is null.
+    * @throws ResponseStatusException
+    *            <ul>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+    *            there is no scenario with the given {@code id}
+    *            {@linkplain UUID#equals(Object) equivalent to} its
+    *            {@linkplain Scenario#getIdentifier() identifier}.</li>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
+    *            (Internal Server Error)} if there is data access error.</li>
+    *            </ul>
+    */
+   @PostMapping("/api/scenario/{scenario}")
+   @Nonnull
+   public ResponseEntity<Void> create(
+            @Nonnull @PathVariable("scenario") final UUID scenario) {
+      try {
+         final var game = gameService.create(scenario);
+
+         final var location = URI.create(createPathFor(game.getIdentifier()));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized ID", e);
+      } catch (final DataAccessException e) {
+         // Hard to test
+         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                  e.getMessage(), e);
+      }
    }
 
    /**
