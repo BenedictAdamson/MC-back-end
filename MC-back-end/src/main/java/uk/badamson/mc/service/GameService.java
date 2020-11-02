@@ -118,8 +118,8 @@ public interface GameService {
     * </p>
     * <ul>
     * <li>Returns a (non null) optional value.</li>
-    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a value for
-    * which the {@linkplain Game#getIdentifier() identifier}
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which the {@linkplain Game#getIdentifier() identifier}
     * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
     * </ul>
     *
@@ -134,8 +134,8 @@ public interface GameService {
 
    /**
     * <p>
-    * Retrieve a stream of the identifiers of all the games of this instance of the
-    * Mission Command game.
+    * Retrieve a stream of the identifiers of all the games of this instance of
+    * the Mission Command game.
     * </p>
     * <ul>
     * <li>Always returns a (non null) stream.</li>
@@ -148,4 +148,18 @@ public interface GameService {
     */
    @Nonnull
    Stream<Game.Identifier> getGameIdentifiers();
+
+   /**
+    * <p>
+    * The part of the service layer that this service uses for information about
+    * scenarios.
+    * </p>
+    * <ul>
+    * <li>Not null.</li>
+    * </ul>
+    *
+    * @return the scenario service
+    */
+   @Nonnull
+   ScenarioService getScenarioService();
 }

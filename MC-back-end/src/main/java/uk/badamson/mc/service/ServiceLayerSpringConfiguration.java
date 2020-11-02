@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import java.time.Clock;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,10 +47,12 @@ public class ServiceLayerSpringConfiguration {
     *
     * @return the part of the service layer.
     */
+   @Autowired
    @Bean
-   public GameService gameService(
-            @NonNull final GameRepository gameRepository) {
-      return new GameServiceImpl(gameRepository, Clock.systemUTC());
+   public GameService gameService(@NonNull final GameRepository gameRepository,
+            @NonNull final ScenarioService scenarioService) {
+      return new GameServiceImpl(gameRepository, Clock.systemUTC(),
+               scenarioService);
    }
 
    @Bean

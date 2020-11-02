@@ -38,6 +38,8 @@ public class GameServiceImpl implements GameService {
 
    private final Clock clock;
 
+   private final ScenarioService scenarioService;
+
    /**
     * <p>
     * Construct a service with give associations.
@@ -47,6 +49,8 @@ public class GameServiceImpl implements GameService {
     * {@linkplain #getRepository() repository}.</li>
     * <li>The created service has the given {@code clock} as its
     * {@linkplain #getClock() clock}.</li>
+    * <li>The created service has the given {@code scenarioService} as its
+    * {@linkplain #getScenarioService() scenario service}.</li>
     * </ul>
     *
     * @param repository
@@ -54,16 +58,23 @@ public class GameServiceImpl implements GameService {
     * @param clock
     *           The clock that this service uses to access to the current
     *           {@linkplain Instant instant} (point in time).
+    * @param scenarioService
+    *           The part of the service layer that this service uses for
+    *           information about scenarios.
     * @throws NullPointerException
     *            <ul>
     *            <li>If {@code repository} is null.</li>
     *            <li>If {@code clock} is null.</li>
+    *            <li>If {@code scenarioService} is null.</li>
     *            </ul>
     */
    public GameServiceImpl(@Nonnull final GameRepository repository,
-            @Nonnull final Clock clock) {
+            @Nonnull final Clock clock,
+            @Nonnull final ScenarioService scenarioService) {
       this.repository = Objects.requireNonNull(repository, "repository");
       this.clock = Objects.requireNonNull(clock, "clock");
+      this.scenarioService = Objects.requireNonNull(scenarioService,
+               "scenarioService");
    }
 
    @Override
@@ -117,6 +128,12 @@ public class GameServiceImpl implements GameService {
    @Nonnull
    public final GameRepository getRepository() {
       return repository;
+   }
+
+   @Override
+   @Nonnull
+   public final ScenarioService getScenarioService() {
+      return scenarioService;
    }
 
 }

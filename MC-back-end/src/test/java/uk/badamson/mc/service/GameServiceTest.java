@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -39,7 +40,9 @@ import uk.badamson.mc.Game;
 public class GameServiceTest {
 
    public static void assertInvariants(final GameService service) {
-      assertNotNull(service.getClock(), "Not null, clock");
+      assertAll("Not null", () -> assertNotNull(service.getClock(), "clock"),
+               () -> assertNotNull(service.getScenarioService(),
+                        "scenarioService"));
    }
 
    public static Game create(final GameService service, final UUID scenario) {
