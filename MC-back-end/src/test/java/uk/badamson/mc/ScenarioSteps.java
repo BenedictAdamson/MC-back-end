@@ -135,7 +135,7 @@ public class ScenarioSteps {
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      ids = scenarioService.getNamedScenarioIdentifiers().map(id -> id.getId())
+      ids = scenarioService.getScenarioIdentifiers()
                .collect(toUnmodifiableSet());
    }
 }

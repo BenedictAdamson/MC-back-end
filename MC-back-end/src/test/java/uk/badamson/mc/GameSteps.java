@@ -111,8 +111,8 @@ public class GameSteps {
 
    @When("A scenario has games")
    public void scenario_has_games() {
-      final var scenarioId = scenarioService.getNamedScenarioIdentifiers()
-               .map(si -> si.getId()).findAny().get();
+      final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
       scenario = scenarioService.getScenario(scenarioId).get();
       gameService.create(scenarioId);
    }

@@ -95,7 +95,7 @@ public class ScenarioControllerTest {
 
    @Test
    public void getScenario_absent() throws Exception {
-      final var ids = service.getNamedScenarioIdentifiers().map(si -> si.getId())
+      final var ids = service.getScenarioIdentifiers()
                .collect(toUnmodifiableSet());
       var id = UUID.randomUUID();
       while (ids.contains(id)) {
@@ -109,8 +109,7 @@ public class ScenarioControllerTest {
 
    @Test
    public void getScenario_present() throws Exception {
-      final var id = service.getNamedScenarioIdentifiers().map(si -> si.getId())
-               .findAny().get();
+      final var id = service.getScenarioIdentifiers().findAny().get();
 
       final var response = getScenario(id);
 
