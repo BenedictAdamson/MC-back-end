@@ -88,9 +88,8 @@ public class ScenarioController {
     * </p>
     * <ul>
     * <li>Returns a (non null) scenario.</li>
-    * <li>The {@linkplain NamedUUID#getId() unique identifier} of the
-    * {@linkplain Scenario#getIdentifier() identification information} of the
-    * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
+    * <li>The {@linkplain Scenario#getIdentifier() identifier} of the returned
+    * scenario {@linkplain UUID#equals(Object) is equivalent to} the given
     * ID</li>
     * </ul>
     *
@@ -100,15 +99,11 @@ public class ScenarioController {
     * @throws NullPointerException
     *            If {@code id} is null.
     * @throws ResponseStatusException
-    *            <ul>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-    *            there is no scenario with the given {@code id}
-    *            {@linkplain UUID#equals(Object) is equivalent to} the
-    *            {@linkplain NamedUUID#getId() unique identifier} of the
-    *            {@linkplain Scenario#getIdentifier() identification
-    *            information} of the scenario.</li>
-    *            </ul>
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+    *            is no scenario with the given {@code id}
+    *            {@linkplain UUID#equals(Object) equivalent to} its
+    *            {@linkplain Scenario#getIdentifier() identifier}.
     */
    @GetMapping("/api/scenario/{id}")
    @Nonnull
