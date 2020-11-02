@@ -42,21 +42,9 @@ public class ScenarioServiceTest {
       // Do nothing
    }
 
-   public static Optional<Scenario> getScenario(final ScenarioService service,
-            final UUID id) {
-      final var result = service.getScenario(id);
-
-      assertInvariants(service);
-      assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
-         assertEquals(id, result.get().getIdentifier(), "identifier");
-      }
-      return result;
-   }
-
-   public static Stream<NamedUUID> getScenarioIdentifiers(
+   public static Stream<NamedUUID> getNamedScenarioIdentifiers(
             final ScenarioService service) {
-      final var scenarios = service.getScenarioIdentifiers();
+      final var scenarios = service.getNamedScenarioIdentifiers();
 
       assertInvariants(service);
       assertNotNull(scenarios, "Always returns a (non null) stream.");// guard
@@ -67,5 +55,17 @@ public class ScenarioServiceTest {
                "Does not contain duplicates.");
 
       return scenariosList.stream();
+   }
+
+   public static Optional<Scenario> getScenario(final ScenarioService service,
+            final UUID id) {
+      final var result = service.getScenario(id);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      if (result.isPresent()) {
+         assertEquals(id, result.get().getIdentifier(), "identifier");
+      }
+      return result;
    }
 }

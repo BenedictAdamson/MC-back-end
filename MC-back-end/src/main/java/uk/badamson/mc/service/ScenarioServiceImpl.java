@@ -41,16 +41,16 @@ public class ScenarioServiceImpl implements ScenarioService {
 
    @Override
    @Nonnull
-   public Optional<Scenario> getScenario(@Nonnull final UUID id) {
-      Objects.requireNonNull(id, "id");
-      return SCENARIOS.values().stream()
-               .filter(s -> id.equals(s.getIdentifier())).findAny();
+   public Stream<NamedUUID> getNamedScenarioIdentifiers() {
+      return SCENARIOS.keySet().stream();
    }
 
    @Override
    @Nonnull
-   public Stream<NamedUUID> getScenarioIdentifiers() {
-      return SCENARIOS.keySet().stream();
+   public Optional<Scenario> getScenario(@Nonnull final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return SCENARIOS.values().stream()
+               .filter(s -> id.equals(s.getIdentifier())).findAny();
    }
 
 }

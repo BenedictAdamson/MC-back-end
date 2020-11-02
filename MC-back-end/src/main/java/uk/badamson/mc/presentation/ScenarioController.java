@@ -79,7 +79,7 @@ public class ScenarioController {
    @GetMapping("/api/scenario")
    @Nonnull
    public Stream<NamedUUID> getAll() {
-      return service.getScenarioIdentifiers();
+      return service.getNamedScenarioIdentifiers();
    }
 
    /**

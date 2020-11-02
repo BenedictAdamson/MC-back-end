@@ -57,7 +57,7 @@ public class ScenarioServiceImplTest {
       }
 
       private Set<UUID> getIds(final ScenarioService service) {
-         return service.getScenarioIdentifiers().map(si -> si.getId())
+         return service.getNamedScenarioIdentifiers().map(si -> si.getId())
                   .collect(toUnmodifiableSet());
       }
 
@@ -76,21 +76,22 @@ public class ScenarioServiceImplTest {
       ScenarioServiceTest.assertInvariants(service);// inherited
    }
 
+   public static Stream<NamedUUID> getNamedScenarioIdentifiers(
+            final ScenarioServiceImpl service) {
+      final var scenarios = ScenarioServiceTest
+               .getNamedScenarioIdentifiers(service);// inherited
+
+      assertInvariants(service);
+
+      return scenarios;
+   }
+
    public static Optional<Scenario> getScenario(
             final ScenarioServiceImpl service, final UUID id) {
       final var result = ScenarioServiceTest.getScenario(service, id);
 
       assertInvariants(service);
       return result;
-   }
-
-   public static Stream<NamedUUID> getScenarioIdentifiers(
-            final ScenarioServiceImpl service) {
-      final var scenarios = ScenarioServiceTest.getScenarioIdentifiers(service);// inherited
-
-      assertInvariants(service);
-
-      return scenarios;
    }
 
    @Test
@@ -101,8 +102,8 @@ public class ScenarioServiceImplTest {
    }
 
    @Test
-   public void getScenarioIdentifiers() {
+   public void getNamedScenarioIdentifiers() {
       final var service = new ScenarioServiceImpl();
-      getScenarioIdentifiers(service);
+      getNamedScenarioIdentifiers(service);
    }
 }
