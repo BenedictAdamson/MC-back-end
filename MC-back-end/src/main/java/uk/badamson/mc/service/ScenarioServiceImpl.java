@@ -36,13 +36,13 @@ public class ScenarioServiceImpl implements ScenarioService {
    private static final Scenario SCENARIO = new Scenario(ID, "Section assault",
             "Basic fire and movement tactics.") {
    };
-   private static final Map<NamedUUID, Scenario> SCENARIOS = Map
-            .of(SCENARIO.getNamedUUID(), SCENARIO);
+   private static final Map<UUID, Scenario> SCENARIOS = Map
+            .of(SCENARIO.getIdentifier(), SCENARIO);
 
    @Override
    @Nonnull
    public Stream<NamedUUID> getNamedScenarioIdentifiers() {
-      return SCENARIOS.keySet().stream();
+      return SCENARIOS.values().stream().map(s -> s.getNamedUUID());
    }
 
    @Override
@@ -51,6 +51,12 @@ public class ScenarioServiceImpl implements ScenarioService {
       Objects.requireNonNull(id, "id");
       return SCENARIOS.values().stream()
                .filter(s -> id.equals(s.getIdentifier())).findAny();
+   }
+
+   @Override
+   @Nonnull
+   public Stream<UUID> getScenarioIdentifiers() {
+      return SCENARIOS.keySet().stream();
    }
 
 }

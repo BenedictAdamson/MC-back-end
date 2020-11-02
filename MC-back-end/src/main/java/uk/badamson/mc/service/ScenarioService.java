@@ -45,6 +45,11 @@ public interface ScenarioService {
     * <li>The returned stream will not include a null element</li>
     * <li>Does not contain {@linkplain NamedUUID#equals(Object) duplicate} named
     * identifiers.</li>
+    * <li>Contains a named identifier corresponding to each
+    * {@linkplain #getScenarioIdentifiers() scenario identifier}. That is, for
+    * each scenario identifier there is a named identifier that has an
+    * {@linkplain UUID#equals(Object) equivalent} {@linkplain NamedUUID#getId()
+    * ID}.</li>
     * </ul>
     *
     * @return a {@linkplain Stream stream} of the named identifiers.
@@ -73,5 +78,22 @@ public interface ScenarioService {
     */
    @Nonnull
    Optional<Scenario> getScenario(@Nonnull final UUID id);
+
+   /**
+    * <p>
+    * Retrieve a stream of the {@linkplain UUID unique identifiers} of the
+    * scenarios of this instance of the Mission Command game.
+    * </p>
+    * <ul>
+    * <li>Always returns a (non null) stream.</li>
+    * <li>The returned stream will not include a null element</li>
+    * <li>Does not contain {@linkplain UUID#equals(Object) duplicate} named
+    * identifiers.</li>
+    * </ul>
+    *
+    * @return a {@linkplain Stream stream} of the identifiers.
+    */
+   @Nonnull
+   Stream<UUID> getScenarioIdentifiers();
 
 }

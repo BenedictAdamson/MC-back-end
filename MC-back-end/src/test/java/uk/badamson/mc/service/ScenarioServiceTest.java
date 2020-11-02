@@ -68,4 +68,19 @@ public class ScenarioServiceTest {
       }
       return result;
    }
+
+   public static Stream<UUID> getScenarioIdentifiers(
+            final ScenarioService service) {
+      final var scenarios = service.getScenarioIdentifiers();
+
+      assertInvariants(service);
+      assertNotNull(scenarios, "Always returns a (non null) stream.");// guard
+      final var scenariosList = scenarios.collect(toList());
+      final var scenariosSet = scenariosList.stream()
+               .collect(toUnmodifiableSet());
+      assertEquals(scenariosSet.size(), scenariosList.size(),
+               "Does not contain duplicates.");
+
+      return scenariosList.stream();
+   }
 }

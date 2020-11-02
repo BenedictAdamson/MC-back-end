@@ -19,6 +19,7 @@ package uk.badamson.mc.service;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -56,11 +57,6 @@ public class ScenarioServiceImplTest {
          assertTrue(result.isEmpty(), "absent");
       }
 
-      private Set<UUID> getIds(final ScenarioService service) {
-         return service.getNamedScenarioIdentifiers().map(si -> si.getId())
-                  .collect(toUnmodifiableSet());
-      }
-
       @Test
       public void present() {
          final var service = new ScenarioServiceImpl();
@@ -74,6 +70,10 @@ public class ScenarioServiceImplTest {
 
    public static void assertInvariants(final ScenarioServiceImpl service) {
       ScenarioServiceTest.assertInvariants(service);// inherited
+   }
+
+   private static Set<UUID> getIds(final ScenarioService service) {
+      return service.getScenarioIdentifiers().collect(toUnmodifiableSet());
    }
 
    public static Stream<NamedUUID> getNamedScenarioIdentifiers(
@@ -94,6 +94,15 @@ public class ScenarioServiceImplTest {
       return result;
    }
 
+   public static Stream<UUID> getScenarioIdentifiers(
+            final ScenarioServiceImpl service) {
+      final var scenarios = ScenarioServiceTest.getScenarioIdentifiers(service);// inherited
+
+      assertInvariants(service);
+
+      return scenarios;
+   }
+
    @Test
    public void constructor() {
       final var service = new ScenarioServiceImpl();
@@ -104,6 +113,13 @@ public class ScenarioServiceImplTest {
    @Test
    public void getNamedScenarioIdentifiers() {
       final var service = new ScenarioServiceImpl();
-      getNamedScenarioIdentifiers(service);
+      final var ids = getIds(service);
+
+      final var namedIds = getNamedScenarioIdentifiers(service);
+
+      final var idsOfNamedIds = namedIds.map(ni -> ni.getId())
+               .collect(toUnmodifiableSet());
+      assertEquals(ids, idsOfNamedIds,
+               "Contains a named identifier corresponding to each scenario identifier.");
    }
 }
