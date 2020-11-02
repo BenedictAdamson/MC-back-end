@@ -40,7 +40,7 @@ public class GameServiceImpl implements GameService {
 
    /**
     * <p>
-    * Construct a service that uses a give repository.
+    * Construct a service with give associations.
     * </p>
     * <ul>
     * <li>The created service has the given {@code repository} as its
@@ -74,17 +74,6 @@ public class GameServiceImpl implements GameService {
       return repository.save(game);
    }
 
-   /**
-    * <p>
-    * The clock that this service uses to access to the current
-    * {@linkplain Instant instant} (point in time).
-    * </p>
-    * <ul>
-    * <li>Not null.</li>
-    * </ul>
-    *
-    * @return the clock
-    */
    @Nonnull
    @Override
    public final Clock getClock() {

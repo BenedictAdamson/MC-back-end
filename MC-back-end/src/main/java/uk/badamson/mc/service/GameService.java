@@ -118,7 +118,7 @@ public interface GameService {
     * </p>
     * <ul>
     * <li>Returns a (non null) optional value.</li>
-    * <li>Returns an {@linkplain Optional#isEmpty() empty} value, or a value for
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a value for
     * which the {@linkplain Game#getIdentifier() identifier}
     * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
     * </ul>
@@ -134,7 +134,7 @@ public interface GameService {
 
    /**
     * <p>
-    * Retrieve a stream of the identifiers of the games of this instance of the
+    * Retrieve a stream of the identifiers of all the games of this instance of the
     * Mission Command game.
     * </p>
     * <ul>
