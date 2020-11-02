@@ -26,12 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -39,6 +41,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
@@ -82,38 +85,56 @@ public class GameServiceImplTest {
    @Nested
    public class Create {
 
-      @Test
-      public void a() {
-         test(SCENARIO_ID_A, Instant.EPOCH);
-      }
+      @Nested
+      public class KnownScenario {
+
+         @Test
+         public void a() {
+            test(Instant.EPOCH);
+         }
+
+         @Test
+         public void b() {
+            test(Instant.now());
+         }
+
+         private void test(final Instant now) {
+            final var clock = Clock.fixed(now, UTC);
+            final var scenarioService = scenarioServiceA;
+            final var scenario = scenarioService.getScenarioIdentifiers()
+                     .findAny().get();
+            final var service = new GameServiceImpl(gameRepositoryA, clock,
+                     scenarioService);
+
+            final var game = create(service, scenario);
+
+            final var identifier = game.getIdentifier();
+            assertThat(
+                     "The returned game has the current time as the creation time of its identifier.",
+                     identifier.getCreated(), is(now));
+            final var retrievedGame = service.getGame(identifier);
+            assertNotNull(retrievedGame,
+                     "can retrieve something using the ID (not null)");// guard
+            assertTrue(retrievedGame.isPresent(),
+                     "can retrieve something using the ID");// guard
+            final var retrievedIdentifier = retrievedGame.get().getIdentifier();
+            assertAll("can retrieve the created game using the ID",
+                     () -> assertThat("scenario",
+                              retrievedIdentifier.getScenario(), is(scenario)),
+                     () -> assertThat("created",
+                              retrievedIdentifier.getCreated(), is(now)));
+         }
+      }// class
 
       @Test
-      public void b() {
-         test(SCENARIO_ID_B, Instant.now());
-      }
+      public void unknownScenario() {
+         final var scenarioService = scenarioServiceA;
+         final var scenario = UUID.randomUUID();
+         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+                  scenarioService);
 
-      private void test(final UUID scenario, final Instant now) {
-         final var clock = Clock.fixed(now, UTC);
-         final var service = new GameServiceImpl(gameRepositoryA, clock,
-                  scenarioServiceA);
-
-         final var game = create(service, scenario);
-
-         final var identifier = game.getIdentifier();
-         assertThat(
-                  "The returned game has the current time as the creation time of its identifier.",
-                  identifier.getCreated(), is(now));
-         final var retrievedGame = service.getGame(identifier);
-         assertNotNull(retrievedGame,
-                  "can retrieve something using the ID (not null)");// guard
-         assertTrue(retrievedGame.isPresent(),
-                  "can retrieve something using the ID");// guard
-         final var retrievedIdentifier = retrievedGame.get().getIdentifier();
-         assertAll("can retrieve the created game using the ID",
-                  () -> assertThat("scenario",
-                           retrievedIdentifier.getScenario(), is(scenario)),
-                  () -> assertThat("created", retrievedIdentifier.getCreated(),
-                           is(now)));
+         assertThrows(NoSuchElementException.class,
+                  () -> create(service, scenario));
       }
    }// class
 
@@ -239,9 +260,15 @@ public class GameServiceImplTest {
       assertNotNull(service.getRepository(), "Not null, repository");
    }
 
-   public static Game create(final GameServiceImpl service,
-            final UUID scenario) {
-      final var game = GameServiceTest.create(service, scenario);// inherited
+   public static Game create(final GameServiceImpl service, final UUID scenario)
+            throws DataAccessException, NoSuchElementException {
+      final Game game;
+      try {
+         game = GameServiceTest.create(service, scenario);
+      } catch (DataAccessException | NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
 
       assertInvariants(service);
 
@@ -279,9 +306,9 @@ public class GameServiceImplTest {
 
    private GameRepositoryTest.Fake gameRepositoryB;
 
-   private ScenarioService scenarioServiceA = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceA = new ScenarioServiceImpl();
 
-   private ScenarioService scenarioServiceB = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceB = new ScenarioServiceImpl();
 
    @BeforeEach
    public void createRepositories() {

@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,6 +81,12 @@ public class GameServiceImpl implements GameService {
    @Override
    @Nonnull
    public Game create(@Nonnull final UUID scenario) {
+      Objects.requireNonNull(scenario, "scenario");
+      if (!scenarioService.getScenarioIdentifiers()
+               .anyMatch(id -> scenario.equals(id))) {
+         throw new NoSuchElementException("unknown scenario");
+      }
+
       final var identifier = new Game.Identifier(scenario, clock.instant());
       final var game = new Game(identifier);
       return repository.save(game);

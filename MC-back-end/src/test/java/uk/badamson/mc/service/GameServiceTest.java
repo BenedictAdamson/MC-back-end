@@ -25,9 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
 
@@ -45,8 +48,15 @@ public class GameServiceTest {
                         "scenarioService"));
    }
 
-   public static Game create(final GameService service, final UUID scenario) {
-      final var game = service.create(scenario);
+   public static Game create(final GameService service, final UUID scenario)
+            throws DataAccessException, NoSuchElementException {
+      final Game game;
+      try {
+         game = service.create(scenario);
+      } catch (DataAccessException | NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
 
       assertInvariants(service);
       assertNotNull(game, "Always returns a (non null) game.");// guard

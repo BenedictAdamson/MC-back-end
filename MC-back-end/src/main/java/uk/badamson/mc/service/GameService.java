@@ -65,12 +65,17 @@ public interface GameService {
     *            If {@code scenario} is null.
     * @throws NoSuchElementException
     *            If {@code scenario} is not the ID of a recognised scenario.
+    *            That is, if {@code scenario} is not one of the
+    *            {@linkplain ScenarioService#getScenarioIdentifiers()
+    *            identifiers} of the associated
+    *            {@linkplain #getScenarioService() scenario service}.
     * @throws DataAccessException
     *            If the service could not create the game because of a problem
     *            accessing a repository.
     */
    @Nonnull
-   Game create(@Nonnull UUID scenario);
+   Game create(@Nonnull UUID scenario)
+            throws DataAccessException, NoSuchElementException;
 
    /**
     * <p>
