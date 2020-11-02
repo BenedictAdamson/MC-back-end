@@ -44,6 +44,28 @@ import uk.badamson.mc.service.ScenarioService;
 @RestController
 public class ScenarioController {
 
+   /**
+    * <p>
+    * Create a valid path for a scenario resource for a scenariothat has a given
+    * identifier.
+    * </p>
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #getScenario(UUID)}.
+    * </p>
+    *
+    *
+    * @param id
+    *           The identifier of the scenario
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   static String createPathFor(final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return "/api/scenario/" + id;
+   }
+
    private final ScenarioService service;
 
    /**

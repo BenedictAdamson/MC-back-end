@@ -86,11 +86,10 @@ public class ScenarioControllerTest {
    }
 
    private ResultActions getScenario(final UUID id) throws Exception {
-      final var request = get("/api/scenario/" + id)
-               .accept(MediaType.APPLICATION_JSON);
+      final var path = ScenarioController.createPathFor(id);
+      final var request = get(path).accept(MediaType.APPLICATION_JSON);
 
-      final var response = mockMvc.perform(request);
-      return response;
+      return mockMvc.perform(request);
    }
 
    @Test
