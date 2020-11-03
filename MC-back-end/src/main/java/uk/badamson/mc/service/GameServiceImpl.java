@@ -81,12 +81,7 @@ public class GameServiceImpl implements GameService {
    @Override
    @Nonnull
    public Game create(@Nonnull final UUID scenario) {
-      Objects.requireNonNull(scenario, "scenario");
-      if (!scenarioService.getScenarioIdentifiers()
-               .anyMatch(id -> scenario.equals(id))) {
-         throw new NoSuchElementException("unknown scenario");
-      }
-
+      requireKnownScenario(scenario);
       final var identifier = new Game.Identifier(scenario, clock.instant());
       final var game = new Game(identifier);
       return repository.save(game);
@@ -101,6 +96,7 @@ public class GameServiceImpl implements GameService {
    @Override
    public Stream<Instant> getCreationTimesOfGamesOfScenario(
             final UUID scenario) {
+      requireKnownScenario(scenario);
       return getGameIdentifiers()
                .filter(id -> scenario.equals(id.getScenario()))
                .map(gameId -> gameId.getCreated());
@@ -141,6 +137,14 @@ public class GameServiceImpl implements GameService {
    @Nonnull
    public final ScenarioService getScenarioService() {
       return scenarioService;
+   }
+
+   private void requireKnownScenario(final UUID scenario) {
+      Objects.requireNonNull(scenario, "scenario");
+      if (!scenarioService.getScenarioIdentifiers()
+               .anyMatch(id -> scenario.equals(id))) {
+         throw new NoSuchElementException("unknown scenario");
+      }
    }
 
 }

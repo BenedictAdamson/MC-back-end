@@ -113,9 +113,16 @@ public interface GameService {
     * @return The creation times
     * @throws NullPointerException
     *            If {@code scenario} is null.
+    * @throws NoSuchElementException
+    *            If {@code scenario} is not the ID of a recognised scenario.
+    *            That is, if {@code scenario} is not one of the
+    *            {@linkplain ScenarioService#getScenarioIdentifiers()
+    *            identifiers} of the associated
+    *            {@linkplain #getScenarioService() scenario service}.
     */
    @Nonnull
-   Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull UUID scenario);
+   Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull UUID scenario)
+            throws NoSuchElementException;
 
    /**
     * <p>

@@ -145,24 +145,26 @@ public class GameServiceImplTest {
       public void none() {
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
+         final var scenario = scenarioServiceA.getScenarioIdentifiers()
+                  .findAny().get();
 
          final var result = getCreationTimesOfGamesOfScenario(service,
-                  SCENARIO_ID_A);
+                  scenario);
 
          assertEquals(0L, result.count(), "empty");
       }
 
       @Test
       public void one() {
-         final var id = IDENTIFIER_A;
-         final var scenarioId = id.getScenario();
-         final var created = id.getCreated();
-         gameRepositoryA.save(new Game(id));
+         final var scenario = scenarioServiceA.getScenarioIdentifiers()
+                  .findAny().get();
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
+         final var created = service.create(scenario).getIdentifier()
+                  .getCreated();
 
          final var result = getCreationTimesOfGamesOfScenario(service,
-                  scenarioId);
+                  scenario);
 
          final var list = result.collect(toList());
          assertAll(() -> assertEquals(1L, list.size(), "count"),
@@ -171,16 +173,13 @@ public class GameServiceImplTest {
       }
 
       @Test
-      public void otherScenarioHasOne() {
-         final var scenarioId = SCENARIO_ID_B;
-         gameRepositoryA.save(new Game(IDENTIFIER_A));
+      public void unknownScenario() {
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
+         final var scenario = UUID.randomUUID();
 
-         final var result = getCreationTimesOfGamesOfScenario(service,
-                  scenarioId);
-
-         assertEquals(0L, result.count(), "empty");
+         assertThrows(NoSuchElementException.class,
+                  () -> getCreationTimesOfGamesOfScenario(service, scenario));
       }
    }// class
 
@@ -249,8 +248,6 @@ public class GameServiceImplTest {
 
    private static final UUID SCENARIO_ID_A = UUID.randomUUID();
 
-   private static final UUID SCENARIO_ID_B = UUID.randomUUID();
-
    private static final Identifier IDENTIFIER_A = new Game.Identifier(
             SCENARIO_ID_A, Instant.now());
 
@@ -276,9 +273,16 @@ public class GameServiceImplTest {
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
-            final GameServiceImpl service, final UUID scenario) {
-      final var times = GameServiceTest
-               .getCreationTimesOfGamesOfScenario(service, scenario);
+            final GameServiceImpl service, final UUID scenario)
+            throws NoSuchElementException {
+      final Stream<Instant> times;
+      try {
+         times = GameServiceTest.getCreationTimesOfGamesOfScenario(service,
+                  scenario);
+      } catch (final NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
 
       assertInvariants(service);
 

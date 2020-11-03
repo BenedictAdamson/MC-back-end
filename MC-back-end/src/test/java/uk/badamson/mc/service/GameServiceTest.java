@@ -67,8 +67,15 @@ public class GameServiceTest {
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
-            final GameService service, final UUID scenario) {
-      final var times = service.getCreationTimesOfGamesOfScenario(scenario);
+            final GameService service, final UUID scenario)
+            throws NoSuchElementException {
+      final Stream<Instant> times;
+      try {
+         times = service.getCreationTimesOfGamesOfScenario(scenario);
+      } catch (NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
 
       assertInvariants(service);
       assertNotNull(times, "Always returns a (non null) stream.");// guard
