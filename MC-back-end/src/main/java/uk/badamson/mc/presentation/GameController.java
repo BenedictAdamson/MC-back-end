@@ -72,8 +72,25 @@ public class GameController {
     */
    public static String createPathFor(final Game.Identifier id) {
       Objects.requireNonNull(id, "id");
-      return "/api/scenario/" + id.getScenario() + "/game/"
+      return createPathForGames(id.getScenario())
                + URI_DATETIME_FORMATTER.format(id.getCreated());
+   }
+
+   /**
+    * <p>
+    * Create a valid path for the games collection resource for a scenario with
+    * a given identifier.
+    * </p>
+    *
+    *
+    * @param scenario
+    *           The identifier of the scenario
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code scenario} is null.
+    */
+   public static String createPathForGames(final UUID scenario) {
+      return ScenarioController.createPathFor(scenario) + "/game/";
    }
 
    private final GameService gameService;
