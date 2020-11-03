@@ -77,7 +77,7 @@ public class GameControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
-   private ResultActions createGame(final UUID scenario) throws Exception {
+   private ResultActions create(final UUID scenario) throws Exception {
       final var request = post(GameController.createPathForGames(scenario));
 
       final var response = mockMvc.perform(request);
@@ -85,11 +85,11 @@ public class GameControllerTest {
    }
 
    @Test
-   public void createGame_knowScenario() throws Exception {
+   public void create_knowScenario() throws Exception {
       final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                .get();
 
-      final var response = createGame(scenario);
+      final var response = create(scenario);
 
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
@@ -102,10 +102,10 @@ public class GameControllerTest {
    }
 
    @Test
-   public void createGame_unknowScenario() throws Exception {
+   public void create_unknowScenario() throws Exception {
       final var scenario = UUID.randomUUID();
 
-      final var response = createGame(scenario);
+      final var response = create(scenario);
 
       response.andExpect(status().isNotFound());
    }
