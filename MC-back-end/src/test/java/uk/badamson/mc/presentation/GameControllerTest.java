@@ -19,6 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -182,6 +183,8 @@ public class GameControllerTest {
       response.andExpect(status().isOk());
       final var jsonResponse = response.andReturn().getResponse()
                .getContentAsString();
+      assertThat("Creation time is in ISO format", jsonResponse,
+               containsString(created.toString()));
       final var creationTimes = objectMapper.readValue(jsonResponse,
                INSTANT_LIST);
       assertEquals(List.of(created), creationTimes, "creation times");

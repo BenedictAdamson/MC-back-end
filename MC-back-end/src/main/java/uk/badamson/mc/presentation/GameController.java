@@ -52,7 +52,13 @@ import uk.badamson.mc.service.GameService;
 @RestController
 public class GameController {
 
-   private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
+   /**
+    * <p>
+    * The format of time-stamps when used as parts of paths of URIs used by this
+    * controller.
+    * </p>
+    */
+   public static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
    /**
     * <p>
@@ -176,7 +182,8 @@ public class GameController {
 
    /**
     * <p>
-    * Get the creation times of the games for a given scenario.
+    * Get the creation times of the games for a given scenario, formatted in a
+    * manner suitable for use in URIs used by this controller.
     * </p>
     * <p>
     * The behaviour of the GET verb for a games collection resource.
@@ -185,6 +192,9 @@ public class GameController {
     * <li>Always returns a (non null) collection.</li>
     * <li>The returned collection has no null elements.</li>
     * <li>The returned collection has no duplicate elements.</li>
+    * <li>The returned collection contains strings
+    * {@linkplain #URI_DATETIME_FORMATTER suitably formatted for use as URI
+    * paths of this controller}.</li>
     * </ul>
     *
     * @param scenario
@@ -201,10 +211,11 @@ public class GameController {
     */
    @GetMapping("/api/scenario/{scenario}/game")
    @Nonnull
-   public Stream<Instant> getCreationTimes(
+   public Stream<String> getCreationTimes(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
       try {
-         return gameService.getCreationTimesOfGamesOfScenario(scenario);
+         return gameService.getCreationTimesOfGamesOfScenario(scenario)
+                  .map(t -> URI_DATETIME_FORMATTER.format(t));
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
