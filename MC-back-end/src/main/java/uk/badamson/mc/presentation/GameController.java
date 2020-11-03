@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -83,7 +84,7 @@ public class GameController {
     * </p>
     * <p>
     * The created value is consistent with the path used for
-    * {@link #create(UUID)}.
+    * {@link #create(UUID)} and {@link #getCreationTimes(UUID)}.
     * </p>
     *
     * @param scenario
@@ -118,7 +119,7 @@ public class GameController {
     * Create a game for a given scenario.
     * </p>
     * <p>
-    * The behaviour of the POST verb for a scenario resource.
+    * The behaviour of the POST verb for a games collection resource.
     * </p>
     * <ul>
     * <li>Creates a new game for the given scenario.</li>
@@ -144,7 +145,7 @@ public class GameController {
     *            <ul>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-    *            there is no scenario with the given {@code id}
+    *            there is no scenario with the given {@code scenario} ID
     *            {@linkplain UUID#equals(Object) equivalent to} its
     *            {@linkplain Scenario#getIdentifier() identifier}.</li>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
@@ -170,6 +171,43 @@ public class GameController {
          // Hard to test
          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                   e.getMessage(), e);
+      }
+   }
+
+   /**
+    * <p>
+    * Get the creation times of the games for a given scenario.
+    * </p>
+    * <p>
+    * The behaviour of the GET verb for a games collection resource.
+    * </p>
+    * <ul>
+    * <li>Always returns a (non null) collection.</li>
+    * <li>The returned collection has no null elements.</li>
+    * <li>The returned collection has no duplicate elements.</li>
+    * </ul>
+    *
+    * @param scenario
+    *           The unique ID of the scenario for which to create a game.
+    * @return The response.
+    * @throws NullPointerException
+    *            If {@code scenario} is null.
+    * @throws ResponseStatusException
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+    *            is no scenario with the given {@code scenario} ID
+    *            {@linkplain UUID#equals(Object) equivalent to} its
+    *            {@linkplain Scenario#getIdentifier() identifier}.
+    */
+   @GetMapping("/api/scenario/{scenario}/game")
+   @Nonnull
+   public Stream<Instant> getCreationTimes(
+            @Nonnull @PathVariable("scenario") final UUID scenario) {
+      try {
+         return gameService.getCreationTimesOfGamesOfScenario(scenario);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized ID", e);
       }
    }
 

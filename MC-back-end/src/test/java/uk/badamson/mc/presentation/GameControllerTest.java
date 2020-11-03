@@ -18,6 +18,8 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -38,6 +41,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Game;
@@ -61,6 +65,9 @@ import uk.badamson.mc.service.ScenarioService;
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class GameControllerTest {
+
+   private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
+   };
 
    @Autowired
    GameRepository gameRepository;
@@ -139,5 +146,53 @@ public class GameControllerTest {
                .getContentAsString();
       final var game = objectMapper.readValue(jsonResponse, Game.class);
       assertEquals(id, game.getIdentifier(), "game has the requested ID");
+   }
+
+   private ResultActions getGames(final UUID scenario) throws Exception {
+      final var path = GameController.createPathForGames(scenario);
+      final var request = get(path).accept(MediaType.APPLICATION_JSON);
+
+      return mockMvc.perform(request);
+   }
+
+   @Test
+   public void getGames_0() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+
+      final var response = getGames(scenario);
+
+      response.andExpect(status().isOk());
+      final var jsonResponse = response.andReturn().getResponse()
+               .getContentAsString();
+      final var creationTimes = objectMapper.readValue(jsonResponse,
+               INSTANT_LIST);
+      assertThat("creation times", creationTimes, empty());
+   }
+
+   @Test
+   public void getGames_1() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var created = gameService.create(scenario).getIdentifier()
+               .getCreated();
+
+      final var response = getGames(scenario);
+
+      response.andExpect(status().isOk());
+      final var jsonResponse = response.andReturn().getResponse()
+               .getContentAsString();
+      final var creationTimes = objectMapper.readValue(jsonResponse,
+               INSTANT_LIST);
+      assertEquals(List.of(created), creationTimes, "creation times");
+   }
+
+   @Test
+   public void getGames_absent() throws Exception {
+      final var scenario = UUID.randomUUID();
+
+      final var response = getGames(scenario);
+
+      response.andExpect(status().isNotFound());
    }
 }
