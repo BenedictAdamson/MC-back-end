@@ -78,7 +78,7 @@ public class GameControllerTest {
    private MockMvc mockMvc;
 
    private ResultActions createGame(final UUID scenario) throws Exception {
-      final var request = post(ScenarioController.createPathFor(scenario));
+      final var request = post(GameController.createPathForGames(scenario));
 
       final var response = mockMvc.perform(request);
       return response;

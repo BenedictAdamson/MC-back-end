@@ -81,7 +81,10 @@ public class GameController {
     * Create a valid path for the games collection resource for a scenario with
     * a given identifier.
     * </p>
-    *
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #create(UUID)}.
+    * </p>
     *
     * @param scenario
     *           The identifier of the scenario
@@ -149,7 +152,7 @@ public class GameController {
     *            (Internal Server Error)} if there is data access error.</li>
     *            </ul>
     */
-   @PostMapping("/api/scenario/{scenario}")
+   @PostMapping("/api/scenario/{scenario}/game")
    @Nonnull
    public ResponseEntity<Void> create(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
