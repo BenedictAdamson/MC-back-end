@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.Scenario.Identifier;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -43,6 +43,28 @@ import uk.badamson.mc.service.ScenarioService;
  */
 @RestController
 public class ScenarioController {
+
+   /**
+    * <p>
+    * Create a valid path for a scenario resource for a scenariothat has a given
+    * identifier.
+    * </p>
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #getScenario(UUID)}.
+    * </p>
+    *
+    *
+    * @param id
+    *           The identifier of the scenario
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   static String createPathFor(final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return "/api/scenario/" + id;
+   }
 
    private final ScenarioService service;
 
@@ -78,8 +100,8 @@ public class ScenarioController {
     */
    @GetMapping("/api/scenario")
    @Nonnull
-   public Stream<Scenario.Identifier> getAll() {
-      return service.getScenarioIdentifiers();
+   public Stream<NamedUUID> getAll() {
+      return service.getNamedScenarioIdentifiers();
    }
 
    /**
@@ -88,9 +110,8 @@ public class ScenarioController {
     * </p>
     * <ul>
     * <li>Returns a (non null) scenario.</li>
-    * <li>The {@linkplain Identifier#getId() unique identifier} of the
-    * {@linkplain Scenario#getIdentifier() identification information} of the
-    * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
+    * <li>The {@linkplain Scenario#getIdentifier() identifier} of the returned
+    * scenario {@linkplain UUID#equals(Object) is equivalent to} the given
     * ID</li>
     * </ul>
     *
@@ -100,15 +121,11 @@ public class ScenarioController {
     * @throws NullPointerException
     *            If {@code id} is null.
     * @throws ResponseStatusException
-    *            <ul>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-    *            there is no scenario with the given {@code id}
-    *            {@linkplain UUID#equals(Object) is equivalent to} the
-    *            {@linkplain Identifier#getId() unique identifier} of the
-    *            {@linkplain Scenario#getIdentifier() identification
-    *            information} of the scenario.</li>
-    *            </ul>
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+    *            is no scenario with the given {@code id}
+    *            {@linkplain UUID#equals(Object) equivalent to} its
+    *            {@linkplain Scenario#getIdentifier() identifier}.
     */
    @GetMapping("/api/scenario/{id}")
    @Nonnull
@@ -131,6 +148,7 @@ public class ScenarioController {
     *
     * @return the service
     */
+   @Nonnull
    public final ScenarioService getService() {
       return service;
    }

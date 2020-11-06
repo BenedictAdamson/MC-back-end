@@ -19,6 +19,7 @@ package uk.badamson.mc.service;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 /**
@@ -55,11 +57,6 @@ public class ScenarioServiceImplTest {
          assertTrue(result.isEmpty(), "absent");
       }
 
-      private Set<UUID> getIds(final ScenarioService service) {
-         return service.getScenarioIdentifiers().map(si -> si.getId())
-                  .collect(toUnmodifiableSet());
-      }
-
       @Test
       public void present() {
          final var service = new ScenarioServiceImpl();
@@ -75,6 +72,20 @@ public class ScenarioServiceImplTest {
       ScenarioServiceTest.assertInvariants(service);// inherited
    }
 
+   private static Set<UUID> getIds(final ScenarioService service) {
+      return service.getScenarioIdentifiers().collect(toUnmodifiableSet());
+   }
+
+   public static Stream<NamedUUID> getNamedScenarioIdentifiers(
+            final ScenarioServiceImpl service) {
+      final var scenarios = ScenarioServiceTest
+               .getNamedScenarioIdentifiers(service);// inherited
+
+      assertInvariants(service);
+
+      return scenarios;
+   }
+
    public static Optional<Scenario> getScenario(
             final ScenarioServiceImpl service, final UUID id) {
       final var result = ScenarioServiceTest.getScenario(service, id);
@@ -83,7 +94,7 @@ public class ScenarioServiceImplTest {
       return result;
    }
 
-   public static Stream<Scenario.Identifier> getScenarioIdentifiers(
+   public static Stream<UUID> getScenarioIdentifiers(
             final ScenarioServiceImpl service) {
       final var scenarios = ScenarioServiceTest.getScenarioIdentifiers(service);// inherited
 
@@ -100,8 +111,15 @@ public class ScenarioServiceImplTest {
    }
 
    @Test
-   public void getScenarioIdentifiers() {
+   public void getNamedScenarioIdentifiers() {
       final var service = new ScenarioServiceImpl();
-      getScenarioIdentifiers(service);
+      final var ids = getIds(service);
+
+      final var namedIds = getNamedScenarioIdentifiers(service);
+
+      final var idsOfNamedIds = namedIds.map(ni -> ni.getId())
+               .collect(toUnmodifiableSet());
+      assertEquals(ids, idsOfNamedIds,
+               "Contains a named identifier corresponding to each scenario identifier.");
    }
 }

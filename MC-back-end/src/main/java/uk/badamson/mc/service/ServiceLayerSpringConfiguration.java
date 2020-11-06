@@ -18,6 +18,9 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Clock;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +28,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.repository.UserRepository;
 
 /**
@@ -34,6 +38,22 @@ import uk.badamson.mc.repository.UserRepository;
  */
 @Configuration
 public class ServiceLayerSpringConfiguration {
+
+   /**
+    * <p>
+    * Create the part of the service layer pertaining to games (plays) of the
+    * Mission Command game.
+    * </p>
+    *
+    * @return the part of the service layer.
+    */
+   @Autowired
+   @Bean
+   public GameService gameService(@NonNull final GameRepository gameRepository,
+            @NonNull final ScenarioService scenarioService) {
+      return new GameServiceImpl(gameRepository, Clock.systemUTC(),
+               scenarioService);
+   }
 
    @Bean
    public PasswordEncoder passwordEncoder() {

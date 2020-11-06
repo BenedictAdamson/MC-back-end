@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
 /**
@@ -55,7 +57,13 @@ public class ScenarioSteps {
    private BackEndWorldCore worldCore;
 
    @Autowired
-   private ScenarioService service;
+   private GameService gameService;
+
+   @Autowired
+   private ScenarioService scenarioService;
+
+   @Autowired
+   private ObjectMapper objectMapper;
 
    private Set<UUID> ids = Set.of();
 
@@ -65,9 +73,8 @@ public class ScenarioSteps {
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = worldCore.getResponseBodyAsString();
-      new ObjectMapper().readValue(response,
-               new TypeReference<List<Scenario.Identifier>>() {
-               });
+      objectMapper.readValue(response, new TypeReference<List<NamedUUID>>() {
+      });
    }
 
    private void getScenarios() throws Exception {
@@ -83,9 +90,8 @@ public class ScenarioSteps {
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() throws Exception {
       final var responseText = worldCore.getResponseBodyAsString();
-      final var mapper = new ObjectMapper();
-      responseScenario = mapper.readValue(responseText, Scenario.class);
-      assertEquals(id, responseScenario.getIdentifier().getId(),
+      responseScenario = objectMapper.readValue(responseText, Scenario.class);
+      assertEquals(id, responseScenario.getIdentifier(),
                "scenario has the requested ID");
    }
 
@@ -110,20 +116,26 @@ public class ScenarioSteps {
       }
    }
 
+   @Then("The scenario page includes the list of games of that scenario")
+   public void scenario_page_includes_games() {
+      Objects.requireNonNull(id, "id");
+      assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
+   }
+
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
-      Objects.requireNonNull(service, "service");
+      Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
 
-      final var expectedScenario = service.getScenario(id).get();
+      final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
    }
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      ids = service.getScenarioIdentifiers().map(id -> id.getId())
+      ids = scenarioService.getScenarioIdentifiers()
                .collect(toUnmodifiableSet());
    }
 }

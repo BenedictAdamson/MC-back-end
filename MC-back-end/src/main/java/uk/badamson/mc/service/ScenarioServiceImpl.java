@@ -26,29 +26,36 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
-   private static final Scenario SCENARIO = new Scenario(
-            new Scenario.Identifier(UUID.randomUUID(), "Section assault"),
+   private static final UUID ID = UUID.randomUUID();
+   private static final Scenario SCENARIO = new Scenario(ID, "Section assault",
             "Basic fire and movement tactics.") {
    };
-   private static final Map<Scenario.Identifier, Scenario> SCENARIOS = Map
+   private static final Map<UUID, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);
+
+   @Override
+   @Nonnull
+   public Stream<NamedUUID> getNamedScenarioIdentifiers() {
+      return SCENARIOS.values().stream().map(s -> s.getNamedUUID());
+   }
 
    @Override
    @Nonnull
    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
       Objects.requireNonNull(id, "id");
       return SCENARIOS.values().stream()
-               .filter(s -> id.equals(s.getIdentifier().getId())).findAny();
+               .filter(s -> id.equals(s.getIdentifier())).findAny();
    }
 
    @Override
    @Nonnull
-   public Stream<Scenario.Identifier> getScenarioIdentifiers() {
+   public Stream<UUID> getScenarioIdentifiers() {
       return SCENARIOS.keySet().stream();
    }
 

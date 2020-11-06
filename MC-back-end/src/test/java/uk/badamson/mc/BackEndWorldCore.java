@@ -58,22 +58,14 @@ import uk.badamson.mc.repository.UserRepository;
 @AutoConfigureMockMvc
 public class BackEndWorldCore {
 
-   public static String encodeAsJson(final Object obj) {
-      try {
-         final ObjectMapper mapper = new ObjectMapper();
-         final String jsonContent = mapper.writeValueAsString(obj);
-         System.out.println(jsonContent);
-         return jsonContent;
-      } catch (final Exception e) {
-         throw new RuntimeException(e);
-      }
-   }
-
    @Autowired
    private WebApplicationContext context;
 
    @Autowired
    private UserRepository userRepository;
+
+   @Autowired
+   private ObjectMapper objectMapper;
 
    private MockMvc mockMvc;
 
@@ -124,7 +116,7 @@ public class BackEndWorldCore {
             throws Exception {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
-      final var encodedBody = encodeAsJson(body);
+      final var encodedBody = objectMapper.writeValueAsString(body);
       performRequest(post(path).contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).content(encodedBody));
    }
