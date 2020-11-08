@@ -14,4 +14,10 @@
 	<logger name="ch.qos.logback" level="WARN">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	<logger name="org.springframework.boot.test" level="WARN">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.springframework.test" level="WARN">
+		<appender-ref ref="STDOUT" />
+	</logger>
 </configuration>
