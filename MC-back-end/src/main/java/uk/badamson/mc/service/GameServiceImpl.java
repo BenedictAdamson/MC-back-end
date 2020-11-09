@@ -29,12 +29,15 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.GameRepository;
 
+@Service
 public class GameServiceImpl implements GameService {
 
    private final GameRepository repository;
@@ -71,6 +74,7 @@ public class GameServiceImpl implements GameService {
     *            <li>If {@code scenarioService} is null.</li>
     *            </ul>
     */
+   @Autowired
    public GameServiceImpl(@Nonnull final GameRepository repository,
             @Nonnull final Clock clock,
             @Nonnull final ScenarioService scenarioService) {

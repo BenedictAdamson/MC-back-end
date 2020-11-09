@@ -23,10 +23,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Authority;
@@ -38,7 +38,6 @@ import uk.badamson.mc.repository.UserRepository;
  * The concrete implementation of the service layer of the Mission Command game.
  * </p>
  */
-@Service
 public class UserServiceImpl implements UserService {
 
    private final PasswordEncoder passwordEncoder;
@@ -75,6 +74,7 @@ public class UserServiceImpl implements UserService {
     *            <li>If {@code administratorPasword} is null.</li>
     *            </ul>
     */
+   @Autowired
    public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository userRepository,
             @NonNull final String administratorPassword) {
