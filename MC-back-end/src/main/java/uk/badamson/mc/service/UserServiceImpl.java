@@ -24,9 +24,11 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Authority;
@@ -38,6 +40,7 @@ import uk.badamson.mc.repository.UserRepository;
  * The concrete implementation of the service layer of the Mission Command game.
  * </p>
  */
+@Service
 public class UserServiceImpl implements UserService {
 
    private final PasswordEncoder passwordEncoder;
@@ -77,7 +80,7 @@ public class UserServiceImpl implements UserService {
    @Autowired
    public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository userRepository,
-            @NonNull final String administratorPassword) {
+            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");
@@ -127,8 +130,8 @@ public class UserServiceImpl implements UserService {
    @Override
    public Stream<User> getUsers() {
       final var repositoryIterable = userRepository.findAll();
-      final Stream<User> adminUses = Stream.of(administrator);
-      final Stream<User> normalUsers = StreamSupport
+      final var adminUses = Stream.of(administrator);
+      final var normalUsers = StreamSupport
                .stream(repositoryIterable.spliterator(), false).filter(u -> !u
                         .getUsername().equals(User.ADMINISTRATOR_USERNAME));
       return Stream.concat(adminUses, normalUsers);

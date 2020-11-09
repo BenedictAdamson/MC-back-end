@@ -26,9 +26,12 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.stereotype.Service;
+
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
+@Service
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
