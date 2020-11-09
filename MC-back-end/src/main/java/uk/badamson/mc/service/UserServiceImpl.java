@@ -27,6 +27,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.User;
@@ -88,11 +89,12 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
+   @Transactional
    public void add(User user) {
       Objects.requireNonNull(user, "user");
       if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
          throw new IllegalArgumentException("User is administrator");
-      } else if (userRepository.existsById(user.getUsername())) {
+      } else if (userRepository.existsById(user.getUsername())) {// read
          throw new UserExistsException();
       }
       user = new User(user.getUsername(),
@@ -100,7 +102,7 @@ public class UserServiceImpl implements UserService {
                user.getAuthorities(), user.isAccountNonExpired(),
                user.isAccountNonLocked(), user.isCredentialsNonExpired(),
                user.isEnabled());
-      userRepository.save(user);
+      userRepository.save(user);// write
    }
 
    @Override
