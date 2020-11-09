@@ -50,7 +50,7 @@ pipeline {
         stage('Clean') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS clean'
+                    sh 'mvn -B -s $MAVEN_SETTINGS clean'
                 }
             }
         }
@@ -69,7 +69,7 @@ pipeline {
             } 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS verify'
+                    sh 'mvn -B -s $MAVEN_SETTINGS verify'
                 }
             }
         }
@@ -80,7 +80,7 @@ pipeline {
             } 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS deploy'
+                    sh 'mvn -B -s $MAVEN_SETTINGS deploy'
                 }
             }
         }

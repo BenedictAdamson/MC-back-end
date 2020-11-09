@@ -26,9 +26,18 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.stereotype.Service;
+
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
+/**
+ * <p>
+ * Implementation of the part of the service layer pertaining to scenarios of
+ * the Mission Command game.
+ * </p>
+ */
+@Service
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
@@ -49,8 +58,7 @@ public class ScenarioServiceImpl implements ScenarioService {
    @Nonnull
    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
       Objects.requireNonNull(id, "id");
-      return SCENARIOS.values().stream()
-               .filter(s -> id.equals(s.getIdentifier())).findAny();
+      return Optional.ofNullable(SCENARIOS.get(id));
    }
 
    @Override

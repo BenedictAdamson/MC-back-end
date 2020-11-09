@@ -23,10 +23,13 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.User;
@@ -34,7 +37,8 @@ import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
- * The concrete implementation of the service layer of the Mission Command game.
+ * Implementation of the part of the service layer pertaining to users of the
+ * Mission Command game.
  * </p>
  */
 @Service
@@ -74,9 +78,10 @@ public class UserServiceImpl implements UserService {
     *            <li>If {@code administratorPasword} is null.</li>
     *            </ul>
     */
+   @Autowired
    public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
             @NonNull final UserRepository userRepository,
-            @NonNull final String administratorPassword) {
+            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");
@@ -88,11 +93,12 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
+   @Transactional
    public void add(User user) {
       Objects.requireNonNull(user, "user");
       if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
          throw new IllegalArgumentException("User is administrator");
-      } else if (userRepository.existsById(user.getUsername())) {
+      } else if (userRepository.existsById(user.getUsername())) {// read
          throw new UserExistsException();
       }
       user = new User(user.getUsername(),
@@ -100,7 +106,7 @@ public class UserServiceImpl implements UserService {
                user.getAuthorities(), user.isAccountNonExpired(),
                user.isAccountNonLocked(), user.isCredentialsNonExpired(),
                user.isEnabled());
-      userRepository.save(user);
+      userRepository.save(user);// write
    }
 
    @Override
@@ -125,8 +131,8 @@ public class UserServiceImpl implements UserService {
    @Override
    public Stream<User> getUsers() {
       final var repositoryIterable = userRepository.findAll();
-      final Stream<User> adminUses = Stream.of(administrator);
-      final Stream<User> normalUsers = StreamSupport
+      final var adminUses = Stream.of(administrator);
+      final var normalUsers = StreamSupport
                .stream(repositoryIterable.spliterator(), false).filter(u -> !u
                         .getUsername().equals(User.ADMINISTRATOR_USERNAME));
       return Stream.concat(adminUses, normalUsers);

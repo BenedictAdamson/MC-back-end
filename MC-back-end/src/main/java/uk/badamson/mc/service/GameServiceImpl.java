@@ -29,10 +29,21 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.GameRepository;
 
+/**
+ * <p>
+ * Implementation of the part of the service layer pertaining to games of
+ * Mission Command.
+ * </p>
+ */
+@Service
 public class GameServiceImpl implements GameService {
 
    private final GameRepository repository;
@@ -69,6 +80,7 @@ public class GameServiceImpl implements GameService {
     *            <li>If {@code scenarioService} is null.</li>
     *            </ul>
     */
+   @Autowired
    public GameServiceImpl(@Nonnull final GameRepository repository,
             @Nonnull final Clock clock,
             @Nonnull final ScenarioService scenarioService) {
@@ -80,11 +92,12 @@ public class GameServiceImpl implements GameService {
 
    @Override
    @Nonnull
+   @Transactional
    public Game create(@Nonnull final UUID scenario) {
-      requireKnownScenario(scenario);
+      requireKnownScenario(scenario);// read-and-check
       final var identifier = new Game.Identifier(scenario, clock.instant());
       final var game = new Game(identifier);
-      return repository.save(game);
+      return repository.save(game);// write
    }
 
    @Nonnull
@@ -94,10 +107,11 @@ public class GameServiceImpl implements GameService {
    }
 
    @Override
+   @Transactional
    public Stream<Instant> getCreationTimesOfGamesOfScenario(
             final UUID scenario) {
-      requireKnownScenario(scenario);
-      return getGameIdentifiers()
+      requireKnownScenario(scenario);// read-and-check
+      return getGameIdentifiers()// read
                .filter(id -> scenario.equals(id.getScenario()))
                .map(gameId -> gameId.getCreated());
    }

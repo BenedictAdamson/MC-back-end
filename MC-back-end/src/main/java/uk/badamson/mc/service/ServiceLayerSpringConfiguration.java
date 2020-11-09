@@ -20,16 +20,11 @@ package uk.badamson.mc.service;
 
 import java.time.Clock;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import uk.badamson.mc.repository.GameRepository;
-import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
@@ -37,22 +32,12 @@ import uk.badamson.mc.repository.UserRepository;
  * </p>
  */
 @Configuration
+@ComponentScan
 public class ServiceLayerSpringConfiguration {
 
-   /**
-    * <p>
-    * Create the part of the service layer pertaining to games (plays) of the
-    * Mission Command game.
-    * </p>
-    *
-    * @return the part of the service layer.
-    */
-   @Autowired
    @Bean
-   public GameService gameService(@NonNull final GameRepository gameRepository,
-            @NonNull final ScenarioService scenarioService) {
-      return new GameServiceImpl(gameRepository, Clock.systemUTC(),
-               scenarioService);
+   public Clock clock() {
+      return Clock.systemUTC();
    }
 
    @Bean
@@ -60,33 +45,4 @@ public class ServiceLayerSpringConfiguration {
       return PasswordEncoderFactories.createDelegatingPasswordEncoder();
    }
 
-   /**
-    * <p>
-    * Create the part of the service layer pertaining to scenarios of the
-    * Mission Command game.
-    * </p>
-    *
-    * @return the part of the service layer.
-    */
-   @Bean
-   public ScenarioService scenarioService() {
-      return new ScenarioServiceImpl();
-   }
-
-   /**
-    * <p>
-    * Create the part of the service layer pertaining to users of the Mission
-    * Command game.
-    * </p>
-    *
-    * @return the part of the service layer.
-    */
-   @Bean
-   public UserService userService(
-            @NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final UserRepository playerRepository,
-            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
-      return new UserServiceImpl(passwordEncoder, playerRepository,
-               administratorPassword);
-   }
 }
