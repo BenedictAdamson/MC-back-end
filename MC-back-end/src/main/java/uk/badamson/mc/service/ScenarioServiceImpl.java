@@ -58,8 +58,7 @@ public class ScenarioServiceImpl implements ScenarioService {
    @Nonnull
    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
       Objects.requireNonNull(id, "id");
-      return SCENARIOS.values().stream()
-               .filter(s -> id.equals(s.getIdentifier())).findAny();
+      return Optional.ofNullable(SCENARIOS.get(id));
    }
 
    @Override
