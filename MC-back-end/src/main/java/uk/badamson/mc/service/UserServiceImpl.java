@@ -37,7 +37,8 @@ import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
- * The concrete implementation of the service layer of the Mission Command game.
+ * Implementation of the part of the service layer pertaining to users of the
+ * Mission Command game.
  * </p>
  */
 @Service

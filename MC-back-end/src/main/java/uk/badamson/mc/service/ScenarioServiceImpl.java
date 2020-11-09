@@ -31,6 +31,12 @@ import org.springframework.stereotype.Service;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
+/**
+ * <p>
+ * Implementation of the part of the service layer pertaining to scenarios of
+ * the Mission Command game.
+ * </p>
+ */
 @Service
 public class ScenarioServiceImpl implements ScenarioService {
 

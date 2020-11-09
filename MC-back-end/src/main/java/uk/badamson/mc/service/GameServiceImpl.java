@@ -37,6 +37,12 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.GameRepository;
 
+/**
+ * <p>
+ * Implementation of the part of the service layer pertaining to games of
+ * Mission Command.
+ * </p>
+ */
 @Service
 public class GameServiceImpl implements GameService {
 
