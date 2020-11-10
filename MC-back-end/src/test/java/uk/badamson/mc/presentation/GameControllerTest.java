@@ -135,6 +135,28 @@ public class GameControllerTest {
    }
 
    @Test
+   public void create_noCsrfToken() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var request = post(GameController.createPathForGames(scenario))
+               .with(user(USER_WITH_ALL_AUTHORITIES));
+
+      final var response = mockMvc.perform(request);
+
+      // TODO: at present, have no CSRF protection
+      final var id = gameService.getGameIdentifiers()
+               .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+      final var location = response.andReturn().getResponse()
+               .getHeaderValue("Location");
+      assertAll(
+               () -> assertTrue(id.isPresent(),
+                        "created a game for the scenario"),
+               () -> response.andExpect(status().isFound()),
+               () -> assertEquals(GameController.createPathFor(id.get()),
+                        location, "redirection location"));
+   }
+
+   @Test
    public void create_unknowScenario() throws Exception {
       final var scenario = UUID.randomUUID();
 
