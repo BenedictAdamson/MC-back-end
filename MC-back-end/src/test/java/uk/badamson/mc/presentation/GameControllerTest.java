@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,8 +46,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
+import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
@@ -70,6 +73,9 @@ public class GameControllerTest {
    private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
    };
 
+   private static final User USER_WITH_ALL_AUTHORITIES = new User("jeff",
+            "letmein", Authority.ALL, true, true, true, true);
+
    @Autowired
    GameRepository gameRepository;
 
@@ -85,20 +91,32 @@ public class GameControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
-   private ResultActions create(final UUID scenario) throws Exception {
-      final var request = post(GameController.createPathForGames(scenario));
-
-      final var response = mockMvc.perform(request);
-      return response;
-   }
-
    @Test
    public void create_knowScenario() throws Exception {
       final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                .get();
 
-      final var response = create(scenario);
+      final var response = createAuthenticated(scenario);
 
+      final var id = gameService.getGameIdentifiers()
+               .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+      assertTrue(id.isPresent(), "created a game for the scenario");
+      response.andExpect(status().isFound());
+      final var location = response.andReturn().getResponse()
+               .getHeaderValue("Location");
+      assertEquals(GameController.createPathFor(id.get()), location,
+               "redirection location");
+   }
+
+   @Test
+   public void create_noAuthentication() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var request = post(GameController.createPathForGames(scenario));
+
+      final var response = mockMvc.perform(request);
+
+      // TODO: at present, do not need authorization to create games
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
       assertTrue(id.isPresent(), "created a game for the scenario");
@@ -113,9 +131,17 @@ public class GameControllerTest {
    public void create_unknowScenario() throws Exception {
       final var scenario = UUID.randomUUID();
 
-      final var response = create(scenario);
+      final var response = createAuthenticated(scenario);
 
       response.andExpect(status().isNotFound());
+   }
+
+   private ResultActions createAuthenticated(final UUID scenario)
+            throws Exception {
+      final var request = post(GameController.createPathForGames(scenario))
+               .with(user(USER_WITH_ALL_AUTHORITIES));
+
+      return mockMvc.perform(request);
    }
 
    private ResultActions getGame(final Game.Identifier id) throws Exception {
