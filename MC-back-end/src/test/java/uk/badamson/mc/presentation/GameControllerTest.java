@@ -21,8 +21,10 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -100,31 +102,36 @@ public class GameControllerTest {
 
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
-      assertTrue(id.isPresent(), "created a game for the scenario");
-      response.andExpect(status().isFound());
       final var location = response.andReturn().getResponse()
                .getHeaderValue("Location");
-      assertEquals(GameController.createPathFor(id.get()), location,
-               "redirection location");
+      assertAll(
+               () -> assertTrue(id.isPresent(),
+                        "created a game for the scenario"),
+               () -> response.andExpect(status().isFound()),
+               () -> assertEquals(GameController.createPathFor(id.get()),
+                        location, "redirection location"));
    }
 
    @Test
    public void create_noAuthentication() throws Exception {
       final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                .get();
-      final var request = post(GameController.createPathForGames(scenario));
+      final var request = post(GameController.createPathForGames(scenario))
+               .with(csrf());
 
       final var response = mockMvc.perform(request);
 
       // TODO: at present, do not need authorization to create games
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
-      assertTrue(id.isPresent(), "created a game for the scenario");
-      response.andExpect(status().isFound());
       final var location = response.andReturn().getResponse()
                .getHeaderValue("Location");
-      assertEquals(GameController.createPathFor(id.get()), location,
-               "redirection location");
+      assertAll(
+               () -> assertTrue(id.isPresent(),
+                        "created a game for the scenario"),
+               () -> response.andExpect(status().isFound()),
+               () -> assertEquals(GameController.createPathFor(id.get()),
+                        location, "redirection location"));
    }
 
    @Test
@@ -133,13 +140,13 @@ public class GameControllerTest {
 
       final var response = createAuthenticated(scenario);
 
-      response.andExpect(status().isNotFound());
+      response.andExpect(status().is4xxClientError());
    }
 
    private ResultActions createAuthenticated(final UUID scenario)
             throws Exception {
       final var request = post(GameController.createPathForGames(scenario))
-               .with(user(USER_WITH_ALL_AUTHORITIES));
+               .with(user(USER_WITH_ALL_AUTHORITIES)).with(csrf());
 
       return mockMvc.perform(request);
    }
