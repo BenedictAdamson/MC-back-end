@@ -40,13 +40,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
    }
 
+   private static void configureCsrfProtection(final HttpSecurity http)
+            throws Exception {
+      http.csrf();
+   }
+
    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
       http.httpBasic();
-      /*
-       * If we use HTTP basic authentication for everything, CSRF is impossible.
-       */
-      http.csrf().disable();
    }
 
    private static void configureLoginAndLogout(final HttpSecurity http)
@@ -58,6 +59,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
       configureHttpBasic(http);
+      configureCsrfProtection(http);
       configureAuthorizedRequests(http);
       configureLoginAndLogout(http);
    }
