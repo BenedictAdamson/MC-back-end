@@ -171,6 +171,10 @@ public class UserControllerTest {
 
       response.andExpect(status().isOk());
       /*
+       * We can not test that the response has sessino and CSRF cookies, because
+       * MocMvc does not set those cookies.
+       */
+      /*
        * We can not check the response body for equivalence to a JSON encoding
        * of the user object, because the returned object has an encoded password
        * with a random salt. Checking the decoded response body for equivalence
