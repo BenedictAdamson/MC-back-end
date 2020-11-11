@@ -54,8 +54,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
    private static void configureLoginAndLogout(final HttpSecurity http)
             throws Exception {
-      http.formLogin().loginPage("/login").permitAll().and().logout()
-               .permitAll();
+      // Is the default
    }
 
    @Override
