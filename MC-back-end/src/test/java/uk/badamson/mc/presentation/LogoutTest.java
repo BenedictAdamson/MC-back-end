@@ -81,12 +81,14 @@ public class LogoutTest {
    public void logout_noCsrfToken() throws Exception {
       final var user = USER_A;
       service.add(user);
-      final var request = post(PATH).with(user(user));
+      final var session = new MockHttpSession();
+      final var request = post(PATH).with(user(user)).session(session);
 
       final var response = mockMvc.perform(request);
 
-      // TODO: at present, have no CSRF protection
-      response.andExpect(status().isNoContent());
+      assertAll(() -> response.andExpect(status().isNoContent()),
+               () -> assertThat("session is still valid",
+                        !session.isInvalid()));
    }
 
    @Test

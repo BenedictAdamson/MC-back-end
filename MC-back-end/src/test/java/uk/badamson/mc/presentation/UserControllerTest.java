@@ -156,10 +156,9 @@ public class UserControllerTest {
 
       final var response = mockMvc.perform(request);
 
-      // TODO: at present, have no CSRF protection
-      response.andExpect(status().isCreated());
-      assertThat("List of users includes the added user", service.getUsers()
-               .anyMatch(u -> u.getUsername().equals(addedUser.getUsername())));
+      assertAll(() -> response.andExpect(status().isForbidden()),
+               () -> assertThat("User not added", !service.getUsers().anyMatch(
+                        u -> u.getUsername().equals(addedUser.getUsername()))));
    }
 
    private void getSelf(final User user) throws Exception {

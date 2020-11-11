@@ -143,17 +143,12 @@ public class GameControllerTest {
 
       final var response = mockMvc.perform(request);
 
-      // TODO: at present, have no CSRF protection
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
-      final var location = response.andReturn().getResponse()
-               .getHeaderValue("Location");
       assertAll(
-               () -> assertTrue(id.isPresent(),
-                        "created a game for the scenario"),
-               () -> response.andExpect(status().isFound()),
-               () -> assertEquals(GameController.createPathFor(id.get()),
-                        location, "redirection location"));
+               () -> assertTrue(id.isEmpty(),
+                        "Did not create a game for the scenario"),
+               () -> response.andExpect(status().isForbidden()));
    }
 
    @Test
