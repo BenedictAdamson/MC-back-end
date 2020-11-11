@@ -55,7 +55,7 @@ import uk.badamson.mc.service.UserService;
  * <p>
  * We can not use JUnit 5 {@link Nested} test classes because
  * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tets.
+ * {@link DirtiesContext} annotation is ignored on nested tests.
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
