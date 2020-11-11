@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * <p>
@@ -36,26 +37,30 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             throws Exception {
       http.authorizeRequests().antMatchers("/api/user/**").authenticated();
       http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
+      // TODO: at present, do not need authorization to create games
+      http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
+   }
+
+   private static void configureCsrfProtection(final HttpSecurity http)
+            throws Exception {
+      http.csrf().csrfTokenRepository(
+               CookieCsrfTokenRepository.withHttpOnlyFalse());
    }
 
    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
       http.httpBasic();
-      /*
-       * If we use HTTP basic authentication for everything, CSRF is impossible.
-       */
-      http.csrf().disable();
    }
 
    private static void configureLoginAndLogout(final HttpSecurity http)
             throws Exception {
-      http.formLogin().loginPage("/login").permitAll().and().logout()
-               .permitAll();
+      // Is the default
    }
 
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
       configureHttpBasic(http);
+      configureCsrfProtection(http);
       configureAuthorizedRequests(http);
       configureLoginAndLogout(http);
    }

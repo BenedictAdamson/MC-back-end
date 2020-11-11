@@ -55,7 +55,7 @@ import uk.badamson.mc.service.UserService;
  * <p>
  * We can not use JUnit 5 {@link Nested} test classes because
  * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tets.
+ * {@link DirtiesContext} annotation is ignored on nested tests.
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
@@ -125,6 +125,42 @@ public class UserControllerTest {
       response.andExpect(status().isConflict());
    }
 
+   @Test
+   public void add_noAuthentication() throws Exception {
+      final var performingUser = USER_A;
+      final var addedUser = USER_B;
+      service.add(performingUser);
+      final var encoded = objectMapper.writeValueAsString(addedUser);
+      final var request = post("/api/user")
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).with(csrf())
+               .content(encoded);
+
+      final var response = mockMvc.perform(request);
+
+      response.andExpect(status().is4xxClientError());
+      assertThat("User not added", !service.getUsers()
+               .anyMatch(u -> u.getUsername().equals(addedUser.getUsername())));
+   }
+
+   @Test
+   public void add_noCsrfToken() throws Exception {
+      final var performingUser = USER_A;
+      final var addedUser = USER_B;
+      service.add(performingUser);
+      final var encoded = objectMapper.writeValueAsString(addedUser);
+      final var request = post("/api/user")
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+               .content(encoded);
+
+      final var response = mockMvc.perform(request);
+
+      assertAll(() -> response.andExpect(status().isForbidden()),
+               () -> assertThat("User not added", !service.getUsers().anyMatch(
+                        u -> u.getUsername().equals(addedUser.getUsername()))));
+   }
+
    private void getSelf(final User user) throws Exception {
       service.add(user);
       final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
@@ -133,6 +169,10 @@ public class UserControllerTest {
       final var response = mockMvc.perform(request);
 
       response.andExpect(status().isOk());
+      /*
+       * We can not test that the response has sessino and CSRF cookies, because
+       * MocMvc does not set those cookies.
+       */
       /*
        * We can not check the response body for equivalence to a JSON encoding
        * of the user object, because the returned object has an encoded password

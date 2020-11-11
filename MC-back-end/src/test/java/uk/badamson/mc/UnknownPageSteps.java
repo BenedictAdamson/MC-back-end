@@ -45,20 +45,15 @@ public class UnknownPageSteps {
       worldCore.getJson(path);
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() throws Exception {
-      worldCore.getResponse().andExpect(status().isForbidden());
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() throws Exception {
-      worldCore.getResponse().andExpect(status().isNotFound());
+   @Then("MC replies with Client Error")
+   public void mc_replies_with_client_error() throws Exception {
+      worldCore.getResponse().andExpect(status().is4xxClientError());
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
    public void modifying_the_unknown_resource_with_a(final String verb,
             final String path) throws Exception {
-      final HttpMethod method = HttpMethod.valueOf(verb);
+      final var method = HttpMethod.valueOf(verb);
       assert method != null;
       worldCore.exchangeJson(method, path);
    }
