@@ -86,7 +86,7 @@ public class LogoutTest {
 
       final var response = mockMvc.perform(request);
 
-      assertAll(() -> response.andExpect(status().isNoContent()),
+      assertAll(() -> response.andExpect(status().isForbidden()),
                () -> assertThat("session is still valid",
                         !session.isInvalid()));
    }
