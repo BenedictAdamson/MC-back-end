@@ -19,9 +19,12 @@ package uk.badamson.mc;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -165,8 +168,16 @@ public class GameSteps {
                });
    }
 
+   @Then("the list of games includes the new game")
+   public void list_of_games_includes_new_game() {
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+      Objects.requireNonNull(gameId, "gameId");
+
+      assertThat(gameCreationTimes, contains(gameId.getCreated()));
+   }
+
    @Then("MC accepts the creation of the game")
-   public void mc_accepts_creation_of_game() throws Exception {
+   public void mc_accepts_creation_of_game() {
       Objects.requireNonNull(scenario, "scenario");
 
       final var location = worldCore.getResponse().andReturn().getResponse()
@@ -176,6 +187,8 @@ public class GameSteps {
       gameId = parseGamePath(location);
       assertEquals(scenario.getIdentifier(), gameId.getScenario(),
                "Location is for a game of the given scenario");
+      assertTrue(gameService.getGame(gameId).isPresent(),
+               "identified game exists");
    }
 
    @Then("MC serves the game page")
