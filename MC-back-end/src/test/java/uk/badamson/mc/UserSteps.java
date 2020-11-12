@@ -175,7 +175,7 @@ public class UserSteps {
 
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
-      final Set<Authority> authorities = Set.of();
+      final Set<Authority> authorities = Set.of();// no roles
       user_has_authorities(authorities);
    }
 
@@ -186,6 +186,6 @@ public class UserSteps {
 
    @When("user has the {string} role")
    public void user_has_role(final String role) {
-      user_has_authorities(Set.of(Authority.valueOf(role)));
+      user_has_authorities(Set.of(Authority.valueOf("ROLE_" + role)));
    }
 }
