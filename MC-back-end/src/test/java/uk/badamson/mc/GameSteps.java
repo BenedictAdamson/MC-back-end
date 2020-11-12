@@ -19,7 +19,9 @@ package uk.badamson.mc;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,10 +30,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.util.UriTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -50,9 +54,24 @@ import uk.badamson.mc.service.ScenarioService;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class GameSteps {
 
+   private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
+            GameController.GAME_PATH_PATTERN);
+
    private static String createGamePath(final Game.Identifier identifier) {
       return "/api/scenario/" + identifier.getScenario() + "/game/"
                + identifier.getCreated();
+   }
+
+   private static Game.Identifier parseGamePath(final String path) {
+      Objects.requireNonNull(path, "path");
+      final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path);
+      try {
+         final var scenarioId = UUID.fromString(pathVariable.get("scenario"));
+         final var created = Instant.parse(pathVariable.get("created"));
+         return new Game.Identifier(scenarioId, created);
+      } catch (final RuntimeException e) {
+         throw new IllegalArgumentException("Path " + path, e);
+      }
    }
 
    @Autowired
@@ -112,6 +131,19 @@ public class GameSteps {
    public void game_page_includes_timestamp() {
       assertEquals(gameId.getCreated(),
                responseGame.getIdentifier().getCreated());
+   }
+
+   @Then("MC accepts the creation of the game")
+   public void mc_accepts_creation_of_game() throws Exception {
+      Objects.requireNonNull(scenario, "scenario");
+
+      final var location = worldCore.getResponse().andReturn().getResponse()
+               .getHeader("Location");
+      assertAll(() -> worldCore.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header"));// guard
+      gameId = parseGamePath(location);
+      assertEquals(scenario.getIdentifier(), gameId.getScenario(),
+               "Location is for a game of the given scenario");
    }
 
    @Then("MC serves the game page")
