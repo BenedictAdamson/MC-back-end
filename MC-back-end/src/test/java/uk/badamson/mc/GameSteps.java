@@ -20,7 +20,7 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -173,7 +173,7 @@ public class GameSteps {
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
       Objects.requireNonNull(gameId, "gameId");
 
-      assertThat(gameCreationTimes, contains(gameId.getCreated()));
+      assertThat(gameCreationTimes, hasItem(gameId.getCreated()));
    }
 
    @Then("MC accepts the creation of the game")
