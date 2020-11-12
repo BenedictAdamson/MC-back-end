@@ -24,9 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
@@ -35,8 +37,10 @@ import java.util.UUID;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.web.util.UriTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
@@ -94,6 +98,20 @@ public class GameSteps {
 
    private Game responseGame;
 
+   @Then("can get the list of games")
+   public void can_get_list_of_games() {
+      try {
+         getGames();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can request games resource", e);
+      }
+      try {
+         getResponseAsGameCreationTimes();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
+   }
+
    private void chooseScenario() {
       final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
                .get();
@@ -131,6 +149,20 @@ public class GameSteps {
    public void game_page_includes_timestamp() {
       assertEquals(gameId.getCreated(),
                responseGame.getIdentifier().getCreated());
+   }
+
+   private void getGames() throws Exception {
+      Objects.requireNonNull(scenario, "scenario");
+      final var path = GameController
+               .createPathForGames(scenario.getIdentifier());
+      worldCore.performRequest(get(path).accept(MediaType.APPLICATION_JSON));
+   }
+
+   private void getResponseAsGameCreationTimes() throws IOException {
+      final var response = worldCore.getResponseBodyAsString();
+      gameCreationTimes = objectMapper.readValue(response,
+               new TypeReference<Set<Instant>>() {
+               });
    }
 
    @Then("MC accepts the creation of the game")
@@ -180,5 +212,4 @@ public class GameSteps {
                .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
                .collect(toUnmodifiableSet());
    }
-
 }
