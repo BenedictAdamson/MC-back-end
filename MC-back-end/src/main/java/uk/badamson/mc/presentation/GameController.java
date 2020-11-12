@@ -54,6 +54,22 @@ public class GameController {
 
    /**
     * <p>
+    * The format of URI paths for {@linkplain #createPathFor(Identifier) game
+    * resources}.
+    * </p>
+    */
+   public static final String GAME_PATH_PATTERN = "/api/scenario/{scenario}/game/{created:.+}";
+
+   /**
+    * <p>
+    * The format of URI paths for {@linkplain #createPathForGames(UUID) games
+    * collection resources}.
+    * </p>
+    */
+   public static final String GAMES_PATH_PATTERN = "/api/scenario/{scenario}/game";
+
+   /**
+    * <p>
     * The format of time-stamps when used as parts of paths of URIs used by this
     * controller.
     * </p>
@@ -159,7 +175,7 @@ public class GameController {
     *            (Internal Server Error)} if there is data access error.</li>
     *            </ul>
     */
-   @PostMapping("/api/scenario/{scenario}/game")
+   @PostMapping(GAMES_PATH_PATTERN)
    @Nonnull
    public ResponseEntity<Void> create(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
@@ -209,7 +225,7 @@ public class GameController {
     *            {@linkplain UUID#equals(Object) equivalent to} its
     *            {@linkplain Scenario#getIdentifier() identifier}.
     */
-   @GetMapping("/api/scenario/{scenario}/game")
+   @GetMapping(GAMES_PATH_PATTERN)
    @Nonnull
    public Stream<String> getCreationTimes(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
@@ -250,7 +266,7 @@ public class GameController {
     *            identification information} equivalent to the given
     *            {@code scenario} and {@code created}.
     */
-   @GetMapping("/api/scenario/{scenario}/game/{created:.+}")
+   @GetMapping(GAME_PATH_PATTERN)
    @Nonnull
    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
