@@ -68,8 +68,6 @@ public class UserSteps {
 
    private User user;
 
-   private User loggedInUser;
-
    private List<User> responseUserList;
 
    @Then("MC does not present adding a user as an option")
@@ -86,14 +84,15 @@ public class UserSteps {
 
    private void addUser(final String name, final String password)
             throws Exception {
-      Objects.requireNonNull(loggedInUser, "loggedInUser");
+      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
       final var addedUser = new User(name, password, Set.of(), true, true, true,
                true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
-      worldCore.performRequest(post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(loggedInUser))
-               .with(csrf()).content(encoded));
+      worldCore.performRequest(
+               post("/api/user").contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(user(worldCore.loggedInUser)).with(csrf())
+                        .content(encoded));
    }
 
    @Then("can get the list of users")
@@ -123,16 +122,16 @@ public class UserSteps {
    }
 
    private void getUsers() throws Exception {
-      Objects.requireNonNull(loggedInUser, "loggedInUser");
+      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
       worldCore.performRequest(
                get("/api/user").accept(MediaType.APPLICATION_JSON)
-                        .with(user(loggedInUser)).with(csrf()));
+                        .with(user(worldCore.loggedInUser)).with(csrf()));
    }
 
    @Given("logged in")
    public void logged_in() {
       Objects.requireNonNull(user, "user");
-      loggedInUser = user;
+      worldCore.loggedInUser = user;
    }
 
    @Then("MC accepts the addition")

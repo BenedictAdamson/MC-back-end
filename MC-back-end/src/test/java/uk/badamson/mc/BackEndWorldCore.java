@@ -71,6 +71,8 @@ public class BackEndWorldCore {
 
    private ResultActions response;
 
+   public User loggedInUser;
+
    public void exchangeJson(final HttpMethod method, final String path)
             throws Exception {
       Objects.requireNonNull(context, "context");
