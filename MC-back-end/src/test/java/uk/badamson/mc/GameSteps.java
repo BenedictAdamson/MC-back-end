@@ -20,6 +20,9 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -70,6 +74,28 @@ public class GameSteps {
    private Game.Identifier gameId;
 
    private Game responseGame;
+
+   private void chooseScenario() {
+      final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      scenario = scenarioService.getScenario(scenarioId).get();
+   }
+
+   private void createGame() throws Exception {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
+
+      final var path = GameController
+               .createPathForGames(scenario.getIdentifier());
+      worldCore.performRequest(
+               post(path).with(user(worldCore.loggedInUser)).with(csrf()));
+   }
+
+   @When("creating a game")
+   public void creating_game() throws Exception {
+      chooseScenario();
+      createGame();
+   }
 
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
@@ -111,10 +137,8 @@ public class GameSteps {
 
    @When("A scenario has games")
    public void scenario_has_games() {
-      final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
-               .get();
-      scenario = scenarioService.getScenario(scenarioId).get();
-      gameService.create(scenarioId);
+      chooseScenario();
+      gameService.create(scenario.getIdentifier());
    }
 
    @When("Viewing the games of the scenario")
