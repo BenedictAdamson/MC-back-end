@@ -128,7 +128,7 @@ public class GameControllerTest {
       assertAll(
                () -> assertTrue(id.isEmpty(),
                         "Did not create a game for the scenario"),
-               () -> response.andExpect(status().isForbidden()));
+               () -> response.andExpect(status().isUnauthorized()));
    }
 
    @Test

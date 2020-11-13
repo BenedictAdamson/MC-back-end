@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -177,6 +178,7 @@ public class GameController {
     */
    @PostMapping(GAMES_PATH_PATTERN)
    @Nonnull
+   @RolesAllowed("MANAGE_GAMES")
    public ResponseEntity<Void> create(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
       try {
