@@ -20,7 +20,7 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -210,6 +210,17 @@ public class GameSteps {
       gameId = new Game.Identifier(scenarioId, created);
 
       worldCore.getJson(createGamePath(gameId));
+   }
+
+   @Then("MC does not present creating a game as an option")
+   public void nc_does_not_present_creating_game_option() throws Exception {
+      /*
+       * A REST API does not really "present options", but it can indicate that
+       * permission is denied.
+       */
+      chooseScenario();
+      createGame();
+      worldCore.getResponse().andExpect(status().is4xxClientError());
    }
 
    @When("A scenario has games")
