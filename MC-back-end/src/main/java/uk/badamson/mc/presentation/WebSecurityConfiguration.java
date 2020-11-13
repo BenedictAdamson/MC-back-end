@@ -52,17 +52,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.httpBasic();
    }
 
-   private static void configureLoginAndLogout(final HttpSecurity http)
-            throws Exception {
-      // Is the default
-   }
-
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
       configureHttpBasic(http);
       configureCsrfProtection(http);
       configureAuthorizedRequests(http);
-      configureLoginAndLogout(http);
+      // login and logout pages are configured by default
    }
 
 }

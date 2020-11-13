@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,7 +99,8 @@ public class GameControllerTest {
       final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                .get();
 
-      final var response = createAuthenticated(scenario);
+      final var response = createAuthenticated(scenario,
+               USER_WITH_ALL_AUTHORITIES);
 
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
@@ -121,17 +123,12 @@ public class GameControllerTest {
 
       final var response = mockMvc.perform(request);
 
-      // TODO: at present, do not need authorization to create games
       final var id = gameService.getGameIdentifiers()
                .filter(gi -> scenario.equals(gi.getScenario())).findAny();
-      final var location = response.andReturn().getResponse()
-               .getHeaderValue("Location");
       assertAll(
-               () -> assertTrue(id.isPresent(),
-                        "created a game for the scenario"),
-               () -> response.andExpect(status().isFound()),
-               () -> assertEquals(GameController.createPathFor(id.get()),
-                        location, "redirection location"));
+               () -> assertTrue(id.isEmpty(),
+                        "Did not create a game for the scenario"),
+               () -> response.andExpect(status().isUnauthorized()));
    }
 
    @Test
@@ -152,18 +149,38 @@ public class GameControllerTest {
    }
 
    @Test
+   public void create_notPermitted() throws Exception {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var authorities = EnumSet
+               .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
+      final var user = new User("allan", "letmein", authorities, true, true,
+               true, true);
+
+      final var response = createAuthenticated(scenario, user);
+
+      final var id = gameService.getGameIdentifiers()
+               .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+      assertAll(
+               () -> assertTrue(id.isEmpty(),
+                        "Did not create a game for the scenario"),
+               () -> response.andExpect(status().is4xxClientError()));
+   }
+
+   @Test
    public void create_unknowScenario() throws Exception {
       final var scenario = UUID.randomUUID();
 
-      final var response = createAuthenticated(scenario);
+      final var response = createAuthenticated(scenario,
+               USER_WITH_ALL_AUTHORITIES);
 
       response.andExpect(status().is4xxClientError());
    }
 
-   private ResultActions createAuthenticated(final UUID scenario)
-            throws Exception {
+   private ResultActions createAuthenticated(final UUID scenario,
+            final User user) throws Exception {
       final var request = post(GameController.createPathForGames(scenario))
-               .with(user(USER_WITH_ALL_AUTHORITIES)).with(csrf());
+               .with(user(user)).with(csrf());
 
       return mockMvc.perform(request);
    }
