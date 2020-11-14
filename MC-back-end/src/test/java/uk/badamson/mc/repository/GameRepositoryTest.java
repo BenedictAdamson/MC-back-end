@@ -18,10 +18,12 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import uk.badamson.mc.Game;
@@ -82,28 +84,40 @@ public class GameRepositoryTest {
 
       @Override
       public Iterable<Game> findAll() {
-         return games.values();
+         // Return copies of the games so we are isolated from downstream
+         // mutations
+         return games.values().stream().map(game -> new Game(game))
+                  .collect(toList());
       }
 
       @Override
       public Iterable<Game> findAllById(
                final Iterable<Game.Identifier> identifiers) {
          requireNonNull(identifiers, "identifiers");
+         // Return copies of the games so we are isolated from downstream
+         // mutations
          return StreamSupport.stream(identifiers.spliterator(), false)
                   .distinct().map(un -> games.get(un)).filter(un -> un != null)
-                  .collect(Collectors.toUnmodifiableList());
+                  .map(game -> new Game(game)).collect(toUnmodifiableList());
       }
 
       @Override
       public Optional<Game> findById(final Game.Identifier identifier) {
          requireNonNull(identifier, "identifier");
-         return Optional.ofNullable(games.get(identifier));
+         var game = games.get(identifier);
+         // Return copy so we are isolated from downstream mutations
+         if (game != null) {
+            game = new Game(game);
+         }
+         return Optional.ofNullable(game);
       }
 
       @Override
       public <GAME extends Game> GAME save(final GAME game) {
          requireNonNull(game, "game");
-         games.put(game.getIdentifier(), game);
+         // Save a copy to we are insulated from changes to the given game
+         // object.
+         games.put(game.getIdentifier(), new Game(game));
          return game;
       }
 
@@ -112,7 +126,7 @@ public class GameRepositoryTest {
                final Iterable<GAME> games) {
          requireNonNull(games, "games");
          for (final var game : games) {
-            this.games.put(game.getIdentifier(), game);
+            save(game);
          }
          return games;
       }
