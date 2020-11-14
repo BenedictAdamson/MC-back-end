@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -165,6 +166,13 @@ public class GameSteps {
    @Then("the game page indicates that the game is recruiting players")
    public void game_page_indicates_game_recuiting_players() {
       assertTrue(game.isRecruiting());
+   }
+
+   @Then("the game page indicates that the game is not recruiting players")
+   public void game_page_indicates_that_game_is_not_recuiting_players() {
+      Objects.requireNonNull(gameId, "gameId");
+      game = gameService.getGame(gameId).get();
+      assertFalse(game.isRecruiting());
    }
 
    @Then("The game page indicates whether the game is recruiting players")
