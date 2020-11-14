@@ -47,6 +47,7 @@ import org.springframework.web.util.UriTemplate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GameController;
@@ -241,6 +242,29 @@ public class GameSteps {
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
+   }
+
+   @When("user ends recruitment for the game")
+   public void user_ends_recuitment_for_game() {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = createGamePath(gameId);
+      game.endRecruitment();
+
+      try {
+         worldCore.putResource(path, game);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to change the game",
+                  e);
+      }
+   }
+
+   @Given("viewing a game that is recruiting players")
+   public void viewing_game_recruiting_players() {
+      chooseScenario();
+      game = gameService.create(scenario.getIdentifier());
+      gameId = game.getIdentifier();
    }
 
    @When("Viewing the games of the scenario")

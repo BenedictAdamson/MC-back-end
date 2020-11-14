@@ -21,6 +21,7 @@ package uk.badamson.mc;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -118,8 +119,19 @@ public class BackEndWorldCore {
             throws Exception {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
+
       final var encodedBody = objectMapper.writeValueAsString(body);
       performRequest(post(path).contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).content(encodedBody));
+   }
+
+   public void putResource(final String path, final Object body)
+            throws Exception {
+      Objects.requireNonNull(context, "context");
+      Objects.requireNonNull(mockMvc, "mockMvc");
+
+      final var encodedBody = objectMapper.writeValueAsString(body);
+      performRequest(put(path).contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).content(encodedBody));
    }
 
