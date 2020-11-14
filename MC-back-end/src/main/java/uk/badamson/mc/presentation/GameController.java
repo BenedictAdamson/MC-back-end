@@ -343,10 +343,25 @@ public class GameController {
     *            </ul>
     */
    @PutMapping(GAME_PATH_PATTERN)
+   @RolesAllowed("MANAGE_GAMES")
    public void modify(@Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created,
             @Nonnull @RequestBody final Game newGameState) {
-      // FIXME
+      final var identifier = new Game.Identifier(scenario, created);
+      try {
+         final var game0 = gameService.getGame(identifier).get();
+         if (game0.isRecruiting() && !newGameState.isRecruiting()) {
+            gameService.endRecruitment(identifier).get();
+         } else if (!game0.isRecruiting() && newGameState.isRecruiting()) {
+            throw new IllegalStateException(
+                     "Attempting to re-enable recruitment");
+         }
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized ID", e);
+      } catch (final IllegalStateException e) {
+         throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
+                  e.getMessage(), e);
+      }
    }
-
 }
