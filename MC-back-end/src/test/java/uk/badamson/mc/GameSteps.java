@@ -100,7 +100,7 @@ public class GameSteps {
 
    private Game.Identifier gameId;
 
-   private Game responseGame;
+   private Game game;
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -145,19 +145,23 @@ public class GameSteps {
 
    @Then("The game page includes the scenario title")
    public void game_page_includes_scenario_title() {
-      assertEquals(scenario.getIdentifier(),
-               responseGame.getIdentifier().getScenario(), "scenario ID");
+      assertEquals(scenario.getIdentifier(), game.getIdentifier().getScenario(),
+               "scenario ID");
    }
 
    @Then("The game page includes the date and time that the game was set up")
    public void game_page_includes_timestamp() {
-      assertEquals(gameId.getCreated(),
-               responseGame.getIdentifier().getCreated());
+      assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
+   }
+
+   @Then("the game page indicates that the game is recruiting players")
+   public void game_page_indicates_game_recuiting_players() {
+      assertTrue(game.isRecruiting());
    }
 
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
-      assertThat(responseGame.isRecruiting(), anything());
+      assertThat(game.isRecruiting(), anything());
    }
 
    private void getGames() throws Exception {
@@ -191,10 +195,14 @@ public class GameSteps {
       assertAll(() -> worldCore.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header"));// guard
       gameId = parseGamePath(location);
-      assertEquals(scenario.getIdentifier(), gameId.getScenario(),
-               "Location is for a game of the given scenario");
-      assertTrue(gameService.getGame(gameId).isPresent(),
-               "identified game exists");
+      final var indicatedGame = gameService.getGame(gameId);
+      assertAll(
+               () -> assertEquals(scenario.getIdentifier(),
+                        gameId.getScenario(),
+                        "Location is for a game of the given scenario"),
+               () -> assertTrue(indicatedGame.isPresent(),
+                        "identified game exists"));// guard
+      game = indicatedGame.get();
    }
 
    @Then("MC serves the game page")
@@ -203,7 +211,7 @@ public class GameSteps {
       try {
          response.andExpect(status().isOk());
          final var responseText = worldCore.getResponseBodyAsString();
-         responseGame = objectMapper.readValue(responseText, Game.class);
+         game = objectMapper.readValue(responseText, Game.class);
       } catch (final Exception e) {
          throw new AssertionFailedError("HTTP response provides a game", e);
       }

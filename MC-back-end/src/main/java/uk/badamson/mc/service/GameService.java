@@ -54,6 +54,8 @@ public interface GameService {
     * (as given by the {@linkplain #getClock() associated clock} of this
     * service) as the {@linkplain Identifier#getCreated() creation time} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
+    * <li>The returned game {@linkplain Game#isRecruiting() is recruiting}
+    * players.</li>
     * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
     * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
     * </ul>
