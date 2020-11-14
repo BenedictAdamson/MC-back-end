@@ -20,8 +20,10 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,9 +40,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hamcrest.Matcher;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriTemplate;
 
@@ -65,6 +69,9 @@ public class GameSteps {
 
    private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
             GameController.GAME_PATH_PATTERN);
+
+   private static final Matcher<Integer> PUT_OK_STATUS = anyOf(
+            is(HttpStatus.OK.value()), is(HttpStatus.NO_CONTENT.value()));
 
    private static String createGamePath(final Game.Identifier identifier) {
       return "/api/scenario/" + identifier.getScenario() + "/game/"
@@ -206,6 +213,11 @@ public class GameSteps {
       game = indicatedGame.get();
    }
 
+   @Then("MC accepts ending recuitment for the game")
+   public void mc_accepts_ending_recuitment_for_game() throws Exception {
+      worldCore.getResponse().andExpect(status().is(PUT_OK_STATUS));
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       final var response = worldCore.getResponse();
@@ -265,7 +277,7 @@ public class GameSteps {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
-      BackEndWorldCore.require(game.isRecruiting(), "game is recuiting");
+      BackEndWorldCore.require(game.isRecruiting(), "game is recruiting");
    }
 
    @When("Viewing the games of the scenario")
