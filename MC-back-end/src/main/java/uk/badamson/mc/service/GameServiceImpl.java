@@ -100,6 +100,16 @@ public class GameServiceImpl implements GameService {
       return repository.save(game);// write
    }
 
+   @Override
+   @Nonnull
+   public Optional<Game> endRecruitment(@Nonnull final Identifier id) {
+      final var game = repository.findById(id);
+      if (game.isPresent()) {
+         game.get().endRecruitment();
+      }
+      return game;
+   }
+
    @Nonnull
    @Override
    public final Clock getClock() {

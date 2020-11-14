@@ -81,6 +81,35 @@ public interface GameService {
 
    /**
     * <p>
+    * Indicate that a game is not {@linkplain Game#isRecruiting() recruiting}
+    * players (any longer).
+    * </p>
+    * <p>
+    * This mutator is idempotent: the mutator does not have the precondition
+    * that the game is recruiting.
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which
+    * <ul>
+    * <li>the {@linkplain Game#getIdentifier() identifier}
+    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
+    * <li>the game is not {@linkplain Game#isRecruiting() recruiting}.</li>
+    * </ul>
+    * </li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the game to mutate.
+    * @return The mutated game.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<Game> endRecruitment(@Nonnull final Game.Identifier id);
+
+   /**
+    * <p>
     * The clock that this service uses to access to the current
     * {@linkplain Instant instant} (point in time).
     * </p>

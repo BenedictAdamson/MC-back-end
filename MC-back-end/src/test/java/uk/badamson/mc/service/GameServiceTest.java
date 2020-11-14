@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -68,6 +69,20 @@ public class GameServiceTest {
                         "The returned game is recruiting players."));
 
       return game;
+   }
+
+   public static Optional<Game> endRecruitment(final GameService service,
+            final Game.Identifier id) {
+      final var result = service.endRecruitment(id);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      if (result.isPresent()) {
+         final var game = result.get();
+         assertAll(() -> assertEquals(id, game.getIdentifier(), "identifier"),
+                  () -> assertFalse(game.isRecruiting(), "recruiting"));
+      }
+      return result;
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(

@@ -139,6 +139,47 @@ public class GameServiceImplTest {
    }// class
 
    @Nested
+   public class EndRecruitment {
+
+      @Test
+      public void absent() {
+         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+                  scenarioServiceA);
+         final var id = IDENTIFIER_A;
+
+         final var result = endRecruitment(service, id);
+
+         assertTrue(result.isEmpty(), "absent");
+      }
+
+      @Test
+      public void notRecruiting() {
+         final var id = IDENTIFIER_B;
+         final var game = new Game(id, false);
+         gameRepositoryA.save(game);
+         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+                  scenarioServiceA);
+
+         final var result = endRecruitment(service, id);
+
+         assertTrue(result.isPresent(), "present");
+      }
+
+      @Test
+      public void recruiting() {
+         final var id = IDENTIFIER_A;
+         final var game = new Game(id, true);
+         gameRepositoryA.save(game);
+         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+                  scenarioServiceA);
+
+         final var result = endRecruitment(service, id);
+
+         assertTrue(result.isPresent(), "present");
+      }
+   }// class
+
+   @Nested
    public class GetCreationTimesOfGamesOfScenario {
 
       @Test
@@ -248,8 +289,13 @@ public class GameServiceImplTest {
 
    private static final UUID SCENARIO_ID_A = UUID.randomUUID();
 
+   private static final UUID SCENARIO_ID_B = UUID.randomUUID();
+
    private static final Identifier IDENTIFIER_A = new Game.Identifier(
             SCENARIO_ID_A, Instant.now());
+
+   private static final Identifier IDENTIFIER_B = new Game.Identifier(
+            SCENARIO_ID_B, Instant.EPOCH);
 
    public static void assertInvariants(final GameServiceImpl service) {
       GameServiceTest.assertInvariants(service);// inherited
@@ -270,6 +316,14 @@ public class GameServiceImplTest {
       assertInvariants(service);
 
       return game;
+   }
+
+   public static Optional<Game> endRecruitment(final GameServiceImpl service,
+            final Game.Identifier id) {
+      final var result = GameServiceTest.endRecruitment(service, id);
+
+      assertInvariants(service);
+      return result;
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
