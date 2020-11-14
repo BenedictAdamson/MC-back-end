@@ -221,8 +221,8 @@ public class GameSteps {
       game = indicatedGame.get();
    }
 
-   @Then("MC accepts ending recuitment for the game")
-   public void mc_accepts_ending_recuitment_for_game() throws Exception {
+   @Then("MC accepts ending recruitment for the game")
+   public void mc_accepts_ending_recruitment_for_game() throws Exception {
       worldCore.getResponse().andExpect(status().is(PUT_OK_STATUS));
    }
 
