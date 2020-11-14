@@ -59,6 +59,12 @@ import uk.badamson.mc.repository.UserRepository;
 @AutoConfigureMockMvc
 public class BackEndWorldCore {
 
+   static void require(final boolean assertion, final String description) {
+      if (!assertion) {
+         throw new IllegalStateException("Not " + description);
+      }
+   }
+
    @Autowired
    private WebApplicationContext context;
 

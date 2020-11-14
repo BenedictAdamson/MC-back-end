@@ -265,6 +265,7 @@ public class GameSteps {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
+      BackEndWorldCore.require(game.isRecruiting(), "game is recuiting");
    }
 
    @When("Viewing the games of the scenario")
