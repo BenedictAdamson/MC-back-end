@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -137,8 +139,10 @@ public class BackEndWorldCore {
       Objects.requireNonNull(mockMvc, "mockMvc");
 
       final var encodedBody = objectMapper.writeValueAsString(body);
-      performRequest(put(path).contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).content(encodedBody));
+      final var request = put(path).contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).content(encodedBody)
+               .with(csrf()).with(user(loggedInUser));
+      performRequest(request);
    }
 
    public void responseIsOk() throws Exception {
