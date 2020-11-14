@@ -97,6 +97,9 @@ public interface GameService {
     * <li>the game is not {@linkplain Game#isRecruiting() recruiting}.</li>
     * </ul>
     * </li>
+    * <li>Subsequent {@linkplain #getGame(Identifier) retrieval} of a game using
+    * an identifier equivalent to the given ID returns a value that is also not
+    * recruiting. That is, the method also saves the mutated value.</li>
     * </ul>
     *
     * @param id

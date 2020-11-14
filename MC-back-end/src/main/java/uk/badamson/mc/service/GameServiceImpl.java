@@ -102,12 +102,16 @@ public class GameServiceImpl implements GameService {
 
    @Override
    @Nonnull
+   @Transactional
    public Optional<Game> endRecruitment(@Nonnull final Identifier id) {
-      final var game = repository.findById(id);
-      if (game.isPresent()) {
-         game.get().endRecruitment();
+      final var optionalGame = repository.findById(id);// read
+      if (optionalGame.isPresent()) {
+         final var game = optionalGame.get();
+         game.endRecruitment();
+         return Optional.of(repository.save(game));// write
+      } else {
+         return optionalGame;
       }
-      return game;
    }
 
    @Nonnull

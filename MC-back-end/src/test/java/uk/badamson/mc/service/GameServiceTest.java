@@ -81,6 +81,9 @@ public class GameServiceTest {
          final var game = result.get();
          assertAll(() -> assertEquals(id, game.getIdentifier(), "identifier"),
                   () -> assertFalse(game.isRecruiting(), "recruiting"));
+         assertFalse(service.getGame(id).get().isRecruiting(),
+                  "Subsequent retrieval of a game using an identifier equivalent to the given ID returns "
+                           + "a value that is also not recruiting.");
       }
       return result;
    }
