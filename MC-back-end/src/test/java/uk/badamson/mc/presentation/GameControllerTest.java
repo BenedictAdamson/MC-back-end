@@ -205,7 +205,7 @@ public class GameControllerTest {
    @Test
    public void getGame_present() throws Exception {
       final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
-      gameRepository.save(new Game(id));
+      gameRepository.save(new Game(id, true));
 
       final var response = getGame(id);
 

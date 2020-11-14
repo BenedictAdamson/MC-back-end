@@ -200,7 +200,7 @@ public class GameServiceImplTest {
       @Test
       public void present() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id);
+         final var game = new Game(id, false);
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -228,7 +228,7 @@ public class GameServiceImplTest {
       @Test
       public void one() {
          final var id = IDENTIFIER_A;
-         gameRepositoryA.save(new Game(id));
+         gameRepositoryA.save(new Game(id, false));
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
