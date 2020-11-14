@@ -248,13 +248,25 @@ public class GameSteps {
    }
 
    @Then("MC does not present creating a game as an option")
-   public void nc_does_not_present_creating_game_option() throws Exception {
+   public void mc_does_not_present_creating_game_option() throws Exception {
       /*
        * A REST API does not really "present options", but it can indicate that
        * permission is denied.
        */
       chooseScenario();
       createGame();
+      worldCore.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("MC does not present ending recruitment for the game as an option")
+   public void mc_does_not_present_ending_recuitment_game_option()
+            throws Exception {
+      /*
+       * A REST API does not really "present options", but it can indicate that
+       * permission is denied.
+       */
+      chooseScenario();
+      endRecruitmentForGame();
       worldCore.getResponse().andExpect(status().is4xxClientError());
    }
 
@@ -266,18 +278,20 @@ public class GameSteps {
 
    @When("user ends recruitment for the game")
    public void user_ends_recuitment_for_game() {
-      Objects.requireNonNull(game, "game");
-      Objects.requireNonNull(gameId, "gameId");
-
-      final var path = createGamePath(gameId);
-      game.endRecruitment();
-
       try {
-         worldCore.putResource(path, game);
+         endRecruitmentForGame();
       } catch (final Exception e) {
          throw new AssertionFailedError("Can ask the server to change the game",
                   e);
       }
+   }
+
+   private void endRecruitmentForGame() throws Exception {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = createGamePath(gameId);
+      game.endRecruitment();
+      worldCore.putResource(path, game);
    }
 
    @Given("viewing a game that is recruiting players")
