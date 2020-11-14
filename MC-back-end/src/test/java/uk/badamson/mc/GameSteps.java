@@ -20,6 +20,7 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -152,6 +153,11 @@ public class GameSteps {
    public void game_page_includes_timestamp() {
       assertEquals(gameId.getCreated(),
                responseGame.getIdentifier().getCreated());
+   }
+
+   @Then("The game page indicates whether the game is recruiting players")
+   public void game_page_indicates_whether_recuiting_players() {
+      assertThat(responseGame.isRecruiting(), anything());
    }
 
    private void getGames() throws Exception {
