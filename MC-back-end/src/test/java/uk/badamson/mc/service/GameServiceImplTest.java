@@ -105,13 +105,14 @@ public class GameServiceImplTest {
                      .findAny().get();
             final var service = new GameServiceImpl(gameRepositoryA, clock,
                      scenarioService);
+            final var truncatedNow = service.getNow();
 
             final var game = create(service, scenario);
 
             final var identifier = game.getIdentifier();
             assertThat(
                      "The returned game has the current time as the creation time of its identifier.",
-                     identifier.getCreated(), is(now));
+                     identifier.getCreated(), is(truncatedNow));
             final var retrievedGame = service.getGame(identifier);
             assertNotNull(retrievedGame,
                      "can retrieve something using the ID (not null)");// guard
@@ -122,7 +123,7 @@ public class GameServiceImplTest {
                      () -> assertThat("scenario",
                               retrievedIdentifier.getScenario(), is(scenario)),
                      () -> assertThat("created",
-                              retrievedIdentifier.getCreated(), is(now)));
+                              retrievedIdentifier.getCreated(), is(truncatedNow)));
          }
       }// class
 

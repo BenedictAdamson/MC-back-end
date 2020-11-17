@@ -50,9 +50,8 @@ public interface GameService {
     * <li>The returned game has the given {@code scenario} as the
     * {@linkplain Identifier#getScenario() scenario} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game has the {@linkplain Clock#instant() current time}
-    * (as given by the {@linkplain #getClock() associated clock} of this
-    * service) as the {@linkplain Identifier#getCreated() creation time} of its
+    * <li>The returned game has the {@linkplain #getNow() current time} as the
+    * {@linkplain Identifier#getCreated() creation time} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
     * <li>The returned game {@linkplain Game#isRecruiting() is recruiting}
     * players.</li>
@@ -194,6 +193,28 @@ public interface GameService {
     */
    @Nonnull
    Stream<Game.Identifier> getGameIdentifiers();
+
+   /**
+    * <p>
+    * Retrieve the current point in time, using the {@linkplain #getClock()
+    * clock} associated with this service, truncated to practical precision.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    * <p>
+    * Ideally, we would simply delegate to {@link Clock#instant()}.
+    * Unfortunately, some repository implementations (including the MongoDB
+    * Spring Data repository) can not store very high precision time-stamps, but
+    * are limited to millisecond precision. So we must truncate any excess
+    * precision in some cases.
+    * </p>
+    *
+    * @return the current time.
+    */
+
+   @Nonnull
+   Instant getNow();
 
    /**
     * <p>

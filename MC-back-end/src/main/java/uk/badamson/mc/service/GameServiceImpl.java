@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -95,7 +96,7 @@ public class GameServiceImpl implements GameService {
    @Transactional
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
-      final var identifier = new Game.Identifier(scenario, clock.instant());
+      final var identifier = new Game.Identifier(scenario, getNow());
       final var game = new Game(identifier, true);
       return repository.save(game);// write
    }
@@ -144,6 +145,12 @@ public class GameServiceImpl implements GameService {
 
    private Stream<Game> getGames() {
       return StreamSupport.stream(repository.findAll().spliterator(), false);
+   }
+
+   @Override
+   @Nonnull
+   public Instant getNow() {
+      return clock.instant().truncatedTo(ChronoUnit.MILLIS);
    }
 
    /**
