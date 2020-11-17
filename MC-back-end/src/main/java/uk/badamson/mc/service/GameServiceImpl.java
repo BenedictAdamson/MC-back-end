@@ -122,8 +122,8 @@ public class GameServiceImpl implements GameService {
 
    @Override
    @Transactional
-   public Stream<Instant> getCreationTimesOfGamesOfScenario(
-            final UUID scenario) {
+   public Stream<Instant> getCreationTimesOfGamesOfScenario(final UUID scenario)
+            throws NoSuchElementException {
       requireKnownScenario(scenario);// read-and-check
       return getGameIdentifiers()// read
                .filter(id -> scenario.equals(id.getScenario()))
@@ -167,7 +167,8 @@ public class GameServiceImpl implements GameService {
       return scenarioService;
    }
 
-   private void requireKnownScenario(final UUID scenario) {
+   private void requireKnownScenario(final UUID scenario)
+            throws NoSuchElementException {
       Objects.requireNonNull(scenario, "scenario");
       if (!scenarioService.getScenarioIdentifiers()
                .anyMatch(id -> scenario.equals(id))) {
