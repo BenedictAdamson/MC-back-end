@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -95,9 +96,23 @@ public class GameServiceImpl implements GameService {
    @Transactional
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
-      final var identifier = new Game.Identifier(scenario, clock.instant());
-      final var game = new Game(identifier);
+      final var identifier = new Game.Identifier(scenario, getNow());
+      final var game = new Game(identifier, true);
       return repository.save(game);// write
+   }
+
+   @Override
+   @Nonnull
+   @Transactional
+   public Optional<Game> endRecruitment(@Nonnull final Identifier id) {
+      final var optionalGame = repository.findById(id);// read
+      if (optionalGame.isPresent()) {
+         final var game = optionalGame.get();
+         game.endRecruitment();
+         return Optional.of(repository.save(game));// write
+      } else {
+         return optionalGame;
+      }
    }
 
    @Nonnull
@@ -108,8 +123,8 @@ public class GameServiceImpl implements GameService {
 
    @Override
    @Transactional
-   public Stream<Instant> getCreationTimesOfGamesOfScenario(
-            final UUID scenario) {
+   public Stream<Instant> getCreationTimesOfGamesOfScenario(final UUID scenario)
+            throws NoSuchElementException {
       requireKnownScenario(scenario);// read-and-check
       return getGameIdentifiers()// read
                .filter(id -> scenario.equals(id.getScenario()))
@@ -130,6 +145,12 @@ public class GameServiceImpl implements GameService {
 
    private Stream<Game> getGames() {
       return StreamSupport.stream(repository.findAll().spliterator(), false);
+   }
+
+   @Override
+   @Nonnull
+   public Instant getNow() {
+      return clock.instant().truncatedTo(ChronoUnit.MILLIS);
    }
 
    /**
@@ -153,7 +174,8 @@ public class GameServiceImpl implements GameService {
       return scenarioService;
    }
 
-   private void requireKnownScenario(final UUID scenario) {
+   private void requireKnownScenario(final UUID scenario)
+            throws NoSuchElementException {
       Objects.requireNonNull(scenario, "scenario");
       if (!scenarioService.getScenarioIdentifiers()
                .anyMatch(id -> scenario.equals(id))) {

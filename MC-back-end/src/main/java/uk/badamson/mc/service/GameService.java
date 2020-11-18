@@ -50,10 +50,11 @@ public interface GameService {
     * <li>The returned game has the given {@code scenario} as the
     * {@linkplain Identifier#getScenario() scenario} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game has the {@linkplain Clock#instant() current time}
-    * (as given by the {@linkplain #getClock() associated clock} of this
-    * service) as the {@linkplain Identifier#getCreated() creation time} of its
+    * <li>The returned game has the {@linkplain #getNow() current time} as the
+    * {@linkplain Identifier#getCreated() creation time} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
+    * <li>The returned game {@linkplain Game#isRecruiting() is recruiting}
+    * players.</li>
     * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
     * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
     * </ul>
@@ -76,6 +77,38 @@ public interface GameService {
    @Nonnull
    Game create(@Nonnull UUID scenario)
             throws DataAccessException, NoSuchElementException;
+
+   /**
+    * <p>
+    * Indicate that a game is not {@linkplain Game#isRecruiting() recruiting}
+    * players (any longer).
+    * </p>
+    * <p>
+    * This mutator is idempotent: the mutator does not have the precondition
+    * that the game is recruiting.
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which
+    * <ul>
+    * <li>the {@linkplain Game#getIdentifier() identifier}
+    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
+    * <li>the game is not {@linkplain Game#isRecruiting() recruiting}.</li>
+    * </ul>
+    * </li>
+    * <li>Subsequent {@linkplain #getGame(Identifier) retrieval} of a game using
+    * an identifier equivalent to the given ID returns a value that is also not
+    * recruiting. That is, the method also saves the mutated value.</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the game to mutate.
+    * @return The mutated game.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<Game> endRecruitment(@Nonnull final Game.Identifier id);
 
    /**
     * <p>
@@ -160,6 +193,28 @@ public interface GameService {
     */
    @Nonnull
    Stream<Game.Identifier> getGameIdentifiers();
+
+   /**
+    * <p>
+    * Retrieve the current point in time, using the {@linkplain #getClock()
+    * clock} associated with this service, truncated to practical precision.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    * <p>
+    * Ideally, we would simply delegate to {@link Clock#instant()}.
+    * Unfortunately, some repository implementations (including the MongoDB
+    * Spring Data repository) can not store very high precision time-stamps, but
+    * are limited to millisecond precision. So we must truncate any excess
+    * precision in some cases.
+    * </p>
+    *
+    * @return the current time.
+    */
+
+   @Nonnull
+   Instant getNow();
 
    /**
     * <p>

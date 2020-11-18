@@ -22,7 +22,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.NoSuchElementException;
@@ -60,10 +62,30 @@ public class GameServiceTest {
 
       assertInvariants(service);
       assertNotNull(game, "Always returns a (non null) game.");// guard
-      assertEquals(scenario, game.getIdentifier().getScenario(),
-               "The returned game has the given scenario as the scenario of its identifier");
+      assertAll("The returned game", () -> assertEquals(scenario,
+               game.getIdentifier().getScenario(),
+               "The returned game has the given scenario as the scenario of its identifier"),
+               () -> assertTrue(game.isRecruiting(),
+                        "The returned game is recruiting players."));
 
       return game;
+   }
+
+   public static Optional<Game> endRecruitment(final GameService service,
+            final Game.Identifier id) {
+      final var result = service.endRecruitment(id);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      if (result.isPresent()) {
+         final var game = result.get();
+         assertAll(() -> assertEquals(id, game.getIdentifier(), "identifier"),
+                  () -> assertFalse(game.isRecruiting(), "recruiting"));
+         assertFalse(service.getGame(id).get().isRecruiting(),
+                  "Subsequent retrieval of a game using an identifier equivalent to the given ID returns "
+                           + "a value that is also not recruiting.");
+      }
+      return result;
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
@@ -72,7 +94,7 @@ public class GameServiceTest {
       final Stream<Instant> times;
       try {
          times = service.getCreationTimesOfGamesOfScenario(scenario);
-      } catch (NoSuchElementException e) {
+      } catch (final NoSuchElementException e) {
          assertInvariants(service);
          throw e;
       }

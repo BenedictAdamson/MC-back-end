@@ -18,9 +18,22 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.boot.env.RandomValuePropertySource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.MutablePropertySources;
 
 @Configuration
 public class CucumberBeansConfiguration {
+
+   @Bean
+   public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+      final var configurer = new PropertySourcesPlaceholderConfigurer();
+      final var sources = new MutablePropertySources();
+      sources.addFirst(new RandomValuePropertySource());
+      configurer.setPropertySources(sources);
+      return configurer;
+   }
 
 }

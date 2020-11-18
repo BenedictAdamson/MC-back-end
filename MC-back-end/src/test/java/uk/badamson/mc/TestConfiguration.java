@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Import;
 import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.repository.GameRepositoryTest;
+import uk.badamson.mc.repository.RepositoryLayerSpringConfiguration;
 import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
 import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
@@ -35,19 +37,11 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
  * </p>
  */
 @Configuration
+@EnableAutoConfiguration
 @Import(value = { MethodSecurityConfiguration.class,
          PresentationLayerSpringConfiguration.class,
-         ServiceLayerSpringConfiguration.class })
+         ServiceLayerSpringConfiguration.class,
+         RepositoryLayerSpringConfiguration.class })
 public class TestConfiguration {
-
-   @Bean
-   GameRepository gameRepository() {
-      return new GameRepositoryTest.Fake();
-   }
-
-   @Bean
-   UserRepository userRepository() {
-      return new UserRepositoryTest.Fake();
-   }
 
 }

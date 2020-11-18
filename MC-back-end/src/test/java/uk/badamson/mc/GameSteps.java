@@ -20,9 +20,13 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -37,15 +41,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hamcrest.Matcher;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GameController;
@@ -63,6 +70,9 @@ public class GameSteps {
 
    private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
             GameController.GAME_PATH_PATTERN);
+
+   private static final Matcher<Integer> PUT_OK_STATUS = anyOf(
+            is(HttpStatus.OK.value()), is(HttpStatus.NO_CONTENT.value()));
 
    private static String createGamePath(final Game.Identifier identifier) {
       return "/api/scenario/" + identifier.getScenario() + "/game/"
@@ -99,7 +109,7 @@ public class GameSteps {
 
    private Game.Identifier gameId;
 
-   private Game responseGame;
+   private Game game;
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -144,14 +154,30 @@ public class GameSteps {
 
    @Then("The game page includes the scenario title")
    public void game_page_includes_scenario_title() {
-      assertEquals(scenario.getIdentifier(),
-               responseGame.getIdentifier().getScenario(), "scenario ID");
+      assertEquals(scenario.getIdentifier(), game.getIdentifier().getScenario(),
+               "scenario ID");
    }
 
    @Then("The game page includes the date and time that the game was set up")
    public void game_page_includes_timestamp() {
-      assertEquals(gameId.getCreated(),
-               responseGame.getIdentifier().getCreated());
+      assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
+   }
+
+   @Then("the game page indicates that the game is recruiting players")
+   public void game_page_indicates_game_recuiting_players() {
+      assertTrue(game.isRecruiting());
+   }
+
+   @Then("the game page indicates that the game is not recruiting players")
+   public void game_page_indicates_that_game_is_not_recuiting_players() {
+      Objects.requireNonNull(gameId, "gameId");
+      game = gameService.getGame(gameId).get();
+      assertFalse(game.isRecruiting());
+   }
+
+   @Then("The game page indicates whether the game is recruiting players")
+   public void game_page_indicates_whether_recuiting_players() {
+      assertThat(game.isRecruiting(), anything());
    }
 
    private void getGames() throws Exception {
@@ -185,10 +211,19 @@ public class GameSteps {
       assertAll(() -> worldCore.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header"));// guard
       gameId = parseGamePath(location);
-      assertEquals(scenario.getIdentifier(), gameId.getScenario(),
-               "Location is for a game of the given scenario");
-      assertTrue(gameService.getGame(gameId).isPresent(),
-               "identified game exists");
+      final var indicatedGame = gameService.getGame(gameId);
+      assertAll(
+               () -> assertEquals(scenario.getIdentifier(),
+                        gameId.getScenario(),
+                        "Location is for a game of the given scenario"),
+               () -> assertTrue(indicatedGame.isPresent(),
+                        "identified game exists"));// guard
+      game = indicatedGame.get();
+   }
+
+   @Then("MC accepts ending recruitment for the game")
+   public void mc_accepts_ending_recruitment_for_game() throws Exception {
+      worldCore.getResponse().andExpect(status().is(PUT_OK_STATUS));
    }
 
    @Then("MC serves the game page")
@@ -197,7 +232,7 @@ public class GameSteps {
       try {
          response.andExpect(status().isOk());
          final var responseText = worldCore.getResponseBodyAsString();
-         responseGame = objectMapper.readValue(responseText, Game.class);
+         game = objectMapper.readValue(responseText, Game.class);
       } catch (final Exception e) {
          throw new AssertionFailedError("HTTP response provides a game", e);
       }
@@ -213,7 +248,7 @@ public class GameSteps {
    }
 
    @Then("MC does not present creating a game as an option")
-   public void nc_does_not_present_creating_game_option() throws Exception {
+   public void mc_does_not_present_creating_game_option() throws Exception {
       /*
        * A REST API does not really "present options", but it can indicate that
        * permission is denied.
@@ -223,10 +258,48 @@ public class GameSteps {
       worldCore.getResponse().andExpect(status().is4xxClientError());
    }
 
+   @Then("MC does not present ending recruitment for the game as an option")
+   public void mc_does_not_present_ending_recuitment_game_option()
+            throws Exception {
+      /*
+       * A REST API does not really "present options", but it can indicate that
+       * permission is denied.
+       */
+      chooseScenario();
+      endRecruitmentForGame();
+      worldCore.getResponse().andExpect(status().is4xxClientError());
+   }
+
    @When("A scenario has games")
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
+   }
+
+   @When("user ends recruitment for the game")
+   public void user_ends_recuitment_for_game() {
+      try {
+         endRecruitmentForGame();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to change the game",
+                  e);
+      }
+   }
+
+   private void endRecruitmentForGame() throws Exception {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = createGamePath(gameId);
+      game.endRecruitment();
+      worldCore.putResource(path, game);
+   }
+
+   @Given("viewing a game that is recruiting players")
+   public void viewing_game_recruiting_players() {
+      chooseScenario();
+      game = gameService.create(scenario.getIdentifier());
+      gameId = game.getIdentifier();
+      BackEndWorldCore.require(game.isRecruiting(), "game is recruiting");
    }
 
    @When("Viewing the games of the scenario")

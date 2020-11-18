@@ -18,9 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,6 +60,12 @@ import uk.badamson.mc.repository.UserRepository;
 @ScenarioScope
 @AutoConfigureMockMvc
 public class BackEndWorldCore {
+
+   static void require(final boolean assertion, final String description) {
+      if (!assertion) {
+         throw new IllegalStateException("Not " + description);
+      }
+   }
 
    @Autowired
    private WebApplicationContext context;
@@ -118,9 +127,22 @@ public class BackEndWorldCore {
             throws Exception {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
+
       final var encodedBody = objectMapper.writeValueAsString(body);
       performRequest(post(path).contentType(MediaType.APPLICATION_JSON)
                .accept(MediaType.APPLICATION_JSON).content(encodedBody));
+   }
+
+   public void putResource(final String path, final Object body)
+            throws Exception {
+      Objects.requireNonNull(context, "context");
+      Objects.requireNonNull(mockMvc, "mockMvc");
+
+      final var encodedBody = objectMapper.writeValueAsString(body);
+      final var request = put(path).contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON).content(encodedBody)
+               .with(csrf()).with(user(loggedInUser));
+      performRequest(request);
    }
 
    public void responseIsOk() throws Exception {
