@@ -37,17 +37,17 @@ import io.cucumber.java.en.When;
 public class UnknownPageSteps {
 
    @Autowired
-   private BackEndWorld worldCore;
+   private BackEndWorld world;
 
    @When("getting the unknown resource at {string}")
    public void getting_the_unknown_resource_at(final String path)
             throws Exception {
-      worldCore.getJson(path);
+      world.getJson(path);
    }
 
    @Then("MC replies with Client Error")
    public void mc_replies_with_client_error() throws Exception {
-      worldCore.getResponse().andExpect(status().is4xxClientError());
+      world.getResponse().andExpect(status().is4xxClientError());
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
@@ -55,7 +55,7 @@ public class UnknownPageSteps {
             final String path) throws Exception {
       final var method = HttpMethod.valueOf(verb);
       assert method != null;
-      worldCore.exchangeJson(method, path);
+      world.exchangeJson(method, path);
    }
 
 }

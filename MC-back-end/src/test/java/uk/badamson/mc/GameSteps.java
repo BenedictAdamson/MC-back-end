@@ -92,7 +92,7 @@ public class GameSteps {
    }
 
    @Autowired
-   private BackEndWorld worldCore;
+   private BackEndWorld world;
 
    @Autowired
    private GameService gameService;
@@ -133,12 +133,12 @@ public class GameSteps {
 
    private void createGame() throws Exception {
       Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       final var path = GameController
                .createPathForGames(scenario.getIdentifier());
-      worldCore.performRequest(
-               post(path).with(user(worldCore.loggedInUser)).with(csrf()));
+      world.performRequest(
+               post(path).with(user(world.loggedInUser)).with(csrf()));
    }
 
    @When("creating a game")
@@ -184,11 +184,11 @@ public class GameSteps {
       Objects.requireNonNull(scenario, "scenario");
       final var path = GameController
                .createPathForGames(scenario.getIdentifier());
-      worldCore.performRequest(get(path).accept(MediaType.APPLICATION_JSON));
+      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON));
    }
 
    private void getResponseAsGameCreationTimes() throws IOException {
-      final var response = worldCore.getResponseBodyAsString();
+      final var response = world.getResponseBodyAsString();
       gameCreationTimes = objectMapper.readValue(response,
                new TypeReference<Set<Instant>>() {
                });
@@ -206,9 +206,9 @@ public class GameSteps {
    public void mc_accepts_creation_of_game() {
       Objects.requireNonNull(scenario, "scenario");
 
-      final var location = worldCore.getResponse().andReturn().getResponse()
+      final var location = world.getResponse().andReturn().getResponse()
                .getHeader("Location");
-      assertAll(() -> worldCore.expectResponse(status().isFound()),
+      assertAll(() -> world.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header"));// guard
       gameId = parseGamePath(location);
       final var indicatedGame = gameService.getGame(gameId);
@@ -223,15 +223,15 @@ public class GameSteps {
 
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recruitment_for_game() throws Exception {
-      worldCore.getResponse().andExpect(status().is(PUT_OK_STATUS));
+      world.getResponse().andExpect(status().is(PUT_OK_STATUS));
    }
 
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
-      final var response = worldCore.getResponse();
+      final var response = world.getResponse();
       try {
          response.andExpect(status().isOk());
-         final var responseText = worldCore.getResponseBodyAsString();
+         final var responseText = world.getResponseBodyAsString();
          game = objectMapper.readValue(responseText, Game.class);
       } catch (final Exception e) {
          throw new AssertionFailedError("HTTP response provides a game", e);
@@ -244,7 +244,7 @@ public class GameSteps {
       final var created = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenarioId, created);
 
-      worldCore.getJson(createGamePath(gameId));
+      world.getJson(createGamePath(gameId));
    }
 
    @Then("MC does not present creating a game as an option")
@@ -255,7 +255,7 @@ public class GameSteps {
        */
       chooseScenario();
       createGame();
-      worldCore.getResponse().andExpect(status().is4xxClientError());
+      world.getResponse().andExpect(status().is4xxClientError());
    }
 
    @Then("MC does not present ending recruitment for the game as an option")
@@ -267,7 +267,7 @@ public class GameSteps {
        */
       chooseScenario();
       endRecruitmentForGame();
-      worldCore.getResponse().andExpect(status().is4xxClientError());
+      world.getResponse().andExpect(status().is4xxClientError());
    }
 
    @When("A scenario has games")
@@ -291,7 +291,7 @@ public class GameSteps {
       Objects.requireNonNull(gameId, "gameId");
       final var path = createGamePath(gameId);
       game.endRecruitment();
-      worldCore.putResource(path, game);
+      world.putResource(path, game);
    }
 
    @Given("viewing a game that is recruiting players")

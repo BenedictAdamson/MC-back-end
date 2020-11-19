@@ -58,7 +58,7 @@ import uk.badamson.mc.service.UserService;
 public class UserSteps {
 
    @Autowired
-   private BackEndWorld worldCore;
+   private BackEndWorld world;
 
    @Autowired
    private UserService service;
@@ -73,7 +73,7 @@ public class UserSteps {
    @Then("MC does not present adding a user as an option")
    public void add_user_not_permitted() throws Exception {
       addUser("Allan", "letmein");
-      worldCore.expectResponse(status().isForbidden());
+      world.expectResponse(status().isForbidden());
    }
 
    @When("adding a user named {string} with  password {string}")
@@ -84,14 +84,14 @@ public class UserSteps {
 
    private void addUser(final String name, final String password)
             throws Exception {
-      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       final var addedUser = new User(name, password, Set.of(), true, true, true,
                true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
-      worldCore.performRequest(
+      world.performRequest(
                post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .with(user(worldCore.loggedInUser)).with(csrf())
+                        .with(user(world.loggedInUser)).with(csrf())
                         .content(encoded));
    }
 
@@ -110,7 +110,7 @@ public class UserSteps {
    }
 
    private void getResponseAsUserList() throws IOException {
-      final var response = worldCore.getResponseBodyAsString();
+      final var response = world.getResponseBodyAsString();
       responseUserList = objectMapper.readValue(response,
                new TypeReference<List<User>>() {
                });
@@ -122,33 +122,33 @@ public class UserSteps {
    }
 
    private void getUsers() throws Exception {
-      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
-      worldCore.performRequest(
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      world.performRequest(
                get("/api/user").accept(MediaType.APPLICATION_JSON)
-                        .with(user(worldCore.loggedInUser)).with(csrf()));
+                        .with(user(world.loggedInUser)).with(csrf()));
    }
 
    @Given("logged in")
    public void logged_in() {
       Objects.requireNonNull(user, "user");
-      worldCore.loggedInUser = user;
+      world.loggedInUser = user;
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() throws Exception {
-      worldCore.expectResponse(status().isCreated());
+      world.expectResponse(status().isCreated());
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_the_login() throws Exception {
-      assertAll(() -> worldCore.expectResponse(status().isFound()),
-               () -> worldCore
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> world
                         .expectResponse(header().string("Location", "/")));
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() throws Exception {
-      worldCore.responseIsOk();
+      world.responseIsOk();
    }
 
    @Then("the list of users has at least one user")
