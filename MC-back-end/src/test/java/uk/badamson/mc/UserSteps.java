@@ -183,7 +183,8 @@ public class UserSteps {
       Objects.requireNonNull(userList, "userList");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       expectedUser = userList.get(0);
-      final var path = UserController.createPathForUser(user.getUsername());
+      final var path = UserController
+               .createPathForUser(expectedUser.getUsername());
       world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
                .with(user(world.loggedInUser)).with(csrf()));
    }
