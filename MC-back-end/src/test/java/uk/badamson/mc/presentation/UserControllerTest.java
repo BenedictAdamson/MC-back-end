@@ -59,6 +59,185 @@ import uk.badamson.mc.service.UserService;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserControllerTest {
 
+   @Nested
+   public class Add {
+
+      @Test
+      public void administrator() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = new User(User.ADMINISTRATOR_USERNAME,
+                  "password1", Set.of(Authority.ROLE_PLAYER), true, true, true,
+                  true);
+
+         final var response = test(performingUser, addedUser);
+
+         response.andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void duplicate() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
+
+         service.add(addedUser);
+         final var response = test(performingUser, addedUser);
+
+         response.andExpect(status().isConflict());
+      }
+
+      @Test
+      public void noAuthentication() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
+         service.add(performingUser);
+         final var encoded = objectMapper.writeValueAsString(addedUser);
+         final var request = post("/api/user")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON).with(csrf())
+                  .content(encoded);
+
+         final var response = mockMvc.perform(request);
+
+         response.andExpect(status().is4xxClientError());
+         assertThat("User not added", !service.getUsers().anyMatch(
+                  u -> u.getUsername().equals(addedUser.getUsername())));
+      }
+
+      @Test
+      public void noCsrfToken() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
+         service.add(performingUser);
+         final var encoded = objectMapper.writeValueAsString(addedUser);
+         final var request = post("/api/user")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+                  .content(encoded);
+
+         final var response = mockMvc.perform(request);
+
+         assertAll(() -> response.andExpect(status().isForbidden()),
+                  () -> assertThat("User not added",
+                           !service.getUsers().anyMatch(u -> u.getUsername()
+                                    .equals(addedUser.getUsername()))));
+      }
+
+      private ResultActions test(final User performingUser,
+               final User addedUser) throws Exception {
+         service.add(performingUser);
+         final var encoded = objectMapper.writeValueAsString(addedUser);
+         final var request = post("/api/user")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+                  .with(csrf()).content(encoded);
+
+         return mockMvc.perform(request);
+      }
+
+      @Test
+      public void typical() throws Exception {
+         final var performingUser = USER_A;
+         final var addedUser = USER_B;
+
+         final var response = test(performingUser, addedUser);
+
+         response.andExpect(status().isCreated());
+         assertThat("List of users includes the added user",
+                  service.getUsers().anyMatch(u -> u.getUsername()
+                           .equals(addedUser.getUsername())));
+      }
+
+   }// class
+
+   @Nested
+   public class GetSelf {
+
+      @Test
+      public void a() throws Exception {
+         test(USER_A);
+      }
+
+      @Test
+      public void b() throws Exception {
+         test(USER_B);
+      }
+
+      private void test(final User user) throws Exception {
+         service.add(user);
+         final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+                  .with(user(user)).with(csrf());
+
+         final var response = mockMvc.perform(request);
+
+         response.andExpect(status().isOk());
+         /*
+          * We can not test that the response has session and CSRF cookies,
+          * because MocMvc does not set those cookies.
+          */
+         /*
+          * We can not check the response body for equivalence to a JSON
+          * encoding of the user object, because the returned object has an
+          * encoded password with a random salt. Checking the decoded response
+          * body for equivalence to the user object is a weak test because User
+          * objects have only entity semantics.
+          */
+         final var jsonResponse = response.andReturn().getResponse()
+                  .getContentAsString();
+         final var decodedResponse = objectMapper.readValue(jsonResponse,
+                  User.class);
+         assertAll("Response is the authenticated user",
+                  () -> assertThat("username", decodedResponse.getUsername(),
+                           is(user.getUsername())),
+                  () -> assertThat("authorities",
+                           decodedResponse.getAuthorities(),
+                           is(user.getAuthorities())),
+                  () -> assertThat("password",
+                           service.getPasswordEncoder().matches(
+                                    user.getPassword(),
+                                    decodedResponse.getPassword())),
+                  () -> assertThat("accountNonExpired",
+                           decodedResponse.isAccountNonExpired(),
+                           is(user.isAccountNonExpired())),
+                  () -> assertThat("accountNonLocked",
+                           decodedResponse.isAccountNonLocked(),
+                           is(user.isAccountNonLocked())),
+                  () -> assertThat("credentialsNonExpired",
+                           decodedResponse.isCredentialsNonExpired(),
+                           is(user.isCredentialsNonExpired())),
+                  () -> assertThat("enabled", decodedResponse.isEnabled(),
+                           is(user.isEnabled())));
+      }
+
+      @Test
+      public void unknownUser() throws Exception {
+         final var user = USER_A;
+         final var headers = new HttpHeaders();
+         headers.setBasicAuth(user.getUsername(), user.getPassword());
+         final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+                  .headers(headers).with(csrf());
+
+         final var response = mockMvc.perform(request);
+
+         response.andExpect(status().isUnauthorized());
+      }
+
+      @Test
+      public void wrongPassword() throws Exception {
+         final var user = USER_A;
+         final var wrongPassword = "****";
+         final var headers = new HttpHeaders();
+         headers.setBasicAuth(user.getUsername(), wrongPassword);
+         service.add(user);
+         final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
+                  .headers(headers).with(csrf());
+
+         final var response = mockMvc.perform(request);
+
+         response.andExpect(status().isUnauthorized());
+      }
+
+   }// class
+
    private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
             true, true, true, true);
 
@@ -73,180 +252,4 @@ public class UserControllerTest {
 
    @Autowired
    private ObjectMapper objectMapper;
-   
-   @Nested
-   public class Add
-   {
-
-   private ResultActions add(final User performingUser, final User addedUser)
-            throws Exception {
-      service.add(performingUser);
-      final var encoded = objectMapper.writeValueAsString(addedUser);
-      final var request = post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
-               .with(csrf()).content(encoded);
-
-      return mockMvc.perform(request);
-   }
-
-   @Test
-   public void add_a() throws Exception {
-      final var performingUser = USER_A;
-      final var addedUser = USER_B;
-
-      final var response = add(performingUser, addedUser);
-
-      response.andExpect(status().isCreated());
-      assertThat("List of users includes the added user", service.getUsers()
-               .anyMatch(u -> u.getUsername().equals(addedUser.getUsername())));
-   }
-
-   @Test
-   public void add_administrator() throws Exception {
-      final var performingUser = USER_A;
-      final var addedUser = new User(User.ADMINISTRATOR_USERNAME, "password1",
-               Set.of(Authority.ROLE_PLAYER), true, true, true, true);
-
-      final var response = add(performingUser, addedUser);
-
-      response.andExpect(status().isBadRequest());
-   }
-
-   @Test
-   public void add_duplicate() throws Exception {
-      final var performingUser = USER_A;
-      final var addedUser = USER_B;
-
-      service.add(addedUser);
-      final var response = add(performingUser, addedUser);
-
-      response.andExpect(status().isConflict());
-   }
-
-   @Test
-   public void add_noAuthentication() throws Exception {
-      final var performingUser = USER_A;
-      final var addedUser = USER_B;
-      service.add(performingUser);
-      final var encoded = objectMapper.writeValueAsString(addedUser);
-      final var request = post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(csrf())
-               .content(encoded);
-
-      final var response = mockMvc.perform(request);
-
-      response.andExpect(status().is4xxClientError());
-      assertThat("User not added", !service.getUsers()
-               .anyMatch(u -> u.getUsername().equals(addedUser.getUsername())));
-   }
-
-   @Test
-   public void add_noCsrfToken() throws Exception {
-      final var performingUser = USER_A;
-      final var addedUser = USER_B;
-      service.add(performingUser);
-      final var encoded = objectMapper.writeValueAsString(addedUser);
-      final var request = post("/api/user")
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
-               .content(encoded);
-
-      final var response = mockMvc.perform(request);
-
-      assertAll(() -> response.andExpect(status().isForbidden()),
-               () -> assertThat("User not added", !service.getUsers().anyMatch(
-                        u -> u.getUsername().equals(addedUser.getUsername()))));
-   }
-   
-   }// class
-   
-   @Nested
-   public class GetSelf
-   {
-
-   private void getSelf(final User user) throws Exception {
-      service.add(user);
-      final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
-               .with(user(user)).with(csrf());
-
-      final var response = mockMvc.perform(request);
-
-      response.andExpect(status().isOk());
-      /*
-       * We can not test that the response has sessino and CSRF cookies, because
-       * MocMvc does not set those cookies.
-       */
-      /*
-       * We can not check the response body for equivalence to a JSON encoding
-       * of the user object, because the returned object has an encoded password
-       * with a random salt. Checking the decoded response body for equivalence
-       * to the user object is a weak test because User objects have only entity
-       * semantics.
-       */
-      final var jsonResponse = response.andReturn().getResponse()
-               .getContentAsString();
-      final var decodedResponse = objectMapper.readValue(jsonResponse,
-               User.class);
-      assertAll("Response is the authenticated user",
-               () -> assertThat("username", decodedResponse.getUsername(),
-                        is(user.getUsername())),
-               () -> assertThat("authorities", decodedResponse.getAuthorities(),
-                        is(user.getAuthorities())),
-               () -> assertThat("password",
-                        service.getPasswordEncoder().matches(user.getPassword(),
-                                 decodedResponse.getPassword())),
-               () -> assertThat("accountNonExpired",
-                        decodedResponse.isAccountNonExpired(),
-                        is(user.isAccountNonExpired())),
-               () -> assertThat("accountNonLocked",
-                        decodedResponse.isAccountNonLocked(),
-                        is(user.isAccountNonLocked())),
-               () -> assertThat("credentialsNonExpired",
-                        decodedResponse.isCredentialsNonExpired(),
-                        is(user.isCredentialsNonExpired())),
-               () -> assertThat("enabled", decodedResponse.isEnabled(),
-                        is(user.isEnabled())));
-   }
-
-   @Test
-   public void getSelf_a() throws Exception {
-      getSelf(USER_A);
-   }
-
-   @Test
-   public void getSelf_b() throws Exception {
-      getSelf(USER_B);
-   }
-
-   @Test
-   public void getSelf_unknownUser() throws Exception {
-      final var user = USER_A;
-      final var headers = new HttpHeaders();
-      headers.setBasicAuth(user.getUsername(), user.getPassword());
-      final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
-               .headers(headers).with(csrf());
-
-      final var response = mockMvc.perform(request);
-
-      response.andExpect(status().isUnauthorized());
-   }
-
-   @Test
-   public void getSelf_wrongPassword() throws Exception {
-      final var user = USER_A;
-      final var wrongPassword = "****";
-      final var headers = new HttpHeaders();
-      headers.setBasicAuth(user.getUsername(), wrongPassword);
-      service.add(user);
-      final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
-               .headers(headers).with(csrf());
-
-      final var response = mockMvc.perform(request);
-
-      response.andExpect(status().isUnauthorized());
-   }
-   
-   }// class
 }
