@@ -36,7 +36,7 @@
 		<MC.node.version>v14.13.1</MC.node.version>
 		<MC.npm.version>6.14.8</MC.npm.version>
 		<MC.spotbugs.version>4.1.4</MC.spotbugs.version>
-		<MC.spring-boot.version>2.3.4.RELEASE</MC.spring-boot.version>
+		<MC.spring-boot.version>2.4.0</MC.spring-boot.version>
 		<helm.init.add-default-repo>false</helm.init.add-default-repo>
 	</properties>
 	<build>
