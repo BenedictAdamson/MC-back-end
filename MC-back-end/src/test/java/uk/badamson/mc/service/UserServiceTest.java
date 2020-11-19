@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,7 +38,8 @@ import uk.badamson.mc.User;
 
 /**
  * <p>
- * Auxiliary test code for classes that implement the {@link UserService} interface.
+ * Auxiliary test code for classes that implement the {@link UserService}
+ * interface.
  * </p>
  */
 public class UserServiceTest {
@@ -53,7 +53,7 @@ public class UserServiceTest {
    public static void add_1(final UserService service, final User user) {
       add(service, user);
 
-      final Stream<User> users = service.getUsers();
+      final var users = service.getUsers();
       final UserDetails userDetails = loadUserByUsername(service,
                user.getUsername());
       final var usersList = users.collect(toList());
@@ -88,7 +88,7 @@ public class UserServiceTest {
             final User user2) {
       add(service, user1);
       add(service, user2);
-      final Stream<User> users = service.getUsers();
+      final var users = service.getUsers();
       final var usersList = users.collect(toList());
       assertThat(
                "A subsequently retrieved sequence of the users will include a user equivalent to the given user [1].",
@@ -103,13 +103,13 @@ public class UserServiceTest {
    }
 
    public static Stream<User> getUsers(final UserService service) {
-      final Stream<User> users = service.getUsers();
+      final var users = service.getUsers();
 
       assertInvariants(service);
       assertNotNull(users, "Always returns a (non null) stream.");// guard
       final var usersList = users.collect(toList());
-      final Set<String> userNames = usersList.stream()
-               .map(user -> user.getUsername()).collect(toUnmodifiableSet());
+      final var userNames = usersList.stream().map(user -> user.getUsername())
+               .collect(toUnmodifiableSet());
       assertThat("The list of users always has an administrator.", userNames,
                hasItem(User.ADMINISTRATOR_USERNAME));
       assertEquals(userNames.size(), usersList.size(),
@@ -118,23 +118,22 @@ public class UserServiceTest {
       return usersList.stream();
    }
 
-   public static UserDetails loadUserByUsername(final UserService service,
+   public static User loadUserByUsername(final UserService service,
             final String username) {
-      final boolean administrator = User.ADMINISTRATOR_USERNAME
-               .equals(username);
+      final var administrator = User.ADMINISTRATOR_USERNAME.equals(username);
 
-      final UserDetails userDetails = service.loadUserByUsername(username);
+      final var user = service.loadUserByUsername(username);
 
       assertInvariants(service);
-      assertNotNull(userDetails, "Non null user");
+      assertNotNull(user, "Non null user");// guard
 
-      assertTrue(!(administrator && userDetails == null),
+      assertTrue(!(administrator && user == null),
                "Always have user details for the administrator.");
-      if (userDetails != null) {
+      if (user != null) {
          assertThat("The administrator has a complete set of authorities.",
-                  userDetails.getAuthorities(),
+                  user.getAuthorities(),
                   administrator ? is(Authority.ALL) : anything());
       }
-      return userDetails;
+      return user;
    }
 }
