@@ -52,11 +52,6 @@ import uk.badamson.mc.service.UserService;
  * <p>
  * Unit tests of the {@link UserController} class.
  * <p>
- * <p>
- * We can not use JUnit 5 {@link Nested} test classes because
- * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tests.
- * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -78,6 +73,10 @@ public class UserControllerTest {
 
    @Autowired
    private ObjectMapper objectMapper;
+   
+   @Nested
+   public class Add
+   {
 
    private ResultActions add(final User performingUser, final User addedUser)
             throws Exception {
@@ -160,6 +159,12 @@ public class UserControllerTest {
                () -> assertThat("User not added", !service.getUsers().anyMatch(
                         u -> u.getUsername().equals(addedUser.getUsername()))));
    }
+   
+   }// class
+   
+   @Nested
+   public class GetSelf
+   {
 
    private void getSelf(final User user) throws Exception {
       service.add(user);
@@ -242,4 +247,6 @@ public class UserControllerTest {
 
       response.andExpect(status().isUnauthorized());
    }
+   
+   }// class
 }

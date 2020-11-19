@@ -62,11 +62,6 @@ import uk.badamson.mc.service.ScenarioService;
  * <p>
  * Unit tests of the {@link GameController} class.
  * <p>
- * <p>
- * We can not use JUnit 5 {@link Nested} test classes because
- * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tests.
- * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -95,6 +90,9 @@ public class GameControllerTest {
    @Autowired
    private MockMvc mockMvc;
 
+   @Nested
+   public class Create
+   {
    @Test
    public void create_knowScenario() throws Exception {
       final var scenario = scenarioService.getScenarioIdentifiers().findAny()
@@ -185,6 +183,12 @@ public class GameControllerTest {
 
       return mockMvc.perform(request);
    }
+   
+   }// class
+   
+   @Nested
+   public class GetGame
+   {
 
    private ResultActions getGame(final Game.Identifier id) throws Exception {
       final var request = get(GameController.createPathFor(id))
@@ -267,6 +271,12 @@ public class GameControllerTest {
 
       response.andExpect(status().isNotFound());
    }
+   
+   }// class
+   
+   @Nested
+   public class Modify
+   {
 
    @Test
    public void modify_endRecruitment() throws Exception {
@@ -406,4 +416,6 @@ public class GameControllerTest {
 
       return mockMvc.perform(request);
    }
+   
+   }// class
 }

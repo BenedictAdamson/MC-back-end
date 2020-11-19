@@ -49,11 +49,6 @@ import uk.badamson.mc.service.ScenarioService;
  * <p>
  * Unit tests of the {@link ScenarioController} class.
  * <p>
- * <p>
- * We can not use JUnit 5 {@link Nested} test classes because
- * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tests.
- * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -84,6 +79,10 @@ public class ScenarioControllerTest {
                new TypeReference<List<NamedUUID>>() {
                });
    }
+   
+   @Nested
+   public class GetScenario
+   {
 
    private ResultActions getScenario(final UUID id) throws Exception {
       final var path = ScenarioController.createPathFor(id);
@@ -119,4 +118,6 @@ public class ScenarioControllerTest {
       assertEquals(id, scenario.getIdentifier(),
                "scenario has the requested ID");
    }
+   
+   }// class
 }
