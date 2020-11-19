@@ -19,16 +19,11 @@ package uk.badamson.mc;
  */
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
-import uk.badamson.mc.repository.GameRepository;
-import uk.badamson.mc.repository.GameRepositoryTest;
 import uk.badamson.mc.repository.RepositoryLayerSpringConfiguration;
-import uk.badamson.mc.repository.UserRepository;
-import uk.badamson.mc.repository.UserRepositoryTest;
 import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
 
 /**
