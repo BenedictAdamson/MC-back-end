@@ -18,10 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -47,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.service.UserService;
 
 /**
@@ -76,9 +79,11 @@ public class UserSteps {
    @Autowired
    private ObjectMapper objectMapper;
 
+   private User expectedUser;
+
    private User user;
 
-   private List<User> responseUserList;
+   private List<User> userList;
 
    @Then("MC does not present adding a user as an option")
    public void add_user_not_permitted() throws Exception {
@@ -118,9 +123,14 @@ public class UserSteps {
       }
    }
 
+   private void getResponseAsUser() throws IOException {
+      final var response = world.getResponseBodyAsString();
+      user = objectMapper.readValue(response, User.class);
+   }
+
    private void getResponseAsUserList() throws IOException {
       final var response = world.getResponseBodyAsString();
-      responseUserList = objectMapper.readValue(response,
+      userList = objectMapper.readValue(response,
                new TypeReference<List<User>>() {
                });
    }
@@ -153,21 +163,41 @@ public class UserSteps {
                () -> world.expectResponse(header().string("Location", "/")));
    }
 
+   @Then("MC serves the user page")
+   public void mc_serves_user_page() throws Exception {
+      world.responseIsOk();
+      try {
+         getResponseAsUser();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
+   }
+
    @Then("MC serves the users page")
    public void mc_serves_users_page() throws Exception {
       world.responseIsOk();
    }
 
+   @When("Navigate to one user")
+   public void navigate_to_one_user() throws Exception {
+      Objects.requireNonNull(userList, "userList");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      expectedUser = userList.get(0);
+      final var path = UserController.createPathForUser(user.getUsername());
+      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
+   }
+
    @Then("the list of users has at least one user")
    public void the_list_of_users_has_one_user() {
-      assertThat(responseUserList, not(empty()));
+      assertThat(userList, not(empty()));
    }
 
    @Then("the list of users includes a user named {string}")
    public void the_list_of_users_includes_a_user_named(final String name) {
-      Objects.requireNonNull(responseUserList, "user list");
-      assertTrue(responseUserList.stream()
-               .filter(u -> u.getUsername().equals(name)).count() == 1);
+      Objects.requireNonNull(userList, "user list");
+      assertTrue(userList.stream().filter(u -> u.getUsername().equals(name))
+               .count() == 1);
    }
 
    @Then("the response is a list of users")
@@ -193,5 +223,26 @@ public class UserSteps {
    @When("user has the {string} role")
    public void user_has_role(final String role) {
       user_has_authorities(Set.of(parseRole(role)));
+   }
+
+   @Then("The user page includes the user name")
+   public void user_page_includes_user_name() {
+      Objects.requireNonNull(expectedUser, "expectedUser");
+      Objects.requireNonNull(user, "user");
+
+      assertEquals(expectedUser.getUsername(), user.getUsername());
+   }
+
+   @Then("The user page lists the roles of the user")
+   public void user_page_lists_roles_of_user() {
+      Objects.requireNonNull(expectedUser, "expectedUser");
+      Objects.requireNonNull(user, "user");
+
+      assertEquals(expectedUser.getAuthorities(), user.getAuthorities());
+   }
+
+   @Given("Viewing the list of users")
+   public void viewing_list_of_users() {
+      userList = service.getUsers().collect(toList());
    }
 }

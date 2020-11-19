@@ -46,6 +46,24 @@ import uk.badamson.mc.service.UserService;
 @RestController
 public class UserController {
 
+   /**
+    * <p>
+    * Create a valid path for a user resource for a user that has a given user
+    * name.
+    * </p>
+    *
+    *
+    * @param username
+    *           The identifier of the user
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code username} is null.
+    */
+   public static String createPathForUser(final String username) {
+      Objects.requireNonNull(username, "id");
+      return "/api/user/" + username;
+   }
+
    private final UserService service;
 
    /**
