@@ -54,7 +54,7 @@ import uk.badamson.mc.service.ScenarioService;
 public class ScenarioSteps {
 
    @Autowired
-   private BackEndWorldCore worldCore;
+   private BackEndWorld worldCore;
 
    @Autowired
    private GameService gameService;

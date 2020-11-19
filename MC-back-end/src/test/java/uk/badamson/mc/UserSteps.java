@@ -58,7 +58,7 @@ import uk.badamson.mc.service.UserService;
 public class UserSteps {
 
    @Autowired
-   private BackEndWorldCore worldCore;
+   private BackEndWorld worldCore;
 
    @Autowired
    private UserService service;

@@ -92,7 +92,7 @@ public class GameSteps {
    }
 
    @Autowired
-   private BackEndWorldCore worldCore;
+   private BackEndWorld worldCore;
 
    @Autowired
    private GameService gameService;
@@ -299,7 +299,7 @@ public class GameSteps {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
-      BackEndWorldCore.require(game.isRecruiting(), "game is recruiting");
+      BackEndWorld.require(game.isRecruiting(), "game is recruiting");
    }
 
    @When("Viewing the games of the scenario")

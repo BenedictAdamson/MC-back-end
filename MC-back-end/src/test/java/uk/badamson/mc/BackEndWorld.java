@@ -59,7 +59,7 @@ import uk.badamson.mc.repository.UserRepository;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ScenarioScope
 @AutoConfigureMockMvc
-public class BackEndWorldCore {
+public class BackEndWorld {
 
    static void require(final boolean assertion, final String description) {
       if (!assertion) {
