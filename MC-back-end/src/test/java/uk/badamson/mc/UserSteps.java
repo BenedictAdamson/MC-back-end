@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -56,6 +57,11 @@ import uk.badamson.mc.service.UserService;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserSteps {
+
+   private static Authority parseRole(final String role) {
+      return Authority.valueOf(
+               "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
+   }
 
    @Autowired
    private BackEndWorld world;
@@ -88,11 +94,10 @@ public class UserSteps {
       final var addedUser = new User(name, password, Set.of(), true, true, true,
                true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
-      world.performRequest(
-               post("/api/user").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .with(user(world.loggedInUser)).with(csrf())
-                        .content(encoded));
+      world.performRequest(post("/api/user")
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()).content(encoded));
    }
 
    @Then("can get the list of users")
@@ -123,9 +128,8 @@ public class UserSteps {
 
    private void getUsers() throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-      world.performRequest(
-               get("/api/user").accept(MediaType.APPLICATION_JSON)
-                        .with(user(world.loggedInUser)).with(csrf()));
+      world.performRequest(get("/api/user").accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
    }
 
    @Given("logged in")
@@ -142,8 +146,7 @@ public class UserSteps {
    @Then("MC accepts the login")
    public void mc_accepts_the_login() throws Exception {
       assertAll(() -> world.expectResponse(status().isFound()),
-               () -> world
-                        .expectResponse(header().string("Location", "/")));
+               () -> world.expectResponse(header().string("Location", "/")));
    }
 
    @Then("MC serves the users page")
@@ -185,6 +188,6 @@ public class UserSteps {
 
    @When("user has the {string} role")
    public void user_has_role(final String role) {
-      user_has_authorities(Set.of(Authority.valueOf("ROLE_" + role)));
+      user_has_authorities(Set.of(parseRole(role)));
    }
 }
