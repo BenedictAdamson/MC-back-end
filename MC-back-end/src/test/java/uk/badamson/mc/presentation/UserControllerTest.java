@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.MultipleFailuresError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,9 +66,7 @@ public class UserControllerTest {
       @Test
       public void administrator() throws Exception {
          final var performingUser = USER_A;
-         final var addedUser = new User(User.ADMINISTRATOR_USERNAME,
-                  "password1", Set.of(Authority.ROLE_PLAYER), true, true, true,
-                  true);
+         final var addedUser = ADMINISTRATOR;
 
          final var response = test(performingUser, addedUser);
 
@@ -185,27 +184,8 @@ public class UserControllerTest {
                   .getContentAsString();
          final var decodedResponse = objectMapper.readValue(jsonResponse,
                   User.class);
-         assertAll("Response is the authenticated user",
-                  () -> assertThat("username", decodedResponse.getUsername(),
-                           is(user.getUsername())),
-                  () -> assertThat("authorities",
-                           decodedResponse.getAuthorities(),
-                           is(user.getAuthorities())),
-                  () -> assertThat("password",
-                           service.getPasswordEncoder().matches(
-                                    user.getPassword(),
-                                    decodedResponse.getPassword())),
-                  () -> assertThat("accountNonExpired",
-                           decodedResponse.isAccountNonExpired(),
-                           is(user.isAccountNonExpired())),
-                  () -> assertThat("accountNonLocked",
-                           decodedResponse.isAccountNonLocked(),
-                           is(user.isAccountNonLocked())),
-                  () -> assertThat("credentialsNonExpired",
-                           decodedResponse.isCredentialsNonExpired(),
-                           is(user.isCredentialsNonExpired())),
-                  () -> assertThat("enabled", decodedResponse.isEnabled(),
-                           is(user.isEnabled())));
+         assertEquivalentUserAttributes("Response is the authenticated user",
+                  user, decodedResponse);
       }
 
       @Test
@@ -238,11 +218,83 @@ public class UserControllerTest {
 
    }// class
 
+   @Nested
+   public class GetUser {
+      @Nested
+      public class Valid {
+
+         @Test
+         public void a() throws Exception {
+            test(USER_A);
+         }
+
+         @Test
+         public void b() throws Exception {
+            test(USER_B);
+         }
+
+         private void test(final User user) throws Exception {
+            final var requestingUserName = USER_C.getUsername();
+            assert !requestingUserName.equals(user.getUsername());
+            // Tough test: requesting user has minimum authority
+            final var requestingUser = new User(requestingUserName, "password1",
+                     Set.of(Authority.ROLE_PLAYER), true, true, true, true);
+            service.add(user);
+
+            final var response = GetUser.this.perform(user.getUsername(),
+                     requestingUser);
+
+            response.andExpect(status().isOk());
+            final var jsonResponse = response.andReturn().getResponse()
+                     .getContentAsString();
+            final var decodedResponse = objectMapper.readValue(jsonResponse,
+                     User.class);
+            assertEquivalentUserAttributes("Response is the identified user",
+                     user, decodedResponse);
+         }
+      }// class
+
+      @Test
+      public void notLoggedIn() throws Exception {
+         // Tough test: exists and has CSRF token
+         final var user = USER_A;
+         service.add(user);
+         final var response = perform(user.getUsername(), null);
+
+         response.andExpect(status().isUnauthorized());
+      }
+
+      private ResultActions perform(final String id, final User requestingUser)
+               throws Exception {
+         final var path = UserController.createPathForUser(id);
+         var request = get(path).accept(MediaType.APPLICATION_JSON);
+         if (requestingUser != null) {
+            request = request.with(user(requestingUser));
+         }
+
+         return mockMvc.perform(request);
+      }
+
+      @Test
+      public void unknownUser() throws Exception {
+         // Tough test: has permission and CSRF token
+         final var response = perform(USER_A.getUsername(), ADMINISTRATOR);
+
+         response.andExpect(status().isNotFound());
+      }
+   }// class
+
+   private static final User ADMINISTRATOR = new User(
+            User.ADMINISTRATOR_USERNAME, "password1",
+            Set.of(Authority.ROLE_PLAYER), true, true, true, true);
    private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
             true, true, true, true);
 
    private static final User USER_B = new User("allan", "password1",
             Set.of(Authority.ROLE_PLAYER), false, false, false, false);
+
+   private static final User USER_C = new User("john", "password2",
+            Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true, true);
 
    @Autowired
    private UserService service;
@@ -252,4 +304,27 @@ public class UserControllerTest {
 
    @Autowired
    private ObjectMapper objectMapper;
+
+   private void assertEquivalentUserAttributes(final String message,
+            final User expected, final User actual)
+            throws MultipleFailuresError {
+      assertAll(message,
+               () -> assertThat("username", actual.getUsername(),
+                        is(expected.getUsername())),
+               () -> assertThat("authorities", actual.getAuthorities(),
+                        is(expected.getAuthorities())),
+               () -> assertThat("password",
+                        service.getPasswordEncoder().matches(
+                                 expected.getPassword(), actual.getPassword())),
+               () -> assertThat("accountNonExpired",
+                        actual.isAccountNonExpired(),
+                        is(expected.isAccountNonExpired())),
+               () -> assertThat("accountNonLocked", actual.isAccountNonLocked(),
+                        is(expected.isAccountNonLocked())),
+               () -> assertThat("credentialsNonExpired",
+                        actual.isCredentialsNonExpired(),
+                        is(expected.isCredentialsNonExpired())),
+               () -> assertThat("enabled", actual.isEnabled(),
+                        is(expected.isEnabled())));
+   }
 }
