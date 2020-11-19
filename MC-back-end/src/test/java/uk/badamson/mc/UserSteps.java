@@ -59,8 +59,12 @@ import uk.badamson.mc.service.UserService;
 public class UserSteps {
 
    private static Authority parseRole(final String role) {
-      return Authority.valueOf(
-               "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
+      try {
+         return Authority.valueOf(
+                  "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("roleName " + role, e);
+      }
    }
 
    @Autowired
