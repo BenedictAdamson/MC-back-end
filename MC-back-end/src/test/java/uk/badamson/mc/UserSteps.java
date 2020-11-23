@@ -152,6 +152,11 @@ public class UserSteps {
       world.loggedInUser = user;
    }
 
+   @Then("MC accepts the logout")
+   public void mc_accepts_logout() throws Exception {
+      world.expectResponse(status().is2xxSuccessful());
+   }
+
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() throws Exception {
       world.expectResponse(status().isCreated());
@@ -189,6 +194,12 @@ public class UserSteps {
                .with(user(world.loggedInUser)).with(csrf()));
    }
 
+   @When("request logout")
+   public void request_logout() throws Exception {
+      world.performRequest(
+               post("/logout").with(user(world.loggedInUser)).with(csrf()));
+   }
+
    @Then("the list of users has at least one user")
    public void the_list_of_users_has_one_user() {
       assertThat(userList, not(empty()));
@@ -213,17 +224,17 @@ public class UserSteps {
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
       final Set<Authority> authorities = Set.of();// no roles
-      user_has_authorities(authorities);
+      userHasAuthorities(authorities);
    }
 
-   private void user_has_authorities(final Set<Authority> authorities) {
-      user = new User("Zoe", "password1", authorities, true, true, true, true);
-      service.add(user);
+   @When("user has any role")
+   public void user_has_any_role() {
+      userHasAuthorities(Set.of(Authority.values()[0]));
    }
 
    @When("user has the {string} role")
    public void user_has_role(final String role) {
-      user_has_authorities(Set.of(parseRole(role)));
+      userHasAuthorities(Set.of(parseRole(role)));
    }
 
    @Then("The user page includes the user name")
@@ -240,6 +251,11 @@ public class UserSteps {
       Objects.requireNonNull(user, "user");
 
       assertEquals(expectedUser.getAuthorities(), user.getAuthorities());
+   }
+
+   private void userHasAuthorities(final Set<Authority> authorities) {
+      user = new User("Zoe", "password1", authorities, true, true, true, true);
+      service.add(user);
    }
 
    @Given("Viewing the list of users")
