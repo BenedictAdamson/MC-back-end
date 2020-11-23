@@ -171,7 +171,7 @@ public class UserControllerTest {
          response.andExpect(status().isOk());
          /*
           * We can not test that the response has session and CSRF cookies,
-          * because MocMvc does not set those cookies.
+          * because MockMvc does not set those cookies.
           */
          /*
           * We can not check the response body for equivalence to a JSON
@@ -181,6 +181,38 @@ public class UserControllerTest {
           * objects have only entity semantics.
           */
          final var jsonResponse = response.andReturn().getResponse()
+                  .getContentAsString();
+         final var decodedResponse = objectMapper.readValue(jsonResponse,
+                  User.class);
+         assertEquivalentUserAttributes("Response is the authenticated user",
+                  user, decodedResponse);
+      }
+
+      @Test
+      public void twice() throws Exception {
+         final var user = USER_A;
+         service.add(user);
+         final var request1 = get("/api/self")
+                  .accept(MediaType.APPLICATION_JSON).with(user(user))
+                  .with(csrf());
+         mockMvc.perform(request1);
+
+         final var request2 = get("/api/self")
+                  .accept(MediaType.APPLICATION_JSON).with(user(user))
+                  .with(csrf());
+         final var response2 = mockMvc.perform(request2);
+         /*
+          * We can not test that the response has the same session and CSRF
+          * cookies, because MockMvc does not set those cookies.
+          */
+         /*
+          * We can not check the response body for equivalence to a JSON
+          * encoding of the user object, because the returned object has an
+          * encoded password with a random salt. Checking the decoded response
+          * body for equivalence to the user object is a weak test because User
+          * objects have only entity semantics.
+          */
+         final var jsonResponse = response2.andReturn().getResponse()
                   .getContentAsString();
          final var decodedResponse = objectMapper.readValue(jsonResponse,
                   User.class);
