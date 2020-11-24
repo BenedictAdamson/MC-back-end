@@ -147,6 +147,14 @@ public class GameSteps {
       createGame();
    }
 
+   private void endRecruitmentForGame() throws Exception {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = createGamePath(gameId);
+      game.endRecruitment();
+      world.putResource(path, game);
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // Do nothing
@@ -226,6 +234,20 @@ public class GameSteps {
       world.getResponse().andExpect(status().is(PUT_OK_STATUS));
    }
 
+   @Then("MC does not allow creating a game")
+   public void mc_does_not_allow_creating_game() throws Exception {
+      chooseScenario();
+      createGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("MC does not allow ending recruitment for the game")
+   public void mc_does_not_allow_ending_recuitment_for_game() throws Exception {
+      chooseScenario();
+      endRecruitmentForGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       final var response = world.getResponse();
@@ -247,21 +269,6 @@ public class GameSteps {
       world.getJson(createGamePath(gameId));
    }
 
-   @Then("MC does not allow creating a game as an option")
-   public void mc_does_not_allow_creating_game_option() throws Exception {
-      chooseScenario();
-      createGame();
-      world.getResponse().andExpect(status().is4xxClientError());
-   }
-
-   @Then("MC does not allow ending recruitment for the game as an option")
-   public void mc_does_not_allow_ending_recuitment_game_option()
-            throws Exception {
-      chooseScenario();
-      endRecruitmentForGame();
-      world.getResponse().andExpect(status().is4xxClientError());
-   }
-
    @When("A scenario has games")
    public void scenario_has_games() {
       chooseScenario();
@@ -276,14 +283,6 @@ public class GameSteps {
          throw new AssertionFailedError("Can ask the server to change the game",
                   e);
       }
-   }
-
-   private void endRecruitmentForGame() throws Exception {
-      Objects.requireNonNull(game, "game");
-      Objects.requireNonNull(gameId, "gameId");
-      final var path = createGamePath(gameId);
-      game.endRecruitment();
-      world.putResource(path, game);
    }
 
    @Given("viewing a game that is recruiting players")

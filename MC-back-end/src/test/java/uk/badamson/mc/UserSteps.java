@@ -85,12 +85,6 @@ public class UserSteps {
 
    private List<User> userList;
 
-   @Then("MC does not allow adding a user as an option")
-   public void add_user_not_allowed() throws Exception {
-      addUser("Allan", "letmein");
-      world.expectResponse(status().isForbidden());
-   }
-
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user_named(final String name, final String password)
             throws Exception {
@@ -166,6 +160,12 @@ public class UserSteps {
    public void mc_accepts_the_login() throws Exception {
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> world.expectResponse(header().string("Location", "/")));
+   }
+
+   @Then("MC does not allow adding a user")
+   public void mc_does_not_allow_adding_user() throws Exception {
+      addUser("Allan", "letmein");
+      world.expectResponse(status().isForbidden());
    }
 
    @Then("MC serves the user page")
