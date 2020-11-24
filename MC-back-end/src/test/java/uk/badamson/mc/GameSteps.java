@@ -247,24 +247,16 @@ public class GameSteps {
       world.getJson(createGamePath(gameId));
    }
 
-   @Then("MC does not present creating a game as an option")
-   public void mc_does_not_present_creating_game_option() throws Exception {
-      /*
-       * A REST API does not really "present options", but it can indicate that
-       * permission is denied.
-       */
+   @Then("MC does not allow creating a game as an option")
+   public void mc_does_not_allow_creating_game_option() throws Exception {
       chooseScenario();
       createGame();
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
-   @Then("MC does not present ending recruitment for the game as an option")
-   public void mc_does_not_present_ending_recuitment_game_option()
+   @Then("MC does not allow ending recruitment for the game as an option")
+   public void mc_does_not_allow_ending_recuitment_game_option()
             throws Exception {
-      /*
-       * A REST API does not really "present options", but it can indicate that
-       * permission is denied.
-       */
       chooseScenario();
       endRecruitmentForGame();
       world.getResponse().andExpect(status().is4xxClientError());

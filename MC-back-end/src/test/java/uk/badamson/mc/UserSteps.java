@@ -85,8 +85,8 @@ public class UserSteps {
 
    private List<User> userList;
 
-   @Then("MC does not present adding a user as an option")
-   public void add_user_not_permitted() throws Exception {
+   @Then("MC does not allow adding a user as an option")
+   public void add_user_not_allowed() throws Exception {
       addUser("Allan", "letmein");
       world.expectResponse(status().isForbidden());
    }
