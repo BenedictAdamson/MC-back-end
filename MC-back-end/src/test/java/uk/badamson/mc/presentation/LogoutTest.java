@@ -25,7 +25,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,11 +43,6 @@ import uk.badamson.mc.service.UserService;
  * <p>
  * Unit tests of the {@code /logout} end-point.
  * <p>
- * <p>
- * We can not use JUnit 5 {@link Nested} test classes because
- * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tests.
- * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)

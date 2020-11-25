@@ -49,17 +49,53 @@ import uk.badamson.mc.service.ScenarioService;
  * <p>
  * Unit tests of the {@link ScenarioController} class.
  * <p>
- * <p>
- * We can not use JUnit 5 {@link Nested} test classes because
- * {@link SpringBootTest} does not work properly with them; in particular the
- * {@link DirtiesContext} annotation is ignored on nested tests.
- * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class ScenarioControllerTest {
+
+   @Nested
+   public class GetScenario {
+
+      @Test
+      public void absent() throws Exception {
+         final var ids = service.getScenarioIdentifiers()
+                  .collect(toUnmodifiableSet());
+         var id = UUID.randomUUID();
+         while (ids.contains(id)) {
+            id = UUID.randomUUID();
+         }
+
+         final var response = perform(id);
+
+         response.andExpect(status().isNotFound());
+      }
+
+      private ResultActions perform(final UUID id) throws Exception {
+         final var path = ScenarioController.createPathFor(id);
+         final var request = get(path).accept(MediaType.APPLICATION_JSON);
+
+         return mockMvc.perform(request);
+      }
+
+      @Test
+      public void present() throws Exception {
+         final var id = service.getScenarioIdentifiers().findAny().get();
+
+         final var response = perform(id);
+
+         response.andExpect(status().isOk());
+         final var jsonResponse = response.andReturn().getResponse()
+                  .getContentAsString();
+         final var scenario = objectMapper.readValue(jsonResponse,
+                  Scenario.class);
+         assertEquals(id, scenario.getIdentifier(),
+                  "scenario has the requested ID");
+      }
+
+   }// class
 
    @Autowired
    private MockMvc mockMvc;
@@ -83,40 +119,5 @@ public class ScenarioControllerTest {
       objectMapper.readValue(jsonResponse,
                new TypeReference<List<NamedUUID>>() {
                });
-   }
-
-   private ResultActions getScenario(final UUID id) throws Exception {
-      final var path = ScenarioController.createPathFor(id);
-      final var request = get(path).accept(MediaType.APPLICATION_JSON);
-
-      return mockMvc.perform(request);
-   }
-
-   @Test
-   public void getScenario_absent() throws Exception {
-      final var ids = service.getScenarioIdentifiers()
-               .collect(toUnmodifiableSet());
-      var id = UUID.randomUUID();
-      while (ids.contains(id)) {
-         id = UUID.randomUUID();
-      }
-
-      final var response = getScenario(id);
-
-      response.andExpect(status().isNotFound());
-   }
-
-   @Test
-   public void getScenario_present() throws Exception {
-      final var id = service.getScenarioIdentifiers().findAny().get();
-
-      final var response = getScenario(id);
-
-      response.andExpect(status().isOk());
-      final var jsonResponse = response.andReturn().getResponse()
-               .getContentAsString();
-      final var scenario = objectMapper.readValue(jsonResponse, Scenario.class);
-      assertEquals(id, scenario.getIdentifier(),
-               "scenario has the requested ID");
    }
 }

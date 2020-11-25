@@ -112,7 +112,6 @@ public interface UserService extends UserDetailsService {
     * </ul>
     */
    @Override
-   UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException;
+   User loadUserByUsername(String username) throws UsernameNotFoundException;
 
 }

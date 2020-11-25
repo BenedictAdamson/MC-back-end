@@ -51,15 +51,15 @@ import uk.badamson.mc.repository.UserRepository;
 
 /**
  * <p>
- * Shared code and basic SUT objects (the core of the test world) for BDD steps
- * for the Cucumber-JVM BDD testing tool
+ * Shared code and basic SUT objects (the test <i>world</i>) for BDD steps for
+ * the Cucumber-JVM BDD testing tool
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ScenarioScope
 @AutoConfigureMockMvc
-public class BackEndWorldCore {
+public class BackEndWorld {
 
    static void require(final boolean assertion, final String description) {
       if (!assertion) {

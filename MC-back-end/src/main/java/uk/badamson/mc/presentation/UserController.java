@@ -22,12 +22,15 @@ import java.security.Principal;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -45,6 +48,27 @@ import uk.badamson.mc.service.UserService;
  */
 @RestController
 public class UserController {
+
+   /**
+    * <p>
+    * Create a valid path for a user resource for a user that has a given user
+    * name.
+    * </p>
+    * <p>
+    * The created path is consistent with the path used with
+    * {@link #getUser(String)}.
+    * </p>
+    *
+    * @param username
+    *           The identifier of the user
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code username} is null.
+    */
+   public static String createPathForUser(final String username) {
+      Objects.requireNonNull(username, "id");
+      return "/api/user/" + username;
+   }
 
    private final UserService service;
 
@@ -154,5 +178,38 @@ public class UserController {
     */
    public final UserService getService() {
       return service;
+   }
+
+   /**
+    * <p>
+    * Behaviour of the GET verb for a user resource.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) user.</li>
+    * <li>The {@linkplain User#getUsername() username} of the returned user
+    * {@linkplain String#equals(Object) is equivalent to} the given ID</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the wanted user.
+    * @return The response.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    * @throws ResponseStatusException
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+    *            is no user with the given {@code id}
+    *            {@linkplain String#equals(Object) equivalent to} its
+    *            {@linkplain User#getUsername() username}.
+    */
+   @GetMapping("/api/user/{id}")
+   @Nonnull
+   public User getUser(@Nonnull @PathVariable final String id) {
+      try {
+         return service.loadUserByUsername(id);
+      } catch (final UsernameNotFoundException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized ID", e);
+      }
    }
 }

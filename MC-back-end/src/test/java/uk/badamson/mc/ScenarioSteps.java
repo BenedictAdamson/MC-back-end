@@ -54,7 +54,7 @@ import uk.badamson.mc.service.ScenarioService;
 public class ScenarioSteps {
 
    @Autowired
-   private BackEndWorldCore worldCore;
+   private BackEndWorld world;
 
    @Autowired
    private GameService gameService;
@@ -72,13 +72,13 @@ public class ScenarioSteps {
    private Scenario responseScenario;
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
-      final var response = worldCore.getResponseBodyAsString();
+      final var response = world.getResponseBodyAsString();
       objectMapper.readValue(response, new TypeReference<List<NamedUUID>>() {
       });
    }
 
    private void getScenarios() throws Exception {
-      worldCore.performRequest(
+      world.performRequest(
                get("/api/scenario").accept(MediaType.APPLICATION_JSON));
    }
 
@@ -89,7 +89,7 @@ public class ScenarioSteps {
 
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() throws Exception {
-      final var responseText = worldCore.getResponseBodyAsString();
+      final var responseText = world.getResponseBodyAsString();
       responseScenario = objectMapper.readValue(responseText, Scenario.class);
       assertEquals(id, responseScenario.getIdentifier(),
                "scenario has the requested ID");
@@ -97,13 +97,13 @@ public class ScenarioSteps {
 
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() throws Exception {
-      worldCore.responseIsOk();
+      world.responseIsOk();
    }
 
    @When("Navigate to one scenario")
    public void navigate_to_one_scenario() throws Exception {
       id = ids.stream().findAny().get();
-      worldCore.performRequest(
+      world.performRequest(
                get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
    }
 

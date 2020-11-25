@@ -18,10 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -32,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.service.UserService;
 
 /**
@@ -57,8 +61,17 @@ import uk.badamson.mc.service.UserService;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserSteps {
 
+   private static Authority parseRole(final String role) {
+      try {
+         return Authority.valueOf(
+                  "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("roleName " + role, e);
+      }
+   }
+
    @Autowired
-   private BackEndWorldCore worldCore;
+   private BackEndWorld world;
 
    @Autowired
    private UserService service;
@@ -66,15 +79,11 @@ public class UserSteps {
    @Autowired
    private ObjectMapper objectMapper;
 
+   private User expectedUser;
+
    private User user;
 
-   private List<User> responseUserList;
-
-   @Then("MC does not present adding a user as an option")
-   public void add_user_not_permitted() throws Exception {
-      addUser("Allan", "letmein");
-      worldCore.expectResponse(status().isForbidden());
-   }
+   private List<User> userList;
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user_named(final String name, final String password)
@@ -84,15 +93,14 @@ public class UserSteps {
 
    private void addUser(final String name, final String password)
             throws Exception {
-      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       final var addedUser = new User(name, password, Set.of(), true, true, true,
                true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
-      worldCore.performRequest(
-               post("/api/user").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .with(user(worldCore.loggedInUser)).with(csrf())
-                        .content(encoded));
+      world.performRequest(post("/api/user")
+               .contentType(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()).content(encoded));
    }
 
    @Then("can get the list of users")
@@ -109,9 +117,14 @@ public class UserSteps {
       }
    }
 
+   private void getResponseAsUser() throws IOException {
+      final var response = world.getResponseBodyAsString();
+      user = objectMapper.readValue(response, User.class);
+   }
+
    private void getResponseAsUserList() throws IOException {
-      final var response = worldCore.getResponseBodyAsString();
-      responseUserList = objectMapper.readValue(response,
+      final var response = world.getResponseBodyAsString();
+      userList = objectMapper.readValue(response,
                new TypeReference<List<User>>() {
                });
    }
@@ -122,45 +135,81 @@ public class UserSteps {
    }
 
    private void getUsers() throws Exception {
-      Objects.requireNonNull(worldCore.loggedInUser, "loggedInUser");
-      worldCore.performRequest(
-               get("/api/user").accept(MediaType.APPLICATION_JSON)
-                        .with(user(worldCore.loggedInUser)).with(csrf()));
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      world.performRequest(get("/api/user").accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
    }
 
    @Given("logged in")
    public void logged_in() {
       Objects.requireNonNull(user, "user");
-      worldCore.loggedInUser = user;
+      world.loggedInUser = user;
+   }
+
+   @Then("MC accepts the logout")
+   public void mc_accepts_logout() throws Exception {
+      world.expectResponse(status().is2xxSuccessful());
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() throws Exception {
-      worldCore.expectResponse(status().isCreated());
+      world.expectResponse(status().isCreated());
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_the_login() throws Exception {
-      assertAll(() -> worldCore.expectResponse(status().isFound()),
-               () -> worldCore
-                        .expectResponse(header().string("Location", "/")));
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> world.expectResponse(header().string("Location", "/")));
+   }
+
+   @Then("MC does not allow adding a user")
+   public void mc_does_not_allow_adding_user() throws Exception {
+      addUser("Allan", "letmein");
+      world.expectResponse(status().isForbidden());
+   }
+
+   @Then("MC serves the user page")
+   public void mc_serves_user_page() throws Exception {
+      world.responseIsOk();
+      try {
+         getResponseAsUser();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Can decode response", e);
+      }
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() throws Exception {
-      worldCore.responseIsOk();
+      world.responseIsOk();
+   }
+
+   @When("Navigate to one user")
+   public void navigate_to_one_user() throws Exception {
+      Objects.requireNonNull(userList, "userList");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      expectedUser = userList.get(0);
+      final var path = UserController
+               .createPathForUser(expectedUser.getUsername());
+      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
+   }
+
+   @When("request logout")
+   public void request_logout() throws Exception {
+      world.performRequest(
+               post("/logout").with(user(world.loggedInUser)).with(csrf()));
    }
 
    @Then("the list of users has at least one user")
    public void the_list_of_users_has_one_user() {
-      assertThat(responseUserList, not(empty()));
+      assertThat(userList, not(empty()));
    }
 
    @Then("the list of users includes a user named {string}")
    public void the_list_of_users_includes_a_user_named(final String name) {
-      Objects.requireNonNull(responseUserList, "user list");
-      assertTrue(responseUserList.stream()
-               .filter(u -> u.getUsername().equals(name)).count() == 1);
+      Objects.requireNonNull(userList, "user list");
+      assertTrue(userList.stream().filter(u -> u.getUsername().equals(name))
+               .count() == 1);
    }
 
    @Then("the response is a list of users")
@@ -175,16 +224,42 @@ public class UserSteps {
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
       final Set<Authority> authorities = Set.of();// no roles
-      user_has_authorities(authorities);
+      userHasAuthorities(authorities);
    }
 
-   private void user_has_authorities(final Set<Authority> authorities) {
-      user = new User("Zoe", "password1", authorities, true, true, true, true);
-      service.add(user);
+   @When("user has any role")
+   public void user_has_any_role() {
+      userHasAuthorities(Set.of(Authority.values()[0]));
    }
 
    @When("user has the {string} role")
    public void user_has_role(final String role) {
-      user_has_authorities(Set.of(Authority.valueOf("ROLE_" + role)));
+      userHasAuthorities(Set.of(parseRole(role)));
+   }
+
+   @Then("The user page includes the user name")
+   public void user_page_includes_user_name() {
+      Objects.requireNonNull(expectedUser, "expectedUser");
+      Objects.requireNonNull(user, "user");
+
+      assertEquals(expectedUser.getUsername(), user.getUsername());
+   }
+
+   @Then("The user page lists the roles of the user")
+   public void user_page_lists_roles_of_user() {
+      Objects.requireNonNull(expectedUser, "expectedUser");
+      Objects.requireNonNull(user, "user");
+
+      assertEquals(expectedUser.getAuthorities(), user.getAuthorities());
+   }
+
+   private void userHasAuthorities(final Set<Authority> authorities) {
+      user = new User("Zoe", "password1", authorities, true, true, true, true);
+      service.add(user);
+   }
+
+   @Given("Viewing the list of users")
+   public void viewing_list_of_users() {
+      userList = service.getUsers().collect(toList());
    }
 }
