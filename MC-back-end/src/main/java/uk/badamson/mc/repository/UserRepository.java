@@ -41,7 +41,7 @@ public interface UserRepository extends CrudRepository<User, UUID> {
     *
     * @param username
     *           the username used to authenticate the user
-    * @return the entity with the given {@link username} or
+    * @return the entity with the given {@code username} or
     *         {@literal Optional#empty()} if none found.
     * @throws NullPointerException
     *            If {@code username} is null
