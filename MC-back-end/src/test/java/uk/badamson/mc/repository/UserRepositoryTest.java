@@ -20,6 +20,7 @@ package uk.badamson.mc.repository;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -42,7 +43,7 @@ public class UserRepositoryTest {
          }
       }
 
-      private final Map<String, User> users = new ConcurrentHashMap<>();
+      private final Map<UUID, User> users = new ConcurrentHashMap<>();
 
       @Override
       public long count() {
@@ -52,7 +53,7 @@ public class UserRepositoryTest {
       @Override
       public void delete(final User user) {
          requireNonNull(user, "user");
-         deleteById(user.getUsername());
+         deleteById(user.getId());
       }
 
       @Override
@@ -64,20 +65,20 @@ public class UserRepositoryTest {
       public void deleteAll(final Iterable<? extends User> users) {
          requireNonNull(users, "users");
          for (final User user : users) {
-            this.users.remove(user.getUsername());
+            this.users.remove(user.getId());
          }
       }
 
       @Override
-      public void deleteById(final String username) {
-         requireNonNull(username, "username");
-         users.remove(username);
+      public void deleteById(final UUID id) {
+         requireNonNull(id, "id");
+         users.remove(id);
       }
 
       @Override
-      public boolean existsById(final String username) {
-         requireNonNull(username, "username");
-         return users.containsKey(username);
+      public boolean existsById(final UUID id) {
+         requireNonNull(id, "id");
+         return users.containsKey(id);
       }
 
       @Override
@@ -86,23 +87,30 @@ public class UserRepositoryTest {
       }
 
       @Override
-      public Iterable<User> findAllById(final Iterable<String> usernames) {
-         requireNonNull(usernames, "usernames");
-         return StreamSupport.stream(usernames.spliterator(), false).distinct()
+      public Iterable<User> findAllById(final Iterable<UUID> ids) {
+         requireNonNull(ids, "ids");
+         return StreamSupport.stream(ids.spliterator(), false).distinct()
                   .map(un -> users.get(un)).filter(un -> un != null)
                   .collect(Collectors.toUnmodifiableList());
       }
 
       @Override
-      public Optional<User> findById(final String username) {
+      public Optional<User> findById(final UUID id) {
+         requireNonNull(id, "id");
+         return Optional.ofNullable(users.get(id));
+      }
+
+      @Override
+      public Optional<User> findByUsername(final String username) {
          requireNonNull(username, "username");
-         return Optional.ofNullable(users.get(username));
+         return users.values().stream()
+                  .filter(u -> username.equals(u.getUsername())).findAny();
       }
 
       @Override
       public <USER extends User> USER save(final USER user) {
          requireNonNull(user, "user");
-         users.put(user.getUsername(), user);
+         users.put(user.getId(), user);
          return user;
       }
 
@@ -111,7 +119,7 @@ public class UserRepositoryTest {
                final Iterable<USER> users) {
          requireNonNull(users, "users");
          for (final var user : users) {
-            this.users.put(user.getUsername(), user);
+            this.users.put(user.getId(), user);
          }
          return users;
       }

@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
       Objects.requireNonNull(user, "user");
       if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
          throw new IllegalArgumentException("User is administrator");
-      } else if (userRepository.existsById(user.getUsername())) {// read
+      } else if (userRepository.existsById(user.getId())) {// read
          throw new UserExistsException();
       }
       user = new User(user.getId(), user.getUsername(),
@@ -144,7 +144,7 @@ public class UserServiceImpl implements UserService {
          return administrator;
       } else {
          try {
-            return userRepository.findById(username).get();
+            return userRepository.findByUsername(username).get();
          } catch (final NoSuchElementException e) {
             throw new UsernameNotFoundException("No such user, " + username, e);
          }
