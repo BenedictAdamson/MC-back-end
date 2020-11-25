@@ -62,8 +62,6 @@ import uk.badamson.mc.service.UserService;
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserSteps {
 
-   private static final UUID ID_A = UUID.randomUUID();
-
    private static Authority parseRole(final String role) {
       try {
          return Authority.valueOf(
@@ -97,8 +95,8 @@ public class UserSteps {
    private void addUser(final String name, final String password)
             throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-      final var addedUser = new User(ID_A, name, password, Set.of(), true, true,
-               true, true);
+      final var addedUser = new User(UUID.randomUUID(), name, password,
+               Set.of(), true, true, true, true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
       world.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
@@ -255,8 +253,8 @@ public class UserSteps {
    }
 
    private void userHasAuthorities(final Set<Authority> authorities) {
-      user = new User(ID_A, "Zoe", "password1", authorities, true, true, true,
-               true);
+      user = new User(UUID.randomUUID(), "Zoe", "password1", authorities, true,
+               true, true, true);
       service.add(user);
    }
 
