@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -28,7 +29,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -98,9 +101,16 @@ public class UserController {
     * <p>
     * Behaviour of the POST verb for the user list.
     * </p>
-    * <p>
-    * Adds the given user to the list of users.
-    * </p>
+    * <ul>
+    * <li>Creates a new user.</li>
+    * <li>Returns a redirect to the newly created user. That is, a response with
+    * <ul>
+    * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
+    * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
+    * <li>A {@linkplain HttpHeaders#getLocation()
+    * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+    * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
+    * </ul>
     *
     * @param user
     *           The body of the request
@@ -118,13 +128,19 @@ public class UserController {
     *            the {@linkplain User#getUsername() username} of {@code user} is
     *            already the username of a user.</li>
     *            </ul>
+    * @return The response.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
    @RolesAllowed("MANAGE_USERS")
-   public void add(@RequestBody final User user) {
+   public ResponseEntity<Void> add(@RequestBody final User user) {
       try {
          service.add(user);
+
+         final var location = URI.create(createPathForUser(user.getId()));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
       } catch (final UserExistsException e) {
          throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
                   e);

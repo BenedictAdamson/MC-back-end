@@ -154,7 +154,7 @@ public class UserSteps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() throws Exception {
-      world.expectResponse(status().isCreated());
+      world.expectResponse(status().isFound());
    }
 
    @Then("MC accepts the login")

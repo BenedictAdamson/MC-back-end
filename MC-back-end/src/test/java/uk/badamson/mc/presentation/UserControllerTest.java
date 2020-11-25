@@ -21,6 +21,8 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,6 +65,44 @@ public class UserControllerTest {
 
    @Nested
    public class Add {
+
+      @Nested
+      public class Valid {
+
+         @Test
+         public void a() throws Exception {
+            test(USER_B);
+         }
+
+         @Test
+         public void b() throws Exception {
+            test(USER_C);
+         }
+
+         private void test(final User addedUser) throws Exception {
+            final var performingUser = USER_A;
+            assert performingUser.getAuthorities()
+                     .contains(Authority.ROLE_MANAGE_USERS);
+            final var response = Add.this.test(performingUser, addedUser);
+
+            final var location = response.andReturn().getResponse()
+                     .getHeaderValue("Location");
+            final var newUserOptional = service.getUsers().filter(
+                     u -> u.getUsername().equals(addedUser.getUsername()))
+                     .findAny();
+            assertTrue(newUserOptional.isPresent(),
+                     "List of users includes the added user");// guard
+            final var newUser = newUserOptional.get();
+            assertAll(() -> response.andExpect(status().isFound()),
+                     () -> assertEquals(
+                              UserController.createPathForUser(newUser.getId()),
+                              location,
+                              "redirection location is the resource for the added user"),
+                     () -> assertEquivalentUserAttributes(
+                              "Added user has the given attributes", addedUser,
+                              newUser));
+         }
+      }// class
 
       @Test
       public void administrator() throws Exception {
@@ -132,19 +172,6 @@ public class UserControllerTest {
                   .with(csrf()).content(encoded);
 
          return mockMvc.perform(request);
-      }
-
-      @Test
-      public void typical() throws Exception {
-         final var performingUser = USER_A;
-         final var addedUser = USER_B;
-
-         final var response = test(performingUser, addedUser);
-
-         response.andExpect(status().isCreated());
-         assertThat("List of users includes the added user",
-                  service.getUsers().anyMatch(u -> u.getUsername()
-                           .equals(addedUser.getUsername())));
       }
 
    }// class
