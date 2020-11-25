@@ -31,7 +31,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.badamson.mc.Authority;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserRepository;
 
@@ -87,9 +86,8 @@ public class UserServiceImpl implements UserService {
       Objects.requireNonNull(administratorPassword, "administratorPassword");
       this.passwordEncoder = Objects.requireNonNull(passwordEncoder,
                "passwordEncoder");
-      administrator = new User(User.ADMINISTRATOR_USERNAME,
-               passwordEncoder.encode(administratorPassword), Authority.ALL,
-               true, true, true, true);
+      administrator = User.createAdministrator(
+               passwordEncoder.encode(administratorPassword));
    }
 
    @Override
