@@ -20,12 +20,15 @@ package uk.badamson.mc.service;
 
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 
 /**
@@ -38,36 +41,40 @@ public interface UserService extends UserDetailsService {
 
    /**
     * <p>
-    * Add a user to the {@linkplain #getUsers() list of users}.
+    * Create a new user, having given {@linkplain BasicUserDetails user
+    * details}, and add them to the {@linkplain #getUsers() list of users}.
     * </p>
     * <ul>
+    * <li>Always returns the (non null) created users.</li>
+    * <li>The attributes of the returned user are equivalent to those of the
+    * given user details. However, the {@linkplain User#getPassword() password}
+    * will have been encrypted using the {@linkplain #getPasswordEncoder()
+    * password encoder} of this service.</li>
     * <li>A subsequently retrieved {@linkplain #getUsers() sequence of the
     * users} will include a {@linkplain User user}
-    * {@linkplain User#equals(Object) equivalent to} the given user.</li>
+    * {@linkplain User#equals(Object) equivalent to} the returned user.</li>
     * <li>Subsequently {@linkplain #loadUserByUsername(String) finding user
     * details} using the {@linkplain User#getUsername() username} of the given
-    * user will retrieve {@linkplain UserDetails user details} equivalent to the
-    * user details of the given user. However, the
-    * {@linkplain UserDetails#getPassword() password} will have been encrypted
-    * using the {@linkplain #getPasswordEncoder() password encoder} of this
-    * service.</li>
+    * user details will retrieve {@linkplain UserDetails user details}
+    * equivalent to the user details of the returned user.
     * </ul>
     *
-    * @param user
-    *           The user to add, with an unencrypted
-    *           {@linkplain User#getPassword() password}.
+    * @param userDetails
+    *           The details of the user to add, with an unencrypted
+    *           {@linkplain BasicUserDetails#getPassword() password}.
     * @throws NullPointerException
-    *            If {@code user} is null
+    *            If {@code userDetails} is null
     * @throws IllegalArgumentException
-    *            If the {@linkplain User#getUsername() username} of {@code user}
-    *            indicates it is the {@linkplain User#ADMINISTRATOR_USERNAME
-    *            administrator}.
+    *            If the {@linkplain BasicUserDetails#getUsername() username} of
+    *            {@code userDetails} indicates it is the
+    *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.
     * @throws UserExistsException
-    *            If the {@linkplain User#getUsername() username} of {@code user}
-    *            is already the username of a user, and is not the
-    *            administrator.
+    *            If the {@linkplain BasicUserDetails#getUsername() username} of
+    *            {@code userDetails} is already the username of a user, and is
+    *            not the administrator.
     */
-   void add(final User user);
+   @Nonnull
+   User add(@Nonnull BasicUserDetails userDetails);
 
    /**
     * <p>

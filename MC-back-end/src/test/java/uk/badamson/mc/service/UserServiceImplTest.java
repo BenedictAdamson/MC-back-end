@@ -43,6 +43,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
@@ -55,7 +56,7 @@ import uk.badamson.mc.repository.UserRepositoryTest;
 public class UserServiceImplTest {
 
    @Nested
-   public class Add_User {
+   public class Add {
 
       @Nested
       public class AlreadyExists {
@@ -73,7 +74,7 @@ public class UserServiceImplTest {
          private void test(final User user) {
             final var service = new UserServiceImpl(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
-            service.add(user);
+            add(service, user);
             assertThrows(UserExistsException.class,
                      () -> UserServiceTest.add(service, user));
          }
@@ -265,7 +266,7 @@ public class UserServiceImplTest {
          final var usernames = users.stream().map(u -> u.getUsername())
                   .collect(toUnmodifiableSet());
          assertThat("the list of users includes a user named \"Administrator\"",
-                  usernames, hasItem(User.ADMINISTRATOR_USERNAME));
+                  usernames, hasItem(BasicUserDetails.ADMINISTRATOR_USERNAME));
       }
 
       private void when_getting_the_users() {
@@ -286,6 +287,15 @@ public class UserServiceImplTest {
    private static final String PASSWORD_B = "password123";
 
    private static final String PASSWORD_C = "secret";
+
+   public static User add(final UserServiceImpl service,
+            final BasicUserDetails userDetails) {
+      final var user = UserServiceTest.add(service, userDetails);// inherited
+
+      assertInvariants(service);
+
+      return user;
+   }
 
    public static void assertInvariants(final UserServiceImpl service) {
       UserServiceTest.assertInvariants(service);// inherited
@@ -310,7 +320,7 @@ public class UserServiceImplTest {
                "The password encoder of this service is the given password encoder.");
       getUsers(service);
       final var encryptedAdminPassword = loadUserByUsername(service,
-               User.ADMINISTRATOR_USERNAME).getPassword();
+               BasicUserDetails.ADMINISTRATOR_USERNAME).getPassword();
       assertTrue(
                passwordEncoder.matches(administratorPassword,
                         encryptedAdminPassword),
@@ -379,4 +389,5 @@ public class UserServiceImplTest {
       userC = new User(UUID.randomUUID(), USERNAME_C, PASSWORD_C, Set.of(),
                true, true, true, true);
    }
+
 }

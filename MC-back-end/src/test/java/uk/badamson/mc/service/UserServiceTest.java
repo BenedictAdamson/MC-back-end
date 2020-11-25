@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 
 /**
@@ -44,57 +45,79 @@ import uk.badamson.mc.User;
  */
 public class UserServiceTest {
 
-   public static void add(final UserService service, final User user) {
-      service.add(user);
+   public static User add(final UserService service,
+            final BasicUserDetails userDetails) {
+      final var user = service.add(userDetails);
 
       assertInvariants(service);
+      assertNotNull(user, "user");// guard
+      assertAll("Attributes",
+               () -> assertEquals(userDetails.getAuthorities(),
+                        user.getAuthorities(), "authorities"),
+               () -> assertEquals(userDetails.getUsername(), user.getUsername(),
+                        "username"),
+               () -> assertEquals(userDetails.isAccountNonExpired(),
+                        user.isAccountNonExpired(), "accountNonExpired"),
+               () -> assertEquals(userDetails.isAccountNonLocked(),
+                        user.isAccountNonLocked(), "accountNonLocked"),
+               () -> assertEquals(userDetails.isCredentialsNonExpired(),
+                        user.isCredentialsNonExpired(),
+                        "credentialsNonExpired"),
+               () -> assertEquals(userDetails.isEnabled(), user.isEnabled(),
+                        "enabled"));
+
+      return user;
    }
 
-   public static void add_1(final UserService service, final User user) {
-      add(service, user);
+   public static void add_1(final UserService service,
+            final BasicUserDetails userDetails) {
+      final var user = add(service, userDetails);
 
       final var users = service.getUsers();
-      final UserDetails userDetails = loadUserByUsername(service,
-               user.getUsername());
+      final UserDetails userDetailsAfter = loadUserByUsername(service,
+               userDetails.getUsername());
       final var usersList = users.collect(toList());
       assertThat(
-               "A subsequently retrieved sequence of the users will include a user equivalent to the given user.",
+               "A subsequently retrieved sequence of the users will include a user equivalent to the returned user.",
                usersList, hasItem(user));
       assertAll(
                "Subsequently finding user details using the username of the given user will retrieve user details "
                         + "equivalent to the user details of the given user.",
-               () -> assertThat("authorities", userDetails.getAuthorities(),
-                        is(user.getAuthorities())),
-               () -> assertThat("username", userDetails.getUsername(),
-                        is(user.getUsername())),
+               () -> assertThat("authorities",
+                        userDetailsAfter.getAuthorities(),
+                        is(userDetails.getAuthorities())),
+               () -> assertThat("username", userDetailsAfter.getUsername(),
+                        is(userDetails.getUsername())),
                () -> assertThat("accountNonExpired",
-                        userDetails.isAccountNonExpired(),
-                        is(user.isAccountNonExpired())),
+                        userDetailsAfter.isAccountNonExpired(),
+                        is(userDetails.isAccountNonExpired())),
                () -> assertThat("accountNonLocked",
-                        userDetails.isAccountNonLocked(),
-                        is(user.isAccountNonLocked())),
+                        userDetailsAfter.isAccountNonLocked(),
+                        is(userDetails.isAccountNonLocked())),
                () -> assertThat("credentialsNonExpired",
-                        userDetails.isCredentialsNonExpired(),
-                        is(user.isCredentialsNonExpired())),
-               () -> assertThat("enabled", userDetails.isEnabled(),
-                        is(user.isEnabled())),
+                        userDetailsAfter.isCredentialsNonExpired(),
+                        is(userDetails.isCredentialsNonExpired())),
+               () -> assertThat("enabled", userDetailsAfter.isEnabled(),
+                        is(userDetails.isEnabled())),
                () -> assertTrue(
-                        service.getPasswordEncoder().matches(user.getPassword(),
-                                 userDetails.getPassword()),
+                        service.getPasswordEncoder().matches(
+                                 userDetails.getPassword(),
+                                 userDetailsAfter.getPassword()),
                         "Recorded password has been encrypted using the pasword encoder of this service."));
    }
 
-   public static void add_2(final UserService service, final User user1,
-            final User user2) {
-      add(service, user1);
-      add(service, user2);
+   public static void add_2(final UserService service, final User userDetails1,
+            final User userDetails2) {
+      final var user1 = add(service, userDetails1);
+      final var user2 = add(service, userDetails2);
+
       final var users = service.getUsers();
       final var usersList = users.collect(toList());
       assertThat(
-               "A subsequently retrieved sequence of the users will include a user equivalent to the given user [1].",
+               "A subsequently retrieved sequence of the users will include a user equivalent to the returned user [1].",
                usersList, hasItem(user1));
       assertThat(
-               "A subsequently retrieved sequence of the users will include a user equivalent to the given user [2].",
+               "A subsequently retrieved sequence of the users will include a user equivalent to the returned user [2].",
                usersList, hasItem(user2));
    }
 
@@ -111,7 +134,7 @@ public class UserServiceTest {
       final var userNames = usersList.stream().map(user -> user.getUsername())
                .collect(toUnmodifiableSet());
       assertThat("The list of users always has an administrator.", userNames,
-               hasItem(User.ADMINISTRATOR_USERNAME));
+               hasItem(BasicUserDetails.ADMINISTRATOR_USERNAME));
       assertEquals(userNames.size(), usersList.size(),
                "Does not contain users with duplicate usernames.");
 
@@ -120,7 +143,8 @@ public class UserServiceTest {
 
    public static User loadUserByUsername(final UserService service,
             final String username) {
-      final var administrator = User.ADMINISTRATOR_USERNAME.equals(username);
+      final var administrator = BasicUserDetails.ADMINISTRATOR_USERNAME
+               .equals(username);
 
       final var user = service.loadUserByUsername(username);
 

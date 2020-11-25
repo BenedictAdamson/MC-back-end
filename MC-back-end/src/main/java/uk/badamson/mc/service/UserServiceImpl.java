@@ -20,8 +20,11 @@ package uk.badamson.mc.service;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserRepository;
 
@@ -92,19 +96,18 @@ public class UserServiceImpl implements UserService {
 
    @Override
    @Transactional
-   public void add(User user) {
-      Objects.requireNonNull(user, "user");
-      if (User.ADMINISTRATOR_USERNAME.equals(user.getUsername())) {
+   @Nonnull
+   public User add(@Nonnull final BasicUserDetails userDetails) {
+      Objects.requireNonNull(userDetails, "userDetails");
+      if (BasicUserDetails.ADMINISTRATOR_USERNAME
+               .equals(userDetails.getUsername())) {
          throw new IllegalArgumentException("User is administrator");
-      } else if (userRepository.existsById(user.getId())) {// read
+      } else if (userRepository.findByUsername(userDetails.getUsername())
+               .isPresent()) {// read
          throw new UserExistsException();
       }
-      user = new User(user.getId(), user.getUsername(),
-               passwordEncoder.encode(user.getPassword()),
-               user.getAuthorities(), user.isAccountNonExpired(),
-               user.isAccountNonLocked(), user.isCredentialsNonExpired(),
-               user.isEnabled());
-      userRepository.save(user);// write
+      final var user = new User(UUID.randomUUID(), userDetails);
+      return userRepository.save(user);// write
    }
 
    @Override
@@ -131,8 +134,9 @@ public class UserServiceImpl implements UserService {
       final var repositoryIterable = userRepository.findAll();
       final var adminUses = Stream.of(administrator);
       final var normalUsers = StreamSupport
-               .stream(repositoryIterable.spliterator(), false).filter(u -> !u
-                        .getUsername().equals(User.ADMINISTRATOR_USERNAME));
+               .stream(repositoryIterable.spliterator(), false)
+               .filter(u -> !u.getUsername()
+                        .equals(BasicUserDetails.ADMINISTRATOR_USERNAME));
       return Stream.concat(adminUses, normalUsers);
    }
 
@@ -140,7 +144,7 @@ public class UserServiceImpl implements UserService {
    public User loadUserByUsername(final String username)
             throws UsernameNotFoundException {
       Objects.requireNonNull(username, "username");
-      if (User.ADMINISTRATOR_USERNAME.equals(username)) {
+      if (BasicUserDetails.ADMINISTRATOR_USERNAME.equals(username)) {
          return administrator;
       } else {
          try {
