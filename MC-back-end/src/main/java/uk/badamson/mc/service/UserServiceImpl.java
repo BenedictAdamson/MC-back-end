@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
       } else if (userRepository.existsById(user.getUsername())) {// read
          throw new UserExistsException();
       }
-      user = new User(user.getUsername(),
+      user = new User(user.getId(), user.getUsername(),
                passwordEncoder.encode(user.getPassword()),
                user.getAuthorities(), user.isAccountNonExpired(),
                user.isAccountNonLocked(), user.isCredentialsNonExpired(),

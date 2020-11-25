@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,8 @@ import uk.badamson.mc.service.UserService;
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserSteps {
+
+   private static final UUID ID_A = UUID.randomUUID();
 
    private static Authority parseRole(final String role) {
       try {
@@ -94,8 +97,8 @@ public class UserSteps {
    private void addUser(final String name, final String password)
             throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-      final var addedUser = new User(name, password, Set.of(), true, true, true,
-               true);
+      final var addedUser = new User(ID_A, name, password, Set.of(), true, true,
+               true, true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
       world.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
@@ -254,7 +257,8 @@ public class UserSteps {
    }
 
    private void userHasAuthorities(final Set<Authority> authorities) {
-      user = new User("Zoe", "password1", authorities, true, true, true, true);
+      user = new User(ID_A, "Zoe", "password1", authorities, true, true, true,
+               true);
       service.add(user);
    }
 

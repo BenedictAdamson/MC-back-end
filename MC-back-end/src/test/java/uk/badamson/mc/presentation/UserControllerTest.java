@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -269,7 +270,8 @@ public class UserControllerTest {
             final var requestingUserName = USER_C.getUsername();
             assert !requestingUserName.equals(user.getUsername());
             // Tough test: requesting user has minimum authority
-            final var requestingUser = new User(requestingUserName, "password1",
+            final var requestingUser = new User(UUID.randomUUID(),
+                     requestingUserName, "password1",
                      Set.of(Authority.ROLE_PLAYER), true, true, true, true);
             service.add(user);
 
@@ -316,17 +318,16 @@ public class UserControllerTest {
       }
    }// class
 
-   private static final User ADMINISTRATOR = new User(
-            User.ADMINISTRATOR_USERNAME, "password1",
-            Set.of(Authority.ROLE_PLAYER), true, true, true, true);
-   private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
-            true, true, true, true);
-
-   private static final User USER_B = new User("allan", "password1",
-            Set.of(Authority.ROLE_PLAYER), false, false, false, false);
-
-   private static final User USER_C = new User("john", "password2",
-            Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true, true);
+   private static final User ADMINISTRATOR = User
+            .createAdministrator("password");
+   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
+            "letmein", Authority.ALL, true, true, true, true);
+   private static final User USER_B = new User(UUID.randomUUID(), "allan",
+            "password1", Set.of(Authority.ROLE_PLAYER), false, false, false,
+            false);
+   private static final User USER_C = new User(UUID.randomUUID(), "john",
+            "password2", Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true,
+            true);
 
    @Autowired
    private UserService service;
