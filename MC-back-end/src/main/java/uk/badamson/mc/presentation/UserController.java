@@ -19,6 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import java.security.Principal;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -213,7 +214,7 @@ public class UserController {
       try {
          return service.getUsers().filter(u -> u.getId().equals(id)).findAny()
                   .get();
-      } catch (final UsernameNotFoundException e) {
+      } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
       }
