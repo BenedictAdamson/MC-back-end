@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import java.security.Principal;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -51,23 +52,24 @@ public class UserController {
 
    /**
     * <p>
-    * Create a valid path for a user resource for a user that has a given user
-    * name.
+    * Create a valid path for a user resource for a user that has a given unique
+    * ID.
     * </p>
     * <p>
     * The created path is consistent with the path used with
-    * {@link #getUser(String)}.
+    * {@link #getUser(UUID)}.
     * </p>
     *
-    * @param username
+    * @param id
     *           The identifier of the user
     * @return The path.
     * @throws NullPointerException
-    *            If {@code username} is null.
+    *            If {@code id} is null.
     */
-   public static String createPathForUser(final String username) {
-      Objects.requireNonNull(username, "id");
-      return "/api/user/" + username;
+   @Nonnull
+   public static String createPathForUser(@Nonnull final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return "/api/user/" + id;
    }
 
    private final UserService service;
@@ -160,7 +162,9 @@ public class UserController {
     */
    @GetMapping("/api/self")
    @PreAuthorize("isAuthenticated()")
-   public User getSelf(final Principal id) {
+   @Nonnull
+   public User getSelf(@Nonnull final Principal id) {
+      Objects.requireNonNull(id, "id");
       return service.getUsers()
                .filter(u -> u.getUsername().equals(id.getName())).findAny()
                .get();
@@ -204,9 +208,11 @@ public class UserController {
     */
    @GetMapping("/api/user/{id}")
    @Nonnull
-   public User getUser(@Nonnull @PathVariable final String id) {
+   public User getUser(@Nonnull @PathVariable final UUID id) {
+      Objects.requireNonNull(id, "id");
       try {
-         return service.loadUserByUsername(id);
+         return service.getUsers().filter(u -> u.getId().equals(id)).findAny()
+                  .get();
       } catch (final UsernameNotFoundException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);

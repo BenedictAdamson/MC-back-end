@@ -191,8 +191,7 @@ public class UserSteps {
       Objects.requireNonNull(userList, "userList");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       expectedUser = userList.get(0);
-      final var path = UserController
-               .createPathForUser(expectedUser.getUsername());
+      final var path = UserController.createPathForUser(expectedUser.getId());
       world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
                .with(user(world.loggedInUser)).with(csrf()));
    }
@@ -226,8 +225,7 @@ public class UserSteps {
 
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
-      final Set<Authority> authorities = Set.of();// no roles
-      userHasAuthorities(authorities);
+      userHasAuthorities(Set.of());
    }
 
    @When("user has any role")

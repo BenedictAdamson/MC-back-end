@@ -275,7 +275,7 @@ public class UserControllerTest {
                      Set.of(Authority.ROLE_PLAYER), true, true, true, true);
             service.add(user);
 
-            final var response = GetUser.this.perform(user.getUsername(),
+            final var response = GetUser.this.perform(user.getId(),
                      requestingUser);
 
             response.andExpect(status().isOk());
@@ -293,12 +293,12 @@ public class UserControllerTest {
          // Tough test: exists and has CSRF token
          final var user = USER_A;
          service.add(user);
-         final var response = perform(user.getUsername(), null);
+         final var response = perform(user.getId(), null);
 
          response.andExpect(status().isUnauthorized());
       }
 
-      private ResultActions perform(final String id, final User requestingUser)
+      private ResultActions perform(final UUID id, final User requestingUser)
                throws Exception {
          final var path = UserController.createPathForUser(id);
          var request = get(path).accept(MediaType.APPLICATION_JSON);
@@ -312,7 +312,7 @@ public class UserControllerTest {
       @Test
       public void unknownUser() throws Exception {
          // Tough test: has permission and CSRF token
-         final var response = perform(USER_A.getUsername(), ADMINISTRATOR);
+         final var response = perform(USER_A.getId(), ADMINISTRATOR);
 
          response.andExpect(status().isNotFound());
       }
