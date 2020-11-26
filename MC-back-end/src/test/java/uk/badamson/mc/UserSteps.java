@@ -194,6 +194,11 @@ public class UserSteps {
                .with(user(world.loggedInUser)).with(csrf()));
    }
 
+   @Given("not logged in")
+   public void not_logged_in() {
+      world.loggedInUser = null;
+   }
+
    @When("request logout")
    public void request_logout() throws Exception {
       world.performRequest(
