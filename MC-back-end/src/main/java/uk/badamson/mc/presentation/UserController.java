@@ -225,6 +225,7 @@ public class UserController {
     *            {@linkplain User#getUsername() username}.
     */
    @GetMapping("/api/user/{id}")
+   @RolesAllowed("MANAGE_USERS")
    @Nonnull
    public User getUser(@Nonnull @PathVariable final UUID id) {
       Objects.requireNonNull(id, "id");
