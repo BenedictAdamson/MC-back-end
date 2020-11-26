@@ -135,6 +135,13 @@ public class UserSteps {
       getUsers();
    }
 
+   private void getUser(final UUID id) throws Exception {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      final var path = UserController.createPathForUser(id);
+      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
+   }
+
    private void getUsers() throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       world.performRequest(get("/api/user").accept(MediaType.APPLICATION_JSON)
@@ -168,6 +175,15 @@ public class UserSteps {
                () -> world.expectResponse(header().string("Location", "/")));
    }
 
+   @Then("MC does not allow navigating to a user page")
+   public void mc_does_not_alllow_navigating_to_user_page() throws Exception {
+      Objects.requireNonNull(userList, "userList");
+
+      expectedUser = null;
+      getUser(userList.get(0).getId());
+      world.getResponse().andExpect(status().isForbidden());
+   }
+
    @Then("MC does not allow adding a user")
    public void mc_does_not_allow_adding_user() throws Exception {
       addUser("Allan", "letmein");
@@ -192,12 +208,9 @@ public class UserSteps {
    @When("Navigate to one user page")
    public void navigate_to_one_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
-      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       expectedUser = userList.get(0);
-      final var path = UserController.createPathForUser(expectedUser.getId());
-      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
-               .with(user(world.loggedInUser)).with(csrf()));
+      getUser(expectedUser.getId());
    }
 
    @Given("not logged in")
@@ -288,4 +301,5 @@ public class UserSteps {
    public void when_viewing_list_of_users() {
       viewListOfUsers();
    }
+
 }
