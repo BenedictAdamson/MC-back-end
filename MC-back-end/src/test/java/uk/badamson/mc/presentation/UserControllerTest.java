@@ -48,6 +48,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserService;
@@ -79,7 +80,7 @@ public class UserControllerTest {
             test(USER_C);
          }
 
-         private void test(final User addedUser) throws Exception {
+         private void test(final BasicUserDetails addedUser) throws Exception {
             final var performingUser = USER_A;
             assert performingUser.getAuthorities()
                      .contains(Authority.ROLE_MANAGE_USERS);
@@ -163,7 +164,7 @@ public class UserControllerTest {
       }
 
       private ResultActions test(final User performingUser,
-               final User addedUser) throws Exception {
+               final BasicUserDetails addedUser) throws Exception {
          service.add(performingUser);
          final var encoded = objectMapper.writeValueAsString(addedUser);
          final var request = post("/api/user")
@@ -366,7 +367,7 @@ public class UserControllerTest {
    private ObjectMapper objectMapper;
 
    private void assertEquivalentUserAttributes(final String message,
-            final User expected, final User actual)
+            final BasicUserDetails expected, final BasicUserDetails actual)
             throws MultipleFailuresError {
       assertAll(message,
                () -> assertThat("username", actual.getUsername(),

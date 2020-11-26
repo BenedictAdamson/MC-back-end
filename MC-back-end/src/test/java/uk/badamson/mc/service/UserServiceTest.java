@@ -71,7 +71,7 @@ public class UserServiceTest {
 
    public static void add_1(final UserService service,
             final BasicUserDetails userDetails) {
-      final var user = add(service, userDetails);
+      final User user = add(service, userDetails);
 
       final var users = service.getUsers();
       final UserDetails userDetailsAfter = loadUserByUsername(service,

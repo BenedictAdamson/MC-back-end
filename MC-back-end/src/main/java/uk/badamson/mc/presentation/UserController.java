@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserService;
@@ -102,7 +103,7 @@ public class UserController {
     * Behaviour of the POST verb for the user list.
     * </p>
     * <ul>
-    * <li>Creates a new user.</li>
+    * <li>Creates a new user having given user details.</li>
     * <li>Returns a redirect to the newly created user. That is, a response with
     * <ul>
     * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
@@ -112,30 +113,31 @@ public class UserController {
     * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
     * </ul>
     *
-    * @param user
+    * @param userDetails
     *           The body of the request
     * @throws NullPointerException
-    *            If {@code user} is null
+    *            If {@code userDetails} is null
     * @throws ResponseStatusException
     *            <ul>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
-    *            Request)} If the {@linkplain User#getUsername() username} of
-    *            {@code user} indicates it is the
+    *            Request)} If the {@linkplain BasicUserDetails#getUsername()
+    *            username} of {@code user} indicates it is the
     *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
-    *            the {@linkplain User#getUsername() username} of {@code user} is
-    *            already the username of a user.</li>
+    *            the {@linkplain BasicUserDetails#getUsername() username} of
+    *            {@code userDetails} is already the username of a user.</li>
     *            </ul>
     * @return The response.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
    @RolesAllowed("MANAGE_USERS")
-   public ResponseEntity<Void> add(@RequestBody final User user) {
+   public ResponseEntity<Void> add(
+            @RequestBody final BasicUserDetails userDetails) {
       try {
-         service.add(user);
+         final var user = service.add(userDetails);
 
          final var location = URI.create(createPathForUser(user.getId()));
          final var headers = new HttpHeaders();

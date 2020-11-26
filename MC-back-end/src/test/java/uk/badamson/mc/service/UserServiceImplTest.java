@@ -90,7 +90,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
@@ -103,7 +103,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = false;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
@@ -116,7 +116,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Set.of(Authority.ROLE_PLAYER), accountNonExpired,
                      accountNonLocked, credentialsNonExpired, enabled);
 
@@ -129,7 +129,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
@@ -142,7 +142,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = false;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
@@ -155,7 +155,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = false;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
@@ -168,18 +168,20 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_A, PASSWORD_B,
+            final var user = new BasicUserDetails(USERNAME_A, PASSWORD_B,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
             test(user, passwordEncoderA);
          }
 
-         private void test(final User user,
+         private void test(final BasicUserDetails userDetails,
                   final PasswordEncoder passwordEncoder) {
             final var service = new UserServiceImpl(passwordEncoder,
                      userRepositoryA, PASSWORD_A);
-            UserServiceTest.add_1(service, user);
+            
+            UserServiceTest.add_1(service, userDetails);
+            
             assertThat("Added a user", service.getUsers().count(), is(2L));
          }
 
@@ -189,7 +191,7 @@ public class UserServiceImplTest {
             final var accountNonLocked = true;
             final var credentialsNonExpired = true;
             final var enabled = true;
-            final var user = new User(ID_A, USERNAME_B, PASSWORD_A,
+            final var user = new BasicUserDetails(USERNAME_B, PASSWORD_A,
                      Authority.ALL, accountNonExpired, accountNonLocked,
                      credentialsNonExpired, enabled);
 
