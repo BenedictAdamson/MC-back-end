@@ -184,10 +184,11 @@ public class UserSteps {
       world.responseIsOk();
    }
 
-   @When("Navigate to one user")
-   public void navigate_to_one_user() throws Exception {
+   @When("Navigate to one user page")
+   public void navigate_to_one_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
       expectedUser = userList.get(0);
       final var path = UserController.createPathForUser(expectedUser.getId());
       world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
