@@ -141,6 +141,11 @@ public class UserSteps {
                .with(user(world.loggedInUser)).with(csrf()));
    }
 
+   @Given("Viewing the list of users")
+   public void given_viewing_list_of_users() {
+      viewListOfUsers();
+   }
+
    @Given("logged in")
    public void logged_in() {
       Objects.requireNonNull(user, "user");
@@ -275,8 +280,12 @@ public class UserSteps {
       service.add(user);
    }
 
-   @Given("Viewing the list of users")
-   public void viewing_list_of_users() {
+   private void viewListOfUsers() {
       userList = service.getUsers().collect(toList());
+   }
+
+   @When("Viewing the list of users")
+   public void when_viewing_list_of_users() {
+      viewListOfUsers();
    }
 }
