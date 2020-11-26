@@ -106,7 +106,11 @@ public class UserServiceImpl implements UserService {
                .isPresent()) {// read
          throw new UserExistsException();
       }
-      final var user = new User(UUID.randomUUID(), userDetails);
+
+      final var encryptedUserDetails = new BasicUserDetails(userDetails);
+      encryptedUserDetails
+               .setPassword(passwordEncoder.encode(userDetails.getPassword()));
+      final var user = new User(UUID.randomUUID(), encryptedUserDetails);
       return userRepository.save(user);// write
    }
 
