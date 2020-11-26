@@ -242,6 +242,17 @@ public class UserSteps {
       userHasAuthorities(Set.of(parseRole(role)));
    }
 
+   @When("user has the {string} role but not the {string} role")
+   public void user_has_role_but_not_role(final String included,
+            final String excluded) {
+      final var includedRole = parseRole(included);
+      final var excludedRole = parseRole(excluded);
+      if (includedRole == excludedRole) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+      userHasAuthorities(Set.of(includedRole));
+   }
+
    @Then("The user page includes the user name")
    public void user_page_includes_user_name() {
       Objects.requireNonNull(expectedUser, "expectedUser");
