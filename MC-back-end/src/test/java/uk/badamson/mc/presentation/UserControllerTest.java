@@ -313,8 +313,8 @@ public class UserControllerTest {
             final var decodedResponse = objectMapper.readValue(jsonResponse,
                      User.class);
             assertAll("Response is the identified user",
-                     () -> assertEquivalentUserAttributes("user details", user,
-                              decodedResponse),
+                     () -> assertEquivalentUserAttributes("user details",
+                              userDetails, decodedResponse),
                      () -> assertEquals(user.getId(), decodedResponse.getId(),
                               "id"));
          }
