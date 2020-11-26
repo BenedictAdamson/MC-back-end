@@ -294,14 +294,15 @@ public class UserControllerTest {
             test(USER_B);
          }
 
-         private void test(final User user) throws Exception {
+         private void test(final BasicUserDetails userDetails)
+                  throws Exception {
             final var requestingUserName = USER_C.getUsername();
-            assert !requestingUserName.equals(user.getUsername());
+            assert !requestingUserName.equals(userDetails.getUsername());
             // Tough test: requesting user has minimum authority
             final var requestingUser = new User(UUID.randomUUID(),
                      requestingUserName, "password1",
                      Set.of(Authority.ROLE_PLAYER), true, true, true, true);
-            service.add(user);
+            final User user = service.add(userDetails);
 
             final var response = GetUser.this.perform(user.getId(),
                      requestingUser);
@@ -311,8 +312,11 @@ public class UserControllerTest {
                      .getContentAsString();
             final var decodedResponse = objectMapper.readValue(jsonResponse,
                      User.class);
-            assertEquivalentUserAttributes("Response is the identified user",
-                     user, decodedResponse);
+            assertAll("Response is the identified user",
+                     () -> assertEquivalentUserAttributes("user details", user,
+                              decodedResponse),
+                     () -> assertEquals(user.getId(), decodedResponse.getId(),
+                              "id"));
          }
       }// class
 
