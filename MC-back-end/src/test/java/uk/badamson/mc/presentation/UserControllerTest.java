@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -286,23 +287,24 @@ public class UserControllerTest {
 
          @Test
          public void a() throws Exception {
-            test(USER_A);
+            test(USER_A.getUsername(), USER_B);
          }
 
          @Test
          public void b() throws Exception {
-            test(USER_B);
+            test(USER_B.getUsername(), USER_A);
          }
 
-         private void test(final BasicUserDetails userDetails)
-                  throws Exception {
-            final var requestingUserName = USER_C.getUsername();
+         private void test(final String requestingUserName,
+                  final BasicUserDetails userDetails) throws Exception {
             assert !requestingUserName.equals(userDetails.getUsername());
             // Tough test: requesting user has minimum authority
-            final var requestingUser = new User(UUID.randomUUID(),
+            final var requestingUserDetails = new BasicUserDetails(
                      requestingUserName, "password1",
-                     Set.of(Authority.ROLE_PLAYER), true, true, true, true);
-            final User user = service.add(userDetails);
+                     Set.of(Authority.ROLE_MANAGE_USERS), true, true, true,
+                     true);
+            final var requestingUser = service.add(requestingUserDetails);
+            final var user = service.add(userDetails);
 
             final var response = GetUser.this.perform(user.getId(),
                      requestingUser);
@@ -319,6 +321,23 @@ public class UserControllerTest {
                               "id"));
          }
       }// class
+
+      @Test
+      public void forbidden() throws Exception {
+         // Tough test: user exists, requester has all other permissinos, and
+         // request hasCSRF token
+         // Tough test: requesting user has minimum authority
+         final var requestingUserName = USER_C.getUsername();
+         final var authorities = EnumSet.allOf(Authority.class);
+         authorities.remove(Authority.ROLE_MANAGE_USERS);
+         final var requestingUser = service
+                  .add(new BasicUserDetails(requestingUserName, "password1",
+                           authorities, true, true, true, true));
+         final var user = service.add(USER_A);
+         final var response = perform(user.getId(), requestingUser);
+
+         response.andExpect(status().isForbidden());
+      }
 
       @Test
       public void notLoggedIn() throws Exception {
