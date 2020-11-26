@@ -179,9 +179,9 @@ public class UserServiceImplTest {
                   final PasswordEncoder passwordEncoder) {
             final var service = new UserServiceImpl(passwordEncoder,
                      userRepositoryA, PASSWORD_A);
-            
+
             UserServiceTest.add_1(service, userDetails);
-            
+
             assertThat("Added a user", service.getUsers().count(), is(2L));
          }
 
@@ -275,8 +275,6 @@ public class UserServiceImplTest {
          users = getUsers(service).collect(toList());
       }
    }// class
-
-   private static final UUID ID_A = UUID.randomUUID();
 
    private static final String USERNAME_C = "Gweezer";
 
