@@ -240,6 +240,12 @@ public class UserSteps {
       }
    }
 
+   @When("Trying to navigate to a user page")
+   public void trying_to_navigate_to_user_page() {
+      // Do nothing
+      Objects.requireNonNull(userList, "userList");
+   }
+
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
       userHasAuthorities(Set.of());
