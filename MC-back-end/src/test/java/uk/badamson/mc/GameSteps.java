@@ -183,6 +183,11 @@ public class GameSteps {
       assertFalse(game.isRecruiting());
    }
 
+   @Then("The game page indicates that the user may not join the game")
+   public void game_page_indicates_user_may_not_join_game() {
+      // Do nothing
+   }
+
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
       assertThat(game.isRecruiting(), anything());

@@ -272,6 +272,11 @@ public class UserSteps {
       userHasAuthorities(Set.of(includedRole));
    }
 
+   @Given("user is not playing any games")
+   public void user_not_playing_any_games() {
+      // Do nothing: implied because create each user afresh.
+   }
+
    @Then("The user page includes the user name")
    public void user_page_includes_user_name() {
       Objects.requireNonNull(expectedUser, "expectedUser");
