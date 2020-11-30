@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -123,7 +124,8 @@ public class GameServiceImplTest {
                      () -> assertThat("scenario",
                               retrievedIdentifier.getScenario(), is(scenario)),
                      () -> assertThat("created",
-                              retrievedIdentifier.getCreated(), is(truncatedNow)));
+                              retrievedIdentifier.getCreated(),
+                              is(truncatedNow)));
          }
       }// class
 
@@ -156,7 +158,7 @@ public class GameServiceImplTest {
       @Test
       public void notRecruiting() {
          final var id = IDENTIFIER_B;
-         final var game = new Game(id, false);
+         final var game = new Game(id, false, Set.of());
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -169,7 +171,7 @@ public class GameServiceImplTest {
       @Test
       public void recruiting() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id, true);
+         final var game = new Game(id, true, Set.of());
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -242,7 +244,7 @@ public class GameServiceImplTest {
       @Test
       public void present() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id, false);
+         final var game = new Game(id, false, Set.of());
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -270,7 +272,7 @@ public class GameServiceImplTest {
       @Test
       public void one() {
          final var id = IDENTIFIER_A;
-         gameRepositoryA.save(new Game(id, false));
+         gameRepositoryA.save(new Game(id, false, Set.of()));
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
