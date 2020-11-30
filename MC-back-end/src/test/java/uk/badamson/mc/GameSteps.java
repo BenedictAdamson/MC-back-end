@@ -155,6 +155,11 @@ public class GameSteps {
       world.putResource(path, game);
    }
 
+   @When("examining a game recruiting players")
+   public void examining_game_recruiting_players() {
+      prepareGame();
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // Do nothing
@@ -274,6 +279,13 @@ public class GameSteps {
       world.getJson(createGamePath(gameId));
    }
 
+   private void prepareGame() {
+      chooseScenario();
+      game = gameService.create(scenario.getIdentifier());
+      gameId = game.getIdentifier();
+      BackEndWorld.require(game.isRecruiting(), "game is recruiting");
+   }
+
    @When("A scenario has games")
    public void scenario_has_games() {
       chooseScenario();
@@ -292,10 +304,7 @@ public class GameSteps {
 
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recruiting_players() {
-      chooseScenario();
-      game = gameService.create(scenario.getIdentifier());
-      gameId = game.getIdentifier();
-      BackEndWorld.require(game.isRecruiting(), "game is recruiting");
+      prepareGame();
    }
 
    @When("Viewing the games of the scenario")
