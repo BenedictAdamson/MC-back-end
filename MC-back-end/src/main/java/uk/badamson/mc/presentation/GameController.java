@@ -334,10 +334,6 @@ public class GameController {
     *            <li>the {@linkplain Game#getIdentifier() identification
     *            information} of the given {@code newGameState} is inconsistent
     *            with the given {@code scenario} and {@code created}.</li>
-    *            <li>the {@code newGameState} {@linkplain Game#isRecruiting() is
-    *            recruiting} but the current state of the game is that it is not
-    *            recruiting (that is, recruiting can be stopped but never
-    *            restarted).</li>
     *            </ul>
     *            </li>
     *            </ul>
@@ -350,16 +346,13 @@ public class GameController {
       final var identifier = new Game.Identifier(scenario, created);
       try {
          final var game0 = gameService.getGame(identifier).get();
-         if (game0.isRecruiting() && !newGameState.isRecruiting()) {
-            gameService.endRecruitment(identifier).get();
-         } else if (!game0.isRecruiting() && newGameState.isRecruiting()) {
-            throw new IllegalStateException(
-                     "Attempting to re-enable recruitment");
+         if (!identifier.equals(newGameState.getIdentifier())) {
+            throw new IllegalArgumentException("Inconsistent identifier");
          }
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
-      } catch (final IllegalStateException e) {
+      } catch (final IllegalStateException | IllegalArgumentException e) {
          throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
                   e.getMessage(), e);
       }

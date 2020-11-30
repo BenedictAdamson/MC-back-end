@@ -45,6 +45,7 @@ import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.repository.GameRepositoryTest;
 
@@ -320,7 +321,7 @@ public class GameServiceImplTest {
       return game;
    }
 
-   public static Optional<Game> endRecruitment(final GameServiceImpl service,
+   public static Optional<GamePlayers> endRecruitment(final GameServiceImpl service,
             final Game.Identifier id) {
       final var result = GameServiceTest.endRecruitment(service, id);
 

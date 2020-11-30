@@ -110,6 +110,8 @@ public class GameSteps {
    private Game.Identifier gameId;
 
    private Game game;
+   
+   private GamePlayers gamePlayers;
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -148,11 +150,11 @@ public class GameSteps {
    }
 
    private void endRecruitmentForGame() throws Exception {
-      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(gameId, "gameId");
-      final var path = createGamePath(gameId);
-      game.endRecruitment();
-      world.putResource(path, game);
+      final var path = createGamePath(gameId);//FIXME
+      gamePlayers.endRecruitment();
+      world.putResource(path, gamePlayers);
    }
 
    @When("examining a game recruiting players")
@@ -178,19 +180,19 @@ public class GameSteps {
 
    @Then("the game page indicates that the game is recruiting players")
    public void game_page_indicates_game_recuiting_players() {
-      assertTrue(game.isRecruiting());
+      assertTrue(gamePlayers.isRecruiting());
    }
 
    @Then("The game page indicates the number of players of the game")
    public void game_page_indicates_number_of_players_of_game() {
-      assertThat(game.getPlayers().size(), anything());
+      assertThat(gamePlayers.getUsers().size(), anything());
    }
 
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gameId, "gameId");
-      game = gameService.getGame(gameId).get();
-      assertFalse(game.isRecruiting());
+      //FIXME gamePlayers = gameService.getGamePlayers(gameId).get();
+      assertFalse(gamePlayers.isRecruiting());
    }
 
    @Then("The game page indicates that the user may not join the game")
@@ -200,12 +202,12 @@ public class GameSteps {
 
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
-      assertThat(game.isRecruiting(), anything());
+      assertThat(gamePlayers.isRecruiting(), anything());
    }
 
    @Then("The game page lists the players of the game")
    public void game_page_lists_players_of_game() {
-      assertThat(game.getPlayers(), anything());
+      assertThat(gamePlayers.getUsers(), anything());
    }
 
    private void getGames() throws Exception {
@@ -292,8 +294,9 @@ public class GameSteps {
    private void prepareGame() {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
+      //FIXME gamePlayers = gameService.get ...
       gameId = game.getIdentifier();
-      BackEndWorld.require(game.isRecruiting(), "game is recruiting");
+      BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
 
    @When("A scenario has games")
