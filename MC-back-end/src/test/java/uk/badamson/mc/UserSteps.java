@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +95,8 @@ public class UserSteps {
    private void addUser(final String name, final String password)
             throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-      final var addedUser = new User(name, password, Set.of(), true, true, true,
-               true);
+      final var addedUser = new User(UUID.randomUUID(), name, password,
+               Set.of(), true, true, true, true);
       final var encoded = objectMapper.writeValueAsString(addedUser);
       world.performRequest(post("/api/user")
                .contentType(MediaType.APPLICATION_JSON)
@@ -134,6 +135,13 @@ public class UserSteps {
       getUsers();
    }
 
+   private void getUser(final UUID id) throws Exception {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      final var path = UserController.createPathForUser(id);
+      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
+               .with(user(world.loggedInUser)).with(csrf()));
+   }
+
    private void getUsers() throws Exception {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       world.performRequest(get("/api/user").accept(MediaType.APPLICATION_JSON)
@@ -153,13 +161,22 @@ public class UserSteps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() throws Exception {
-      world.expectResponse(status().isCreated());
+      world.expectResponse(status().isFound());
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_the_login() throws Exception {
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> world.expectResponse(header().string("Location", "/")));
+   }
+
+   @Then("MC does not allow navigating to a user page")
+   public void mc_does_not_alllow_navigating_to_user_page() throws Exception {
+      Objects.requireNonNull(userList, "userList");
+
+      expectedUser = null;
+      getUser(userList.get(0).getId());
+      world.getResponse().andExpect(status().isForbidden());
    }
 
    @Then("MC does not allow adding a user")
@@ -183,15 +200,17 @@ public class UserSteps {
       world.responseIsOk();
    }
 
-   @When("Navigate to one user")
-   public void navigate_to_one_user() throws Exception {
+   @When("Navigate to one user page")
+   public void navigate_to_one_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
-      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
       expectedUser = userList.get(0);
-      final var path = UserController
-               .createPathForUser(expectedUser.getUsername());
-      world.performRequest(get(path).accept(MediaType.APPLICATION_JSON)
-               .with(user(world.loggedInUser)).with(csrf()));
+      getUser(expectedUser.getId());
+   }
+
+   @Given("not logged in")
+   public void not_logged_in() {
+      world.loggedInUser = null;
    }
 
    @When("request logout")
@@ -221,10 +240,15 @@ public class UserSteps {
       }
    }
 
+   @When("Trying to navigate to a user page")
+   public void trying_to_navigate_to_user_page() {
+      // Do nothing
+      Objects.requireNonNull(userList, "userList");
+   }
+
    @When("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
-      final Set<Authority> authorities = Set.of();// no roles
-      userHasAuthorities(authorities);
+      userHasAuthorities(Set.of());
    }
 
    @When("user has any role")
@@ -235,6 +259,17 @@ public class UserSteps {
    @When("user has the {string} role")
    public void user_has_role(final String role) {
       userHasAuthorities(Set.of(parseRole(role)));
+   }
+
+   @When("user has the {string} role but not the {string} role")
+   public void user_has_role_but_not_role(final String included,
+            final String excluded) {
+      final var includedRole = parseRole(included);
+      final var excludedRole = parseRole(excluded);
+      if (includedRole == excludedRole) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+      userHasAuthorities(Set.of(includedRole));
    }
 
    @Then("The user page includes the user name")
@@ -254,7 +289,8 @@ public class UserSteps {
    }
 
    private void userHasAuthorities(final Set<Authority> authorities) {
-      user = new User("Zoe", "password1", authorities, true, true, true, true);
+      user = new User(UUID.randomUUID(), "Zoe", "password1", authorities, true,
+               true, true, true);
       service.add(user);
    }
 
@@ -262,4 +298,5 @@ public class UserSteps {
    public void viewing_list_of_users() {
       userList = service.getUsers().collect(toList());
    }
+
 }

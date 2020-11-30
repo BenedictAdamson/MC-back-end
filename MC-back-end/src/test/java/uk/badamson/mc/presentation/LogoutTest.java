@@ -25,6 +25,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,8 +54,8 @@ public class LogoutTest {
 
    private static final String PATH = "/logout";
 
-   private static final User USER_A = new User("jeff", "letmein", Authority.ALL,
-            true, true, true, true);
+   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
+            "letmein", Authority.ALL, true, true, true, true);
 
    @Autowired
    private UserService service;

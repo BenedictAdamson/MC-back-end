@@ -131,8 +131,8 @@ public class GameControllerTest {
                   .get();
          final var authorities = EnumSet
                   .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-         final var user = new User("allan", "letmein", authorities, true, true,
-                  true, true);
+         final var user = new User(ID_A, "allan", "letmein", authorities, true,
+                  true, true, true);
 
          final var response = testAuthenticated(scenario, user);
 
@@ -345,8 +345,8 @@ public class GameControllerTest {
          newGameState.endRecruitment();
          final var authorities = EnumSet
                   .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-         final var user = new User("allan", "letmein", authorities, true, true,
-                  true, true);
+         final var user = new User(ID_A, "allan", "letmein", authorities, true,
+                  true, true, true);
 
          final var response = performAuthenticated(newGameState, user);
 
@@ -402,11 +402,14 @@ public class GameControllerTest {
 
    }// class
 
+   private static final UUID ID_A = UUID.randomUUID();
+
    private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
    };
 
-   private static final User USER_WITH_ALL_AUTHORITIES = new User("jeff",
-            "letmein", Authority.ALL, true, true, true, true);
+   private static final User USER_WITH_ALL_AUTHORITIES = new User(
+            UUID.randomUUID(), "jeff", "letmein", Authority.ALL, true, true,
+            true, true);
 
    @Autowired
    GameRepository gameRepository;

@@ -18,17 +18,21 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
 import java.security.Principal;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +41,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserService;
@@ -51,23 +56,24 @@ public class UserController {
 
    /**
     * <p>
-    * Create a valid path for a user resource for a user that has a given user
-    * name.
+    * Create a valid path for a user resource for a user that has a given unique
+    * ID.
     * </p>
     * <p>
     * The created path is consistent with the path used with
-    * {@link #getUser(String)}.
+    * {@link #getUser(UUID)}.
     * </p>
     *
-    * @param username
+    * @param id
     *           The identifier of the user
     * @return The path.
     * @throws NullPointerException
-    *            If {@code username} is null.
+    *            If {@code id} is null.
     */
-   public static String createPathForUser(final String username) {
-      Objects.requireNonNull(username, "id");
-      return "/api/user/" + username;
+   @Nonnull
+   public static String createPathForUser(@Nonnull final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return "/api/user/" + id;
    }
 
    private final UserService service;
@@ -96,33 +102,47 @@ public class UserController {
     * <p>
     * Behaviour of the POST verb for the user list.
     * </p>
-    * <p>
-    * Adds the given user to the list of users.
-    * </p>
+    * <ul>
+    * <li>Creates a new user having given user details.</li>
+    * <li>Returns a redirect to the newly created user. That is, a response with
+    * <ul>
+    * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
+    * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
+    * <li>A {@linkplain HttpHeaders#getLocation()
+    * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+    * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
+    * </ul>
     *
-    * @param user
+    * @param userDetails
     *           The body of the request
     * @throws NullPointerException
-    *            If {@code user} is null
+    *            If {@code userDetails} is null
     * @throws ResponseStatusException
     *            <ul>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
-    *            Request)} If the {@linkplain User#getUsername() username} of
-    *            {@code user} indicates it is the
+    *            Request)} If the {@linkplain BasicUserDetails#getUsername()
+    *            username} of {@code user} indicates it is the
     *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
-    *            the {@linkplain User#getUsername() username} of {@code user} is
-    *            already the username of a user.</li>
+    *            the {@linkplain BasicUserDetails#getUsername() username} of
+    *            {@code userDetails} is already the username of a user.</li>
     *            </ul>
+    * @return The response.
     */
    @PostMapping("/api/user")
    @ResponseStatus(HttpStatus.CREATED)
    @RolesAllowed("MANAGE_USERS")
-   public void add(@RequestBody final User user) {
+   public ResponseEntity<Void> add(
+            @RequestBody final BasicUserDetails userDetails) {
       try {
-         service.add(user);
+         final var user = service.add(userDetails);
+
+         final var location = URI.create(createPathForUser(user.getId()));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
       } catch (final UserExistsException e) {
          throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
                   e);
@@ -160,7 +180,9 @@ public class UserController {
     */
    @GetMapping("/api/self")
    @PreAuthorize("isAuthenticated()")
+   @Nonnull
    public User getSelf(final Principal id) {
+      Objects.requireNonNull(id, "id");
       return service.getUsers()
                .filter(u -> u.getUsername().equals(id.getName())).findAny()
                .get();
@@ -203,11 +225,14 @@ public class UserController {
     *            {@linkplain User#getUsername() username}.
     */
    @GetMapping("/api/user/{id}")
+   @RolesAllowed("MANAGE_USERS")
    @Nonnull
-   public User getUser(@Nonnull @PathVariable final String id) {
+   public User getUser(@Nonnull @PathVariable final UUID id) {
+      Objects.requireNonNull(id, "id");
       try {
-         return service.loadUserByUsername(id);
-      } catch (final UsernameNotFoundException e) {
+         return service.getUsers().filter(u -> u.getId().equals(id)).findAny()
+                  .get();
+      } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
       }
