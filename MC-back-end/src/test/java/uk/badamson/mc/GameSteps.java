@@ -181,6 +181,11 @@ public class GameSteps {
       assertTrue(game.isRecruiting());
    }
 
+   @Then("The game page indicates the number of players of the game")
+   public void game_page_indicates_number_of_players_of_game() {
+      assertThat(game.getPlayers().size(), anything());
+   }
+
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gameId, "gameId");
@@ -196,6 +201,11 @@ public class GameSteps {
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
       assertThat(game.isRecruiting(), anything());
+   }
+
+   @Then("The game page lists the players of the game")
+   public void game_page_lists_players_of_game() {
+      assertThat(game.getPlayers(), anything());
    }
 
    private void getGames() throws Exception {
