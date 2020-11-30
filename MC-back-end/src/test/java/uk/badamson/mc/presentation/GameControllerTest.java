@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -188,7 +187,7 @@ public class GameControllerTest {
       public void present() throws Exception {
          final var id = new Game.Identifier(UUID.randomUUID(),
                   gameService.getNow());
-         gameRepository.save(new Game(id, true, Set.of()));
+         gameRepository.save(new Game(id));
 
          final var response = perform(id);
 
@@ -376,7 +375,7 @@ public class GameControllerTest {
                   .get();
          final var id = gameService.create(scenario).getIdentifier();
          final var game0 = gameService.endRecruitment(id).get();
-         final var newGameState = new Game(id, true, Set.of());
+         final var newGameState = new Game(id);
 
          final var response = performAuthenticated(newGameState,
                   USER_WITH_ALL_AUTHORITIES);
@@ -393,7 +392,7 @@ public class GameControllerTest {
       public void unknownGame() throws Exception {
          final var scenario = UUID.randomUUID();
          final var id = new Game.Identifier(scenario, Instant.now());
-         final var game = new Game(id, false, Set.of());
+         final var game = new Game(id);
 
          final var response = performAuthenticated(game,
                   USER_WITH_ALL_AUTHORITIES);

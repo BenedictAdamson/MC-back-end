@@ -24,7 +24,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -98,7 +97,7 @@ public class GameServiceImpl implements GameService {
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
       final var identifier = new Game.Identifier(scenario, getNow());
-      final var game = new Game(identifier, true, Set.of(UUID.randomUUID()));// FIXME
+      final var game = new Game(identifier);// FIXME
       return repository.save(game);// write
    }
 

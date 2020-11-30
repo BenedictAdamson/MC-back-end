@@ -35,7 +35,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -158,7 +157,7 @@ public class GameServiceImplTest {
       @Test
       public void notRecruiting() {
          final var id = IDENTIFIER_B;
-         final var game = new Game(id, false, Set.of());
+         final var game = new Game(id);
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -171,7 +170,7 @@ public class GameServiceImplTest {
       @Test
       public void recruiting() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id, true, Set.of());
+         final var game = new Game(id);
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -244,7 +243,7 @@ public class GameServiceImplTest {
       @Test
       public void present() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id, false, Set.of());
+         final var game = new Game(id);
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -272,7 +271,7 @@ public class GameServiceImplTest {
       @Test
       public void one() {
          final var id = IDENTIFIER_A;
-         gameRepositoryA.save(new Game(id, false, Set.of()));
+         gameRepositoryA.save(new Game(id));
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
