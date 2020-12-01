@@ -18,8 +18,11 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -39,6 +42,12 @@ import uk.badamson.mc.repository.GamePlayersRepository;
  */
 @Service
 public class GamePlayersServiceImpl implements GamePlayersService {
+
+   private static final Set<UUID> NO_USERS = Set.of();
+
+   private static GamePlayers createDefault(final Game.Identifier id) {
+      return new GamePlayers(id, true, NO_USERS);
+   }
 
    private final GamePlayersRepository repository;
 
@@ -76,16 +85,45 @@ public class GamePlayersServiceImpl implements GamePlayersService {
 
    @Override
    @Nonnull
-   public Optional<GamePlayers> endRecruitment(@Nonnull final Identifier id) {
+   public GamePlayers endRecruitment(@Nonnull final Identifier id)
+            throws NoSuchElementException {
       // TODO Auto-generated method stub
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    * <p>
+    * Furthermore:
+    * </p>
+    * <ul>
+    * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
+    * associated {@linkplain #getRepository() repository}
+    * {@linkplain GamePlayersRepository#findById(Identifier) has} a stored value
+    * with the given ID, that returned value is the value retrieved from the
+    * repository.</li>
+    * </ul>
+    *
+    * @param id
+    *           {@inheritDoc}
+    * @return {@inheritDoc}
+    * @throws NullPointerException
+    *            {@inheritDoc}
+    */
    @Override
    @Nonnull
    public Optional<GamePlayers> getGamePlayers(
             @Nonnull final Game.Identifier id) {
-      return repository.findById(id);
+      Objects.requireNonNull(id, "id");
+
+      var result = Optional.<GamePlayers>empty();
+      if (gameService.getGame(id).isPresent()) {
+         result = repository.findById(id);
+         if (result.isEmpty()) {
+            result = Optional.of(createDefault(id));
+         }
+      }
+      return result;
    }
 
    @Override

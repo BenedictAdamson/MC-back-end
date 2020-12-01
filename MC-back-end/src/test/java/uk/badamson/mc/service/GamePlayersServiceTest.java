@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import uk.badamson.mc.Game;
@@ -40,20 +42,27 @@ public class GamePlayersServiceTest {
       assertNotNull(service.getGameService(), "Not null, gameService");
    }
 
-   public static Optional<GamePlayers> endRecruitment(
-            final GamePlayersService service, final Game.Identifier id) {
-      final var result = service.endRecruitment(id);
+   public static GamePlayers endRecruitment(final GamePlayersService service,
+            final Game.Identifier id) throws NoSuchElementException {
+      final var present = service.getGameService().getGame(id).isPresent();
+
+      final GamePlayers result;
+      try {
+         result = service.endRecruitment(id);
+      } catch (final NoSuchElementException e) {
+         assertInvariants(service);
+         assertFalse(present, "game with the given ID is not present");
+         throw e;
+      }
 
       assertInvariants(service);
-      assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
-         final var gamePlayers = result.get();
-         assertAll(() -> assertEquals(id, gamePlayers.getGame(), "game"),
-                  () -> assertFalse(gamePlayers.isRecruiting(), "recruiting"));
-         assertFalse(service.getGamePlayers(id).get().isRecruiting(),
-                  "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
-                           + "a value that is also not recruiting.");
-      }
+      assertTrue(present, "game with the given ID is present");
+      assertNotNull(result, "Returns a (non null) value.");// guard
+      assertAll(() -> assertEquals(id, result.getGame(), "game"),
+               () -> assertFalse(result.isRecruiting(), "recruiting"));
+      assertFalse(service.getGamePlayers(id).get().isRecruiting(),
+               "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
+                        + "a value that is also not recruiting.");
       return result;
    }
 
@@ -63,7 +72,11 @@ public class GamePlayersServiceTest {
 
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
+      final var present = result.isPresent();
+      assertEquals(service.getGameService().getGame(id).isPresent(), present,
+               "Returns a present value if, and only if, "
+                        + "the associated game service indicates that a game with the given ID exists.");
+      if (present) {
          assertEquals(id, result.get().getGame(), "game");
       }
       return result;
