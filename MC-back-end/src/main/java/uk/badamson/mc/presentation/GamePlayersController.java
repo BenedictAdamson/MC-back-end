@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -128,13 +129,14 @@ public class GamePlayersController {
     *            {@code scenario} and {@code created}.
     */
    @GetMapping(GAME_PLAYERS_PATH_PATTERN)
+   @RolesAllowed("PLAYER")
    @Nonnull
-   public Game getGamePlayers(
+   public GamePlayers getGamePlayers(
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
-      new Game.Identifier(scenario, created);
+      final var id = new Game.Identifier(scenario, created);
       try {
-         return null; // FIXME return gamePlayersService.getGame(id).get();
+         return gamePlayersService.getGamePlayers(id).get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
