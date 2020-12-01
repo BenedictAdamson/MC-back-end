@@ -36,7 +36,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -47,15 +50,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.util.UriTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.presentation.GameController;
+import uk.badamson.mc.presentation.GamePlayersController;
+import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -74,11 +83,6 @@ public class GameSteps {
    private static final Matcher<Integer> PUT_OK_STATUS = anyOf(
             is(HttpStatus.OK.value()), is(HttpStatus.NO_CONTENT.value()));
 
-   private static String createGamePath(final Game.Identifier identifier) {
-      return "/api/scenario/" + identifier.getScenario() + "/game/"
-               + identifier.getCreated();
-   }
-
    private static Game.Identifier parseGamePath(final String path) {
       Objects.requireNonNull(path, "path");
       final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path);
@@ -95,10 +99,13 @@ public class GameSteps {
    private BackEndWorld world;
 
    @Autowired
+   private ScenarioService scenarioService;
+
+   @Autowired
    private GameService gameService;
 
    @Autowired
-   private ScenarioService scenarioService;
+   private GamePlayersService gamePlayersService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -110,8 +117,10 @@ public class GameSteps {
    private Game.Identifier gameId;
 
    private Game game;
-   
+
    private GamePlayers gamePlayers;
+
+   private final List<ResultActions> responses = new ArrayList<>(2);
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -152,9 +161,8 @@ public class GameSteps {
    private void endRecruitmentForGame() throws Exception {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(gameId, "gameId");
-      final var path = createGamePath(gameId);//FIXME
-      gamePlayers.endRecruitment();
-      world.putResource(path, gamePlayers);
+      final Identifier identifier = gameId;
+      // FIXME
    }
 
    @When("examining a game recruiting players")
@@ -180,18 +188,19 @@ public class GameSteps {
 
    @Then("the game page indicates that the game is recruiting players")
    public void game_page_indicates_game_recuiting_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertTrue(gamePlayers.isRecruiting());
    }
 
    @Then("The game page indicates the number of players of the game")
    public void game_page_indicates_number_of_players_of_game() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
-      Objects.requireNonNull(gameId, "gameId");
-      //FIXME gamePlayers = gameService.getGamePlayers(gameId).get();
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertFalse(gamePlayers.isRecruiting());
    }
 
@@ -202,11 +211,13 @@ public class GameSteps {
 
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
    }
 
    @Then("The game page lists the players of the game")
    public void game_page_lists_players_of_game() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers(), anything());
    }
 
@@ -272,13 +283,35 @@ public class GameSteps {
 
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
-      final var response = world.getResponse();
+      if (responses.size() < 2) {
+         throw new IllegalStateException("Not enough responses");
+      }
+      try {
+         game = expectEncodedResponse(responses.get(0), Game.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("HTTP response provides game resource",
+                  e);
+      }
+      try {
+         gamePlayers = expectEncodedResponse(responses.get(1),
+                  GamePlayers.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("HTTP response provides game resource",
+                  e);
+      }
+   }
+
+   private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
+            Class<? extends TYPE> clazz) throws Exception {
       try {
          response.andExpect(status().isOk());
-         final var responseText = world.getResponseBodyAsString();
-         game = objectMapper.readValue(responseText, Game.class);
-      } catch (final Exception e) {
-         throw new AssertionFailedError("HTTP response provides a game", e);
+         final String responseText = response.andReturn().getResponse()
+                  .getContentAsString();
+         return objectMapper.readValue(responseText, clazz);
+      } catch (Exception e) {
+         throw new AssertionFailedError(
+                  "Expected OK response encoding a " + clazz.getSimpleName(),
+                  e);
       }
    }
 
@@ -287,15 +320,22 @@ public class GameSteps {
       final var scenarioId = scenario.getIdentifier();
       final var created = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenarioId, created);
+      final Identifier identifier = gameId;
+      responses.clear();
 
-      world.getJson(createGamePath(gameId));
+      world.getJson(GameController.createPathFor(identifier));
+      responses.add(world.getResponse());
+
+      world.getJson(
+               GamePlayersController.createPathForGamePlayersOf(identifier));
+      responses.add(world.getResponse());
    }
 
    private void prepareGame() {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
-      //FIXME gamePlayers = gameService.get ...
       gameId = game.getIdentifier();
+      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
 
