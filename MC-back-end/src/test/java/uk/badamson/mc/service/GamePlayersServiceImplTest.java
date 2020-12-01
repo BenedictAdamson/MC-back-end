@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Clock;
@@ -76,6 +77,110 @@ public class GamePlayersServiceImplTest {
                            "repository"),
                   () -> assertSame(gameService, service.getGameService(),
                            "gameService"));
+      }
+   }// class
+
+   @Nested
+   public class EndRecruitment {
+
+      @Nested
+      public class InRepository {
+
+         @Test
+         public void a() {
+            test(true, Set.of());
+         }
+
+         @Test
+         public void b() {
+            test(false, Set.of(USER_ID_A));
+         }
+
+         @Test
+         public void c() {
+            test(true, Set.of(USER_ID_B));
+         }
+
+         private void test(final boolean recruiting0, final Set<UUID> users) {
+            final var gameService = gameServiceA;
+            final var repository = gamePlayersRepositoryA;
+            final var scenario = gameService.getScenarioService()
+                     .getScenarioIdentifiers().findAny().get();
+            final var game = gameService.create(scenario);
+            final var id = game.getIdentifier();
+            final var gamePlayersInRepository = new GamePlayers(id, recruiting0,
+                     users);
+            repository.save(gamePlayersInRepository);
+            final var service = new GamePlayersServiceImpl(repository,
+                     gameService);
+
+            final var gamePlayers = endRecruitment(service, id);
+
+            assertAll("Attributes of returned value",
+                     () -> assertThat("game", gamePlayers.getGame(), is(id)),
+                     () -> assertThat("recruiting", gamePlayers.isRecruiting(),
+                              is(false)),
+                     () -> assertThat("users", gamePlayers.getUsers(),
+                              is(users)));
+         }
+      }// class
+
+      @Nested
+      public class NoSuchGame {
+         @Test
+         public void a() {
+            test(IDENTIFIER_A);
+         }
+
+         @Test
+         public void b() {
+            test(IDENTIFIER_B);
+         }
+
+         @Test
+         public void inRepository() {
+            final var gameService = gameServiceA;
+            final var repository = gamePlayersRepositoryA;
+            // Tough test: a valid scenario ID
+            final var scenario = gameService.getScenarioService()
+                     .getScenarioIdentifiers().findAny().get();
+            final var id = new Game.Identifier(scenario, Instant.EPOCH);
+            final var gamePlayersInrepository = new GamePlayers(id, true,
+                     Set.of());
+            repository.save(gamePlayersInrepository);
+            final var service = new GamePlayersServiceImpl(repository,
+                     gameService);
+
+            assertThrows(NoSuchElementException.class,
+                     () -> endRecruitment(service, id));
+         }
+
+         private void test(final Game.Identifier id) {
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepositoryA, gameServiceA);
+
+            assertThrows(NoSuchElementException.class,
+                     () -> endRecruitment(service, id));
+         }
+
+      }// class
+
+      @Test
+      public void notInRepository() {
+         final var gameService = gameServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario);
+         final var id = game.getIdentifier();
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  gameService);
+
+         final var gamePlayers = endRecruitment(service, id);
+
+         assertAll("Changed default",
+                  () -> assertThat("recruiting", gamePlayers.isRecruiting(),
+                           is(false)),
+                  () -> assertThat("users", gamePlayers.getUsers(), empty()));
       }
    }// class
 
@@ -177,9 +282,7 @@ public class GamePlayersServiceImplTest {
 
          assertTrue(result.isPresent(), "present");// guard
          final var gamePlayers = result.get();
-         assertAll("Has default values",
-                  () -> assertTrue(gamePlayers.isRecruiting(), "recruiting"),
-                  () -> assertThat("users", gamePlayers.getUsers(), empty()));
+         assertIsDefault(gamePlayers);
       }
    }// class
 
@@ -191,6 +294,8 @@ public class GamePlayersServiceImplTest {
 
    private static final UUID USER_ID_A = UUID.randomUUID();
 
+   private static final UUID USER_ID_B = UUID.randomUUID();
+
    private static final Game.Identifier IDENTIFIER_A = new Game.Identifier(
             UUID.randomUUID(), Instant.EPOCH);
 
@@ -201,6 +306,12 @@ public class GamePlayersServiceImplTest {
       GamePlayersServiceTest.assertInvariants(service);// inherited
 
       assertNotNull(service.getRepository(), "Not null, repository");
+   }
+
+   private static void assertIsDefault(final GamePlayers gamePlayers) {
+      assertAll("Default",
+               () -> assertTrue(gamePlayers.isRecruiting(), "recruiting"),
+               () -> assertThat("users", gamePlayers.getUsers(), empty()));
    }
 
    public static GamePlayers endRecruitment(

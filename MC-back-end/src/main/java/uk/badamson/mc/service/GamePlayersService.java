@@ -32,6 +32,14 @@ import uk.badamson.mc.GamePlayers;
  * The part of the service layer pertaining to players of games of Mission
  * Command.
  * </p>
+ * <p>
+ * By default (that is, if the game players for a game has never been changed),
+ * the game players of a game that exists
+ * </p>
+ * <ul>
+ * <li>{@linkplain GamePlayers#isRecruiting() is recruiting}, and</li>
+ * <li>no {@linkplain GamePlayers#getUsers() users} are playing it</li>
+ * </ul>
  */
 public interface GamePlayersService {
 
@@ -82,12 +90,6 @@ public interface GamePlayersService {
     * if, the associated {@linkplain #getGameService() game service} indicates
     * that a {@linkplain GameService#getGame(Identifier) game} with the given ID
     * exists.</li>
-    * <li>By default (that is, if the game players for a game has never been
-    * changed), a game
-    * <ul>
-    * <li>{@linkplain GamePlayers#isRecruiting() is recruiting}, and</li>
-    * <li>no {@linkplain GamePlayers#getUsers() users} are playing it</li>
-    * </ul>
     * </ul>
     *
     * @param id

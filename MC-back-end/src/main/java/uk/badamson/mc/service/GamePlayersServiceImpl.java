@@ -87,8 +87,21 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    @Nonnull
    public GamePlayers endRecruitment(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      // TODO Auto-generated method stub
-      return null;
+      final var players = get(id).get();
+      players.endRecruitment();
+      return repository.save(players);
+   }
+
+   private Optional<GamePlayers> get(final Game.Identifier id) {
+      Objects.requireNonNull(id, "id");
+      var result = Optional.<GamePlayers>empty();
+      if (gameService.getGame(id).isPresent()) {
+         result = repository.findById(id);
+         if (result.isEmpty()) {
+            result = Optional.of(createDefault(id));
+         }
+      }
+      return result;
    }
 
    /**
@@ -114,16 +127,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    @Nonnull
    public Optional<GamePlayers> getGamePlayers(
             @Nonnull final Game.Identifier id) {
-      Objects.requireNonNull(id, "id");
-
-      var result = Optional.<GamePlayers>empty();
-      if (gameService.getGame(id).isPresent()) {
-         result = repository.findById(id);
-         if (result.isEmpty()) {
-            result = Optional.of(createDefault(id));
-         }
-      }
-      return result;
+      return get(id);
    }
 
    @Override
