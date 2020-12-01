@@ -28,13 +28,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -53,7 +51,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameRepository;
@@ -253,162 +250,6 @@ public class GameControllerTest {
          final var request = get(path).accept(MediaType.APPLICATION_JSON);
 
          return mockMvc.perform(request);
-      }
-
-   }// class
-
-   @Nested
-   public class Modify {
-
-      @Test
-      public void endRecruitment() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game0 = gameService.create(scenario);
-         final var id = game0.getIdentifier();
-         final var gamePlayers = new GamePlayers(id, false, Set.of());
-
-         final var response = performAuthenticated(gamePlayers,
-                  USER_WITH_ALL_AUTHORITIES);
-
-         /*
-          * FIXME final var gamePlayersResultState =
-          * gameService.getGamePlayers(id).get();
-          * response.andExpect(status().isOk());
-          * assertFalse(gamePlayersResultState.isRecruiting(),
-          * "recorded game has changed recuitment flag");
-          */
-      }
-
-      @Test
-      public void noAuthentication() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game0 = gameService.create(scenario);
-         final var id = game0.getIdentifier();
-         final var newGamePlayersState = new GamePlayers(id, false, Set.of());
-         final var path = GameController.createPathFor(id);// FIXME
-         final var request = put(path).with(csrf())
-                  .contentType(MediaType.APPLICATION_JSON).content(objectMapper
-                           .writeValueAsString(newGamePlayersState));
-
-         final var response = mockMvc.perform(request);
-
-         /*
-          * FIXME final var gamePlayersResultState =
-          * gameService.getGamePlayers(id).get(); assertAll( () ->
-          * assertTrue(gamePlayersResultState.isRecruiting(),
-          * "Did not modify recorded game recuiting flag"), () ->
-          * response.andExpect(status().isUnauthorized()));
-          */
-      }
-
-      @Test
-      public void noCsrfToken() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game0 = gameService.create(scenario);
-         final var id = game0.getIdentifier();
-         final var newGamePlayersState = new GamePlayers(id, false, Set.of());
-         newGamePlayersState.endRecruitment();
-         final var path = GameController.createPathFor(id);// FIXME
-         final var request = put(path).with(user(USER_WITH_ALL_AUTHORITIES))
-                  .contentType(MediaType.APPLICATION_JSON).content(objectMapper
-                           .writeValueAsString(newGamePlayersState));
-
-         final var response = mockMvc.perform(request);
-
-         /*
-          * FIXME final var gamePlayersResultState =
-          * gameService.getGamePlayers(id).get(); assertAll( () ->
-          * assertTrue(gamePlayersResultState.isRecruiting(),
-          * "Did not modify recorded game recruiting flag"), () ->
-          * response.andExpect(status().isForbidden()));
-          */
-      }
-
-      @Test
-      public void noop() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game = gameService.create(scenario);
-         final var id = game.getIdentifier();
-         /*
-          * FIXME final var gamePlayers = gameService.getGamePlayers(id);
-          * 
-          * final var response = performAuthenticated(gamePlayers,
-          * USER_WITH_ALL_AUTHORITIES);
-          * 
-          * response.andExpect(status().isOk()); assertEquals(game,
-          * gameService.getGame(game.getIdentifier()).get(),
-          * "recorded game is unchanged");
-          */
-      }
-
-      @Test
-      public void notPermitted() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game0 = gameService.create(scenario);
-         final var id = game0.getIdentifier();
-         final var newGamePlayersState = new GamePlayers(id, true, Set.of());
-         newGamePlayersState.endRecruitment();
-         final var authorities = EnumSet
-                  .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-         final var user = new User(ID_A, "allan", "letmein", authorities, true,
-                  true, true, true);
-
-         final var response = performAuthenticated(newGamePlayersState, user);
-
-         /*
-          * FIXME final var gamePlayersResultState =
-          * gameService.getGamePlayers(id).get(); assertAll( () ->
-          * assertTrue(gamePlayersResultState.isRecruiting(),
-          * "Did not modify recorded game recuiting flag"), () ->
-          * response.andExpect(status().is4xxClientError()));
-          */
-      }
-
-      private ResultActions performAuthenticated(final GamePlayers players,
-               final User user) throws Exception {
-         final var request = put(
-                  GameController.createPathFor(players.getGame()))
-                           .with(user(user)).with(csrf())
-                           .contentType(MediaType.APPLICATION_JSON)
-                           .content(objectMapper.writeValueAsString(players));
-
-         return mockMvc.perform(request);
-      }
-
-      @Test
-      public void reEnableRecruitment() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var id = gameService.create(scenario).getIdentifier();
-         final var game0 = gameService.endRecruitment(id).get();
-         final var newGamePlayersState = new GamePlayers(id, true, Set.of());
-
-         final var response = performAuthenticated(newGamePlayersState,
-                  USER_WITH_ALL_AUTHORITIES);
-         /*
-          * FIXME final var gameResultState =
-          * gameService.getGamePlayers(id).get(); assertAll( () ->
-          * assertFalse(gameResultState.isRecruiting(),
-          * "Did not modify recorded game recuiting flag"), () ->
-          * response.andExpect(status().isPreconditionFailed()));
-          */
-      }
-
-      @Test
-      public void unknownGame() throws Exception {
-         final var scenario = UUID.randomUUID();
-         final var id = new Game.Identifier(scenario, Instant.now());
-         final var game = new GamePlayers(id, true, Set.of());
-
-         final var response = performAuthenticated(game,
-                  USER_WITH_ALL_AUTHORITIES);
-
-         response.andExpect(status().isNotFound());
       }
 
    }// class

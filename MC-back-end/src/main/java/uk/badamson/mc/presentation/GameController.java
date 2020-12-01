@@ -37,8 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -297,64 +295,5 @@ public class GameController {
    @Nonnull
    public final GameService getGameService() {
       return gameService;
-   }
-
-   /**
-    * <p>
-    * Behaviour of the PUT verb for a game resource.
-    * </p>
-    * <ul>
-    * <li>Subsequent retrieval of the game with the given identification
-    * information will get the given new game state.</li>
-    * </ul>
-    *
-    * @param scenario
-    *           The unique ID of the scenario of the game to modify.
-    * @param created
-    *           The creation time of the game to modify.
-    * @param newGameState
-    *           The new state for the game.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code scenario} is null.</li>
-    *            <li>If {@code created} is null.</li>
-    *            <li>If {@code newGameState} is null.</li>
-    *            </ul>
-    * @throws ResponseStatusException
-    *            <ul>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-    *            there is no game that has {@linkplain Game#getIdentifier()
-    *            identification information} equivalent to the given
-    *            {@code scenario} and {@code created}.</li>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#PRECONDITION_FAILED 412
-    *            (Precondition Failed)} if
-    *            <ul>
-    *            <li>the {@linkplain Game#getIdentifier() identification
-    *            information} of the given {@code newGameState} is inconsistent
-    *            with the given {@code scenario} and {@code created}.</li>
-    *            </ul>
-    *            </li>
-    *            </ul>
-    */
-   @PutMapping(GAME_PATH_PATTERN)
-   @RolesAllowed("MANAGE_GAMES")
-   public void modify(@Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created,
-            @Nonnull @RequestBody final Game newGameState) {
-      final var identifier = new Game.Identifier(scenario, created);
-      try {
-         final var game0 = gameService.getGame(identifier).get();
-         if (!identifier.equals(newGameState.getIdentifier())) {
-            throw new IllegalArgumentException("Inconsistent identifier");
-         }
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized ID", e);
-      } catch (final IllegalStateException | IllegalArgumentException e) {
-         throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
-                  e.getMessage(), e);
-      }
    }
 }
