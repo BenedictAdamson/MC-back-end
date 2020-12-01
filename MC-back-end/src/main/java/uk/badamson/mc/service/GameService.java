@@ -31,7 +31,6 @@ import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.GamePlayers;
 
 /**
  * <p>
@@ -54,8 +53,6 @@ public interface GameService {
     * <li>The returned game has the {@linkplain #getNow() current time} as the
     * {@linkplain Identifier#getCreated() creation time} of its
     * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game {@linkplain Game#isRecruiting() is recruiting}
-    * players.</li>
     * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
     * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
     * </ul>
@@ -78,40 +75,6 @@ public interface GameService {
    @Nonnull
    Game create(@Nonnull UUID scenario)
             throws DataAccessException, NoSuchElementException;
-
-   /**
-    * <p>
-    * Indicate that a game is not {@linkplain GamePlayers#isRecruiting()
-    * recruiting} players (any longer).
-    * </p>
-    * <p>
-    * This mutator is idempotent: the mutator does not have the precondition
-    * that the game is recruiting.
-    * <ul>
-    * <li>Returns a (non null) optional value.</li>
-    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
-    * value for which
-    * <ul>
-    * <li>the {@linkplain GamePlayers#getIdentifier() identifier}
-    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
-    * <li>the game is not {@linkplain GamePlayers#isRecruiting()
-    * recruiting}.</li>
-    * </ul>
-    * </li>
-    * <li>Subsequent {@linkplain #getGamePlayers(Identifier) retrieval} of the
-    * game players using an identifier equivalent to the given ID returns a
-    * value that is also not recruiting. That is, the method also saves the
-    * mutated value.</li>
-    * </ul>
-    *
-    * @param id
-    *           The unique ID of the game to mutate.
-    * @return The mutated game players information.
-    * @throws NullPointerException
-    *            If {@code id} is null.
-    */
-   @Nonnull
-   Optional<GamePlayers> endRecruitment(@Nonnull final Game.Identifier id);
 
    /**
     * <p>

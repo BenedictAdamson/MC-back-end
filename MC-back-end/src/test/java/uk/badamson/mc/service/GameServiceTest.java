@@ -22,9 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.NoSuchElementException;
@@ -35,7 +33,6 @@ import java.util.stream.Stream;
 import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
 
 /**
  * <p>
@@ -68,25 +65,6 @@ public class GameServiceTest {
                "The returned game has the given scenario as the scenario of its identifier"));
 
       return game;
-   }
-
-   public static Optional<GamePlayers> endRecruitment(final GameService service,
-            final Game.Identifier id) {
-      final var result = service.endRecruitment(id);
-
-      assertInvariants(service);
-      assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
-         final var game = result.get();
-         assertAll(() -> assertEquals(id, game.getGame(), "game"),
-                  () -> assertFalse(game.isRecruiting(), "recruiting"));
-         /* FIXME
-         assertFalse(service.getGamePlayers(id).get().isRecruiting(),
-                  "Subsequent retrieval of a game using an identifier equivalent to the given ID returns "
-                           + "a value that is also not recruiting.");
-                           */
-      }
-      return result;
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(

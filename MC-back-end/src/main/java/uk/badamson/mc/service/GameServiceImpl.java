@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.repository.GameRepository;
 
 /**
@@ -100,22 +99,6 @@ public class GameServiceImpl implements GameService {
       final var identifier = new Game.Identifier(scenario, getNow());
       final var game = new Game(identifier);// FIXME
       return repository.save(game);// write
-   }
-
-   @Override
-   @Nonnull
-   @Transactional
-   public Optional<GamePlayers> endRecruitment(@Nonnull final Identifier id) {
-      /*FIXME
-      final var optionalGame = repository.findById(id);// read
-      if (optionalGame.isPresent()) {
-         final var game = optionalGame.get();
-         return Optional.of(repository.save(game));// write
-      } else {
-         return optionalGame;
-      }
-      */
-      return null;
    }
 
    @Nonnull
