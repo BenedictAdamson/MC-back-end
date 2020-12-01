@@ -18,12 +18,9 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import uk.badamson.mc.User;
 
@@ -34,100 +31,33 @@ import uk.badamson.mc.User;
  */
 public class UserRepositoryTest {
 
-   public static final class Fake implements UserRepository {
-
-      private static void requireNonNull(final Object object,
-               final String message) {
-         if (object == null) {
-            throw new IllegalArgumentException("Null " + message);
-         }
-      }
-
-      private final Map<UUID, User> users = new ConcurrentHashMap<>();
+   public static final class Fake
+            extends CrudRepositoryTest.AbstractFake<User, UUID>
+            implements UserRepository {
 
       @Override
-      public long count() {
-         return users.size();
-      }
-
-      @Override
-      public void delete(final User user) {
-         requireNonNull(user, "user");
-         deleteById(user.getId());
-      }
-
-      @Override
-      public void deleteAll() {
-         users.clear();
-      }
-
-      @Override
-      public void deleteAll(final Iterable<? extends User> users) {
-         requireNonNull(users, "users");
-         for (final User user : users) {
-            this.users.remove(user.getId());
-         }
-      }
-
-      @Override
-      public void deleteById(final UUID id) {
-         requireNonNull(id, "id");
-         users.remove(id);
-      }
-
-      @Override
-      public boolean existsById(final UUID id) {
-         requireNonNull(id, "id");
-         return users.containsKey(id);
-      }
-
-      @Override
-      public Iterable<User> findAll() {
-         return users.values();
-      }
-
-      @Override
-      public Iterable<User> findAllById(final Iterable<UUID> ids) {
-         requireNonNull(ids, "ids");
-         return StreamSupport.stream(ids.spliterator(), false).distinct()
-                  .map(un -> users.get(un)).filter(un -> un != null)
-                  .collect(Collectors.toUnmodifiableList());
-      }
-
-      @Override
-      public Optional<User> findById(final UUID id) {
-         requireNonNull(id, "id");
-         return Optional.ofNullable(users.get(id));
+      protected User copy(final User user) {
+         Objects.requireNonNull(user, "user");
+         return new User(user.getId(), user);
       }
 
       @Override
       public Optional<User> findByUsername(final String username) {
          requireNonNull(username, "username");
-         return users.values().stream()
+         return entities.values().stream()
                   .filter(u -> username.equals(u.getUsername())).findAny();
       }
 
       @Override
-      public <USER extends User> USER save(final USER user) {
-         requireNonNull(user, "user");
-         users.put(user.getId(), user);
-         return user;
+      protected UUID getId(final User user) {
+         Objects.requireNonNull(user, "user");
+         return user.getId();
       }
 
-      @Override
-      public <USER extends User> Iterable<USER> saveAll(
-               final Iterable<USER> users) {
-         requireNonNull(users, "users");
-         for (final var user : users) {
-            this.users.put(user.getId(), user);
-         }
-         return users;
-      }
-
-   }
+   }// class
 
    public static void assertInvariants(final UserRepository repository) {
-      // Do nothing
+      CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 
 }
