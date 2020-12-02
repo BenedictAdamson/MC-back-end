@@ -106,8 +106,12 @@ public class GamePlayersControllerTest {
       @Test
       public void present() throws Exception {
          final var id = createGame();
+         // Tough test: user has a minimum set of authorities
+         final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
+         final var user = new User(ID_A, "allan", "letmein", authorities, true,
+                  true, true, true);
 
-         final var response = test(id, USER_WITH_ALL_AUTHORITIES);
+         final var response = test(id, user);
 
          response.andExpect(status().isOk());
          final var jsonResponse = response.andReturn().getResponse()
