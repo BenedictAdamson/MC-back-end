@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -37,8 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -116,8 +115,6 @@ public class GameSteps {
 
    private GamePlayers gamePlayers;
 
-   private final List<ResultActions> responses = new ArrayList<>(2);
-
    @Then("can get the list of games")
    public void can_get_list_of_games() {
       try {
@@ -136,6 +133,9 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
                .get();
       scenario = scenarioService.getScenario(scenarioId).get();
+      gameCreationTimes = gameService
+               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
+               .collect(toUnmodifiableSet());
    }
 
    private void createGame() throws Exception {
@@ -179,24 +179,22 @@ public class GameSteps {
       }
    }
 
+   private void expectGetGamePlayersNoAllowed() {
+      assertNull(gamePlayers);
+   }
+
    @Then("The game page does not indicate whether the game is recruiting players")
-   public void game_page_does_not_indicate_whether_game_recruiting_players()
-            throws Exception {
+   public void game_page_does_not_indicate_whether_game_recruiting_players() {
       /*
        * The server does not "indicate" or produce pages, but it can deny access
        * to the resources that provide that information.
        */
-      expectGetGamPlayersNoAllowed();
+      expectGetGamePlayersNoAllowed();
    }
 
-   private void expectGetGamPlayersNoAllowed() throws Exception {
-      final var gamePlayersResponse = responses.get(1);
-      gamePlayersResponse.andExpect(status().is4xxClientError());
-   }
-   
    @Then("The game page does not list the players of the game")
-   public void game_page_does_not_list_players_of_game() throws Exception  {
-      expectGetGamPlayersNoAllowed();
+   public void game_page_does_not_list_players_of_game() {
+      expectGetGamePlayersNoAllowed();
    }
 
    @Then("The game page includes the scenario description")
@@ -264,6 +262,16 @@ public class GameSteps {
                });
    }
 
+   private boolean isPermittedToGetGamePlayers() {
+      if (world.loggedInUser == null) {
+         return false;
+      } else {
+         final var authorities = world.loggedInUser.getAuthorities();
+         return authorities.contains(Authority.ROLE_PLAYER)
+                  || authorities.contains(Authority.ROLE_MANAGE_GAMES);
+      }
+   }
+
    @Then("the list of games includes the new game")
    public void list_of_games_includes_new_game() {
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
@@ -310,51 +318,36 @@ public class GameSteps {
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
-   @Then("MC serves the game page")
-   public void mc_serves_game_page() {
-      if (responses.size() < 2) {
-         throw new IllegalStateException("Not enough responses");
-      }
-      try {
-         game = expectEncodedResponse(responses.get(0), Game.class);
-      } catch (final Exception e) {
-         throw new AssertionFailedError("HTTP response provides game resource",
-                  e);
-      }
-      if (world.loggedInUser != null && world.loggedInUser.getAuthorities()
-               .contains(Authority.ROLE_PLAYER)) {
-         try {
-            gamePlayers = expectEncodedResponse(responses.get(1),
-                     GamePlayers.class);
-         } catch (final Exception e) {
-            throw new AssertionFailedError(
-                     "HTTP response provides game resource", e);
-         }
-      } else {
-         gamePlayers = null;
-      }
-   }
+   @Then("MC provides a game page")
+   public void mc_provides_game_page() throws Exception {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
 
-   @When("Navigate to one game of the scenario")
-   public void navigate_to_game_of_scenario() throws Exception {
       final var scenarioId = scenario.getIdentifier();
       final var created = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenarioId, created);
-      final var identifier = gameId;
-      responses.clear();
 
-      world.getJson(GameController.createPathFor(identifier));
-      responses.add(world.getResponse());
-
-      final var gamePlayersPath = GamePlayersController
-               .createPathForGamePlayersOf(identifier);
-      var gamePlayersRequest = get(gamePlayersPath)
-               .accept(MediaType.APPLICATION_JSON);
-      if (world.loggedInUser != null) {
-         gamePlayersRequest = gamePlayersRequest.with(user(world.loggedInUser));
+      try {
+         requestGetGame();
+         game = expectEncodedResponse(world.getResponse(), Game.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can GET Game resource", e);
       }
-      world.performRequest(gamePlayersRequest);
-      responses.add(world.getResponse());
+
+      try {
+
+         requestGetGamePlayers();
+         if (isPermittedToGetGamePlayers()) {
+            gamePlayers = expectEncodedResponse(world.getResponse(),
+                     GamePlayers.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            gamePlayers = null;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET GamePlayers resource", e);
+      }
    }
 
    private void prepareGame() {
@@ -363,6 +356,23 @@ public class GameSteps {
       gameId = game.getIdentifier();
       gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
+   }
+
+   private void requestGetGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      world.getJson(GameController.createPathFor(gameId));
+   }
+
+   private void requestGetGamePlayers() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController.createPathForGamePlayersOf(gameId);
+      var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    @When("A scenario has games")
@@ -389,8 +399,6 @@ public class GameSteps {
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       Objects.requireNonNull(scenario, "scenario");
-      gameCreationTimes = gameService
-               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
-               .collect(toUnmodifiableSet());
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
 }
