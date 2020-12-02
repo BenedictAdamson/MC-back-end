@@ -42,6 +42,8 @@ import org.junit.jupiter.api.Test;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.repository.CurrentUserGameRepository;
+import uk.badamson.mc.repository.CurrentUserGameRepositoryTest;
 import uk.badamson.mc.repository.GamePlayersRepository;
 import uk.badamson.mc.repository.GamePlayersRepositoryTest;
 import uk.badamson.mc.repository.GameRepositoryTest;
@@ -58,23 +60,28 @@ public class GamePlayersServiceImplTest {
 
       @Test
       public void a() {
-         test(gamePlayersRepositoryA, gameServiceA);
+         test(gamePlayersRepositoryA, currentUserGameRepositoryA, gameServiceA);
       }
 
       @Test
       public void b() {
-         test(gamePlayersRepositoryB, gameServiceB);
+         test(gamePlayersRepositoryB, currentUserGameRepositoryB, gameServiceB);
       }
 
-      private void test(final GamePlayersRepository repository,
+      private void test(final GamePlayersRepository gamePlayersRepository,
+               final CurrentUserGameRepository currentUserGameRepository,
                final GameService gameService) {
-         final var service = new GamePlayersServiceImpl(repository,
-                  gameService);
+         final var service = new GamePlayersServiceImpl(gamePlayersRepository,
+                  currentUserGameRepository, gameService);
 
          assertInvariants(service);
          assertAll("Has the given assoications",
-                  () -> assertSame(repository, service.getRepository(),
-                           "repository"),
+                  () -> assertSame(gamePlayersRepository,
+                           service.getGamePlayersRepository(),
+                           "gamePlayersRepository"),
+                  () -> assertSame(currentUserGameRepository,
+                           service.getCurrentUserGameRepository(),
+                           "currentUserGameRepository"),
                   () -> assertSame(gameService, service.getGameService(),
                            "gameService"));
       }
@@ -102,16 +109,19 @@ public class GamePlayersServiceImplTest {
          }
 
          private void test(final boolean recruiting0, final Set<UUID> users) {
+            final var gamePlayersRepository = gamePlayersRepositoryA;
+            final var currentUserGameRepository = currentUserGameRepositoryA;
             final var gameService = gameServiceA;
-            final var repository = gamePlayersRepositoryA;
+
             final var scenario = gameService.getScenarioService()
                      .getScenarioIdentifiers().findAny().get();
             final var game = gameService.create(scenario);
             final var id = game.getIdentifier();
             final var gamePlayersInRepository = new GamePlayers(id, recruiting0,
                      users);
-            repository.save(gamePlayersInRepository);
-            final var service = new GamePlayersServiceImpl(repository,
+            gamePlayersRepository.save(gamePlayersInRepository);
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepository, currentUserGameRepository,
                      gameService);
 
             final var gamePlayers = endRecruitment(service, id);
@@ -139,16 +149,19 @@ public class GamePlayersServiceImplTest {
 
          @Test
          public void inRepository() {
+            final var gamePlayersRepository = gamePlayersRepositoryA;
+            final var currentUserGameRepository = currentUserGameRepositoryA;
             final var gameService = gameServiceA;
-            final var repository = gamePlayersRepositoryA;
+
             // Tough test: a valid scenario ID
             final var scenario = gameService.getScenarioService()
                      .getScenarioIdentifiers().findAny().get();
             final var id = new Game.Identifier(scenario, Instant.EPOCH);
             final var gamePlayersInrepository = new GamePlayers(id, true,
                      Set.of());
-            repository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(repository,
+            gamePlayersRepository.save(gamePlayersInrepository);
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepository, currentUserGameRepository,
                      gameService);
 
             assertThrows(NoSuchElementException.class,
@@ -157,7 +170,8 @@ public class GamePlayersServiceImplTest {
 
          private void test(final Game.Identifier id) {
             final var service = new GamePlayersServiceImpl(
-                     gamePlayersRepositoryA, gameServiceA);
+                     gamePlayersRepositoryA, currentUserGameRepositoryA,
+                     gameServiceA);
 
             assertThrows(NoSuchElementException.class,
                      () -> endRecruitment(service, id));
@@ -173,7 +187,7 @@ public class GamePlayersServiceImplTest {
          final var game = gameService.create(scenario);
          final var id = game.getIdentifier();
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
-                  gameService);
+                  currentUserGameRepositoryA, gameService);
 
          final var gamePlayers = endRecruitment(service, id);
 
@@ -202,15 +216,16 @@ public class GamePlayersServiceImplTest {
 
          private void test(final boolean recruiting, final Set<UUID> users) {
             final var gameService = gameServiceA;
-            final var repository = gamePlayersRepositoryA;
+            final var gamePlayersRepository = gamePlayersRepositoryA;
             final var scenario = gameService.getScenarioService()
                      .getScenarioIdentifiers().findAny().get();
             final var game = gameService.create(scenario);
             final var id = game.getIdentifier();
             final var gamePlayersInrepository = new GamePlayers(id, recruiting,
                      users);
-            repository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(repository,
+            gamePlayersRepository.save(gamePlayersInrepository);
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepository, currentUserGameRepositoryA,
                      gameService);
 
             final var result = getGamePlayers(service, id);
@@ -241,15 +256,16 @@ public class GamePlayersServiceImplTest {
          @Test
          public void inRepository() {
             final var gameService = gameServiceA;
-            final var repository = gamePlayersRepositoryA;
+            final var gamePlayersRepository = gamePlayersRepositoryA;
             // Tough test: a valid scenario ID
             final var scenario = gameService.getScenarioService()
                      .getScenarioIdentifiers().findAny().get();
             final var id = new Game.Identifier(scenario, Instant.EPOCH);
             final var gamePlayersInrepository = new GamePlayers(id, true,
                      Set.of());
-            repository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(repository,
+            gamePlayersRepository.save(gamePlayersInrepository);
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepository, currentUserGameRepositoryA,
                      gameService);
 
             final var result = getGamePlayers(service, id);
@@ -259,7 +275,8 @@ public class GamePlayersServiceImplTest {
 
          private void test(final Game.Identifier id) {
             final var service = new GamePlayersServiceImpl(
-                     gamePlayersRepositoryA, gameServiceA);
+                     gamePlayersRepositoryA, currentUserGameRepositoryA,
+                     gameServiceA);
 
             final var result = getGamePlayers(service, id);
 
@@ -276,7 +293,7 @@ public class GamePlayersServiceImplTest {
          final var game = gameService.create(scenario);
          final var id = game.getIdentifier();
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
-                  gameService);
+                  currentUserGameRepositoryA, gameService);
 
          final var result = getGamePlayers(service, id);
 
@@ -305,7 +322,7 @@ public class GamePlayersServiceImplTest {
    public static void assertInvariants(final GamePlayersServiceImpl service) {
       GamePlayersServiceTest.assertInvariants(service);// inherited
 
-      assertNotNull(service.getRepository(), "Not null, repository");
+      assertNotNull(service.getGamePlayersRepository(), "Not null, repository");
    }
 
    private static void assertIsDefault(final GamePlayers gamePlayers) {
@@ -347,6 +364,10 @@ public class GamePlayersServiceImplTest {
 
    private GamePlayersRepositoryTest.Fake gamePlayersRepositoryB;
 
+   private CurrentUserGameRepositoryTest.Fake currentUserGameRepositoryA;
+
+   private CurrentUserGameRepositoryTest.Fake currentUserGameRepositoryB;
+
    private GameService gameServiceA;
 
    private GameService gameServiceB;
@@ -357,6 +378,9 @@ public class GamePlayersServiceImplTest {
       gameRepositoryB = new GameRepositoryTest.Fake();
       gamePlayersRepositoryA = new GamePlayersRepositoryTest.Fake();
       gamePlayersRepositoryB = new GamePlayersRepositoryTest.Fake();
+      currentUserGameRepositoryA = new CurrentUserGameRepositoryTest.Fake();
+      currentUserGameRepositoryB = new CurrentUserGameRepositoryTest.Fake();
+
       gameServiceA = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                scenarioServiceA);
       gameServiceB = new GameServiceImpl(gameRepositoryB, CLOCK_B,
