@@ -385,6 +385,7 @@ public class GameSteps {
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
+      updateGameCreationTimes();
    }
 
    private void updateGameCreationTimes() {
