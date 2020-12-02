@@ -134,9 +134,7 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
                .get();
       scenario = scenarioService.getScenario(scenarioId).get();
-      gameCreationTimes = gameService
-               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
-               .collect(toUnmodifiableSet());
+      updateGameCreationTimes();
    }
 
    private void createGame() throws Exception {
@@ -147,6 +145,7 @@ public class GameSteps {
                .createPathForGames(scenario.getIdentifier());
       world.performRequest(
                post(path).with(user(world.loggedInUser)).with(csrf()));
+      updateGameCreationTimes();
    }
 
    @When("creating a game")
@@ -386,6 +385,12 @@ public class GameSteps {
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
+   }
+
+   private void updateGameCreationTimes() {
+      gameCreationTimes = gameService
+               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
+               .collect(toUnmodifiableSet());
    }
 
    @When("user ends recruitment for the game")
