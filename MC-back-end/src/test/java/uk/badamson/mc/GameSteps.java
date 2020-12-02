@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,18 +52,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.util.UriTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.presentation.GamePlayersController;
-import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
@@ -162,13 +157,46 @@ public class GameSteps {
    private void endRecruitmentForGame() throws Exception {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(gameId, "gameId");
-      final Identifier identifier = gameId;
-      // FIXME
+      throw new UnsupportedOperationException();// FIXME
    }
 
    @When("examining a game recruiting players")
    public void examining_game_recruiting_players() {
       prepareGame();
+   }
+
+   private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
+            final Class<? extends TYPE> clazz) throws Exception {
+      try {
+         response.andExpect(status().isOk());
+         final var responseText = response.andReturn().getResponse()
+                  .getContentAsString();
+         return objectMapper.readValue(responseText, clazz);
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Expected OK response encoding a " + clazz.getSimpleName(),
+                  e);
+      }
+   }
+
+   @Then("The game page does not indicate whether the game is recruiting players")
+   public void game_page_does_not_indicate_whether_game_recruiting_players()
+            throws Exception {
+      /*
+       * The server does not "indicate" or produce pages, but it can deny access
+       * to the resources that provide that information.
+       */
+      expectGetGamPlayersNoAllowed();
+   }
+
+   private void expectGetGamPlayersNoAllowed() throws Exception {
+      final var gamePlayersResponse = responses.get(1);
+      gamePlayersResponse.andExpect(status().is4xxClientError());
+   }
+   
+   @Then("The game page does not list the players of the game")
+   public void game_page_does_not_list_players_of_game() throws Exception  {
+      expectGetGamPlayersNoAllowed();
    }
 
    @Then("The game page includes the scenario description")
@@ -307,26 +335,12 @@ public class GameSteps {
       }
    }
 
-   private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
-            Class<? extends TYPE> clazz) throws Exception {
-      try {
-         response.andExpect(status().isOk());
-         final String responseText = response.andReturn().getResponse()
-                  .getContentAsString();
-         return objectMapper.readValue(responseText, clazz);
-      } catch (Exception e) {
-         throw new AssertionFailedError(
-                  "Expected OK response encoding a " + clazz.getSimpleName(),
-                  e);
-      }
-   }
-
    @When("Navigate to one game of the scenario")
    public void navigate_to_game_of_scenario() throws Exception {
       final var scenarioId = scenario.getIdentifier();
       final var created = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenarioId, created);
-      final Identifier identifier = gameId;
+      final var identifier = gameId;
       responses.clear();
 
       world.getJson(GameController.createPathFor(identifier));
