@@ -57,6 +57,8 @@ public class GamePlayersServiceImpl implements GamePlayersService {
 
    private final GameService gameService;
 
+   private final UserService userService;
+
    /**
     * <p>
     * Construct a service with given associations.
@@ -68,7 +70,9 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     * {@linkplain #getCurrentUserGameRepository() current user game
     * repository}.</li>
     * <li>The created service has the given {@code gameService} as its
-    * {@linkplain #getGameService() scenario service}.</li>
+    * {@linkplain #getGameService() game service}.</li>
+    * <li>The created service has the given {@code userService} as its
+    * {@linkplain #getUserService() user service}.</li>
     * </ul>
     *
     * @param gamePlayersRepository
@@ -81,23 +85,29 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     * @param gameService
     *           The part of the service layer that this service uses for
     *           information about scenarios.
+    * @param userService
+    *           The part of the service layer that this service uses for
+    *           information about users.
     * @throws NullPointerException
     *            <ul>
     *            <li>If {@code gamePlayersRepository} is null.</li>
     *            <li>If {@code currentUserGameRepository} is null.</li>
     *            <li>If {@code gameService} is null.</li>
+    *            <li>If {@code userService} is null.</li>
     *            </ul>
     */
    @Autowired
    public GamePlayersServiceImpl(
             @Nonnull final GamePlayersRepository gamePlayersRepository,
             @Nonnull final CurrentUserGameRepository currentUserGameRepository,
-            @Nonnull final GameService gameService) {
+            @Nonnull final GameService gameService,
+            @Nonnull final UserService userService) {
       this.gamePlayersRepository = Objects.requireNonNull(gamePlayersRepository,
                "gamePlayersRepository");
       this.currentUserGameRepository = Objects.requireNonNull(
                currentUserGameRepository, "currentUserGameRepository");
       this.gameService = Objects.requireNonNull(gameService, "gameService");
+      this.userService = Objects.requireNonNull(userService, "userService");
    }
 
    @Override
@@ -184,6 +194,12 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    @Nonnull
    public final GameService getGameService() {
       return gameService;
+   }
+
+   @Override
+   @Nonnull
+   public UserService getUserService() {
+      return userService;
    }
 
 }

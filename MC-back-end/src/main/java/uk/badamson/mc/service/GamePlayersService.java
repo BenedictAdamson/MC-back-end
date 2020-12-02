@@ -114,4 +114,18 @@ public interface GamePlayersService {
     */
    @Nonnull
    GameService getGameService();
+
+   /**
+    * <p>
+    * The part of the service layer that this service uses for information about
+    * users.
+    * </p>
+    * <ul>
+    * <li>Not null.</li>
+    * </ul>
+    *
+    * @return the user service
+    */
+   @Nonnull
+   UserService getUserService();
 }

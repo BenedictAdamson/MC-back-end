@@ -39,6 +39,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
@@ -47,6 +49,8 @@ import uk.badamson.mc.repository.CurrentUserGameRepositoryTest;
 import uk.badamson.mc.repository.GamePlayersRepository;
 import uk.badamson.mc.repository.GamePlayersRepositoryTest;
 import uk.badamson.mc.repository.GameRepositoryTest;
+import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserRepositoryTest;
 
 /**
  * <p>
@@ -60,19 +64,21 @@ public class GamePlayersServiceImplTest {
 
       @Test
       public void a() {
-         test(gamePlayersRepositoryA, currentUserGameRepositoryA, gameServiceA);
+         test(gamePlayersRepositoryA, currentUserGameRepositoryA, gameServiceA,
+                  userServiceA);
       }
 
       @Test
       public void b() {
-         test(gamePlayersRepositoryB, currentUserGameRepositoryB, gameServiceB);
+         test(gamePlayersRepositoryB, currentUserGameRepositoryB, gameServiceB,
+                  userServiceB);
       }
 
       private void test(final GamePlayersRepository gamePlayersRepository,
                final CurrentUserGameRepository currentUserGameRepository,
-               final GameService gameService) {
+               final GameService gameService, final UserService userService) {
          final var service = new GamePlayersServiceImpl(gamePlayersRepository,
-                  currentUserGameRepository, gameService);
+                  currentUserGameRepository, gameService, userService);
 
          assertInvariants(service);
          assertAll("Has the given assoications",
@@ -83,7 +89,9 @@ public class GamePlayersServiceImplTest {
                            service.getCurrentUserGameRepository(),
                            "currentUserGameRepository"),
                   () -> assertSame(gameService, service.getGameService(),
-                           "gameService"));
+                           "gameService"),
+                  () -> assertSame(userService, service.getUserService(),
+                           "userService"));
       }
    }// class
 
@@ -122,7 +130,7 @@ public class GamePlayersServiceImplTest {
             gamePlayersRepository.save(gamePlayersInRepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepository,
-                     gameService);
+                     gameService, userServiceA);
 
             final var gamePlayers = endRecruitment(service, id);
 
@@ -162,7 +170,7 @@ public class GamePlayersServiceImplTest {
             gamePlayersRepository.save(gamePlayersInrepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepository,
-                     gameService);
+                     gameService, userServiceA);
 
             assertThrows(NoSuchElementException.class,
                      () -> endRecruitment(service, id));
@@ -171,7 +179,7 @@ public class GamePlayersServiceImplTest {
          private void test(final Game.Identifier id) {
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
-                     gameServiceA);
+                     gameServiceA, userServiceA);
 
             assertThrows(NoSuchElementException.class,
                      () -> endRecruitment(service, id));
@@ -187,7 +195,7 @@ public class GamePlayersServiceImplTest {
          final var game = gameService.create(scenario);
          final var id = game.getIdentifier();
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
-                  currentUserGameRepositoryA, gameService);
+                  currentUserGameRepositoryA, gameService, userServiceA);
 
          final var gamePlayers = endRecruitment(service, id);
 
@@ -226,7 +234,7 @@ public class GamePlayersServiceImplTest {
             gamePlayersRepository.save(gamePlayersInrepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepositoryA,
-                     gameService);
+                     gameService, userServiceA);
 
             final var result = getGamePlayers(service, id);
 
@@ -266,7 +274,7 @@ public class GamePlayersServiceImplTest {
             gamePlayersRepository.save(gamePlayersInrepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepositoryA,
-                     gameService);
+                     gameService, userServiceA);
 
             final var result = getGamePlayers(service, id);
 
@@ -276,7 +284,7 @@ public class GamePlayersServiceImplTest {
          private void test(final Game.Identifier id) {
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
-                     gameServiceA);
+                     gameServiceA, userServiceA);
 
             final var result = getGamePlayers(service, id);
 
@@ -293,7 +301,7 @@ public class GamePlayersServiceImplTest {
          final var game = gameService.create(scenario);
          final var id = game.getIdentifier();
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
-                  currentUserGameRepositoryA, gameService);
+                  currentUserGameRepositoryA, gameService, userServiceA);
 
          final var result = getGamePlayers(service, id);
 
@@ -318,6 +326,10 @@ public class GamePlayersServiceImplTest {
 
    private static final Game.Identifier IDENTIFIER_B = new Game.Identifier(
             UUID.randomUUID(), Instant.now());
+
+   private static final String PASSWORD_A = "letmein";
+
+   private static final String PASSWORD_B = "password123";
 
    public static void assertInvariants(final GamePlayersServiceImpl service) {
       GamePlayersServiceTest.assertInvariants(service);// inherited
@@ -352,6 +364,12 @@ public class GamePlayersServiceImplTest {
       return result;
    }
 
+   private final PasswordEncoder passwordEncoderA = new BCryptPasswordEncoder(
+            4);
+
+   private final PasswordEncoder passwordEncoderB = new BCryptPasswordEncoder(
+            5);
+
    private final ScenarioService scenarioServiceA = new ScenarioServiceImpl();
 
    private final ScenarioService scenarioServiceB = new ScenarioServiceImpl();
@@ -368,9 +386,17 @@ public class GamePlayersServiceImplTest {
 
    private CurrentUserGameRepositoryTest.Fake currentUserGameRepositoryB;
 
+   private UserRepository userRepositoryA;
+
+   private UserRepository userRepositoryB;
+
    private GameService gameServiceA;
 
    private GameService gameServiceB;
+
+   private UserService userServiceA;
+
+   private UserService userServiceB;
 
    @BeforeEach
    public void setUp() {
@@ -380,10 +406,16 @@ public class GamePlayersServiceImplTest {
       gamePlayersRepositoryB = new GamePlayersRepositoryTest.Fake();
       currentUserGameRepositoryA = new CurrentUserGameRepositoryTest.Fake();
       currentUserGameRepositoryB = new CurrentUserGameRepositoryTest.Fake();
+      userRepositoryA = new UserRepositoryTest.Fake();
+      userRepositoryB = new UserRepositoryTest.Fake();
 
       gameServiceA = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                scenarioServiceA);
       gameServiceB = new GameServiceImpl(gameRepositoryB, CLOCK_B,
                scenarioServiceB);
+      userServiceA = new UserServiceImpl(passwordEncoderA, userRepositoryA,
+               PASSWORD_A);
+      userServiceB = new UserServiceImpl(passwordEncoderB, userRepositoryB,
+               PASSWORD_B);
    }
 }
