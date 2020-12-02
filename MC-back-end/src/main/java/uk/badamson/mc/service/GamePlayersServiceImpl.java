@@ -131,6 +131,13 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return result;
    }
 
+   @Override
+   @Nonnull
+   public Optional<Identifier> getCurrentGameOfUser(@Nonnull final UUID user) {
+      Objects.requireNonNull(user, "user");
+      return Optional.empty();// FIXME
+   }
+
    /**
     * <p>
     * The repository that this service uses for persistent storage of

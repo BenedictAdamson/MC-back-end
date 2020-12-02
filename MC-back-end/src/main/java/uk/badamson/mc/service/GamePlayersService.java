@@ -20,12 +20,14 @@ package uk.badamson.mc.service;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.User;
 
 /**
  * <p>
@@ -74,8 +76,30 @@ public interface GamePlayersService {
     *            game} with the given ID does not exist.
     */
    @Nonnull
-   GamePlayers endRecruitment(@Nonnull final Game.Identifier id)
+   GamePlayers endRecruitment(@Nonnull Game.Identifier id)
             throws NoSuchElementException;
+
+   /**
+    * <p>
+    * The {@linkplain Game#getIdentifier() unique ID} of the <i>current game</i>
+    * of a user who has a given {@linkplain User#getId() unique ID}.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>An {@linkplain Optional#isEmpty() empty} return value indicates either
+    * that the user is not currently playing a game, or that he associated
+    * {@linkplain #getUserService() user service} indicates that there is no
+    * user with the give {@code user} ID.</li>
+    * </ul>
+    *
+    * @param user
+    *           The unique ID of the user.
+    * @return the current game of the user
+    * @throws NullPointerException
+    *            If {@code user} is null
+    */
+   @Nonnull
+   Optional<Game.Identifier> getCurrentGameOfUser(@Nonnull UUID user);
 
    /**
     * <p>
@@ -99,7 +123,7 @@ public interface GamePlayersService {
     *            If {@code id} is null.
     */
    @Nonnull
-   Optional<GamePlayers> getGamePlayers(@Nonnull final Game.Identifier id);
+   Optional<GamePlayers> getGamePlayers(@Nonnull Game.Identifier id);
 
    /**
     * <p>

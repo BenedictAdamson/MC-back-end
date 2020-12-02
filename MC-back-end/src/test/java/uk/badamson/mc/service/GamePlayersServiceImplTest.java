@@ -44,6 +44,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.repository.CurrentUserGameRepository;
 import uk.badamson.mc.repository.CurrentUserGameRepositoryTest;
 import uk.badamson.mc.repository.GamePlayersRepository;
@@ -147,12 +148,12 @@ public class GamePlayersServiceImplTest {
       public class NoSuchGame {
          @Test
          public void a() {
-            test(IDENTIFIER_A);
+            test(GAME_IDENTIFIER_A);
          }
 
          @Test
          public void b() {
-            test(IDENTIFIER_B);
+            test(GAME_IDENTIFIER_B);
          }
 
          @Test
@@ -207,6 +208,34 @@ public class GamePlayersServiceImplTest {
    }// class
 
    @Nested
+   public class GetCurrentGameOfUser {
+
+      @Test
+      public void unknownUser() {
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameServiceA, userServiceA);
+
+         final var result = getCurrentGameOfUser(service, USER_ID_A);
+
+         assertTrue(result.isEmpty(), "empty");
+      }
+
+      @Test
+      public void unknownUserWithRecord() {
+         final var userId = USER_ID_A;
+         final var currentUserGameRepository = currentUserGameRepositoryA;
+         currentUserGameRepository
+                  .save(new UserGameAssociation(userId, GAME_IDENTIFIER_A));
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepository, gameServiceA, userServiceA);
+
+         final var result = getCurrentGameOfUser(service, userId);
+
+         assertTrue(result.isEmpty(), "empty");
+      }
+   }// class
+
+   @Nested
    public class GetGamePlayers {
 
       @Nested
@@ -253,12 +282,12 @@ public class GamePlayersServiceImplTest {
       public class NoSuchGame {
          @Test
          public void a() {
-            test(IDENTIFIER_A);
+            test(GAME_IDENTIFIER_A);
          }
 
          @Test
          public void b() {
-            test(IDENTIFIER_B);
+            test(GAME_IDENTIFIER_B);
          }
 
          @Test
@@ -321,10 +350,10 @@ public class GamePlayersServiceImplTest {
 
    private static final UUID USER_ID_B = UUID.randomUUID();
 
-   private static final Game.Identifier IDENTIFIER_A = new Game.Identifier(
+   private static final Game.Identifier GAME_IDENTIFIER_A = new Game.Identifier(
             UUID.randomUUID(), Instant.EPOCH);
 
-   private static final Game.Identifier IDENTIFIER_B = new Game.Identifier(
+   private static final Game.Identifier GAME_IDENTIFIER_B = new Game.Identifier(
             UUID.randomUUID(), Instant.now());
 
    private static final String PASSWORD_A = "letmein";
@@ -353,6 +382,14 @@ public class GamePlayersServiceImplTest {
          assertInvariants(service);
          throw e;
       }
+      assertInvariants(service);
+      return result;
+   }
+
+   public static Optional<Game.Identifier> getCurrentGameOfUser(
+            final GamePlayersServiceImpl service, final UUID user) {
+      final var result = GamePlayersServiceTest.getCurrentGameOfUser(service,
+               user);
       assertInvariants(service);
       return result;
    }

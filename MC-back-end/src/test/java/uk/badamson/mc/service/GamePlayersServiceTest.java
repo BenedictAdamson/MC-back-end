@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
@@ -63,6 +64,14 @@ public class GamePlayersServiceTest {
       assertFalse(service.getGamePlayers(id).get().isRecruiting(),
                "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
                         + "a value that is also not recruiting.");
+      return result;
+   }
+
+   public static Optional<Game.Identifier> getCurrentGameOfUser(
+            final GamePlayersService service, final UUID user) {
+      final var result = service.getCurrentGameOfUser(user);
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");
       return result;
    }
 
