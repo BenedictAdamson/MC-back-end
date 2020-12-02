@@ -408,9 +408,17 @@ public class GameSteps {
       prepareGame();
    }
 
-   @When("Viewing the games of the scenario")
+   @Given("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+   }
+
+   @When("Navigate to one game page")
+   public void navigate_to_one_game_page() {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+      final var creationTime = gameCreationTimes.stream().findAny().get();
+      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
    }
 }
