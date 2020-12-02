@@ -221,7 +221,7 @@ public class GameSteps {
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
-      assertFalse(gamePlayers.isRecruiting());
+      assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
    }
 
    @Then("The game page indicates that the user may not join the game")
@@ -313,12 +313,7 @@ public class GameSteps {
 
    @Then("MC provides a game page")
    public void mc_provides_game_page() throws Exception {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
-
-      final var scenarioId = scenario.getIdentifier();
-      final var created = gameCreationTimes.stream().findAny().get();
-      gameId = new Game.Identifier(scenarioId, created);
+      Objects.requireNonNull(gameId, "gameId");
 
       try {
          requestGetGame();
@@ -396,12 +391,16 @@ public class GameSteps {
 
    @When("user ends recruitment for the game")
    public void user_ends_recuitment_for_game() {
+      if (!isPermittedToGetGamePlayers()) {
+         throw new IllegalStateException("user not authorized");
+      }
       try {
          requestEndRecruitmentForGame();
       } catch (final Exception e) {
          throw new AssertionFailedError("Can ask the server to change the game",
                   e);
       }
+      gamePlayers = null;// local copy is out of date
    }
 
    @Given("viewing a game that is recruiting players")
