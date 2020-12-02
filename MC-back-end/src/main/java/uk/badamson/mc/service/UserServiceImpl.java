@@ -20,6 +20,7 @@ package uk.badamson.mc.service;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -117,6 +118,12 @@ public class UserServiceImpl implements UserService {
    @Override
    public final PasswordEncoder getPasswordEncoder() {
       return passwordEncoder;
+   }
+
+   @Override
+   public Optional<User> getUser(final UUID id) {
+      Objects.requireNonNull(id, "id");
+      return userRepository.findById(id);
    }
 
    /**

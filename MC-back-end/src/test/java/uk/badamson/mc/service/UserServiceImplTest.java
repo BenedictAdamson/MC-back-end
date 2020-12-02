@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -241,6 +242,33 @@ public class UserServiceImplTest {
    }// class
 
    @Nested
+   public class GetUser {
+
+      @Test
+      public void absent() {
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+
+         final var result = getUser(service, USER_ID_A);
+
+         assertTrue(result.isEmpty(), "empty");
+      }
+
+      @Test
+      public void present() {
+         final var userDetails = new BasicUserDetails(USERNAME_A, PASSWORD_A,
+                  Authority.ALL, true, true, true, true);
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+         final var user = service.add(userDetails);
+
+         final var result = getUser(service, user.getId());
+
+         assertTrue(result.isPresent(), "present");
+      }
+   }// class
+
+   @Nested
    public class Scenario {
 
       private UserServiceImpl service;
@@ -288,6 +316,8 @@ public class UserServiceImplTest {
 
    private static final String PASSWORD_C = "secret";
 
+   private static final UUID USER_ID_A = UUID.randomUUID();
+
    public static User add(final UserServiceImpl service,
             final BasicUserDetails userDetails) {
       final var user = UserServiceTest.add(service, userDetails);// inherited
@@ -329,6 +359,14 @@ public class UserServiceImplTest {
       return service;
    }
 
+   public static Optional<User> getUser(final UserServiceImpl service,
+            final UUID id) {
+      final var result = UserServiceTest.getUser(service, id);// inherited
+
+      assertInvariants(service);
+      return result;
+   }
+
    public static Stream<User> getUsers(final UserServiceImpl service) {
       final var users = UserServiceTest.getUsers(service);// inherited
 
@@ -340,7 +378,7 @@ public class UserServiceImplTest {
    public static UserDetails loadUserByUsername(final UserServiceImpl service,
             final String username) {
       final UserDetails user = UserServiceTest.loadUserByUsername(service,
-               username);
+               username);// inherited
 
       assertInvariants(service);
 
