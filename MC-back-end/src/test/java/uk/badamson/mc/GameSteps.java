@@ -64,6 +64,7 @@ import io.cucumber.java.en.When;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.presentation.GamePlayersController;
+import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
@@ -292,12 +293,17 @@ public class GameSteps {
          throw new AssertionFailedError("HTTP response provides game resource",
                   e);
       }
-      try {
-         gamePlayers = expectEncodedResponse(responses.get(1),
-                  GamePlayers.class);
-      } catch (final Exception e) {
-         throw new AssertionFailedError("HTTP response provides game resource",
-                  e);
+      if (world.loggedInUser != null && world.loggedInUser.getAuthorities()
+               .contains(Authority.ROLE_PLAYER)) {
+         try {
+            gamePlayers = expectEncodedResponse(responses.get(1),
+                     GamePlayers.class);
+         } catch (final Exception e) {
+            throw new AssertionFailedError(
+                     "HTTP response provides game resource", e);
+         }
+      } else {
+         gamePlayers = null;
       }
    }
 
@@ -326,8 +332,14 @@ public class GameSteps {
       world.getJson(GameController.createPathFor(identifier));
       responses.add(world.getResponse());
 
-      world.getJson(
-               GamePlayersController.createPathForGamePlayersOf(identifier));
+      final var gamePlayersPath = GamePlayersController
+               .createPathForGamePlayersOf(identifier);
+      var gamePlayersRequest = get(gamePlayersPath)
+               .accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         gamePlayersRequest = gamePlayersRequest.with(user(world.loggedInUser));
+      }
+      world.performRequest(gamePlayersRequest);
       responses.add(world.getResponse());
    }
 
