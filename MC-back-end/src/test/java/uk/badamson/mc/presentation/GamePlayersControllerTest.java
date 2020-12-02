@@ -18,9 +18,12 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -61,6 +64,89 @@ import uk.badamson.mc.service.ScenarioService;
 public class GamePlayersControllerTest {
 
    @Nested
+   public class EndRecruitment {
+
+      @Test
+      public void absent() throws Exception {
+         final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
+         // Tough test: user has authority
+         final var response = test(id, USER_WITH_ALL_AUTHORITIES, true);
+
+         response.andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void noAuthentication() throws Exception {
+         // Tough test: game exists and CSRF token provided
+         final var id = createGame();
+
+         final var response = test(id, null, true);
+
+         response.andExpect(status().isUnauthorized());
+      }
+
+      @Test
+      public void noCsrfToken() throws Exception {
+         // Tough test: game exists and user has all authorities
+         final var id = createGame();
+
+         final var response = test(id, USER_WITH_ALL_AUTHORITIES, false);
+
+         response.andExpect(status().isForbidden());
+      }
+
+      @Test
+      public void notPermitted() throws Exception {
+         // Tough test: game exists, user has all other authorities, and CSRF
+         // token provided
+         final var authorities = EnumSet.complementOf(EnumSet
+                  .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities,
+                  true, true, true, true);
+         final var id = createGame();
+
+         final var response = test(id, user, true);
+
+         response.andExpect(status().isForbidden());
+      }
+
+      @Test
+      public void permitted() throws Exception {
+         final var id = createGame();
+         final var expectedRedirectionLocation = GamePlayersController
+                  .createPathForGamePlayersOf(id);
+         // Tough test: user has a minimum set of authorities
+         final var authorities = EnumSet.of(Authority.ROLE_MANAGE_GAMES);
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities,
+                  true, true, true, true);
+
+         final var response = test(id, user, true);
+
+         final var location = response.andReturn().getResponse()
+                  .getHeaderValue("Location");
+         assertAll(() -> response.andExpect(status().isFound()),
+                  () -> assertEquals(expectedRedirectionLocation, location,
+                           "redirection location"));
+      }
+
+      private ResultActions test(final Game.Identifier id, final User user,
+               final boolean hasCsrfToken) throws Exception {
+         final var path = GamePlayersController
+                  .createPathForEndRecruitmentOf(id);
+         var request = post(path);
+         if (user != null) {
+            request = request.with(user(user));
+         }
+         if (hasCsrfToken) {
+            request = request.with(csrf());
+         }
+
+         return mockMvc.perform(request);
+      }
+
+   }// class
+
+   @Nested
    public class GetGamePlayers {
 
       @Test
@@ -82,13 +168,6 @@ public class GamePlayersControllerTest {
          valid(Authority.ROLE_PLAYER);
       }
 
-      private Game.Identifier createGame() {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-         final var game = gameService.create(scenario);
-         return game.getIdentifier();
-      }
-
       @Test
       public void noAuthentication() throws Exception {
          // Tough test: game exists
@@ -104,8 +183,8 @@ public class GamePlayersControllerTest {
          // Tough test: game exists and user has all other authorities
          final var authorities = EnumSet.complementOf(EnumSet
                   .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
-         final var user = new User(USER_ID_A, "allan", "letmein", authorities, true,
-                  true, true, true);
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities,
+                  true, true, true, true);
          final var id = createGame();
 
          final var response = test(id, user);
@@ -128,8 +207,8 @@ public class GamePlayersControllerTest {
          final var id = createGame();
          // Tough test: user has a minimum set of authorities
          final var authorities = EnumSet.of(authority);
-         final var user = new User(USER_ID_A, "allan", "letmein", authorities, true,
-                  true, true, true);
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities,
+                  true, true, true, true);
 
          final var response = test(id, user);
 
@@ -164,4 +243,11 @@ public class GamePlayersControllerTest {
 
    @Autowired
    private MockMvc mockMvc;
+
+   private Game.Identifier createGame() {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var game = gameService.create(scenario);
+      return game.getIdentifier();
+   }
 }
