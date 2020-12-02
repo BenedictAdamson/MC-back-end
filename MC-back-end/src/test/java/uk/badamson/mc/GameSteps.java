@@ -20,11 +20,9 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,11 +41,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hamcrest.Matcher;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.util.UriTemplate;
@@ -75,9 +71,6 @@ public class GameSteps {
 
    private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
             GameController.GAME_PATH_PATTERN);
-
-   private static final Matcher<Integer> PUT_OK_STATUS = anyOf(
-            is(HttpStatus.OK.value()), is(HttpStatus.NO_CONTENT.value()));
 
    private static Game.Identifier parseGamePath(final String path) {
       Objects.requireNonNull(path, "path");
@@ -152,12 +145,6 @@ public class GameSteps {
    public void creating_game() throws Exception {
       chooseScenario();
       createGame();
-   }
-
-   private void endRecruitmentForGame() throws Exception {
-      Objects.requireNonNull(gamePlayers, "gamePlayers");
-      Objects.requireNonNull(gameId, "gameId");
-      throw new UnsupportedOperationException();// FIXME
    }
 
    @When("examining a game recruiting players")
@@ -307,7 +294,7 @@ public class GameSteps {
 
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recruitment_for_game() throws Exception {
-      world.getResponse().andExpect(status().is(PUT_OK_STATUS));
+      world.getResponse().andExpect(status().isFound());
    }
 
    @Then("MC does not allow creating a game")
@@ -320,7 +307,7 @@ public class GameSteps {
    @Then("MC does not allow ending recruitment for the game")
    public void mc_does_not_allow_ending_recuitment_for_game() throws Exception {
       chooseScenario();
-      endRecruitmentForGame();
+      requestEndRecruitmentForGame();
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
@@ -364,6 +351,19 @@ public class GameSteps {
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
 
+   private void requestEndRecruitmentForGame() throws Exception {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController
+               .createPathForEndRecruitmentOf(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
    private void requestGetGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
 
@@ -397,7 +397,7 @@ public class GameSteps {
    @When("user ends recruitment for the game")
    public void user_ends_recuitment_for_game() {
       try {
-         endRecruitmentForGame();
+         requestEndRecruitmentForGame();
       } catch (final Exception e) {
          throw new AssertionFailedError("Can ask the server to change the game",
                   e);
