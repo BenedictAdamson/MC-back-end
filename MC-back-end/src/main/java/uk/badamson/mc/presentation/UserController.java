@@ -228,10 +228,8 @@ public class UserController {
    @RolesAllowed("MANAGE_USERS")
    @Nonnull
    public User getUser(@Nonnull @PathVariable final UUID id) {
-      Objects.requireNonNull(id, "id");
       try {
-         return service.getUsers().filter(u -> u.getId().equals(id)).findAny()
-                  .get();
+         return service.getUser(id).get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
