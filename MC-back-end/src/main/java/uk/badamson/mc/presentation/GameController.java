@@ -152,7 +152,7 @@ public class GameController {
     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
     * <li>A {@linkplain HttpHeaders#getLocation()
     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-    * {@linkplain #createPathFor(Identifier) path} of the cew game.</li>
+    * {@linkplain #createPathFor(Identifier) path} of the new game.</li>
     * </ul>
     * </li>
     * <li>The scenario ID part of the identifier of the newly created game is
