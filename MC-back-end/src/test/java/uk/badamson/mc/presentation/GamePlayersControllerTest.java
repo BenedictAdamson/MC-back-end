@@ -104,7 +104,7 @@ public class GamePlayersControllerTest {
          // Tough test: game exists and user has all other authorities
          final var authorities = EnumSet.complementOf(EnumSet
                   .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
-         final var user = new User(ID_A, "allan", "letmein", authorities, true,
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities, true,
                   true, true, true);
          final var id = createGame();
 
@@ -128,7 +128,7 @@ public class GamePlayersControllerTest {
          final var id = createGame();
          // Tough test: user has a minimum set of authorities
          final var authorities = EnumSet.of(authority);
-         final var user = new User(ID_A, "allan", "letmein", authorities, true,
+         final var user = new User(USER_ID_A, "allan", "letmein", authorities, true,
                   true, true, true);
 
          final var response = test(id, user);
@@ -144,7 +144,7 @@ public class GamePlayersControllerTest {
 
    }// class
 
-   private static final UUID ID_A = UUID.randomUUID();
+   private static final UUID USER_ID_A = UUID.randomUUID();
 
    private static final User USER_WITH_ALL_AUTHORITIES = new User(
             UUID.randomUUID(), "jeff", "letmein", Authority.ALL, true, true,
