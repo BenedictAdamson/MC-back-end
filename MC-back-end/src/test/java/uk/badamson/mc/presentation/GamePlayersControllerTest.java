@@ -72,6 +72,16 @@ public class GamePlayersControllerTest {
          response.andExpect(status().isNotFound());
       }
 
+      @Test
+      public void asGamesManager() throws Exception {
+         valid(Authority.ROLE_MANAGE_GAMES);
+      }
+
+      @Test
+      public void asPlayer() throws Exception {
+         valid(Authority.ROLE_PLAYER);
+      }
+
       private Game.Identifier createGame() {
          final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                   .get();
@@ -92,8 +102,8 @@ public class GamePlayersControllerTest {
       @Test
       public void notPermitted() throws Exception {
          // Tough test: game exists and user has all other authorities
-         final var authorities = EnumSet
-                  .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
+         final var authorities = EnumSet.complementOf(EnumSet
+                  .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
          final var user = new User(ID_A, "allan", "letmein", authorities, true,
                   true, true, true);
          final var id = createGame();
@@ -103,11 +113,21 @@ public class GamePlayersControllerTest {
          response.andExpect(status().isForbidden());
       }
 
-      @Test
-      public void present() throws Exception {
+      private ResultActions test(final Game.Identifier id, final User user)
+               throws Exception {
+         final var path = GamePlayersController.createPathForGamePlayersOf(id);
+         var request = get(path).accept(MediaType.APPLICATION_JSON);
+         if (user != null) {
+            request = request.with(user(user));
+         }
+
+         return mockMvc.perform(request);
+      }
+
+      private void valid(final Authority authority) throws Exception {
          final var id = createGame();
          // Tough test: user has a minimum set of authorities
-         final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
+         final var authorities = EnumSet.of(authority);
          final var user = new User(ID_A, "allan", "letmein", authorities, true,
                   true, true, true);
 
@@ -120,17 +140,6 @@ public class GamePlayersControllerTest {
                   GamePlayers.class);
          assertEquals(id, gamePlayers.getGame(),
                   "game-players has the requested ID");
-      }
-
-      private ResultActions test(final Game.Identifier id, final User user)
-               throws Exception {
-         final var path = GamePlayersController.createPathForGamePlayersOf(id);
-         var request = get(path).accept(MediaType.APPLICATION_JSON);
-         if (user != null) {
-            request = request.with(user(user));
-         }
-
-         return mockMvc.perform(request);
       }
 
    }// class

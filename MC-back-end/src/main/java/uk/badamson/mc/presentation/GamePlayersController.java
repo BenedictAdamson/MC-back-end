@@ -129,7 +129,7 @@ public class GamePlayersController {
     *            {@code scenario} and {@code created}.
     */
    @GetMapping(GAME_PLAYERS_PATH_PATTERN)
-   @RolesAllowed("PLAYER")
+   @RolesAllowed({ "PLAYER", "MANAGE_GAMES" })
    @Nonnull
    public GamePlayers getGamePlayers(
             @Nonnull @PathVariable("scenario") final UUID scenario,
