@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -211,6 +212,12 @@ public class GameSteps {
    @Then("The game page includes the date and time that the game was set up")
    public void game_page_includes_timestamp() {
       assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
+   }
+
+   @Then("The game page indicates that the game has no players")
+   public void game_page_indicates_game_has_no_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.getUsers(), empty());
    }
 
    @Then("the game page indicates that the game is recruiting players")
