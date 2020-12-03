@@ -29,10 +29,13 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.User;
 import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.repository.CurrentUserGameRepository;
 import uk.badamson.mc.repository.GamePlayersRepository;
@@ -132,11 +135,26 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return result;
    }
 
+   private Optional<Game.Identifier> getCurrent(final UUID user) {
+      Objects.requireNonNull(user, "user");
+      final var association = currentUserGameRepository.findById(user);
+      if (association.isEmpty()) {
+         return Optional.empty();
+      } else {
+         return Optional.of(association.get().getGame());
+      }
+   }
+
    @Override
    @Nonnull
-   public Optional<Identifier> getCurrentGameOfUser(@Nonnull final UUID user) {
-      Objects.requireNonNull(user, "user");
-      return Optional.empty();// FIXME
+   public Optional<Game.Identifier> getCurrentGameOfUser(
+            @Nonnull final UUID userId) {
+      final var user = getUser(userId);
+      if (user.isPresent()) {
+         return getCurrent(userId);
+      } else {
+         return Optional.empty();
+      }
    }
 
    /**
@@ -204,6 +222,10 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return gameService;
    }
 
+   private Optional<User> getUser(final UUID userId) {
+      return getUserService().getUser(userId);
+   }
+
    @Override
    @Nonnull
    public UserService getUserService() {
@@ -211,14 +233,34 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    }
 
    @Override
-   public void userJoinsGame(@Nonnull final UUID user,
-            @Nonnull final Game.Identifier game)
+   @Transactional
+   public void userJoinsGame(@Nonnull final UUID userId,
+            @Nonnull final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(game, "game");
-      // TODO Auto-generated method stub
+      // read:
+      final var user = getUser(userId).get();
+      final var gamePlayers = get(gameId).get();
+      final var current = getCurrent(userId);
 
+      // check
+      if (!user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
+         throw new AccessControlException("User does not have the player role");
+      }
+      if (!gamePlayers.isRecruiting()) {
+         throw new IllegalGameStateException("Game is not recruiting");
+      }
+      if (current.isPresent() && !gameId.equals(current.get())) {
+         throw new UserAlreadyPlayingException();
+      }
+
+      // modify:
+      final var association = new UserGameAssociation(userId, gameId);
+      gamePlayers.addUser(userId);
+
+      // write:
+      currentUserGameRepository.save(association);
+      gamePlayersRepository.save(gamePlayers);
    }
 
 }

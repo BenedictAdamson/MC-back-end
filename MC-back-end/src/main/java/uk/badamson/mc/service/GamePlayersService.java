@@ -160,6 +160,15 @@ public interface GamePlayersService {
     * Have a {@linkplain User user} become one of the
     * {@linkplain GamePlayers#getUsers() players of a game}.
     * </p>
+    * <p>
+    * Post conditions:
+    * </p>
+    * <ul>
+    * <li>The {@linkplain #getCurrentGameOfUser(UUID) current game of the user}
+    * is the given game.</li>
+    * <li>The {@linkplain #getGamePlayers(Identifier) players} of the game
+    * includes the user.</li>
+    * </ul>
     *
     * @param user
     *           The unique ID of the player.
@@ -180,7 +189,7 @@ public interface GamePlayersService {
     *            service}.</li>
     *            </ul>
     * @throws UserAlreadyPlayingException
-    *            If the {@code user} is already playing a game.
+    *            If the {@code user} is already playing a different game.
     * @throws AccessControlException
     *            If the {@code does not  User#getAuthorities() have}
     *            {@linkplain Authority#ROLE_PLAYER permission} to play games.
