@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,6 +49,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.Game;
+import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.repository.CurrentUserGameRepository;
@@ -345,6 +347,127 @@ public class GamePlayersServiceImplTest {
    }// class
 
    @Nested
+   public class MayUserJoinGame {
+
+      @Test
+      public void gameNotRecuiting() {
+         final var gameService = gameServiceA;
+         final var userService = userServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario).getIdentifier();
+         // Tough test: user exists and is permitted
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
+
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userService);
+         service.endRecruitment(game);
+
+         assertFalse(mayUserJoinGame(service, user, game));
+      }
+
+      @Test
+      public void may() {
+         final var gameService = gameServiceA;
+         final var userService = userServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario).getIdentifier();
+         // Tough test: user has minimum permission
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true, true,
+                  true)).getId();
+
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userService);
+
+         assertTrue(mayUserJoinGame(service, user, game));
+      }
+
+      @Test
+      public void unknownGame() {
+         final var userService = userServiceA;
+         // Tough test: user exists and is permitted
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameServiceA, userService);
+
+         assertFalse(mayUserJoinGame(service, user, GAME_IDENTIFIER_A));
+      }
+
+      @Test
+      public void unknownUser() {
+         // Tough test: game exists and is recruiting
+         final var gameService = gameServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario).getIdentifier();
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userServiceA);
+
+         assertFalse(mayUserJoinGame(service, USER_ID_A, game));
+      }
+
+      @Test
+      public void userAlreadyPlayingDifferentGame() {
+         final var gameService = gameServiceA;
+         final var userService = userServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var gameA = gameService.create(scenario).getIdentifier();
+         final var gameB = gameService.create(scenario).getIdentifier();
+         assert !gameA.equals(gameB);
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
+
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userService);
+         service.userJoinsGame(user, gameA);
+
+         assertFalse(mayUserJoinGame(service, user, gameB));
+      }
+
+      @Test
+      public void userAlreadyPlayingSameGame() {
+         final var gameService = gameServiceA;
+         final var userService = userServiceA;
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario).getIdentifier();
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
+
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userService);
+         service.userJoinsGame(user, game);
+
+         assertTrue(mayUserJoinGame(service, user, game));
+      }
+
+      @Test
+      public void userNotPermitted() {
+         final var gameService = gameServiceA;
+         final var userService = userServiceA;
+         // Tough test: game exists and is recruiting
+         final var scenario = gameService.getScenarioService()
+                  .getScenarioIdentifiers().findAny().get();
+         final var game = gameService.create(scenario).getIdentifier();
+         // Tough test: user has all other permissions
+         final Set<Authority> authorities = EnumSet
+                  .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
+         final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                  PASSWORD_A, authorities, true, true, true, true)).getId();
+
+         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+                  currentUserGameRepositoryA, gameService, userService);
+
+         assertFalse(mayUserJoinGame(service, user, game));
+      }
+   }// class
+
+   @Nested
    public class UserJoinsGame {
 
       @Test
@@ -488,8 +611,7 @@ public class GamePlayersServiceImplTest {
    private static final ZoneId UTC = ZoneId.from(ZoneOffset.UTC);
 
    /*
-    * Guaranteed to produce a different time Instant each time user.
-    *
+    * Guaranteed to produce a different time Instant each time used.
     */
    private static final Clock CLOCK_A = new Clock() {
 
@@ -567,6 +689,14 @@ public class GamePlayersServiceImplTest {
    public static Optional<GamePlayers> getGamePlayers(
             final GamePlayersServiceImpl service, final Game.Identifier id) {
       final var result = GamePlayersServiceTest.getGamePlayers(service, id);// inherited
+      assertInvariants(service);
+      return result;
+   }
+
+   public static boolean mayUserJoinGame(final GamePlayersServiceImpl service,
+            final UUID user, final Identifier game) {
+      final var result = GamePlayersServiceTest.mayUserJoinGame(service, user,
+               game);// inherited
       assertInvariants(service);
       return result;
    }

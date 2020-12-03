@@ -226,24 +226,14 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return getUserService().getUser(userId);
    }
 
-   @Override
-   @Nonnull
-   public UserService getUserService() {
-      return userService;
-   }
-
-   @Override
-   @Transactional
-   public void userJoinsGame(@Nonnull final UUID userId,
-            @Nonnull final Game.Identifier gameId)
+   private GamePlayers getUserJoinsGameState(final UUID userId,
+            final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
-      // read:
       final var user = getUser(userId).get();
       final var gamePlayers = get(gameId).get();
       final var current = getCurrent(userId);
 
-      // check
       if (!user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
          throw new AccessControlException("User does not have the player role");
       }
@@ -253,6 +243,36 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       if (current.isPresent() && !gameId.equals(current.get())) {
          throw new UserAlreadyPlayingException();
       }
+
+      return gamePlayers;
+   }
+
+   @Override
+   @Nonnull
+   public UserService getUserService() {
+      return userService;
+   }
+
+   @Override
+   @Transactional
+   public boolean mayUserJoinGame(final UUID user, final Identifier game) {
+      try {
+         getUserJoinsGameState(user, game);
+      } catch (UserAlreadyPlayingException | IllegalGameStateException
+               | AccessControlException | NoSuchElementException e) {
+         return false;
+      }
+      return true;
+   }
+
+   @Override
+   @Transactional
+   public void userJoinsGame(@Nonnull final UUID userId,
+            @Nonnull final Game.Identifier gameId)
+            throws NoSuchElementException, UserAlreadyPlayingException,
+            IllegalGameStateException, AccessControlException {
+      // read and check:
+      final var gamePlayers = getUserJoinsGameState(userId, gameId);
 
       // modify:
       final var association = new UserGameAssociation(userId, gameId);

@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import uk.badamson.mc.Game;
+import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
 
 /**
@@ -92,6 +93,13 @@ public class GamePlayersServiceTest {
       return result;
    }
 
+   public static boolean mayUserJoinGame(final GamePlayersService service,
+            final UUID user, final Identifier game) {
+      final var result = service.mayUserJoinGame(user, game);
+      assertInvariants(service);
+      return result;
+   }
+
    public static void userJoinsGame(final GamePlayersService service,
             final UUID user, final Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
@@ -105,5 +113,4 @@ public class GamePlayersServiceTest {
       }
       assertInvariants(service);
    }
-
 }
