@@ -31,15 +31,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.User;
 import uk.badamson.mc.service.GamePlayersService;
 
 /**
@@ -60,6 +63,8 @@ public class GamePlayersController {
    public static final String GAME_PLAYERS_PATH_PATTERN = "/api/scenario/{scenario}/game/{created}/players";
 
    public static final String END_RECRUITMENT_PARAM = "endRecruitment";
+
+   public static final String MAY_JOIN_PARAM = "mayJoin";
 
    /**
     * <p>
@@ -102,6 +107,27 @@ public class GamePlayersController {
     */
    public static String createPathForGamePlayersOf(final Game.Identifier id) {
       return GameController.createPathFor(id) + "/players";
+   }
+
+   /**
+    * <p>
+    * Create a valid path for querying whether the current user may join a game
+    * that has a given identifier.
+    * </p>
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #mayJoinGame(User, UUID, Instant)}.
+    * </p>
+    *
+    *
+    * @param id
+    *           The identifier of the game
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   public static String createPathForMayJoinQueryOf(final Game.Identifier id) {
+      return createPathForGamePlayersOf(id) + "?" + MAY_JOIN_PARAM;
    }
 
    private final GamePlayersService gamePlayersService;
@@ -252,5 +278,58 @@ public class GamePlayersController {
    @Nonnull
    public final GamePlayersService getGamePlayersService() {
       return gamePlayersService;
+   }
+
+   /**
+    * <p>
+    * Whether the requesting user can become one of the
+    * {@linkplain GamePlayers#getUsers() players} of a given game.
+    * </p>
+    * <p>
+    * That is, whether all the following are true.</p
+    * <ul>
+    * <li>The{@code user} is the ID of a known user.</li>
+    * <li>The {@code game} is the ID of a known game.</li>
+    * <li>The {@code user} is not already playing a different game.</li>
+    * <li>The {@code user} {@linkplain User#getAuthorities() has}
+    * {@linkplain Authority#ROLE_PLAYER permission} to play games. Note that the
+    * given user need not be the current user.</li>
+    * <li>The game is {@linkplain GamePlayers#isRecruiting() recruiting}
+    * players.</li>
+    * </ul>
+    *
+    * @param user
+    *           The authenticated identity of the current user
+    * @param scenario
+    *           The unique ID of the scenario of the game.
+    * @param created
+    *           The creation time of the game.
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code user} is null.</li>
+    *            <li>If {@code scenario} is null.</li>
+    *            <li>If {@code created} is null.</li>
+    *            </ul>
+    * @throws ResponseStatusException
+    *            With a {@linkplain ResponseStatusException#getStatus() status}
+    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+    *            is no game that has {@linkplain Game#getIdentifier()
+    *            identification information} equivalent to the given
+    *            {@code scenario} and {@code created}.
+    */
+   @GetMapping(path = GAME_PLAYERS_PATH_PATTERN, params = { MAY_JOIN_PARAM })
+   @RolesAllowed("PLAYER")
+   public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @PathVariable("scenario") final UUID scenario,
+            @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
+      final var game = new Game.Identifier(scenario, created);
+      try {
+         gamePlayersService.getGamePlayers(game).get();
+         return gamePlayersService.mayUserJoinGame(user.getId(), game);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized IDs", e);
+      }
    }
 }
