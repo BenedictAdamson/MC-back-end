@@ -18,6 +18,7 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -207,6 +208,17 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    @Nonnull
    public UserService getUserService() {
       return userService;
+   }
+
+   @Override
+   public void userJoinsGame(@Nonnull final UUID user,
+            @Nonnull final Game.Identifier game)
+            throws NoSuchElementException, UserAlreadyPlayingException,
+            IllegalGameStateException, AccessControlException {
+      Objects.requireNonNull(user, "user");
+      Objects.requireNonNull(game, "game");
+      // TODO Auto-generated method stub
+
    }
 
 }

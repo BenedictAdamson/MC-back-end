@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.security.AccessControlException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -399,6 +400,20 @@ public class GamePlayersServiceImplTest {
       final var result = GamePlayersServiceTest.getGamePlayers(service, id);// inherited
       assertInvariants(service);
       return result;
+   }
+
+   public static void userJoinsGame(final GamePlayersServiceImpl service,
+            final UUID user, final Game.Identifier game)
+            throws NoSuchElementException, UserAlreadyPlayingException,
+            IllegalGameStateException, AccessControlException {
+      try {
+         GamePlayersServiceTest.userJoinsGame(service, user, game);// inherited
+      } catch (UserAlreadyPlayingException | IllegalGameStateException
+               | AccessControlException | NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
+      assertInvariants(service);
    }
 
    private final PasswordEncoder passwordEncoderA = new BCryptPasswordEncoder(

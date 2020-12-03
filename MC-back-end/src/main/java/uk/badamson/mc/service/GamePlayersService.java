@@ -18,12 +18,14 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
@@ -152,4 +154,42 @@ public interface GamePlayersService {
     */
    @Nonnull
    UserService getUserService();
+
+   /**
+    * <p>
+    * Have a {@linkplain User user} become one of the
+    * {@linkplain GamePlayers#getUsers() players of a game}.
+    * </p>
+    *
+    * @param user
+    *           The unique ID of the player.
+    * @param game
+    *           The unique ID of the game.
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code user} is null.</li>
+    *            <li>If {@code game} is null.</li>
+    *            </ul>
+    * @throws NoSuchElementException
+    *            <ul>
+    *            <li>If {@code user} is not the ID of a known user, according to
+    *            the associated {@linkplain #getUserService() user
+    *            service}.</li>
+    *            <li>If {@code game} is not the ID of a known user, according to
+    *            the associated {@linkplain #getGameService() game
+    *            service}.</li>
+    *            </ul>
+    * @throws UserAlreadyPlayingException
+    *            If the {@code user} is already playing a game.
+    * @throws AccessControlException
+    *            If the {@code does not  User#getAuthorities() have}
+    *            {@linkplain Authority#ROLE_PLAYER permission} to play games.
+    *            Note that the given user need not be the current user.
+    * @throws IllegalGameStateException
+    *            If the game is not {@linkplain GamePlayers#isRecruiting()
+    *            recruiting} players.
+    */
+   void userJoinsGame(@Nonnull UUID user, @Nonnull Game.Identifier game)
+            throws NoSuchElementException, UserAlreadyPlayingException,
+            IllegalGameStateException, AccessControlException;
 }

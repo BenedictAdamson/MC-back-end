@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,6 +90,20 @@ public class GamePlayersServiceTest {
          assertEquals(id, result.get().getGame(), "game");
       }
       return result;
+   }
+
+   public static void userJoinsGame(final GamePlayersService service,
+            final UUID user, final Game.Identifier game)
+            throws NoSuchElementException, UserAlreadyPlayingException,
+            IllegalGameStateException, AccessControlException {
+      try {
+         service.userJoinsGame(user, game);
+      } catch (UserAlreadyPlayingException | IllegalGameStateException
+               | AccessControlException | NoSuchElementException e) {
+         assertInvariants(service);
+         throw e;
+      }
+      assertInvariants(service);
    }
 
 }
