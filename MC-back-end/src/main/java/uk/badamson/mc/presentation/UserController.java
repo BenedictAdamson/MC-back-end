@@ -19,7 +19,6 @@ package uk.badamson.mc.presentation;
  */
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -172,20 +172,18 @@ public class UserController {
     * Behaviour of the GET verb for the self resource.
     * </p>
     *
-    * @param id
+    * @param user
     *           The authenticated identity of the current user
     * @return The user object for the current user.
     * @throws NullPointerException
-    *            If {@code id} is null
+    *            If {@code user} is null
     */
    @GetMapping("/api/self")
    @PreAuthorize("isAuthenticated()")
    @Nonnull
-   public User getSelf(final Principal id) {
-      Objects.requireNonNull(id, "id");
-      return service.getUsers()
-               .filter(u -> u.getUsername().equals(id.getName())).findAny()
-               .get();
+   public User getSelf(@Nonnull @AuthenticationPrincipal final User user) {
+      Objects.requireNonNull(user, "user");
+      return user;
    }
 
    /**
