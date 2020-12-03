@@ -226,13 +226,23 @@ public class GameSteps {
 
    @Then("The game page indicates that the user may not join the game")
    public void game_page_indicates_user_may_not_join_game() {
-      // Do nothing
+      assertFalse(mayLoggedInUserJoinGame());
    }
 
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
+   }
+
+   @Then("the game page indicates that the user may join the game")
+   public void game_page_indicats_user_may_join_game() {
+      assertTrue(mayLoggedInUserJoinGame());
+   }
+
+   @Then("The game page indicates whether the user may join the game")
+   public void game_page_indicats_whether_user_may_join_game() {
+      assertThat(mayLoggedInUserJoinGame(), anything());
    }
 
    @Then("The game page lists the players of the game")
@@ -271,6 +281,12 @@ public class GameSteps {
       Objects.requireNonNull(gameId, "gameId");
 
       assertThat(gameCreationTimes, hasItem(gameId.getCreated()));
+   }
+
+   private boolean mayLoggedInUserJoinGame() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      return gamePlayersService.mayUserJoinGame(world.loggedInUser.getId(),
+               gameId);
    }
 
    @Then("MC accepts the creation of the game")
@@ -336,6 +352,14 @@ public class GameSteps {
          throw new AssertionFailedError(
                   "Correct behaviour for GET GamePlayers resource", e);
       }
+   }
+
+   @When("Navigate to one game page")
+   public void navigate_to_one_game_page() {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+      final var creationTime = gameCreationTimes.stream().findAny().get();
+      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
    }
 
    private void prepareGame() {
@@ -412,13 +436,5 @@ public class GameSteps {
    public void viewing_games_of_scenario() {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
-   }
-
-   @When("Navigate to one game page")
-   public void navigate_to_one_game_page() {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
-      final var creationTime = gameCreationTimes.stream().findAny().get();
-      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
    }
 }
