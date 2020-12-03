@@ -100,6 +100,8 @@ public interface UserService extends UserDetailsService {
     * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
     * value for which the {@linkplain User#getId() identifier}
     * {@linkplain UUID#equals(Object) is equivalent to} the given ID</li>
+    * <li>Always returns a present value for the
+    * {@linkplain User#ADMINISTRATOR_ID administrator ID}.</li>
     * </ul>
     *
     * @param id

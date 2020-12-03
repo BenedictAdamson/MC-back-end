@@ -123,7 +123,11 @@ public class UserServiceImpl implements UserService {
    @Override
    public Optional<User> getUser(final UUID id) {
       Objects.requireNonNull(id, "id");
-      return userRepository.findById(id);
+      if (User.ADMINISTRATOR_ID.equals(id)) {
+         return Optional.of(administrator);
+      } else {
+         return userRepository.findById(id);
+      }
    }
 
    /**

@@ -255,6 +255,18 @@ public class UserServiceImplTest {
       }
 
       @Test
+      public void administrator() {
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+
+         final var result = getUser(service, User.ADMINISTRATOR_ID);
+
+         assertTrue(result.isPresent(), "present");// guard
+         assertThat("Has full authority", result.get().getAuthorities(),
+                  is(Authority.ALL));
+      }
+
+      @Test
       public void present() {
          final var userDetails = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                   Authority.ALL, true, true, true, true);
