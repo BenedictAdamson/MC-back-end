@@ -25,7 +25,7 @@ package uk.badamson.mc.service;
  * </p>
  */
 @SuppressWarnings("serial")
-public final class UserAlreadyPlayingException extends IllegalStateException {
+public final class UserAlreadyPlayingException extends IllegalPlayerStateException {
 
    public UserAlreadyPlayingException() {
       super("User already playing");

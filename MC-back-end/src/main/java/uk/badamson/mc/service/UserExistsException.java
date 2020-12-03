@@ -25,7 +25,7 @@ package uk.badamson.mc.service;
  * </p>
  */
 @SuppressWarnings("serial")
-public final class UserExistsException extends IllegalStateException {
+public final class UserExistsException extends IllegalPlayerStateException {
 
    public UserExistsException() {
       super("User exists");
