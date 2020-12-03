@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -108,6 +109,8 @@ public class GameSteps {
    private Game game;
 
    private GamePlayers gamePlayers;
+
+   private Boolean mayJoinGame;
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -226,7 +229,7 @@ public class GameSteps {
 
    @Then("The game page indicates that the user may not join the game")
    public void game_page_indicates_user_may_not_join_game() {
-      assertFalse(mayLoggedInUserJoinGame());
+      assertFalse(mayJoinGame);
    }
 
    @Then("The game page indicates whether the game is recruiting players")
@@ -237,12 +240,12 @@ public class GameSteps {
 
    @Then("the game page indicates that the user may join the game")
    public void game_page_indicats_user_may_join_game() {
-      assertTrue(mayLoggedInUserJoinGame());
+      assertTrue(mayJoinGame);
    }
 
    @Then("The game page indicates whether the user may join the game")
    public void game_page_indicats_whether_user_may_join_game() {
-      assertThat(mayLoggedInUserJoinGame(), anything());
+      assertThat(mayJoinGame.booleanValue(), anything());
    }
 
    @Then("The game page lists the players of the game")
@@ -265,14 +268,25 @@ public class GameSteps {
                });
    }
 
-   private boolean isPermittedToGetGamePlayers() {
-      if (world.loggedInUser == null) {
+   private boolean hasAnyAuthorities(final Set<Authority> options) {
+      if (options.isEmpty()) {
+         return true;
+      } else if (world.loggedInUser == null) {
          return false;
       } else {
-         final var authorities = world.loggedInUser.getAuthorities();
-         return authorities.contains(Authority.ROLE_PLAYER)
-                  || authorities.contains(Authority.ROLE_MANAGE_GAMES);
+         return world.loggedInUser.getAuthorities().stream()
+                  .map(a -> options.contains(a)).filter(present -> present)
+                  .findAny().isPresent();
       }
+   }
+
+   private boolean isPlayer() {
+      return hasAnyAuthorities(EnumSet.of(Authority.ROLE_PLAYER));
+   }
+
+   private boolean isPlayerOrGameManager() {
+      return hasAnyAuthorities(
+               EnumSet.of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
    }
 
    @Then("the list of games includes the new game")
@@ -281,12 +295,6 @@ public class GameSteps {
       Objects.requireNonNull(gameId, "gameId");
 
       assertThat(gameCreationTimes, hasItem(gameId.getCreated()));
-   }
-
-   private boolean mayLoggedInUserJoinGame() {
-      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-      return gamePlayersService.mayUserJoinGame(world.loggedInUser.getId(),
-               gameId);
    }
 
    @Then("MC accepts the creation of the game")
@@ -328,7 +336,7 @@ public class GameSteps {
    }
 
    @Then("MC provides a game page")
-   public void mc_provides_game_page() throws Exception {
+   public void mc_provides_game_page() {
       Objects.requireNonNull(gameId, "gameId");
 
       try {
@@ -339,9 +347,8 @@ public class GameSteps {
       }
 
       try {
-
          requestGetGamePlayers();
-         if (isPermittedToGetGamePlayers()) {
+         if (isPlayerOrGameManager()) {
             gamePlayers = expectEncodedResponse(world.getResponse(),
                      GamePlayers.class);
          } else {
@@ -351,6 +358,19 @@ public class GameSteps {
       } catch (final Exception e) {
          throw new AssertionFailedError(
                   "Correct behaviour for GET GamePlayers resource", e);
+      }
+      try {
+         requestGetMayUserJoinGame();
+         if (isPlayer()) {
+            mayJoinGame = expectEncodedResponse(world.getResponse(),
+                     Boolean.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            mayJoinGame = Boolean.FALSE;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET MayJoinGame resource", e);
       }
    }
 
@@ -367,6 +387,7 @@ public class GameSteps {
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
       gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      mayJoinGame = null;
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
 
@@ -400,6 +421,17 @@ public class GameSteps {
       world.performRequest(request);
    }
 
+   private void requestGetMayUserJoinGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = GamePlayersController
+               .createPathForMayJoinQueryOf(gameId);
+      var request = get(path);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
    @When("A scenario has games")
    public void scenario_has_games() {
       chooseScenario();
@@ -415,7 +447,7 @@ public class GameSteps {
 
    @When("user ends recruitment for the game")
    public void user_ends_recuitment_for_game() {
-      if (!isPermittedToGetGamePlayers()) {
+      if (!isPlayerOrGameManager()) {
          throw new IllegalStateException("user not authorized");
       }
       try {
