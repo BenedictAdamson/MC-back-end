@@ -152,7 +152,7 @@ public class GameSteps {
 
    @When("examining a game recruiting players")
    public void examining_game_recruiting_players() {
-      prepareGame();
+      prepareNewGame();
    }
 
    private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
@@ -227,6 +227,11 @@ public class GameSteps {
       assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
    }
 
+   @Then("the game page indicates that the user may join the game")
+   public void game_page_indicates_user_may_join_game() {
+      assertTrue(mayJoinGame, "may join game");
+   }
+
    @Then("The game page indicates that the user may not join the game")
    public void game_page_indicates_user_may_not_join_game() {
       assertFalse(mayJoinGame, "may not join game");
@@ -236,11 +241,6 @@ public class GameSteps {
    public void game_page_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
-   }
-
-   @Then("the game page indicates that the user may join the game")
-   public void game_page_indicates_user_may_join_game() {
-      assertTrue(mayJoinGame, "may join game");
    }
 
    @Then("The game page indicates whether the user may join the game")
@@ -382,7 +382,7 @@ public class GameSteps {
       gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
    }
 
-   private void prepareGame() {
+   private void prepareNewGame() {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
@@ -461,7 +461,7 @@ public class GameSteps {
 
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recruiting_players() {
-      prepareGame();
+      prepareNewGame();
    }
 
    @Given("Viewing the games of the scenario")
