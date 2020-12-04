@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,9 +74,18 @@ public class GameSteps {
    private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
             GameController.GAME_PATH_PATTERN);
 
+   private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
+            GamePlayersController.GAME_PLAYERS_PATH_PATTERN);
+
    private static Game.Identifier parseGamePath(final String path) {
+      return parseGamePath(path, GAME_PATH_URI_TEMPLATE);
+   }
+
+   private static Game.Identifier parseGamePath(final String path,
+            final UriTemplate template) {
       Objects.requireNonNull(path, "path");
-      final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path);
+      Objects.requireNonNull(template, "template");
+      final var pathVariable = template.match(path);
       try {
          final var scenarioId = UUID.fromString(pathVariable.get("scenario"));
          final var created = Instant.parse(pathVariable.get("created"));
@@ -83,6 +93,10 @@ public class GameSteps {
       } catch (final RuntimeException e) {
          throw new IllegalArgumentException("Path " + path, e);
       }
+   }
+
+   private static Game.Identifier parseGamePlayersPath(final String path) {
+      return parseGamePath(path, GAME_PLAYERS_PATH_URI_TEMPLATE);
    }
 
    @Autowired
@@ -107,6 +121,8 @@ public class GameSteps {
    private Game.Identifier gameId;
 
    private Game game;
+
+   private GamePlayers gamePlayers0;
 
    private GamePlayers gamePlayers;
 
@@ -221,6 +237,12 @@ public class GameSteps {
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
+   @Then("The game page indicates that the game has one more player")
+   public void game_page_indicates_that_game_has_one_more_player() {
+      assertThat("Number of game players", gamePlayers.getUsers().size(),
+               is(gamePlayers0.getUsers().size() + 1));
+   }
+
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
@@ -246,6 +268,16 @@ public class GameSteps {
    @Then("The game page indicates whether the user may join the game")
    public void game_page_indicates_whether_user_may_join_game() {
       assertThat(mayJoinGame.booleanValue(), anything());
+   }
+
+   @Then("The game page lists the user as a player of the game")
+   public void game_page_list_user_as_player_of_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      final var userId = world.loggedInUser.getId();
+      assertThat("User added to players of game", gamePlayers.getUsers(),
+               hasItem(userId));
    }
 
    @Then("The game page lists the players of the game")
@@ -319,6 +351,21 @@ public class GameSteps {
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recruitment_for_game() throws Exception {
       world.getResponse().andExpect(status().isFound());
+   }
+
+   @Then("MC accepts joining the game")
+   public void mc_accepts_joining_game() {
+      Objects.requireNonNull(gameId, "gameId");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var location = world.getResponse().andReturn().getResponse()
+               .getHeader("Location");
+      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header")); // guard
+      final var gameRedirectedTo = parseGamePlayersPath(location);
+      assertThat("Redirected to the list of players of the current game",
+               gameRedirectedTo, is(gameId));
    }
 
    @Then("MC does not allow creating a game")
@@ -457,6 +504,19 @@ public class GameSteps {
                   e);
       }
       gamePlayers = null;// local copy is out of date
+   }
+
+   @When("the user joins the game")
+   public void user_joins_game() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+      gamePlayers0 = gamePlayers;
+
+      final var path = GamePlayersController.createPathForJoining(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    @Given("viewing a game that is recruiting players")

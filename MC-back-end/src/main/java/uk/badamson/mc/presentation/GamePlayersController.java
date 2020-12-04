@@ -66,6 +66,8 @@ public class GamePlayersController {
 
    public static final String MAY_JOIN_PARAM = "mayJoin";
 
+   public static final String JOIN_PARAM = "join";
+
    /**
     * <p>
     * Create a valid path for {@linkplain GamePlayers#endRecruitment() ending
@@ -107,6 +109,27 @@ public class GamePlayersController {
     */
    public static String createPathForGamePlayersOf(final Game.Identifier id) {
       return GameController.createPathFor(id) + "/players";
+   }
+
+   /**
+    * <p>
+    * Create a valid path for querying whether the current user may join a game
+    * that has a given identifier.
+    * </p>
+    * <p>
+    * The created value is consistent with the path used for
+    * {@link #joinGame(User, UUID, Instant)}.
+    * </p>
+    *
+    *
+    * @param id
+    *           The identifier of the game
+    * @return The path.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   public static String createPathForJoining(final Game.Identifier id) {
+      return createPathForGamePlayersOf(id) + "?" + JOIN_PARAM;
    }
 
    /**
