@@ -239,12 +239,12 @@ public class GameSteps {
    }
 
    @Then("the game page indicates that the user may join the game")
-   public void game_page_indicats_user_may_join_game() {
+   public void game_page_indicates_user_may_join_game() {
       assertTrue(mayJoinGame);
    }
 
    @Then("The game page indicates whether the user may join the game")
-   public void game_page_indicats_whether_user_may_join_game() {
+   public void game_page_indicates_whether_user_may_join_game() {
       assertThat(mayJoinGame.booleanValue(), anything());
    }
 
