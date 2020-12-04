@@ -294,9 +294,8 @@ public class UserSteps {
    }
 
    private void userHasAuthorities(final Set<Authority> authorities) {
-      user = new User(UUID.randomUUID(), "Zoe", "password1", authorities, true,
-               true, true, true);
-      service.add(user);
+      user = service.add(new BasicUserDetails("Zoe", "password1", authorities,
+               true, true, true, true));
    }
 
    @Given("Viewing the list of users")
