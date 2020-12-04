@@ -44,6 +44,8 @@ import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.GamePlayersService;
+import uk.badamson.mc.service.IllegalGameStateException;
+import uk.badamson.mc.service.UserAlreadyPlayingException;
 
 /**
  * <p>
@@ -305,6 +307,85 @@ public class GamePlayersController {
 
    /**
     * <p>
+    * Add the requesting user as a {@linkplain GamePlayers#getUsers() player} of
+    * a given game.
+    * </p>
+    * <ul>
+    * <li>Returns a redirect to the {@linkplain GamePlayers game players}
+    * resource of the game. That is, a response with
+    * <ul>
+    * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
+    * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
+    * <li>A {@linkplain HttpHeaders#getLocation()
+    * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+    * {@linkplain #createPathForGamePlayersOf(Identifier) path} of the game
+    * players resource.</li>
+    * </ul>
+    * </li>
+    * </ul>
+    *
+    * @param scenario
+    *           The unique ID of the scenario of the game.
+    * @param created
+    *           The creation time of the game.
+    * @return The response.
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code scenario} is null.</li>
+    *            <li>If {@code created} is null.</li>
+    *            </ul>
+    * @throws ResponseStatusException
+    *            <ul>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+    *            there is no game that has {@linkplain Game#getIdentifier()
+    *            identification information} equivalent to the given
+    *            {@code scenario} and {@code created}.</li>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
+    *            any of the following are true:
+    *            <ul>
+    *            <li>If the {@code user} is already playing a different
+    *            game.</li>
+    *            <li>If the game is not {@linkplain GamePlayers#isRecruiting()
+    *            recruiting} players.
+    *            </ul>
+    *            </li>
+    *            <ul>
+    *            <li>With a {@linkplain ResponseStatusException#getStatus()
+    *            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
+    *            the {@code user} does not {@linkplain User#getAuthorities()
+    *            have} {@linkplain Authority#ROLE_PLAYER permission} to play
+    *            games.</li>
+    *            </ul>
+    */
+   @PostMapping(path = GAME_PLAYERS_PATH_PATTERN, params = { JOIN_PARAM })
+   @RolesAllowed("PLAYER")
+   @Nonnull
+   public ResponseEntity<Void> joinGame(
+            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @PathVariable("scenario") final UUID scenario,
+            @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
+      final var game = new Game.Identifier(scenario, created);
+      try {
+         gamePlayersService.userJoinsGame(user.getId(), game);
+         final var location = URI.create(createPathForGamePlayersOf(game));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized IDs", e);
+      } catch (final IllegalGameStateException
+               | UserAlreadyPlayingException e) {
+         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                  e);
+      }
+   }
+
+   /**
+    * <p>
     * Whether the requesting user can become one of the
     * {@linkplain GamePlayers#getUsers() players} of a given game.
     * </p>
@@ -355,4 +436,5 @@ public class GamePlayersController {
                   "unrecognized IDs", e);
       }
    }
+
 }

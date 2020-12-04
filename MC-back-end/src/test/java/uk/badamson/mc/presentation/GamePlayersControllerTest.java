@@ -18,6 +18,10 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -224,6 +228,142 @@ public class GamePlayersControllerTest {
                   GamePlayers.class);
          assertEquals(id, gamePlayers.getGame(),
                   "game-players has the requested ID");
+      }
+
+   }// class
+
+   @Nested
+   public class JoinGame {
+
+      @Test
+      public void absent() throws Exception {
+         final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
+         // Tough test: user has authority
+         final var user = createUser(Authority.ALL);
+         final var response = performRequest(game, user, true);
+
+         response.andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void noAuthentication() throws Exception {
+         // Tough test: game exists and CSRF token provided
+         final var id = createGame();
+
+         final var response = performRequest(id, null, true);
+
+         response.andExpect(status().isUnauthorized());
+      }
+
+      @Test
+      public void noCsrfToken() throws Exception {
+         // Tough test: game exists and user has all authorities
+         final var game = createGame();
+         final var user = createUser(Authority.ALL);
+
+         final var response = performRequest(game, user, false);
+
+         response.andExpect(status().isForbidden());
+         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         assertThat("User not added to players of game", gamePlayers.getUsers(),
+                  not(hasItem(user.getId())));
+      }
+
+      @Test
+      public void notPermitted() throws Exception {
+         /*
+          * Tough test: game exists, user has all other authorities, and CSRF
+          * token provided
+          */
+         final var game = createGame();
+         final var authorities = EnumSet
+                  .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
+         final var user = createUser(authorities);
+
+         final var response = performRequest(game, user, true);
+
+         response.andExpect(status().isForbidden());
+         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         assertThat("User not added to players of game", gamePlayers.getUsers(),
+                  not(hasItem(user.getId())));
+      }
+
+      @Test
+      public void notRecruiting() throws Exception {
+         /*
+          * Tough test: game exists, user has all authorities, and CSRF token
+          * provided
+          */
+         final var game = createGame();
+         final var user = createUser(Authority.ALL);
+         gamePlayersService.endRecruitment(game);
+
+         final var response = performRequest(game, user, true);
+
+         response.andExpect(status().isConflict());
+         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         assertThat("User not added to players of game", gamePlayers.getUsers(),
+                  not(hasItem(user.getId())));
+      }
+
+      private ResultActions performRequest(final Game.Identifier game,
+               final User user, final boolean hasCsrfToken) throws Exception {
+         final var path = GamePlayersController.createPathForJoining(game);
+         var request = post(path);
+         if (user != null) {
+            request = request.with(user(user));
+         }
+         if (hasCsrfToken) {
+            request = request.with(csrf());
+         }
+
+         return mockMvc.perform(request);
+      }
+
+      @Test
+      public void playingOtherGame() throws Exception {
+         /*
+          * Tough test: game exists, user has all authorities, and CSRF token
+          * provided
+          */
+         final var gameA = createGame();
+         Thread.sleep(10);// ensure can create a game with a new unique ID
+         final var gameB = createGame();
+         assert !gameA.equals(gameB);
+         final var user = createUser(Authority.ALL);
+         gamePlayersService.userJoinsGame(user.getId(), gameA);
+
+         final var response = performRequest(gameB, user, true);
+
+         final var gamePlayers = gamePlayersService.getGamePlayers(gameB).get();
+         assertAll(() -> response.andExpect(status().isConflict()),
+                  () -> assertThat("User not added to players of game",
+                           gamePlayers.getUsers(), not(hasItem(user.getId()))));
+      }
+
+      @Test
+      public void valid() throws Exception {
+         final var game = createGame();
+         final var expectedRedirectionLocation = GamePlayersController
+                  .createPathForGamePlayersOf(game);
+         // Tough test: user has a minimum set of authorities
+         final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
+         final var user = createUser(authorities);
+
+         final var response = performRequest(game, user, true);
+
+         final var location = response.andReturn().getResponse()
+                  .getHeaderValue("Location");
+         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var currentGame = gamePlayersService
+                  .getCurrentGameOfUser(user.getId());
+         assertAll(() -> response.andExpect(status().isFound()),
+                  () -> assertEquals(expectedRedirectionLocation, location,
+                           "redirection location"),
+                  () -> assertThat("User added to players of game",
+                           gamePlayers.getUsers(), hasItem(user.getId())),
+                  () -> assertThat("User has a current game",
+                           currentGame.isPresent(), is(true)));
       }
 
    }// class
