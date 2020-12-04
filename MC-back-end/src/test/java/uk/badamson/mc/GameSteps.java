@@ -229,7 +229,7 @@ public class GameSteps {
 
    @Then("The game page indicates that the user may not join the game")
    public void game_page_indicates_user_may_not_join_game() {
-      assertFalse(mayJoinGame);
+      assertFalse(mayJoinGame, "may not join game");
    }
 
    @Then("The game page indicates whether the game is recruiting players")
@@ -240,7 +240,7 @@ public class GameSteps {
 
    @Then("the game page indicates that the user may join the game")
    public void game_page_indicates_user_may_join_game() {
-      assertTrue(mayJoinGame);
+      assertTrue(mayJoinGame, "may join game");
    }
 
    @Then("The game page indicates whether the user may join the game")
