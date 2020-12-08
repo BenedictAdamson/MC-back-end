@@ -261,8 +261,8 @@ public class GameSteps {
                hasItem(userId));
    }
 
-   @Then("The game page lists the players of the game")
-   public void game_page_lists_players_of_game() {
+   @Then("The game page lists the players of the game or reports it has no players")
+   public void game_page_lists_players_of_game_or_reports_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers(), anything());
    }
