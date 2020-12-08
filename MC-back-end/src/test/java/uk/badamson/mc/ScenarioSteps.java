@@ -23,12 +23,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
@@ -39,8 +40,10 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -65,11 +68,19 @@ public class ScenarioSteps {
    @Autowired
    private ObjectMapper objectMapper;
 
-   private Set<UUID> ids = Set.of();
-
    private UUID id;
 
    private Scenario responseScenario;
+
+   private void chooseScenario() {
+      id = gameService.getGameIdentifiers().map(game -> game.getScenario())
+               .findAny().get();
+   }
+
+   @Given("examining scenario")
+   public void examining_scenario() {
+      chooseScenario();
+   }
 
    private void getResponseAsScenarioIdentifierList() throws IOException {
       final var response = world.getResponseBodyAsString();
@@ -100,11 +111,22 @@ public class ScenarioSteps {
       world.responseIsOk();
    }
 
-   @When("Navigate to one scenario")
-   public void navigate_to_one_scenario() throws Exception {
-      id = ids.stream().findAny().get();
+   @When("Navigate to a scenario with games")
+   public void navigate_to_a_scenario_with_games() throws Exception {
+      chooseScenario();
       world.performRequest(
                get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
+   }
+
+   private void requestGameOfScenario() throws Exception {
+      final var gameId = gameService.getCreationTimesOfGamesOfScenario(id)
+               .map(t -> new Game.Identifier(id, t)).findAny().get();
+      final var path = GameController.createPathFor(gameId);
+      final var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    @Then("the response is a list of scenarios")
@@ -114,6 +136,20 @@ public class ScenarioSteps {
       } catch (final IOException e) {
          throw new AssertionFailedError("Can decode response", e);
       }
+   }
+
+   @Then("The scenario page allows navigation to game pages")
+   public void scenario_page_allows_navigation_to_game_pages()
+            throws Exception {
+      requestGameOfScenario();
+      world.getResponse().andExpect(status().isOk());
+   }
+
+   @Then("The scenario page does not allow navigation to game pages")
+   public void scenario_page_does_not_allow_navigation_to_game_pages()
+            throws Exception {
+      requestGameOfScenario();
+      world.getResponse().andExpect(status().isUnauthorized());
    }
 
    @Then("The scenario page includes the list of games of that scenario")
@@ -135,7 +171,6 @@ public class ScenarioSteps {
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      ids = scenarioService.getScenarioIdentifiers()
-               .collect(toUnmodifiableSet());
+      scenarioService.getScenarioIdentifiers().collect(toUnmodifiableSet());
    }
 }
