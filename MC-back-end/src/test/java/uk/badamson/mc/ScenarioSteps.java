@@ -43,7 +43,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.presentation.GameController;
+import uk.badamson.mc.presentation.GamePlayersController;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -71,6 +73,11 @@ public class ScenarioSteps {
    private UUID id;
 
    private Scenario responseScenario;
+
+   private Identifier chooseGameOfScenario() {
+      return gameService.getCreationTimesOfGamesOfScenario(id)
+               .map(t -> new Game.Identifier(id, t)).findAny().get();
+   }
 
    private void chooseScenario() {
       id = gameService.getGameIdentifiers().map(game -> game.getScenario())
@@ -118,10 +125,19 @@ public class ScenarioSteps {
                get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
    }
 
-   private void requestGameOfScenario() throws Exception {
-      final var gameId = gameService.getCreationTimesOfGamesOfScenario(id)
-               .map(t -> new Game.Identifier(id, t)).findAny().get();
-      final var path = GameController.createPathFor(gameId);
+   private void requestGameOfScenario(final Game.Identifier game)
+            throws Exception {
+      final var path = GameController.createPathFor(game);
+      final var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
+   private void requestGamePlayersOfScenario(final Game.Identifier game)
+            throws Exception {
+      final var path = GamePlayersController.createPathForGamePlayersOf(game);
       final var request = get(path).accept(MediaType.APPLICATION_JSON);
       if (world.loggedInUser != null) {
          request.with(user(world.loggedInUser));
@@ -141,15 +157,41 @@ public class ScenarioSteps {
    @Then("The scenario page allows navigation to game pages")
    public void scenario_page_allows_navigation_to_game_pages()
             throws Exception {
-      requestGameOfScenario();
-      world.getResponse().andExpect(status().isOk());
+      final var game = chooseGameOfScenario();
+
+      /* The game page is rendered using data from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (AssertionError e) {
+         throw new AssertionError("Allows GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (AssertionError e) {
+         throw new AssertionError("Allows GET of game-players resource", e);
+      }
    }
 
    @Then("The scenario page does not allow navigation to game pages")
    public void scenario_page_does_not_allow_navigation_to_game_pages()
             throws Exception {
-      requestGameOfScenario();
-      world.getResponse().andExpect(status().isUnauthorized());
+      final var game = chooseGameOfScenario();
+
+      /* The game page is rendered using data from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
    }
 
    @Then("The scenario page includes the list of games of that scenario")

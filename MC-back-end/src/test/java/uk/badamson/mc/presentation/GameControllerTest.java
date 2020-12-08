@@ -30,9 +30,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -46,7 +48,9 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.Authority;
@@ -166,35 +170,77 @@ public class GameControllerTest {
    @Nested
    public class GetGame {
 
+      @Nested
+      public class Valid {
+
+         @Test
+         public void asGamesManager() throws Exception {
+            test(Authority.ROLE_MANAGE_GAMES);
+         }
+
+         @Test
+         public void asPlayer() throws Exception {
+            test(Authority.ROLE_PLAYER);
+         }
+
+         private void test(final Authority authority)
+                  throws Exception, UnsupportedEncodingException,
+                  JsonProcessingException, JsonMappingException {
+            final var id = createGame();
+            final var user = createUser(EnumSet.of(authority));
+
+            final var response = perform(id, user);
+
+            response.andExpect(status().isOk());
+            final var jsonResponse = response.andReturn().getResponse()
+                     .getContentAsString();
+            final var game = objectMapper.readValue(jsonResponse, Game.class);
+            assertEquals(id, game.getIdentifier(), "game has the requested ID");
+         }
+
+      }// class
+
       @Test
       public void absent() throws Exception {
          final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
-
-         final var response = perform(id);
+         /* Tough test: user is authorised. */
+         final var response = perform(id, USER_WITH_ALL_AUTHORITIES);
 
          response.andExpect(status().isNotFound());
       }
 
-      private ResultActions perform(final Game.Identifier id) throws Exception {
-         final var request = get(GameController.createPathFor(id))
-                  .accept(MediaType.APPLICATION_JSON);
+      @Test
+      public void noAuthentication() throws Exception {
+         /* Tough test: game exists. */
+         final var id = createGame();
 
-         return mockMvc.perform(request);
+         final var response = perform(id, null);
+
+         response.andExpect(status().isUnauthorized());
       }
 
       @Test
-      public void present() throws Exception {
-         final var id = new Game.Identifier(UUID.randomUUID(),
-                  gameService.getNow());
-         gameRepository.save(new Game(id));
+      public void notAuthorised() throws Exception {
+         /* Tough test: game exists and user has all other authorities */
+         final Set<Authority> authorities = EnumSet.complementOf(EnumSet
+                  .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+         final var user = createUser(authorities);
+         final var id = createGame();
 
-         final var response = perform(id);
+         final var response = perform(id, user);
 
-         response.andExpect(status().isOk());
-         final var jsonResponse = response.andReturn().getResponse()
-                  .getContentAsString();
-         final var game = objectMapper.readValue(jsonResponse, Game.class);
-         assertEquals(id, game.getIdentifier(), "game has the requested ID");
+         response.andExpect(status().isForbidden());
+      }
+
+      private ResultActions perform(final Game.Identifier id, final User user)
+               throws Exception {
+         final var request = get(GameController.createPathFor(id))
+                  .accept(MediaType.APPLICATION_JSON);
+         if (user != null) {
+            request.with(user(user));
+         }
+
+         return mockMvc.perform(request);
       }
 
    }// class
@@ -277,4 +323,16 @@ public class GameControllerTest {
 
    @Autowired
    private MockMvc mockMvc;
+
+   private Game.Identifier createGame() {
+      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+               .get();
+      final var id = gameService.create(scenario).getIdentifier();
+      return id;
+   }
+
+   private User createUser(final Set<Authority> authoritities) {
+      return new User(ID_A, "Allan", "letmein", authoritities, true, true, true,
+               true);
+   }
 }

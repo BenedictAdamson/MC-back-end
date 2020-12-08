@@ -435,7 +435,12 @@ public class GameSteps {
    private void requestGetGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
 
-      world.getJson(GameController.createPathFor(gameId));
+      final var path = GameController.createPathFor(gameId);
+      var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    private void requestGetGamePlayers() throws Exception {
