@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -183,24 +182,6 @@ public class GameSteps {
                   "Expected OK response encoding a " + clazz.getSimpleName(),
                   e);
       }
-   }
-
-   private void expectGetGamePlayersNoAllowed() {
-      assertNull(gamePlayers);
-   }
-
-   @Then("The game page does not indicate whether the game is recruiting players")
-   public void game_page_does_not_indicate_whether_game_recruiting_players() {
-      /*
-       * The server does not "indicate" or produce pages, but it can deny access
-       * to the resources that provide that information.
-       */
-      expectGetGamePlayersNoAllowed();
-   }
-
-   @Then("The game page does not list the players of the game")
-   public void game_page_does_not_list_players_of_game() {
-      expectGetGamePlayersNoAllowed();
    }
 
    @Then("The game page includes the scenario description")
