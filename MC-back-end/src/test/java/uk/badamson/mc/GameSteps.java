@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -121,8 +122,6 @@ public class GameSteps {
 
    private Game game;
 
-   private GamePlayers gamePlayers0;
-
    private GamePlayers gamePlayers;
 
    private Boolean mayJoinGame;
@@ -218,16 +217,36 @@ public class GameSteps {
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("The game page indicates that the game has one more player")
-   public void game_page_indicates_that_game_has_one_more_player() {
-      assertThat("Number of game players", gamePlayers.getUsers().size(),
-               is(gamePlayers0.getUsers().size() + 1));
+   @Then("The game page indicates that the game has a player")
+   public void game_page_indicates_that_game_has_player() {
+      assertThat("Game players list not empty", gamePlayers.getUsers(),
+               not(empty()));
    }
 
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
+   }
+
+   @Then("The game page indicates that the user is not playing the game")
+   public void game_page_indicates_user_is_not_playing_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      final var userId = world.loggedInUser.getId();
+      assertThat("User is not listed as a player", gamePlayers.getUsers(),
+               not(hasItem(userId)));
+   }
+
+   @Then("The game page indicates that the user is playing the game")
+   public void game_page_indicates_user_is_playing_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      final var userId = world.loggedInUser.getId();
+      assertThat("User is listed as a player", gamePlayers.getUsers(),
+               hasItem(userId));
    }
 
    @Then("the game page indicates that the user may join the game")
@@ -240,31 +259,30 @@ public class GameSteps {
       assertFalse(mayJoinGame, "may not join game");
    }
 
+   @Then("The game page indicates whether the game has players")
+   public void game_page_indicates_whether_game_has_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.getUsers().size(), anything());
+   }
+
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
    }
 
-   @Then("The game page indicates whether the user may join the game")
-   public void game_page_indicates_whether_user_may_join_game() {
-      assertThat(mayJoinGame.booleanValue(), anything());
-   }
-
-   @Then("The game page lists the user as a player of the game")
-   public void game_page_list_user_as_player_of_game() {
+   @Then("The game page indicates whether the user is playing the game")
+   public void game_page_indicates_whether_user_is_playing_game() {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
-      final var userId = world.loggedInUser.getId();
-      assertThat("User added to players of game", gamePlayers.getUsers(),
-               hasItem(userId));
+      assertThat("Has a collection of users for the game",
+               gamePlayers.getUsers(), anything());
    }
 
-   @Then("The game page lists the players of the game or reports it has no players")
-   public void game_page_lists_players_of_game_or_reports_no_players() {
-      Objects.requireNonNull(gamePlayers, "gamePlayers");
-      assertThat(gamePlayers.getUsers(), anything());
+   @Then("The game page indicates whether the user may join the game")
+   public void game_page_indicates_whether_user_may_join_game() {
+      assertThat(mayJoinGame.booleanValue(), anything());
    }
 
    private void getGames() throws Exception {
@@ -495,7 +513,6 @@ public class GameSteps {
    @When("the user joins the game")
    public void user_joins_game() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
-      gamePlayers0 = gamePlayers;
 
       final var path = GamePlayersController.createPathForJoining(gameId);
       var request = post(path).with(csrf());
