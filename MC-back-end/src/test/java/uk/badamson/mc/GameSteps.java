@@ -20,10 +20,11 @@ package uk.badamson.mc;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,16 +38,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hamcrest.Matcher;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.util.UriTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -56,6 +57,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GameController;
+import uk.badamson.mc.presentation.GamePlayersController;
+import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -71,17 +74,18 @@ public class GameSteps {
    private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
             GameController.GAME_PATH_PATTERN);
 
-   private static final Matcher<Integer> PUT_OK_STATUS = anyOf(
-            is(HttpStatus.OK.value()), is(HttpStatus.NO_CONTENT.value()));
-
-   private static String createGamePath(final Game.Identifier identifier) {
-      return "/api/scenario/" + identifier.getScenario() + "/game/"
-               + identifier.getCreated();
-   }
+   private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
+            GamePlayersController.GAME_PLAYERS_PATH_PATTERN);
 
    private static Game.Identifier parseGamePath(final String path) {
+      return parseGamePath(path, GAME_PATH_URI_TEMPLATE);
+   }
+
+   private static Game.Identifier parseGamePath(final String path,
+            final UriTemplate template) {
       Objects.requireNonNull(path, "path");
-      final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path);
+      Objects.requireNonNull(template, "template");
+      final var pathVariable = template.match(path);
       try {
          final var scenarioId = UUID.fromString(pathVariable.get("scenario"));
          final var created = Instant.parse(pathVariable.get("created"));
@@ -91,14 +95,21 @@ public class GameSteps {
       }
    }
 
+   private static Game.Identifier parseGamePlayersPath(final String path) {
+      return parseGamePath(path, GAME_PLAYERS_PATH_URI_TEMPLATE);
+   }
+
    @Autowired
    private BackEndWorld world;
+
+   @Autowired
+   private ScenarioService scenarioService;
 
    @Autowired
    private GameService gameService;
 
    @Autowired
-   private ScenarioService scenarioService;
+   private GamePlayersService gamePlayersService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -110,6 +121,10 @@ public class GameSteps {
    private Game.Identifier gameId;
 
    private Game game;
+
+   private GamePlayers gamePlayers;
+
+   private Boolean mayJoinGame;
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -129,6 +144,7 @@ public class GameSteps {
       final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
                .get();
       scenario = scenarioService.getScenario(scenarioId).get();
+      updateGameCreationTimes();
    }
 
    private void createGame() throws Exception {
@@ -139,6 +155,7 @@ public class GameSteps {
                .createPathForGames(scenario.getIdentifier());
       world.performRequest(
                post(path).with(user(world.loggedInUser)).with(csrf()));
+      updateGameCreationTimes();
    }
 
    @When("creating a game")
@@ -147,12 +164,23 @@ public class GameSteps {
       createGame();
    }
 
-   private void endRecruitmentForGame() throws Exception {
-      Objects.requireNonNull(game, "game");
-      Objects.requireNonNull(gameId, "gameId");
-      final var path = createGamePath(gameId);
-      game.endRecruitment();
-      world.putResource(path, game);
+   @When("examining a game recruiting players")
+   public void examining_game_recruiting_players() {
+      prepareNewGame();
+   }
+
+   private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
+            final Class<? extends TYPE> clazz) throws Exception {
+      try {
+         response.andExpect(status().isOk());
+         final var responseText = response.andReturn().getResponse()
+                  .getContentAsString();
+         return objectMapper.readValue(responseText, clazz);
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Expected OK response encoding a " + clazz.getSimpleName(),
+                  e);
+      }
    }
 
    @Then("The game page includes the scenario description")
@@ -171,21 +199,90 @@ public class GameSteps {
       assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
    }
 
+   @Then("The game page indicates that the game has no players")
+   public void game_page_indicates_game_has_no_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.getUsers(), empty());
+   }
+
    @Then("the game page indicates that the game is recruiting players")
    public void game_page_indicates_game_recuiting_players() {
-      assertTrue(game.isRecruiting());
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertTrue(gamePlayers.isRecruiting());
+   }
+
+   @Then("The game page indicates the number of players of the game")
+   public void game_page_indicates_number_of_players_of_game() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.getUsers().size(), anything());
+   }
+
+   @Then("The game page indicates that the game has a player")
+   public void game_page_indicates_that_game_has_player() {
+      assertThat("Game players list not empty", gamePlayers.getUsers(),
+               not(empty()));
    }
 
    @Then("the game page indicates that the game is not recruiting players")
    public void game_page_indicates_that_game_is_not_recuiting_players() {
-      Objects.requireNonNull(gameId, "gameId");
-      game = gameService.getGame(gameId).get();
-      assertFalse(game.isRecruiting());
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
+   }
+
+   @Then("The game page indicates that the user is not playing the game")
+   public void game_page_indicates_user_is_not_playing_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      final var userId = world.loggedInUser.getId();
+      assertThat("User is not listed as a player", gamePlayers.getUsers(),
+               not(hasItem(userId)));
+   }
+
+   @Then("The game page indicates that the user is playing the game")
+   public void game_page_indicates_user_is_playing_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      final var userId = world.loggedInUser.getId();
+      assertThat("User is listed as a player", gamePlayers.getUsers(),
+               hasItem(userId));
+   }
+
+   @Then("the game page indicates that the user may join the game")
+   public void game_page_indicates_user_may_join_game() {
+      assertTrue(mayJoinGame, "may join game");
+   }
+
+   @Then("The game page indicates that the user may not join the game")
+   public void game_page_indicates_user_may_not_join_game() {
+      assertFalse(mayJoinGame, "may not join game");
+   }
+
+   @Then("The game page indicates whether the game has players")
+   public void game_page_indicates_whether_game_has_players() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.getUsers().size(), anything());
    }
 
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
-      assertThat(game.isRecruiting(), anything());
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      assertThat(gamePlayers.isRecruiting(), anything());
+   }
+
+   @Then("The game page indicates whether the user is playing the game")
+   public void game_page_indicates_whether_user_is_playing_game() {
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      assertThat("Has a collection of users for the game",
+               gamePlayers.getUsers(), anything());
+   }
+
+   @Then("The game page indicates whether the user may join the game")
+   public void game_page_indicates_whether_user_may_join_game() {
+      assertThat(mayJoinGame.booleanValue(), anything());
    }
 
    private void getGames() throws Exception {
@@ -200,6 +297,27 @@ public class GameSteps {
       gameCreationTimes = objectMapper.readValue(response,
                new TypeReference<Set<Instant>>() {
                });
+   }
+
+   private boolean hasAnyAuthorities(final Set<Authority> options) {
+      if (options.isEmpty()) {
+         return true;
+      } else if (world.loggedInUser == null) {
+         return false;
+      } else {
+         return world.loggedInUser.getAuthorities().stream()
+                  .map(a -> options.contains(a)).filter(present -> present)
+                  .findAny().isPresent();
+      }
+   }
+
+   private boolean isPlayer() {
+      return hasAnyAuthorities(EnumSet.of(Authority.ROLE_PLAYER));
+   }
+
+   private boolean isPlayerOrGameManager() {
+      return hasAnyAuthorities(
+               EnumSet.of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
    }
 
    @Then("the list of games includes the new game")
@@ -231,7 +349,22 @@ public class GameSteps {
 
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recruitment_for_game() throws Exception {
-      world.getResponse().andExpect(status().is(PUT_OK_STATUS));
+      world.getResponse().andExpect(status().isFound());
+   }
+
+   @Then("MC accepts joining the game")
+   public void mc_accepts_joining_game() {
+      Objects.requireNonNull(gameId, "gameId");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var location = world.getResponse().andReturn().getResponse()
+               .getHeader("Location");
+      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header")); // guard
+      final var gameRedirectedTo = parseGamePlayersPath(location);
+      assertThat("Redirected to the list of players of the current game",
+               gameRedirectedTo, is(gameId));
    }
 
    @Then("MC does not allow creating a game")
@@ -244,60 +377,159 @@ public class GameSteps {
    @Then("MC does not allow ending recruitment for the game")
    public void mc_does_not_allow_ending_recuitment_for_game() throws Exception {
       chooseScenario();
-      endRecruitmentForGame();
+      requestEndRecruitmentForGame();
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
-   @Then("MC serves the game page")
-   public void mc_serves_game_page() {
-      final var response = world.getResponse();
+   @Then("MC provides a game page")
+   public void mc_provides_game_page() {
+      Objects.requireNonNull(gameId, "gameId");
+
       try {
-         response.andExpect(status().isOk());
-         final var responseText = world.getResponseBodyAsString();
-         game = objectMapper.readValue(responseText, Game.class);
+         requestGetGame();
+         game = expectEncodedResponse(world.getResponse(), Game.class);
       } catch (final Exception e) {
-         throw new AssertionFailedError("HTTP response provides a game", e);
+         throw new AssertionFailedError("Can GET Game resource", e);
+      }
+
+      try {
+         requestGetGamePlayers();
+         if (isPlayerOrGameManager()) {
+            gamePlayers = expectEncodedResponse(world.getResponse(),
+                     GamePlayers.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            gamePlayers = null;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET GamePlayers resource", e);
+      }
+      try {
+         requestGetMayUserJoinGame();
+         if (isPlayer()) {
+            mayJoinGame = expectEncodedResponse(world.getResponse(),
+                     Boolean.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            mayJoinGame = Boolean.FALSE;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET MayJoinGame resource", e);
       }
    }
 
-   @When("Navigate to one game of the scenario")
-   public void navigate_to_game_of_scenario() throws Exception {
-      final var scenarioId = scenario.getIdentifier();
-      final var created = gameCreationTimes.stream().findAny().get();
-      gameId = new Game.Identifier(scenarioId, created);
+   @When("Navigate to one game page")
+   public void navigate_to_one_game_page() {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+      final var creationTime = gameCreationTimes.stream().findAny().get();
+      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
+   }
 
-      world.getJson(createGamePath(gameId));
+   private void prepareNewGame() {
+      chooseScenario();
+      game = gameService.create(scenario.getIdentifier());
+      gameId = game.getIdentifier();
+      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      mayJoinGame = null;
+      BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
+   }
+
+   private void requestEndRecruitmentForGame() throws Exception {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController
+               .createPathForEndRecruitmentOf(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
+   private void requestGetGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GameController.createPathFor(gameId);
+      var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
+   private void requestGetGamePlayers() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController.createPathForGamePlayersOf(gameId);
+      var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
+   private void requestGetMayUserJoinGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = GamePlayersController
+               .createPathForMayJoinQueryOf(gameId);
+      var request = get(path);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    @When("A scenario has games")
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
+      updateGameCreationTimes();
+   }
+
+   private void updateGameCreationTimes() {
+      gameCreationTimes = gameService
+               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
+               .collect(toUnmodifiableSet());
    }
 
    @When("user ends recruitment for the game")
    public void user_ends_recuitment_for_game() {
+      if (!isPlayerOrGameManager()) {
+         throw new IllegalStateException("user not authorized");
+      }
       try {
-         endRecruitmentForGame();
+         requestEndRecruitmentForGame();
       } catch (final Exception e) {
          throw new AssertionFailedError("Can ask the server to change the game",
                   e);
       }
+      gamePlayers = null;// local copy is out of date
+   }
+
+   @When("the user joins the game")
+   public void user_joins_game() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController.createPathForJoining(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recruiting_players() {
-      chooseScenario();
-      game = gameService.create(scenario.getIdentifier());
-      gameId = game.getIdentifier();
-      BackEndWorld.require(game.isRecruiting(), "game is recruiting");
+      prepareNewGame();
    }
 
-   @When("Viewing the games of the scenario")
+   @Given("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       Objects.requireNonNull(scenario, "scenario");
-      gameCreationTimes = gameService
-               .getCreationTimesOfGamesOfScenario(scenario.getIdentifier())
-               .collect(toUnmodifiableSet());
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
 }

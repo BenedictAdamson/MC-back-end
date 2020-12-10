@@ -37,8 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -154,7 +152,7 @@ public class GameController {
     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
     * <li>A {@linkplain HttpHeaders#getLocation()
     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-    * {@linkplain #createPathFor(Identifier) path} of the cew game.</li>
+    * {@linkplain #createPathFor(Identifier) path} of the new game.</li>
     * </ul>
     * </li>
     * <li>The scenario ID part of the identifier of the newly created game is
@@ -272,6 +270,7 @@ public class GameController {
     *            {@code scenario} and {@code created}.
     */
    @GetMapping(GAME_PATH_PATTERN)
+   @RolesAllowed({ "MANAGE_GAMES", "PLAYER" })
    @Nonnull
    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
@@ -297,71 +296,5 @@ public class GameController {
    @Nonnull
    public final GameService getGameService() {
       return gameService;
-   }
-
-   /**
-    * <p>
-    * Behaviour of the PUT verb for a game resource.
-    * </p>
-    * <ul>
-    * <li>Subsequent retrieval of the game with the given identification
-    * information will get the given new game state.</li>
-    * </ul>
-    *
-    * @param scenario
-    *           The unique ID of the scenario of the game to modify.
-    * @param created
-    *           The creation time of the game to modify.
-    * @param newGameState
-    *           The new state for the game.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code scenario} is null.</li>
-    *            <li>If {@code created} is null.</li>
-    *            <li>If {@code newGameState} is null.</li>
-    *            </ul>
-    * @throws ResponseStatusException
-    *            <ul>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-    *            there is no game that has {@linkplain Game#getIdentifier()
-    *            identification information} equivalent to the given
-    *            {@code scenario} and {@code created}.</li>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#PRECONDITION_FAILED 412
-    *            (Precondition Failed)} if
-    *            <ul>
-    *            <li>the {@linkplain Game#getIdentifier() identification
-    *            information} of the given {@code newGameState} is inconsistent
-    *            with the given {@code scenario} and {@code created}.</li>
-    *            <li>the {@code newGameState} {@linkplain Game#isRecruiting() is
-    *            recruiting} but the current state of the game is that it is not
-    *            recruiting (that is, recruiting can be stopped but never
-    *            restarted).</li>
-    *            </ul>
-    *            </li>
-    *            </ul>
-    */
-   @PutMapping(GAME_PATH_PATTERN)
-   @RolesAllowed("MANAGE_GAMES")
-   public void modify(@Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created,
-            @Nonnull @RequestBody final Game newGameState) {
-      final var identifier = new Game.Identifier(scenario, created);
-      try {
-         final var game0 = gameService.getGame(identifier).get();
-         if (game0.isRecruiting() && !newGameState.isRecruiting()) {
-            gameService.endRecruitment(identifier).get();
-         } else if (!game0.isRecruiting() && newGameState.isRecruiting()) {
-            throw new IllegalStateException(
-                     "Attempting to re-enable recruitment");
-         }
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized ID", e);
-      } catch (final IllegalStateException e) {
-         throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
-                  e.getMessage(), e);
-      }
    }
 }

@@ -397,9 +397,6 @@ public class UserControllerTest {
                         is(expected.getUsername())),
                () -> assertThat("authorities", actual.getAuthorities(),
                         is(expected.getAuthorities())),
-               () -> assertThat("password",
-                        service.getPasswordEncoder().matches(
-                                 expected.getPassword(), actual.getPassword())),
                () -> assertThat("accountNonExpired",
                         actual.isAccountNonExpired(),
                         is(expected.isAccountNonExpired())),

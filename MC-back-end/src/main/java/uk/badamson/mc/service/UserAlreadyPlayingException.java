@@ -1,7 +1,7 @@
 package uk.badamson.mc.service;
-/* 
+/*
  * © Copyright Benedict Adamson 2020.
- * 
+ *
  * This file is part of MC.
  *
  * MC is free software: you can redistribute it and/or modify
@@ -21,14 +21,14 @@ package uk.badamson.mc.service;
 /**
  * <p>
  * An exception class for indicating that an operation can not be performed
- * because a user already exists.
+ * because a user is already playing a game.
  * </p>
  */
 @SuppressWarnings("serial")
-public final class UserExistsException extends IllegalPlayerStateException {
+public final class UserAlreadyPlayingException extends IllegalPlayerStateException {
 
-   public UserExistsException() {
-      super("User exists");
+   public UserAlreadyPlayingException() {
+      super("User already playing");
    }
 
 }

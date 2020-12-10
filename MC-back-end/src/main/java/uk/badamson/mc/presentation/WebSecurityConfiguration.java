@@ -37,6 +37,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             throws Exception {
       http.authorizeRequests().antMatchers("/api/user/**").authenticated();
       http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
+      http.authorizeRequests().antMatchers("/api/scenario/*/game/players")
+               .authenticated();
       // TODO: at present, do not need authorization to create games
       http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
    }

@@ -97,22 +97,8 @@ public class GameServiceImpl implements GameService {
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
       final var identifier = new Game.Identifier(scenario, getNow());
-      final var game = new Game(identifier, true);
+      final var game = new Game(identifier);// FIXME
       return repository.save(game);// write
-   }
-
-   @Override
-   @Nonnull
-   @Transactional
-   public Optional<Game> endRecruitment(@Nonnull final Identifier id) {
-      final var optionalGame = repository.findById(id);// read
-      if (optionalGame.isPresent()) {
-         final var game = optionalGame.get();
-         game.endRecruitment();
-         return Optional.of(repository.save(game));// write
-      } else {
-         return optionalGame;
-      }
    }
 
    @Nonnull

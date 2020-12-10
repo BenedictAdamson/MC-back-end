@@ -19,44 +19,36 @@ package uk.badamson.mc.repository;
  */
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
-import uk.badamson.mc.User;
+import uk.badamson.mc.Game;
+import uk.badamson.mc.GamePlayers;
 
 /**
  * <p>
- * Auxiliary test code for classes that implement the {@link UserRepository}
- * interface.
+ * Auxiliary test code for classes that implement the
+ * {@link GamePlayersRepository} interface.
+ * </p>
  */
-public class UserRepositoryTest {
+public class GamePlayersRepositoryTest {
 
-   public static final class Fake
-            extends CrudRepositoryTest.AbstractFake<User, UUID>
-            implements UserRepository {
+   public static final class Fake extends
+            CrudRepositoryTest.AbstractFake<GamePlayers, Game.Identifier>
+            implements GamePlayersRepository {
 
       @Override
-      protected User copy(final User user) {
-         Objects.requireNonNull(user, "user");
-         return new User(user.getId(), user);
+      protected GamePlayers copy(final GamePlayers players) {
+         return new GamePlayers(players);
       }
 
       @Override
-      public Optional<User> findByUsername(final String username) {
-         requireNonNull(username, "username");
-         return entities.values().stream()
-                  .filter(u -> username.equals(u.getUsername())).findAny();
-      }
-
-      @Override
-      protected UUID getId(final User user) {
-         Objects.requireNonNull(user, "user");
-         return user.getId();
+      protected Game.Identifier getId(final GamePlayers players) {
+         Objects.requireNonNull(players, "players");
+         return players.getGame();
       }
 
    }// class
 
-   public static void assertInvariants(final UserRepository repository) {
+   public static void assertInvariants(final GameRepository repository) {
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 

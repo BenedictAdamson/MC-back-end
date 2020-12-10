@@ -272,6 +272,11 @@ public class UserSteps {
       userHasAuthorities(Set.of(includedRole));
    }
 
+   @Given("user is not playing any games")
+   public void user_not_playing_any_games() {
+      // Do nothing: implied because create each user afresh.
+   }
+
    @Then("The user page includes the user name")
    public void user_page_includes_user_name() {
       Objects.requireNonNull(expectedUser, "expectedUser");
@@ -289,9 +294,8 @@ public class UserSteps {
    }
 
    private void userHasAuthorities(final Set<Authority> authorities) {
-      user = new User(UUID.randomUUID(), "Zoe", "password1", authorities, true,
-               true, true, true);
-      service.add(user);
+      user = service.add(new BasicUserDetails("Zoe", "password1", authorities,
+               true, true, true, true));
    }
 
    @Given("Viewing the list of users")

@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -71,7 +73,7 @@ public class UserServiceTest {
 
    public static void add_1(final UserService service,
             final BasicUserDetails userDetails) {
-      final User user = add(service, userDetails);
+      final var user = add(service, userDetails);
 
       final var users = service.getUsers();
       final UserDetails userDetailsAfter = loadUserByUsername(service,
@@ -123,6 +125,17 @@ public class UserServiceTest {
 
    public static void assertInvariants(final UserService service) {
       // Do nothing
+   }
+
+   public static Optional<User> getUser(final UserService service,
+            final UUID id) {
+      final var result = service.getUser(id);
+
+      assertInvariants(service);
+      assertTrue(result.isEmpty() || id.equals(result.get().getId()),
+               "Returns either an empty value, "
+                        + "or a value for which the {@linkplain User#getId() identifier is equivalent to the given ID");
+      return result;
    }
 
    public static Stream<User> getUsers(final UserService service) {

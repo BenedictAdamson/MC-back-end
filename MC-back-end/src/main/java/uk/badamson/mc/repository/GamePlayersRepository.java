@@ -1,7 +1,7 @@
-package uk.badamson.mc.service;
-/* 
+package uk.badamson.mc.repository;
+/*
  * © Copyright Benedict Adamson 2020.
- * 
+ *
  * This file is part of MC.
  *
  * MC is free software: you can redistribute it and/or modify
@@ -18,17 +18,18 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.data.repository.CrudRepository;
+
+import uk.badamson.mc.Game;
+import uk.badamson.mc.GamePlayers;
+
 /**
  * <p>
- * An exception class for indicating that an operation can not be performed
- * because a user already exists.
+ * Interface for generic CRUD operations on a repository for {@link GamePlayers}
+ * objects.
  * </p>
  */
-@SuppressWarnings("serial")
-public final class UserExistsException extends IllegalPlayerStateException {
-
-   public UserExistsException() {
-      super("User exists");
-   }
+public interface GamePlayersRepository
+         extends CrudRepository<GamePlayers, Game.Identifier> {
 
 }

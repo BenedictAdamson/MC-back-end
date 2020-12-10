@@ -18,6 +18,8 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -86,7 +88,28 @@ public interface UserService extends UserDetailsService {
     *
     * @return the encoder.
     */
+   @Nonnull
    PasswordEncoder getPasswordEncoder();
+
+   /**
+    * <p>
+    * Get the {@linkplain User user information} for the user with a given ID.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which the {@linkplain User#getId() identifier}
+    * {@linkplain UUID#equals(Object) is equivalent to} the given ID</li>
+    * <li>Always returns a present value for the
+    * {@linkplain User#ADMINISTRATOR_ID administrator ID}.</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the user.
+    * @return The user
+    */
+   @Nonnull
+   Optional<User> getUser(UUID id);
 
    /**
     * <p>
@@ -105,6 +128,7 @@ public interface UserService extends UserDetailsService {
     *
     * @return a {@linkplain Stream stream} of the users.
     */
+   @Nonnull
    Stream<User> getUsers();
 
    /**
@@ -119,6 +143,6 @@ public interface UserService extends UserDetailsService {
     * </ul>
     */
    @Override
+   @Nonnull
    User loadUserByUsername(String username) throws UsernameNotFoundException;
-
 }
