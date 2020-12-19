@@ -287,24 +287,28 @@ public class UserControllerTest {
 
          @Test
          public void a() throws Exception {
-            test(USER_A.getUsername(), USER_B);
+            testNonAdministrator(USER_A.getUsername(), USER_B);
+         }
+
+         @Test
+         public void administrator() throws Exception {
+            test(USER_A.getUsername(),
+                     service.getUser(User.ADMINISTRATOR_ID).get());
          }
 
          @Test
          public void b() throws Exception {
-            test(USER_B.getUsername(), USER_A);
+            testNonAdministrator(USER_B.getUsername(), USER_A);
          }
 
-         private void test(final String requestingUserName,
-                  final BasicUserDetails userDetails) throws Exception {
-            assert !requestingUserName.equals(userDetails.getUsername());
+         private void test(final String requestingUserName, final User user)
+                  throws Exception {
             // Tough test: requesting user has minimum authority
             final var requestingUserDetails = new BasicUserDetails(
                      requestingUserName, "password1",
                      Set.of(Authority.ROLE_MANAGE_USERS), true, true, true,
                      true);
             final var requestingUser = service.add(requestingUserDetails);
-            final var user = service.add(userDetails);
 
             final var response = GetUser.this.perform(user.getId(),
                      requestingUser);
@@ -315,10 +319,17 @@ public class UserControllerTest {
             final var decodedResponse = objectMapper.readValue(jsonResponse,
                      User.class);
             assertAll("Response is the identified user",
-                     () -> assertEquivalentUserAttributes("user details",
-                              userDetails, decodedResponse),
+                     () -> assertEquivalentUserAttributes("user details", user,
+                              decodedResponse),
                      () -> assertEquals(user.getId(), decodedResponse.getId(),
                               "id"));
+         }
+
+         private void testNonAdministrator(final String requestingUserName,
+                  final BasicUserDetails userDetails) throws Exception {
+            assert !requestingUserName.equals(userDetails.getUsername());
+            final var user = service.add(userDetails);
+            test(requestingUserName, user);
          }
       }// class
 
