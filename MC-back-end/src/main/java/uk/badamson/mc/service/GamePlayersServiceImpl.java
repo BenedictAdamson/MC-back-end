@@ -181,10 +181,9 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     * </p>
     * <ul>
     * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
-    * associated {@linkplain #getGamePlayersRepository() repository}
-    * {@linkplain GamePlayersRepository#findById(Identifier) has} a stored value
-    * with the given ID, that returned value is the value retrieved from the
-    * repository.</li>
+    * associated {@linkplain #getGamePlayersRepository() repository} has a
+    * stored value with the given ID, that returned value is the value retrieved
+    * from the repository.</li>
     * </ul>
     *
     * @param id
