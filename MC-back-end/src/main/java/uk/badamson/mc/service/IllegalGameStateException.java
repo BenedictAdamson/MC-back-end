@@ -72,7 +72,7 @@ public class IllegalGameStateException extends IllegalStateException {
     * <ul>
     * <li>If the given cause is not null, this exception has the
     * {@linkplain Throwable#getMessage() detail message} of the given cause as
-    * its cause.</li
+    * its cause.</li>
     * </ul>
     *
     * @param cause
