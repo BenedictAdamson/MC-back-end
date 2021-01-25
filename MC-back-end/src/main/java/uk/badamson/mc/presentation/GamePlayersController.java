@@ -390,7 +390,8 @@ public class GamePlayersController {
     * {@linkplain GamePlayers#getUsers() players} of a given game.
     * </p>
     * <p>
-    * That is, whether all the following are true.</p
+    * That is, whether all the following are true.
+    * </p>
     * <ul>
     * <li>The{@code user} is the ID of a known user.</li>
     * <li>The {@code game} is the ID of a known game.</li>

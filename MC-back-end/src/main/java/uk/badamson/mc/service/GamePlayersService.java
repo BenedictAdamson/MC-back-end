@@ -161,7 +161,8 @@ public interface GamePlayersService {
     * succeed
     * </p>
     * <p>
-    * That is, whether all the following are true.</p
+    * That is, whether all the following are true.
+    * </p>
     * <ul>
     * <li>The{@code user} is the ID of a known user, according to the associated
     * {@linkplain #getUserService() user service}.</li>
