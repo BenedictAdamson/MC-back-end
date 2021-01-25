@@ -3,7 +3,7 @@ The Mission Command game.
 
 ## License
 
-© Copyright Benedict Adamson 2018-20.
+© Copyright Benedict Adamson 2018-21.
  
 ![AGPLV3](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)
 
