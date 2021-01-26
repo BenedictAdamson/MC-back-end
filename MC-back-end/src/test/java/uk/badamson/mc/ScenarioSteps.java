@@ -200,6 +200,17 @@ public class ScenarioSteps {
       assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
    }
 
+   @Then("The scenario page includes the list of playable characters of that scenario")
+   public void scenario_page_includes_list_of_playable_characters_of_that_scenario() {
+      Objects.requireNonNull(scenarioService, "service");
+      Objects.requireNonNull(id, "id");
+      Objects.requireNonNull(responseScenario, "responseScenario");
+
+      final var expectedScenario = scenarioService.getScenario(id).get();
+      assertThat("characters", responseScenario.getCharacters(),
+               is(expectedScenario.getCharacters()));
+   }
+
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       Objects.requireNonNull(scenarioService, "service");
@@ -209,11 +220,6 @@ public class ScenarioSteps {
       final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
-   }
-
-   @Then("The scenario page includes the list of playable characters of that scenario")
-   public void the_scenario_page_includes_the_list_of_playable_characters_of_that_scenario() {
-      throw new io.cucumber.java.PendingException();
    }
 
    @When("Viewing the scenarios")
