@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -488,6 +488,11 @@ public class GameSteps {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
       updateGameCreationTimes();
+   }
+
+   @Then("The game page indicates which character \\(if any) the user is playing")
+   public void the_game_page_indicates_which_character_if_any_the_user_is_playing() {
+      throw new io.cucumber.java.PendingException();
    }
 
    private void updateGameCreationTimes() {

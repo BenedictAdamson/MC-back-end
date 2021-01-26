@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -163,13 +163,13 @@ public class ScenarioSteps {
       try {
          requestGameOfScenario(game);
          world.getResponse().andExpect(status().isOk());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Allows GET of game resource", e);
       }
       try {
          requestGamePlayersOfScenario(game);
          world.getResponse().andExpect(status().isOk());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Allows GET of game-players resource", e);
       }
    }
@@ -183,13 +183,13 @@ public class ScenarioSteps {
       try {
          requestGameOfScenario(game);
          world.getResponse().andExpect(status().is4xxClientError());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Does not allow GET of game resource", e);
       }
       try {
          requestGamePlayersOfScenario(game);
          world.getResponse().andExpect(status().is4xxClientError());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Does not allow GET of game resource", e);
       }
    }
@@ -209,6 +209,11 @@ public class ScenarioSteps {
       final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
+   }
+
+   @Then("The scenario page includes the list of playable characters of that scenario")
+   public void the_scenario_page_includes_the_list_of_playable_characters_of_that_scenario() {
+      throw new io.cucumber.java.PendingException();
    }
 
    @When("Viewing the scenarios")
