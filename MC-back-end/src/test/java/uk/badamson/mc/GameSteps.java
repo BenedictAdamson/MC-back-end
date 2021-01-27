@@ -202,7 +202,7 @@ public class GameSteps {
    @Then("The game page indicates that the game has no players")
    public void game_page_indicates_game_has_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
-      assertThat(gamePlayers.getUsers(), empty());
+      assertThat(gamePlayers.getUsers().values(), empty());
    }
 
    @Then("the game page indicates that the game is recruiting players")
@@ -219,7 +219,7 @@ public class GameSteps {
 
    @Then("The game page indicates that the game has a player")
    public void game_page_indicates_that_game_has_player() {
-      assertThat("Game players list not empty", gamePlayers.getUsers(),
+      assertThat("Game players list not empty", gamePlayers.getUsers().values(),
                not(empty()));
    }
 
@@ -235,8 +235,8 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       final var userId = world.loggedInUser.getId();
-      assertThat("User is not listed as a player", gamePlayers.getUsers(),
-               not(hasItem(userId)));
+      assertThat("User is not listed as a player",
+               gamePlayers.getUsers().values(), not(hasItem(userId)));
    }
 
    @Then("The game page indicates that the user is playing the game")
@@ -245,7 +245,7 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       final var userId = world.loggedInUser.getId();
-      assertThat("User is listed as a player", gamePlayers.getUsers(),
+      assertThat("User is listed as a player", gamePlayers.getUsers().values(),
                hasItem(userId));
    }
 

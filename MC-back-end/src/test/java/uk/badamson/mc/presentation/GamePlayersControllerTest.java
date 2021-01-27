@@ -265,8 +265,8 @@ public class GamePlayersControllerTest {
 
          response.andExpect(status().isForbidden());
          final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       @Test
@@ -284,8 +284,8 @@ public class GamePlayersControllerTest {
 
          response.andExpect(status().isForbidden());
          final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       @Test
@@ -302,8 +302,8 @@ public class GamePlayersControllerTest {
 
          response.andExpect(status().isConflict());
          final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       private ResultActions performRequest(final Game.Identifier game,
@@ -338,7 +338,8 @@ public class GamePlayersControllerTest {
          final var gamePlayers = gamePlayersService.getGamePlayers(gameB).get();
          assertAll(() -> response.andExpect(status().isConflict()),
                   () -> assertThat("User not added to players of game",
-                           gamePlayers.getUsers(), not(hasItem(user.getId()))));
+                           gamePlayers.getUsers().values(),
+                           not(hasItem(user.getId()))));
       }
 
       @Test
@@ -361,7 +362,8 @@ public class GamePlayersControllerTest {
                   () -> assertEquals(expectedRedirectionLocation, location,
                            "redirection location"),
                   () -> assertThat("User added to players of game",
-                           gamePlayers.getUsers(), hasItem(user.getId())),
+                           gamePlayers.getUsers().values(),
+                           hasItem(user.getId())),
                   () -> assertThat("User has a current game",
                            currentGame.isPresent(), is(true)));
       }

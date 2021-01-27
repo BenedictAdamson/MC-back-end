@@ -35,6 +35,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -111,20 +112,21 @@ public class GamePlayersServiceImplTest {
 
          @Test
          public void a() {
-            test(true, Set.of());
+            test(true, Map.of());
          }
 
          @Test
          public void b() {
-            test(false, Set.of(USER_ID_A));
+            test(false, Map.of(CHARACTER_ID_A, USER_ID_A));
          }
 
          @Test
          public void c() {
-            test(true, Set.of(USER_ID_B));
+            test(true, Map.of(CHARACTER_ID_B, USER_ID_B));
          }
 
-         private void test(final boolean recruiting0, final Set<UUID> users) {
+         private void test(final boolean recruiting0,
+                  final Map<UUID, UUID> users) {
             final var gamePlayersRepository = gamePlayersRepositoryA;
             final var currentUserGameRepository = currentUserGameRepositoryA;
             final var gameService = gameServiceA;
@@ -174,7 +176,7 @@ public class GamePlayersServiceImplTest {
                      .getScenarioIdentifiers().findAny().get();
             final var id = new Game.Identifier(scenario, Instant.EPOCH);
             final var gamePlayersInrepository = new GamePlayers(id, true,
-                     Set.of());
+                     Map.of());
             gamePlayersRepository.save(gamePlayersInrepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepository,
@@ -210,7 +212,8 @@ public class GamePlayersServiceImplTest {
          assertAll("Changed default",
                   () -> assertThat("recruiting", gamePlayers.isRecruiting(),
                            is(false)),
-                  () -> assertThat("users", gamePlayers.getUsers(), empty()));
+                  () -> assertThat("users", gamePlayers.getUsers().entrySet(),
+                           empty()));
       }
    }// class
 
@@ -250,15 +253,16 @@ public class GamePlayersServiceImplTest {
 
          @Test
          public void a() {
-            test(true, Set.of());
+            test(true, Map.of());
          }
 
          @Test
          public void b() {
-            test(false, Set.of(USER_ID_A));
+            test(false, Map.of(CHARACTER_ID_A, USER_ID_A));
          }
 
-         private void test(final boolean recruiting, final Set<UUID> users) {
+         private void test(final boolean recruiting,
+                  final Map<UUID, UUID> users) {
             final var gameService = gameServiceA;
             final var gamePlayersRepository = gamePlayersRepositoryA;
             final var scenario = gameService.getScenarioService()
@@ -306,7 +310,7 @@ public class GamePlayersServiceImplTest {
                      .getScenarioIdentifiers().findAny().get();
             final var id = new Game.Identifier(scenario, Instant.EPOCH);
             final var gamePlayersInrepository = new GamePlayers(id, true,
-                     Set.of());
+                     Map.of());
             gamePlayersRepository.save(gamePlayersInrepository);
             final var service = new GamePlayersServiceImpl(
                      gamePlayersRepository, currentUserGameRepositoryA,
@@ -557,7 +561,7 @@ public class GamePlayersServiceImplTest {
          assertThat("The current game of the user is (still) the given game.",
                   currentGame, is(game));
          assertThat("The players of the game (still) includes the user.",
-                  gamePlayers.getUsers(), hasItem(user));
+                  gamePlayers.getUsers().values(), hasItem(user));
       }
 
       @Test
@@ -603,7 +607,7 @@ public class GamePlayersServiceImplTest {
          assertThat("The current game of the user becomes the given game.",
                   currentGame, is(game));
          assertThat("The players of the game includes the user.",
-                  gamePlayers.getUsers(), hasItem(user));
+                  gamePlayers.getUsers().values(), hasItem(user));
       }
 
    }// class
@@ -636,6 +640,10 @@ public class GamePlayersServiceImplTest {
 
    private static final Clock CLOCK_B = Clock.fixed(Instant.EPOCH, UTC);
 
+   private static final UUID CHARACTER_ID_A = UUID.randomUUID();
+
+   private static final UUID CHARACTER_ID_B = UUID.randomUUID();
+
    private static final UUID USER_ID_A = UUID.randomUUID();
 
    private static final UUID USER_ID_B = UUID.randomUUID();
@@ -661,7 +669,8 @@ public class GamePlayersServiceImplTest {
    private static void assertIsDefault(final GamePlayers gamePlayers) {
       assertAll("Default",
                () -> assertTrue(gamePlayers.isRecruiting(), "recruiting"),
-               () -> assertThat("users", gamePlayers.getUsers(), empty()));
+               () -> assertThat("users", gamePlayers.getUsers().entrySet(),
+                        empty()));
    }
 
    public static GamePlayers endRecruitment(

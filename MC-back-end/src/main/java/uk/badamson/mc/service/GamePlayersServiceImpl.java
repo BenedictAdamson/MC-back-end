@@ -19,10 +19,10 @@ package uk.badamson.mc.service;
  */
 
 import java.security.AccessControlException;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -49,7 +49,7 @@ import uk.badamson.mc.repository.GamePlayersRepository;
 @Service
 public class GamePlayersServiceImpl implements GamePlayersService {
 
-   private static final Set<UUID> NO_USERS = Set.of();
+   private static final Map<UUID, UUID> NO_USERS = Map.of();
 
    private static GamePlayers createDefault(final Game.Identifier id) {
       return new GamePlayers(id, true, NO_USERS);
@@ -275,7 +275,8 @@ public class GamePlayersServiceImpl implements GamePlayersService {
 
       // modify:
       final var association = new UserGameAssociation(userId, gameId);
-      gamePlayers.addUser(userId);
+      final UUID character = null;// FIXME
+      gamePlayers.addUser(character, userId);
 
       // write:
       currentUserGameRepository.save(association);

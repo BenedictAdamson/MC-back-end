@@ -42,10 +42,10 @@ import uk.badamson.mc.Scenario;
 public class ScenarioServiceImpl implements ScenarioService {
 
    // TODO have useful scenarios.
-   private static final UUID ID = UUID.randomUUID();
-   private static final Scenario SCENARIO = new Scenario(ID, "Section assault",
-            "Basic fire and movement tactics.",
-            List.of("Lt. Winters", "Sgt. Summer")) {
+   private static final Scenario SCENARIO = new Scenario(UUID.randomUUID(),
+            "Section assault", "Basic fire and movement tactics.",
+            List.of(new NamedUUID(UUID.randomUUID(), "Lt. Winters"),
+                     new NamedUUID(UUID.randomUUID(), "Sgt. Summer"))) {
    };
    private static final Map<UUID, Scenario> SCENARIOS = Map
             .of(SCENARIO.getIdentifier(), SCENARIO);
