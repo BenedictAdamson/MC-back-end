@@ -201,6 +201,9 @@ public interface GamePlayersService {
     * is the given game.</li>
     * <li>The {@linkplain #getGamePlayers(Identifier) players} of the game
     * includes the user.</li>
+    * <li>The character played by the player is one of the characters of the scenario of the game.</li>
+    * <li>The character played by the player is did not previously have a player.</li>
+    * <li>The character played by the player is the first character that did not previously have a player.</li>
     * </ul>
     *
     * @param user
@@ -228,8 +231,11 @@ public interface GamePlayersService {
     *            have} {@linkplain Authority#ROLE_PLAYER permission} to play
     *            games. Note that the given user need not be the current user.
     * @throws IllegalGameStateException
-    *            If the game is not {@linkplain GamePlayers#isRecruiting()
-    *            recruiting} players.
+    * <ul>
+    *            <li>If the game is not {@linkplain GamePlayers#isRecruiting()
+    *            recruiting} players.</li>
+    *            <li>If the game has no characters free.</li>
+    *            </ul>
     */
    void userJoinsGame(@Nonnull UUID user, @Nonnull Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,

@@ -264,6 +264,17 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return true;
    }
 
+   private UUID getFirstUnplayedCharacter(final GamePlayers gamePlayers)
+            throws NoSuchElementException {
+      final var scenarioId = gamePlayers.getGame().getScenario();
+      final var scenario = gameService.getScenarioService()
+               .getScenario(scenarioId).get();
+      final var characters = scenario.getCharacters();
+      final var playedCharacters = gamePlayers.getUsers().keySet();
+      return characters.stream().sequential().map(namedId -> namedId.getId())
+               .filter(c -> !playedCharacters.contains(c)).findFirst().get();
+   }
+
    @Override
    @Transactional
    public void userJoinsGame(@Nonnull final UUID userId,
@@ -272,10 +283,14 @@ public class GamePlayersServiceImpl implements GamePlayersService {
             IllegalGameStateException, AccessControlException {
       // read and check:
       final var gamePlayers = getUserJoinsGameState(userId, gameId);
+      if (gamePlayers.getUsers().containsValue(userId)) {
+         // Already playing the game: special case
+         return;
+      }
+      final UUID character = getFirstUnplayedCharacter(gamePlayers);
 
       // modify:
       final var association = new UserGameAssociation(userId, gameId);
-      final UUID character = null;// FIXME
       gamePlayers.addUser(character, userId);
 
       // write:
