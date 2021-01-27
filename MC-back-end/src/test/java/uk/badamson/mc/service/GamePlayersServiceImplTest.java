@@ -18,8 +18,12 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,7 +42,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import static java.util.stream.Collectors.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -473,6 +476,127 @@ public class GamePlayersServiceImplTest {
    @Nested
    public class UserJoinsGame {
 
+      @Nested
+      public class Valid {
+
+         @Test
+         public void last() {
+            final var gameService = gameServiceA;
+            final var userService = userServiceA;
+            final var scenarioService = gameService.getScenarioService();
+            final var scenarioId = scenarioService.getScenarioIdentifiers()
+                     .findAny().get();
+            final var scenario = scenarioService.getScenario(scenarioId).get();
+            final var nCharacters = scenario.getCharacters().size();
+            final var game = gameService.create(scenarioId).getIdentifier();
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepositoryA, currentUserGameRepositoryA,
+                     gameService, userService);
+            for (var c = 0; c < nCharacters - 1; ++c) {
+               final var userName = "User " + c;
+               final var user = userService.add(new BasicUserDetails(userName,
+                        PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
+                        true, true)).getId();
+               service.userJoinsGame(user, game);
+            }
+            final var user = userService.add(new BasicUserDetails(USERNAME_B,
+                     PASSWORD_B, Set.of(Authority.ROLE_PLAYER), true, true,
+                     true, true)).getId();
+
+            test(service, user, game);
+
+            final var gamePlayers = service.getGamePlayers(game).get();
+            assertThat("Game is not recruiting", gamePlayers.isRecruiting(),
+                     is(false));
+         }
+
+         @Test
+         public void one() {
+            final var gameService = gameServiceA;
+            final var userService = userServiceA;
+            final var scenarioId = gameService.getScenarioService()
+                     .getScenarioIdentifiers().findAny().get();
+            final var game = gameService.create(scenarioId).getIdentifier();
+            // Tough test: user has minimum permission
+            final var user = userService.add(new BasicUserDetails(USERNAME_A,
+                     PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
+                     true, true)).getId();
+
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepositoryA, currentUserGameRepositoryA,
+                     gameService, userService);
+
+            test(service, user, game);
+         }
+
+         private void test(final GamePlayersServiceImpl gamePlayersService,
+                  final UUID user, final Game.Identifier game) {
+            final var scenarioService = gamePlayersService.getGameService()
+                     .getScenarioService();
+            final var scenario = scenarioService.getScenario(game.getScenario())
+                     .get();
+            final var characterIds = scenario.getCharacters().stream()
+                     .sequential().map(namedId -> namedId.getId())
+                     .collect(toUnmodifiableList());
+            final var gamePlayers0 = gamePlayersService.getGamePlayers(game)
+                     .get();
+            final var playedCharacters0 = gamePlayers0.getUsers().keySet();
+            final var firstUnplayedCharacter0 = characterIds.stream()
+                     .sequential().filter(c -> !playedCharacters0.contains(c))
+                     .findFirst().get();
+
+            userJoinsGame(gamePlayersService, user, game);
+
+            final var currentGame = gamePlayersService
+                     .getCurrentGameOfUser(user).get();
+            final var gamePlayers = gamePlayersService.getGamePlayers(game)
+                     .get();
+            final var users = gamePlayers.getUsers();
+            assertThat("The current game of the user becomes the given game.",
+                     currentGame, is(game));
+            assertAll("The played characters of the game",
+                     () -> assertTrue(characterIds.containsAll(users.keySet()),
+                              "is a subset of the characters of the scenario."),
+                     () -> assertThat("has the user as a player",
+                              users.values(), hasItem(user)),
+                     () -> assertThat(
+                              "has the user as the player of the first unplayed character",
+                              users, hasEntry(firstUnplayedCharacter0, user)));
+            assertThat(
+                     "If the scenario can not allow any more players the game is no longer recruiting players.",
+                     gamePlayers.isRecruiting(),
+                     is(users.size() < characterIds.size()));
+         }
+
+         @Test
+         public void two() {
+            final var gameService = gameServiceA;
+            final var userService = userServiceA;
+            final var scenarioId = gameService.getScenarioService()
+                     .getScenarioIdentifiers().findAny().get();
+            final var game = gameService.create(scenarioId).getIdentifier();
+            final var userA = userService.add(new BasicUserDetails(USERNAME_A,
+                     PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
+                     true, true)).getId();
+            final var userB = userService.add(new BasicUserDetails(USERNAME_B,
+                     PASSWORD_B, Set.of(Authority.ROLE_PLAYER), true, true,
+                     true, true)).getId();
+
+            final var service = new GamePlayersServiceImpl(
+                     gamePlayersRepositoryA, currentUserGameRepositoryA,
+                     gameService, userService);
+            service.userJoinsGame(userA, game);
+
+            test(service, userB, game);
+
+            final var gamePlayers = service.getGamePlayers(game).get();
+            final var users = gamePlayers.getUsers();
+            assertThat("Previous player is (still) a player", users.values(),
+                     hasItem(userA));
+         }
+
+      }// class
+
       @Test
       public void gameNotRecuiting() {
          final var gameService = gameServiceA;
@@ -583,89 +707,6 @@ public class GamePlayersServiceImplTest {
          assertThrows(AccessControlException.class,
                   () -> userJoinsGame(service, user, game));
       }
-
-      @Nested
-      public class Valid {
-
-         @Test
-         public void one() {
-            final var gameService = gameServiceA;
-            final var userService = userServiceA;
-            final var scenarioId = gameService.getScenarioService()
-                     .getScenarioIdentifiers().findAny().get();
-            final var game = gameService.create(scenarioId).getIdentifier();
-            // Tough test: user has minimum permission
-            final var user = userService.add(new BasicUserDetails(USERNAME_A,
-                     PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
-                     true, true)).getId();
-
-            final var service = new GamePlayersServiceImpl(
-                     gamePlayersRepositoryA, currentUserGameRepositoryA,
-                     gameService, userService);
-
-            test(service, user, game);
-         }
-
-         @Test
-         public void two() {
-            final var gameService = gameServiceA;
-            final var userService = userServiceA;
-            final var scenarioId = gameService.getScenarioService()
-                     .getScenarioIdentifiers().findAny().get();
-            final var game = gameService.create(scenarioId).getIdentifier();
-            final var userA = userService.add(new BasicUserDetails(USERNAME_A,
-                     PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
-                     true, true)).getId();
-            final var userB = userService.add(new BasicUserDetails(USERNAME_B,
-                     PASSWORD_B, Set.of(Authority.ROLE_PLAYER), true, true,
-                     true, true)).getId();
-
-            final var service = new GamePlayersServiceImpl(
-                     gamePlayersRepositoryA, currentUserGameRepositoryA,
-                     gameService, userService);
-            service.userJoinsGame(userA, game);
-
-            test(service, userB, game);
-
-            final var gamePlayers = service.getGamePlayers(game).get();
-            final var users = gamePlayers.getUsers();
-            assertThat("Previous player is (still) a player", users.values(),
-                     hasItem(userA));
-         }
-
-         private void test(final GamePlayersServiceImpl service,
-                  final UUID user, final Game.Identifier game) {
-            final var scenarioService = service.getGameService()
-                     .getScenarioService();
-            final var scenario = scenarioService.getScenario(game.getScenario())
-                     .get();
-            final var characterIds = scenario.getCharacters().stream()
-                     .sequential().map(namedId -> namedId.getId())
-                     .collect(toUnmodifiableList());
-            final var gamePlayers0 = service.getGamePlayers(game).get();
-            final var playedCharacters0 = gamePlayers0.getUsers().keySet();
-            final var firstUnplayedCharacter0 = characterIds.stream()
-                     .sequential().filter(c -> !playedCharacters0.contains(c))
-                     .findFirst().get();
-
-            userJoinsGame(service, user, game);
-
-            final var currentGame = service.getCurrentGameOfUser(user).get();
-            final var gamePlayers = service.getGamePlayers(game).get();
-            assertThat("The current game of the user becomes the given game.",
-                     currentGame, is(game));
-            final var users = gamePlayers.getUsers();
-            assertAll("The played characters of the game",
-                     () -> assertTrue(characterIds.containsAll(users.keySet()),
-                              "is a subset of the characters of the scenario."),
-                     () -> assertThat("has the user as a player",
-                              users.values(), hasItem(user)),
-                     () -> assertThat(
-                              "has the user as the player of the first unplayed character",
-                              users, hasEntry(firstUnplayedCharacter0, user)));
-         }
-
-      }// class
 
    }// class
 
