@@ -277,12 +277,20 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       assertThat("Has a collection of users for the game",
-               gamePlayers.getUsers(), anything());
+               gamePlayers.getUsers().values(), anything());
    }
 
    @Then("The game page indicates whether the user may join the game")
    public void game_page_indicates_whether_user_may_join_game() {
       assertThat(mayJoinGame.booleanValue(), anything());
+   }
+
+   @Then("The game page indicates which character \\(if any) the user is playing")
+   public void game_page_indicates_which_character_user_is_playing() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      assertThat("Has a collection of players of characters for the game",
+               gamePlayers.getUsers(), anything());
    }
 
    private void getGames() throws Exception {
@@ -488,11 +496,6 @@ public class GameSteps {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
       updateGameCreationTimes();
-   }
-
-   @Then("The game page indicates which character \\(if any) the user is playing")
-   public void the_game_page_indicates_which_character_if_any_the_user_is_playing() {
-      throw new io.cucumber.java.PendingException();
    }
 
    private void updateGameCreationTimes() {
