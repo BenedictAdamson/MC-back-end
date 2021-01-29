@@ -305,6 +305,14 @@ public class GameSteps {
                gamePlayers.getUsers(), anything());
    }
 
+   @Then("The game page indicates which characters are played by which users")
+   public void game_page_indicates_which_characters_are_played_by_which_users() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      assertThat("Has a collection of players of characters for the game",
+               gamePlayers.getUsers(), anything());
+   }
+
    private void getGames() throws Exception {
       Objects.requireNonNull(scenario, "scenario");
       final var path = GameController
@@ -552,4 +560,5 @@ public class GameSteps {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
+
 }
