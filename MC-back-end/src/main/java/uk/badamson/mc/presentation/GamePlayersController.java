@@ -99,7 +99,7 @@ public class GamePlayersController {
     * </p>
     * <p>
     * The created value is consistent with the path used for
-    * {@link #getGamePlayers(UUID, Instant)}.
+    * {@link #getGamePlayers(User, UUID, Instant)}.
     * </p>
     *
     *
@@ -258,6 +258,8 @@ public class GamePlayersController {
     * creation time</li>
     * </ul>
     *
+    * @param user
+    *           The authenticated identity of the current user
     * @param scenario
     *           The unique ID of the scenario of the game.
     * @param created
@@ -265,6 +267,7 @@ public class GamePlayersController {
     * @return The response.
     * @throws NullPointerException
     *            <ul>
+    *            <li>If {@code user} is null.</li>
     *            <li>If {@code scenario} is null.</li>
     *            <li>If {@code created} is null.</li>
     *            </ul>
@@ -279,8 +282,10 @@ public class GamePlayersController {
    @RolesAllowed({ "PLAYER", "MANAGE_GAMES" })
    @Nonnull
    public GamePlayers getGamePlayers(
+            @Nonnull @AuthenticationPrincipal final User user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
       final var id = new Game.Identifier(scenario, created);
       try {
          return gamePlayersService.getGamePlayersAsGameManager(id).get();// FIXME
@@ -324,6 +329,8 @@ public class GamePlayersController {
     * </li>
     * </ul>
     *
+    * @param user
+    *           The authenticated identity of the current user
     * @param scenario
     *           The unique ID of the scenario of the game.
     * @param created
@@ -331,6 +338,7 @@ public class GamePlayersController {
     * @return The response.
     * @throws NullPointerException
     *            <ul>
+    *            <li>If {@code user} is null.</li>
     *            <li>If {@code scenario} is null.</li>
     *            <li>If {@code created} is null.</li>
     *            </ul>
