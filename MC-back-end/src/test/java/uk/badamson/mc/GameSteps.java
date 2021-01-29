@@ -183,6 +183,18 @@ public class GameSteps {
       }
    }
 
+   @Then("The game page does not indicate which characters are played by which \\(other) users")
+   public void game_page_does_not_indicate_which_characters_are_played_by_which_other_users() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var users = gamePlayers.getUsers().values();
+      final var otherUsers = users.stream()
+               .filter(u -> !u.equals(world.loggedInUser.getId()))
+               .collect(toUnmodifiableSet());
+      assertThat("No other users listed as users", otherUsers, empty());
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // Do nothing
