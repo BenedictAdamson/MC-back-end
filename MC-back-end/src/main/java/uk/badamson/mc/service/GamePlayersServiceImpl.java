@@ -18,6 +18,8 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableMap;
+
 import java.security.AccessControlException;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -216,6 +218,49 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    public Optional<GamePlayers> getGamePlayersAsGameManager(
             @Nonnull final Game.Identifier id) {
       return get(id);
+   }
+
+   /**
+    * {@inheritDoc}
+    * <p>
+    * Furthermore:
+    * </p>
+    * <ul>
+    * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
+    * associated {@linkplain #getGamePlayersRepository() repository} has a
+    * stored value with the given ID, that returned value is the value retrieved
+    * from the repository.</li>
+    * </ul>
+    *
+    * @param id
+    *           {@inheritDoc}
+    * @param user
+    *           {@inheritDoc}
+    * @return {@inheritDoc}
+    * @throws NullPointerException
+    *            {@inheritDoc}
+    */
+   @Override
+   @Nonnull
+   public Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
+      Objects.requireNonNull(user, "user");
+
+      final var fullInformation = get(id);
+      if (fullInformation.isEmpty()) {
+         return fullInformation;
+      } else {
+         final var allUsers = fullInformation.get().getUsers();
+         final Map<UUID, UUID> filteredUsers = allUsers.entrySet().stream()
+                  .filter(entry -> user.equals(entry.getValue()))
+                  .collect(toUnmodifiableMap(entry -> entry.getKey(),
+                           entry -> entry.getValue()));
+         if (allUsers.size() == filteredUsers.size()) {
+            return fullInformation;
+         } else {
+            return Optional.of(new GamePlayers(id, false, filteredUsers));// FIXME
+         }
+      }
    }
 
    /**

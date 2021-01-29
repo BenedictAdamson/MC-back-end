@@ -18,6 +18,10 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import uk.badamson.mc.Game;
@@ -89,6 +94,28 @@ public class GamePlayersServiceTest {
                         + "the associated game service indicates that a game with the given ID exists.");
       if (present) {
          assertEquals(id, result.get().getGame(), "game");
+      }
+      return result;
+   }
+
+   public static Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            final GamePlayersService service, final Game.Identifier id,
+            final UUID user) {
+      final var result = service.getGamePlayersAsNonGameManager(id, user);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      final var present = result.isPresent();
+      assertEquals(service.getGameService().getGame(id).isPresent(), present,
+               "Returns a present value if, and only if, "
+                        + "the associated game service indicates that a game with the given ID exists.");
+      if (present) {
+         final var gamePlayers = result.get();
+         assertEquals(id, gamePlayers.getGame(), "game");
+         assertThat(
+                  "The collection of players is either empty or contains the requesting user.",
+                  Set.copyOf(gamePlayers.getUsers().values()),
+                  either(empty()).or(is(Set.of(user))));
       }
       return result;
    }

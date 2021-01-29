@@ -132,6 +132,36 @@ public interface GamePlayersService {
 
    /**
     * <p>
+    * Retrieve information about the game players for the game that has a given
+    * unique ID, suitable for a non game manager.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which the {@linkplain GamePlayers#getGame() game} ID
+    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
+    * <li>Returns a {@linkplain Optional#isPresent() present} value if, and only
+    * if, the associated {@linkplain #getGameService() game service} indicates
+    * that a {@linkplain GameService#getGame(Identifier) game} with the given ID
+    * exists.</li>
+    * <li>The collection of {@linkplain GamePlayers#getUsers() players} is
+    * either empty or contains the requesting user.</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the game.
+    * @param user
+    *           The (unique ID) of the user requesting the information
+    * @return The game players.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            @Nonnull Game.Identifier id, @Nonnull UUID user);
+
+   /**
+    * <p>
     * The part of the service layer that this service uses for information about
     * games.
     * </p>
