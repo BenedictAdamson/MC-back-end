@@ -22,6 +22,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -271,6 +272,10 @@ public class GamePlayersController {
     *            <li>If {@code scenario} is null.</li>
     *            <li>If {@code created} is null.</li>
     *            </ul>
+    * @throws IllegalArgumentException
+    *            If the {@code user} does not have the
+    *            {@link Authority#ROLE_MANAGE_GAMES} or
+    *            {@link Authority#ROLE_PLAYER} roles.
     * @throws ResponseStatusException
     *            With a {@linkplain ResponseStatusException#getStatus() status}
     *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
@@ -287,8 +292,19 @@ public class GamePlayersController {
             @Nonnull @PathVariable("created") final Instant created) {
       Objects.requireNonNull(user, "user");
       final var id = new Game.Identifier(scenario, created);
+
+      final Optional<GamePlayers> gamePlayers;
+      if (user.getAuthorities().contains(Authority.ROLE_MANAGE_GAMES)) {
+         gamePlayers = gamePlayersService.getGamePlayersAsGameManager(id);
+      } else if (user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
+         gamePlayers = gamePlayersService.getGamePlayersAsNonGameManager(id,
+                  user.getId());
+      } else {
+         throw new IllegalArgumentException("Request not permitted for role");
+      }
+
       try {
-         return gamePlayersService.getGamePlayersAsGameManager(id).get();// FIXME
+         return gamePlayers.get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);

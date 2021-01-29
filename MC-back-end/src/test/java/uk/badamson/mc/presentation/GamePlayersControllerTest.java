@@ -164,19 +164,26 @@ public class GamePlayersControllerTest {
 
          @Test
          public void asGamesManager() throws Exception {
-            test(Authority.ROLE_MANAGE_GAMES);
+            test(Authority.ROLE_MANAGE_GAMES, true);
          }
 
          @Test
          public void asPlayer() throws Exception {
-            test(Authority.ROLE_PLAYER);
+            test(Authority.ROLE_PLAYER, false);
          }
 
-         private void test(final Authority authority) throws Exception {
-            final var id = createGame();
+         private void test(final Authority authority,
+                  final boolean expectListsOtherPlayer) throws Exception {
             // Tough test: user has a minimum set of authorities
-            final var authorities = EnumSet.of(authority);
-            final var user = createUser(authorities);
+            final var user = createUser(EnumSet.of(authority));
+            final var player = userService.add(new BasicUserDetails(USER_NAME_B,
+                     "letmein", EnumSet.of(Authority.ROLE_PLAYER), true, true,
+                     true, true));
+            final var id = createGame();
+            gamePlayersService.userJoinsGame(player.getId(), id);
+            final var expectedPlayers = expectListsOtherPlayer
+                     ? Set.of(player.getId())
+                     : Set.of();
 
             final var response = GetGamePlayers.this.test(id, user);
 
@@ -185,8 +192,11 @@ public class GamePlayersControllerTest {
                      .getContentAsString();
             final var gamePlayers = objectMapper.readValue(jsonResponse,
                      GamePlayers.class);
-            assertEquals(id, gamePlayers.getGame(),
-                     "game-players has the requested ID");
+            assertAll("game-players",
+                     () -> assertThat("gameID", gamePlayers.getGame(), is(id)),
+                     () -> assertThat("players",
+                              Set.copyOf(gamePlayers.getUsers().values()),
+                              is(expectedPlayers)));
          }
 
       }// class
@@ -464,6 +474,10 @@ public class GamePlayersControllerTest {
 
    }// class
 
+   private static final String USER_NAME_A = "Allan";
+
+   private static final String USER_NAME_B = "Rob";
+
    @Autowired
    GameRepository gameRepository;
 
@@ -493,7 +507,7 @@ public class GamePlayersControllerTest {
    }
 
    private User createUser(final Set<Authority> authorities) {
-      return userService.add(new BasicUserDetails("Allan", "letmein",
+      return userService.add(new BasicUserDetails(USER_NAME_A, "letmein",
                authorities, true, true, true, true));
    }
 }
