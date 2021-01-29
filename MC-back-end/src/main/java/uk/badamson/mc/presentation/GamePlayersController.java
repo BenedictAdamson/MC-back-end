@@ -283,7 +283,7 @@ public class GamePlayersController {
             @Nonnull @PathVariable("created") final Instant created) {
       final var id = new Game.Identifier(scenario, created);
       try {
-         return gamePlayersService.getGamePlayers(id).get();
+         return gamePlayersService.getGamePlayersAsGameManager(id).get();// FIXME
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
@@ -430,7 +430,7 @@ public class GamePlayersController {
       Objects.requireNonNull(user, "user");
       final var game = new Game.Identifier(scenario, created);
       try {
-         gamePlayersService.getGamePlayers(game).get();
+         gamePlayersService.getGamePlayersAsGameManager(game).get();
          return gamePlayersService.mayUserJoinGame(user.getId(), game);
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,

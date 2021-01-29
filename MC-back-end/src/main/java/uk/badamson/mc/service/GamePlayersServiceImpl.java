@@ -213,7 +213,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     */
    @Override
    @Nonnull
-   public Optional<GamePlayers> getGamePlayers(
+   public Optional<GamePlayers> getGamePlayersAsGameManager(
             @Nonnull final Game.Identifier id) {
       return get(id);
    }

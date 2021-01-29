@@ -264,7 +264,8 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, false);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -283,7 +284,8 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -301,7 +303,8 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isConflict());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -335,7 +338,8 @@ public class GamePlayersControllerTest {
 
          final var response = performRequest(gameB, user, true);
 
-         final var gamePlayers = gamePlayersService.getGamePlayers(gameB).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(gameB).get();
          assertAll(() -> response.andExpect(status().isConflict()),
                   () -> assertThat("User not added to players of game",
                            gamePlayers.getUsers().values(),
@@ -355,7 +359,8 @@ public class GamePlayersControllerTest {
 
          final var location = response.andReturn().getResponse()
                   .getHeaderValue("Location");
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
          final var currentGame = gamePlayersService
                   .getCurrentGameOfUser(user.getId());
          assertAll(() -> response.andExpect(status().isFound()),

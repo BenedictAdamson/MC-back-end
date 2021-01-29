@@ -61,10 +61,11 @@ public interface GamePlayersService {
     * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
     * <li>The returned value is not {@linkplain GamePlayers#isRecruiting()
     * recruiting}.</li>
-    * <li>On return, subsequent {@linkplain #getGamePlayers(Identifier)
-    * retrieval} of the game players using an identifier equivalent to the given
-    * ID returns a value that is also not recruiting. That is, the method also
-    * saves the mutated value.</li>
+    * <li>On return, subsequent
+    * {@linkplain #getGamePlayersAsGameManager(Identifier) retrieval} of the
+    * game players using an identifier equivalent to the given ID returns a
+    * value that is also not recruiting. That is, the method also saves the
+    * mutated value.</li>
     * </ul>
     *
     * @param id
@@ -105,7 +106,8 @@ public interface GamePlayersService {
 
    /**
     * <p>
-    * Retrieve the game players for the game that has a given unique ID.
+    * Retrieve complete information about the game players for the game that has
+    * a given unique ID.
     * </p>
     * <ul>
     * <li>Returns a (non null) optional value.</li>
@@ -125,7 +127,8 @@ public interface GamePlayersService {
     *            If {@code id} is null.
     */
    @Nonnull
-   Optional<GamePlayers> getGamePlayers(@Nonnull Game.Identifier id);
+   Optional<GamePlayers> getGamePlayersAsGameManager(
+            @Nonnull Game.Identifier id);
 
    /**
     * <p>
@@ -199,8 +202,8 @@ public interface GamePlayersService {
     * <ul>
     * <li>The {@linkplain #getCurrentGameOfUser(UUID) current game of the user}
     * is the given game.</li>
-    * <li>The {@linkplain #getGamePlayers(Identifier) players} of the game
-    * includes the user.</li>
+    * <li>The {@linkplain #getGamePlayersAsGameManager(Identifier) players} of
+    * the game includes the user.</li>
     * <li>The character played by the player is one of the characters of the
     * scenario of the game.</li>
     * <li>The character played by the player did not previously have a

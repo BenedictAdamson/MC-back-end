@@ -130,6 +130,20 @@ public class GameSteps {
 
    private Boolean mayJoinGame;
 
+   private void assertGamePagePlayersInvariants() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var currentUserId = world.loggedInUser.getId();
+      final var users = gamePlayers.getUsers();
+      final var playing = gamePlayersService.getCurrentGameOfUser(currentUserId)
+               .filter(currentGame -> currentGame.equals(gameId)).isPresent();
+      assertAll("Collection of players of characters",
+               () -> assertThat("has", users, anything()),
+               () -> assertThat("lists self if playing", users.values(),
+                        playing ? hasItem(currentUserId) : anything()));
+   }
+
    @Then("can get the list of games")
    public void can_get_list_of_games() {
       try {
@@ -301,31 +315,16 @@ public class GameSteps {
       assertThat(mayJoinGame.booleanValue(), anything());
    }
 
-   private void assertGamePagePlayersInvariants() {
-      Objects.requireNonNull(gamePlayers, "gamePlayers");
-      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-
-      final var currentUserId = world.loggedInUser.getId();
-      final var users = gamePlayers.getUsers();
-      final boolean playing = gamePlayersService
-               .getCurrentGameOfUser(currentUserId)
-               .filter(currentGame -> currentGame.equals(gameId)).isPresent();
-      assertAll("Collection of players of characters",
-               () -> assertThat("has", users, anything()),
-               () -> assertThat("lists self if playing", users.values(),
-                        playing ? hasItem(currentUserId) : anything()));
-   }
-
    @Then("The game page indicates which character \\(if any) the user is playing")
    public void game_page_indicates_which_character_user_is_playing() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       final var currentUserId = world.loggedInUser.getId();
-      final boolean gameManager = world.loggedInUser.getAuthorities()
+      final var gameManager = world.loggedInUser.getAuthorities()
                .contains(Authority.ROLE_MANAGE_GAMES);
-      final var expectedUsers = gamePlayersService.getGamePlayers(gameId).get()
-               .getUsers().values();
+      final var expectedUsers = gamePlayersService
+               .getGamePlayersAsGameManager(gameId).get().getUsers().values();
       final var allOtherUsers = expectedUsers.stream()
                .filter(user -> !user.equals(currentUserId))
                .collect(toUnmodifiableSet());
@@ -418,7 +417,8 @@ public class GameSteps {
 
       final var location = world.getResponse().andReturn().getResponse()
                .getHeader("Location");
-      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
+               .get();
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header")); // guard
       final var gameRedirectedTo = parseGamePlayersPath(location);
@@ -487,7 +487,8 @@ public class GameSteps {
       final var creationTime = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
 
-      if (gamePlayersService.getGamePlayers(gameId).get().isRecruiting()) {
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
          // Tough test: the current user is playing the game
          final var currentUser = world.loggedInUser;
          if (currentUser != null
@@ -499,7 +500,8 @@ public class GameSteps {
             gamePlayersService.userJoinsGame(currentUser.getId(), gameId);
          }
       }
-      if (gamePlayersService.getGamePlayers(gameId).get().isRecruiting()) {
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
          // Tough test: the game has other player
          final var otherUser = userService.add(new BasicUserDetails(
                   "Other Player", "password2",
@@ -512,7 +514,8 @@ public class GameSteps {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
-      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
+               .get();
       mayJoinGame = null;
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }

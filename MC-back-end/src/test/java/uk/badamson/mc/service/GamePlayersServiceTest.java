@@ -63,7 +63,7 @@ public class GamePlayersServiceTest {
       assertNotNull(result, "Returns a (non null) value.");// guard
       assertAll(() -> assertEquals(id, result.getGame(), "game"),
                () -> assertFalse(result.isRecruiting(), "recruiting"));
-      assertFalse(service.getGamePlayers(id).get().isRecruiting(),
+      assertFalse(service.getGamePlayersAsGameManager(id).get().isRecruiting(),
                "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
                         + "a value that is also not recruiting.");
       return result;
@@ -77,9 +77,9 @@ public class GamePlayersServiceTest {
       return result;
    }
 
-   public static Optional<GamePlayers> getGamePlayers(
+   public static Optional<GamePlayers> getGamePlayersAsGameManager(
             final GamePlayersService service, final Game.Identifier id) {
-      final var result = service.getGamePlayers(id);
+      final var result = service.getGamePlayersAsGameManager(id);
 
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard

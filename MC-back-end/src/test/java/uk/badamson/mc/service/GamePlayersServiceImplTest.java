@@ -248,7 +248,7 @@ public class GamePlayersServiceImplTest {
    }// class
 
    @Nested
-   public class GetGamePlayers {
+   public class GetGamePlayersAsGameManager {
 
       @Nested
       public class InRepository {
@@ -278,7 +278,7 @@ public class GamePlayersServiceImplTest {
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
-            final var result = getGamePlayers(service, id);
+            final var result = getGamePlayersAsGameManager(service, id);
 
             assertTrue(result.isPresent(), "present");// guard
             final var gamePlayers = result.get();
@@ -318,7 +318,7 @@ public class GamePlayersServiceImplTest {
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
-            final var result = getGamePlayers(service, id);
+            final var result = getGamePlayersAsGameManager(service, id);
 
             assertTrue(result.isEmpty(), "empty");
          }
@@ -328,7 +328,7 @@ public class GamePlayersServiceImplTest {
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameServiceA, userServiceA);
 
-            final var result = getGamePlayers(service, id);
+            final var result = getGamePlayersAsGameManager(service, id);
 
             assertTrue(result.isEmpty(), "empty");
          }
@@ -344,7 +344,7 @@ public class GamePlayersServiceImplTest {
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
-         final var result = getGamePlayers(service, game);
+         final var result = getGamePlayersAsGameManager(service, game);
 
          assertTrue(result.isPresent(), "present");// guard
          final var gamePlayers = result.get();
@@ -505,7 +505,8 @@ public class GamePlayersServiceImplTest {
 
             test(service, user, game);
 
-            final var gamePlayers = service.getGamePlayers(game).get();
+            final var gamePlayers = service.getGamePlayersAsGameManager(game)
+                     .get();
             assertThat("Game is not recruiting", gamePlayers.isRecruiting(),
                      is(false));
          }
@@ -538,8 +539,8 @@ public class GamePlayersServiceImplTest {
             final var characterIds = scenario.getCharacters().stream()
                      .sequential().map(namedId -> namedId.getId())
                      .collect(toUnmodifiableList());
-            final var gamePlayers0 = gamePlayersService.getGamePlayers(game)
-                     .get();
+            final var gamePlayers0 = gamePlayersService
+                     .getGamePlayersAsGameManager(game).get();
             final var playedCharacters0 = gamePlayers0.getUsers().keySet();
             final var firstUnplayedCharacter0 = characterIds.stream()
                      .sequential().filter(c -> !playedCharacters0.contains(c))
@@ -549,8 +550,8 @@ public class GamePlayersServiceImplTest {
 
             final var currentGame = gamePlayersService
                      .getCurrentGameOfUser(user).get();
-            final var gamePlayers = gamePlayersService.getGamePlayers(game)
-                     .get();
+            final var gamePlayers = gamePlayersService
+                     .getGamePlayersAsGameManager(game).get();
             final var users = gamePlayers.getUsers();
             assertThat("The current game of the user becomes the given game.",
                      currentGame, is(game));
@@ -589,7 +590,8 @@ public class GamePlayersServiceImplTest {
 
             test(service, userB, game);
 
-            final var gamePlayers = service.getGamePlayers(game).get();
+            final var gamePlayers = service.getGamePlayersAsGameManager(game)
+                     .get();
             final var users = gamePlayers.getUsers();
             assertThat("Previous player is (still) a player", users.values(),
                      hasItem(userA));
@@ -680,7 +682,8 @@ public class GamePlayersServiceImplTest {
          userJoinsGame(service, user, game);
 
          final var currentGame = service.getCurrentGameOfUser(user).get();
-         final var gamePlayers = service.getGamePlayers(game).get();
+         final var gamePlayers = service.getGamePlayersAsGameManager(game)
+                  .get();
          assertThat("The current game of the user is (still) the given game.",
                   currentGame, is(game));
          assertThat("The players of the game (still) includes the user.",
@@ -795,9 +798,10 @@ public class GamePlayersServiceImplTest {
       return result;
    }
 
-   public static Optional<GamePlayers> getGamePlayers(
+   public static Optional<GamePlayers> getGamePlayersAsGameManager(
             final GamePlayersServiceImpl service, final Game.Identifier id) {
-      final var result = GamePlayersServiceTest.getGamePlayers(service, id);// inherited
+      final var result = GamePlayersServiceTest
+               .getGamePlayersAsGameManager(service, id);// inherited
       assertInvariants(service);
       return result;
    }
