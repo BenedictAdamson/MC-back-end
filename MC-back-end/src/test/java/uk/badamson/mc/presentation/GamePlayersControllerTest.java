@@ -159,6 +159,38 @@ public class GamePlayersControllerTest {
    @Nested
    public class GetGamePlayers {
 
+      @Nested
+      public class Valid {
+
+         @Test
+         public void asGamesManager() throws Exception {
+            test(Authority.ROLE_MANAGE_GAMES);
+         }
+
+         @Test
+         public void asPlayer() throws Exception {
+            test(Authority.ROLE_PLAYER);
+         }
+
+         private void test(final Authority authority) throws Exception {
+            final var id = createGame();
+            // Tough test: user has a minimum set of authorities
+            final var authorities = EnumSet.of(authority);
+            final var user = createUser(authorities);
+
+            final var response = GetGamePlayers.this.test(id, user);
+
+            response.andExpect(status().isOk());
+            final var jsonResponse = response.andReturn().getResponse()
+                     .getContentAsString();
+            final var gamePlayers = objectMapper.readValue(jsonResponse,
+                     GamePlayers.class);
+            assertEquals(id, gamePlayers.getGame(),
+                     "game-players has the requested ID");
+         }
+
+      }// class
+
       @Test
       public void absent() throws Exception {
          final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
@@ -167,16 +199,6 @@ public class GamePlayersControllerTest {
          final var response = test(game, user);
 
          response.andExpect(status().isNotFound());
-      }
-
-      @Test
-      public void asGamesManager() throws Exception {
-         valid(Authority.ROLE_MANAGE_GAMES);
-      }
-
-      @Test
-      public void asPlayer() throws Exception {
-         valid(Authority.ROLE_PLAYER);
       }
 
       @Test
@@ -211,23 +233,6 @@ public class GamePlayersControllerTest {
          }
 
          return mockMvc.perform(request);
-      }
-
-      private void valid(final Authority authority) throws Exception {
-         final var id = createGame();
-         // Tough test: user has a minimum set of authorities
-         final var authorities = EnumSet.of(authority);
-         final var user = createUser(authorities);
-
-         final var response = test(id, user);
-
-         response.andExpect(status().isOk());
-         final var jsonResponse = response.andReturn().getResponse()
-                  .getContentAsString();
-         final var gamePlayers = objectMapper.readValue(jsonResponse,
-                  GamePlayers.class);
-         assertEquals(id, gamePlayers.getGame(),
-                  "game-players has the requested ID");
       }
 
    }// class
