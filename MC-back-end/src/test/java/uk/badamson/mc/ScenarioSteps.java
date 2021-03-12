@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -163,13 +163,13 @@ public class ScenarioSteps {
       try {
          requestGameOfScenario(game);
          world.getResponse().andExpect(status().isOk());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Allows GET of game resource", e);
       }
       try {
          requestGamePlayersOfScenario(game);
          world.getResponse().andExpect(status().isOk());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Allows GET of game-players resource", e);
       }
    }
@@ -183,13 +183,13 @@ public class ScenarioSteps {
       try {
          requestGameOfScenario(game);
          world.getResponse().andExpect(status().is4xxClientError());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Does not allow GET of game resource", e);
       }
       try {
          requestGamePlayersOfScenario(game);
          world.getResponse().andExpect(status().is4xxClientError());
-      } catch (AssertionError e) {
+      } catch (final AssertionError e) {
          throw new AssertionError("Does not allow GET of game resource", e);
       }
    }
@@ -198,6 +198,17 @@ public class ScenarioSteps {
    public void scenario_page_includes_games() {
       Objects.requireNonNull(id, "id");
       assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
+   }
+
+   @Then("The scenario page includes the list of playable characters of that scenario")
+   public void scenario_page_includes_list_of_playable_characters_of_that_scenario() {
+      Objects.requireNonNull(scenarioService, "service");
+      Objects.requireNonNull(id, "id");
+      Objects.requireNonNull(responseScenario, "responseScenario");
+
+      final var expectedScenario = scenarioService.getScenario(id).get();
+      assertThat("characters", responseScenario.getCharacters(),
+               is(expectedScenario.getCharacters()));
    }
 
    @Then("The scenario page includes the scenario description")

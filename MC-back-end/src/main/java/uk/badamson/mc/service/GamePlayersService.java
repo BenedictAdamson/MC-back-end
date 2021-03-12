@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -61,10 +61,11 @@ public interface GamePlayersService {
     * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
     * <li>The returned value is not {@linkplain GamePlayers#isRecruiting()
     * recruiting}.</li>
-    * <li>On return, subsequent {@linkplain #getGamePlayers(Identifier)
-    * retrieval} of the game players using an identifier equivalent to the given
-    * ID returns a value that is also not recruiting. That is, the method also
-    * saves the mutated value.</li>
+    * <li>On return, subsequent
+    * {@linkplain #getGamePlayersAsGameManager(Identifier) retrieval} of the
+    * game players using an identifier equivalent to the given ID returns a
+    * value that is also not recruiting. That is, the method also saves the
+    * mutated value.</li>
     * </ul>
     *
     * @param id
@@ -105,7 +106,8 @@ public interface GamePlayersService {
 
    /**
     * <p>
-    * Retrieve the game players for the game that has a given unique ID.
+    * Retrieve complete information about the game players for the game that has
+    * a given unique ID.
     * </p>
     * <ul>
     * <li>Returns a (non null) optional value.</li>
@@ -125,7 +127,38 @@ public interface GamePlayersService {
     *            If {@code id} is null.
     */
    @Nonnull
-   Optional<GamePlayers> getGamePlayers(@Nonnull Game.Identifier id);
+   Optional<GamePlayers> getGamePlayersAsGameManager(
+            @Nonnull Game.Identifier id);
+
+   /**
+    * <p>
+    * Retrieve information about the game players for the game that has a given
+    * unique ID, suitable for a non game manager.
+    * </p>
+    * <ul>
+    * <li>Returns a (non null) optional value.</li>
+    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
+    * value for which the {@linkplain GamePlayers#getGame() game} ID
+    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
+    * <li>Returns a {@linkplain Optional#isPresent() present} value if, and only
+    * if, the associated {@linkplain #getGameService() game service} indicates
+    * that a {@linkplain GameService#getGame(Identifier) game} with the given ID
+    * exists.</li>
+    * <li>The collection of {@linkplain GamePlayers#getUsers() players} is
+    * either empty or contains the requesting user.</li>
+    * </ul>
+    *
+    * @param id
+    *           The unique ID of the game.
+    * @param user
+    *           The (unique ID) of the user requesting the information
+    * @return The game players.
+    * @throws NullPointerException
+    *            If {@code id} is null.
+    */
+   @Nonnull
+   Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            @Nonnull Game.Identifier id, @Nonnull UUID user);
 
    /**
     * <p>
@@ -172,8 +205,8 @@ public interface GamePlayersService {
     * <li>The {@code user} {@linkplain User#getAuthorities() has}
     * {@linkplain Authority#ROLE_PLAYER permission} to play games. Note that the
     * given user need not be the current user.</li>
-    * <li>The game is {@linkplain GamePlayers#isRecruiting() recruiting}
-    * players.</li>
+    * <li>The user has already joined the game <em>or</em> the game is
+    * {@linkplain GamePlayers#isRecruiting() recruiting} players.</li>
     * </ul>
     *
     * @param user
@@ -199,8 +232,17 @@ public interface GamePlayersService {
     * <ul>
     * <li>The {@linkplain #getCurrentGameOfUser(UUID) current game of the user}
     * is the given game.</li>
-    * <li>The {@linkplain #getGamePlayers(Identifier) players} of the game
-    * includes the user.</li>
+    * <li>The {@linkplain #getGamePlayersAsGameManager(Identifier) players} of
+    * the game includes the user.</li>
+    * <li>The character played by the player is one of the characters of the
+    * scenario of the game.</li>
+    * <li>The character played by the player did not previously have a
+    * player.</li>
+    * <li>The character played by the player is the first character that did not
+    * previously have a player.</li>
+    * <li>If the scenario can not allow any more players (all the characters
+    * have players), the game is no longer
+    * {@linkplain GamePlayers#isRecruiting() recruiting} players.</li>.
     * </ul>
     *
     * @param user
@@ -228,8 +270,11 @@ public interface GamePlayersService {
     *            have} {@linkplain Authority#ROLE_PLAYER permission} to play
     *            games. Note that the given user need not be the current user.
     * @throws IllegalGameStateException
-    *            If the game is not {@linkplain GamePlayers#isRecruiting()
-    *            recruiting} players.
+    *            <ul>
+    *            <li>If the game is not {@linkplain GamePlayers#isRecruiting()
+    *            recruiting} players.</li>
+    *            <li>If the game has no characters free.</li>
+    *            </ul>
     */
    void userJoinsGame(@Nonnull UUID user, @Nonnull Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,

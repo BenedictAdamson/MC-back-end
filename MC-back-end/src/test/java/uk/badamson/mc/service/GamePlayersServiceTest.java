@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -18,6 +18,10 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import uk.badamson.mc.Game;
@@ -63,7 +68,7 @@ public class GamePlayersServiceTest {
       assertNotNull(result, "Returns a (non null) value.");// guard
       assertAll(() -> assertEquals(id, result.getGame(), "game"),
                () -> assertFalse(result.isRecruiting(), "recruiting"));
-      assertFalse(service.getGamePlayers(id).get().isRecruiting(),
+      assertFalse(service.getGamePlayersAsGameManager(id).get().isRecruiting(),
                "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
                         + "a value that is also not recruiting.");
       return result;
@@ -77,9 +82,9 @@ public class GamePlayersServiceTest {
       return result;
    }
 
-   public static Optional<GamePlayers> getGamePlayers(
+   public static Optional<GamePlayers> getGamePlayersAsGameManager(
             final GamePlayersService service, final Game.Identifier id) {
-      final var result = service.getGamePlayers(id);
+      final var result = service.getGamePlayersAsGameManager(id);
 
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard
@@ -89,6 +94,28 @@ public class GamePlayersServiceTest {
                         + "the associated game service indicates that a game with the given ID exists.");
       if (present) {
          assertEquals(id, result.get().getGame(), "game");
+      }
+      return result;
+   }
+
+   public static Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            final GamePlayersService service, final Game.Identifier id,
+            final UUID user) {
+      final var result = service.getGamePlayersAsNonGameManager(id, user);
+
+      assertInvariants(service);
+      assertNotNull(result, "Returns a (non null) optional value.");// guard
+      final var present = result.isPresent();
+      assertEquals(service.getGameService().getGame(id).isPresent(), present,
+               "Returns a present value if, and only if, "
+                        + "the associated game service indicates that a game with the given ID exists.");
+      if (present) {
+         final var gamePlayers = result.get();
+         assertEquals(id, gamePlayers.getGame(), "game");
+         assertThat(
+                  "The collection of players is either empty or contains the requesting user.",
+                  Set.copyOf(gamePlayers.getUsers().values()),
+                  either(empty()).or(is(Set.of(user))));
       }
       return result;
    }

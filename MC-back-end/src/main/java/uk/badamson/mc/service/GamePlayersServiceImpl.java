@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-1.
  *
  * This file is part of MC.
  *
@@ -18,14 +18,17 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableMap;
+
 import java.security.AccessControlException;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,7 +52,25 @@ import uk.badamson.mc.repository.GamePlayersRepository;
 @Service
 public class GamePlayersServiceImpl implements GamePlayersService {
 
-   private static final Set<UUID> NO_USERS = Set.of();
+   @Immutable
+   private static final class UserJoinsGameState {
+      final GamePlayers gamePlayers;
+      final UUID character;
+      final boolean alreadyJoined;
+      final boolean endRecruitment;
+
+      UserJoinsGameState(final GamePlayers gamePlayers,
+               final UUID firstUnplayedCharacter, final boolean alreadyJoined,
+               final boolean endRecruitment) {
+         this.gamePlayers = gamePlayers;
+         this.character = firstUnplayedCharacter;
+         this.alreadyJoined = alreadyJoined;
+         this.endRecruitment = endRecruitment;
+      }
+
+   }// class
+
+   private static final Map<UUID, UUID> NO_USERS = Map.of();
 
    private static GamePlayers createDefault(final Game.Identifier id) {
       return new GamePlayers(id, true, NO_USERS);
@@ -194,9 +215,52 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     */
    @Override
    @Nonnull
-   public Optional<GamePlayers> getGamePlayers(
+   public Optional<GamePlayers> getGamePlayersAsGameManager(
             @Nonnull final Game.Identifier id) {
       return get(id);
+   }
+
+   /**
+    * {@inheritDoc}
+    * <p>
+    * Furthermore:
+    * </p>
+    * <ul>
+    * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
+    * associated {@linkplain #getGamePlayersRepository() repository} has a
+    * stored value with the given ID, that returned value is the value retrieved
+    * from the repository.</li>
+    * </ul>
+    *
+    * @param id
+    *           {@inheritDoc}
+    * @param user
+    *           {@inheritDoc}
+    * @return {@inheritDoc}
+    * @throws NullPointerException
+    *            {@inheritDoc}
+    */
+   @Override
+   @Nonnull
+   public Optional<GamePlayers> getGamePlayersAsNonGameManager(
+            @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
+      Objects.requireNonNull(user, "user");
+
+      final var fullInformation = get(id);
+      if (fullInformation.isEmpty()) {
+         return fullInformation;
+      } else {
+         final var allUsers = fullInformation.get().getUsers();
+         final Map<UUID, UUID> filteredUsers = allUsers.entrySet().stream()
+                  .filter(entry -> user.equals(entry.getValue()))
+                  .collect(toUnmodifiableMap(entry -> entry.getKey(),
+                           entry -> entry.getValue()));
+         if (allUsers.size() == filteredUsers.size()) {
+            return fullInformation;
+         } else {
+            return Optional.of(new GamePlayers(id, false, filteredUsers));// FIXME
+         }
+      }
    }
 
    /**
@@ -225,7 +289,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return getUserService().getUser(userId);
    }
 
-   private GamePlayers getUserJoinsGameState(final UUID userId,
+   private UserJoinsGameState getUserJoinsGameState(final UUID userId,
             final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
@@ -236,14 +300,37 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       if (!user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
          throw new AccessControlException("User does not have the player role");
       }
-      if (!gamePlayers.isRecruiting()) {
-         throw new IllegalGameStateException("Game is not recruiting");
-      }
+
+      final boolean alreadyJoined;
+      final UUID character;
+      final boolean endRecruitment;
       if (current.isPresent() && !gameId.equals(current.get())) {
          throw new UserAlreadyPlayingException();
+      } else if (current.isPresent()) {// && gameId.equals(current.get())
+         alreadyJoined = true;
+         character = gamePlayers.getUsers().entrySet().stream()
+                  .filter(entry -> userId.equals(entry.getValue())).findAny()
+                  .get().getKey();
+         endRecruitment = false;
+      } else {
+         if (!gamePlayers.isRecruiting()) {
+            throw new IllegalGameStateException("Game is not recruiting");
+         }
+         alreadyJoined = false;
+         final var scenarioId = gamePlayers.getGame().getScenario();
+         final var scenario = gameService.getScenarioService()
+                  .getScenario(scenarioId).get();
+         final var characters = scenario.getCharacters();
+         final var playedCharacters = gamePlayers.getUsers().keySet();
+         final var firstUnplayedCharacter = characters.stream().sequential()
+                  .map(namedId -> namedId.getId())
+                  .filter(c -> !playedCharacters.contains(c)).findFirst().get();
+         character = firstUnplayedCharacter;
+         endRecruitment = characters.size() - 1 <= playedCharacters.size();
       }
 
-      return gamePlayers;
+      return new UserJoinsGameState(gamePlayers, character, alreadyJoined,
+               endRecruitment);
    }
 
    @Override
@@ -271,15 +358,22 @@ public class GamePlayersServiceImpl implements GamePlayersService {
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
       // read and check:
-      final var gamePlayers = getUserJoinsGameState(userId, gameId);
+      final var state = getUserJoinsGameState(userId, gameId);
+      if (state.alreadyJoined) {
+         // optimisation
+         return;
+      }
 
       // modify:
       final var association = new UserGameAssociation(userId, gameId);
-      gamePlayers.addUser(userId);
+      state.gamePlayers.addUser(state.character, userId);
+      if (state.endRecruitment) {
+         state.gamePlayers.endRecruitment();
+      }
 
       // write:
       currentUserGameRepository.save(association);
-      gamePlayersRepository.save(gamePlayers);
+      gamePlayersRepository.save(state.gamePlayers);
    }
 
 }

@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -61,6 +61,7 @@ import uk.badamson.mc.presentation.GamePlayersController;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -112,6 +113,9 @@ public class GameSteps {
    private GamePlayersService gamePlayersService;
 
    @Autowired
+   private UserService userService;
+
+   @Autowired
    private ObjectMapper objectMapper;
 
    private Scenario scenario;
@@ -125,6 +129,20 @@ public class GameSteps {
    private GamePlayers gamePlayers;
 
    private Boolean mayJoinGame;
+
+   private void assertGamePagePlayersInvariants() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var currentUserId = world.loggedInUser.getId();
+      final var users = gamePlayers.getUsers();
+      final var playing = gamePlayersService.getCurrentGameOfUser(currentUserId)
+               .filter(currentGame -> currentGame.equals(gameId)).isPresent();
+      assertAll("Collection of players of characters",
+               () -> assertThat("has", users, anything()),
+               () -> assertThat("lists self if playing", users.values(),
+                        playing ? hasItem(currentUserId) : anything()));
+   }
 
    @Then("can get the list of games")
    public void can_get_list_of_games() {
@@ -183,6 +201,18 @@ public class GameSteps {
       }
    }
 
+   @Then("The game page does not indicate which characters are played by which \\(other) users")
+   public void game_page_does_not_indicate_which_characters_are_played_by_which_other_users() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var users = gamePlayers.getUsers().values();
+      final var otherUsers = users.stream()
+               .filter(u -> !u.equals(world.loggedInUser.getId()))
+               .collect(toUnmodifiableSet());
+      assertThat("No other users listed as users", otherUsers, empty());
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // Do nothing
@@ -202,7 +232,7 @@ public class GameSteps {
    @Then("The game page indicates that the game has no players")
    public void game_page_indicates_game_has_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
-      assertThat(gamePlayers.getUsers(), empty());
+      assertThat(gamePlayers.getUsers().values(), empty());
    }
 
    @Then("the game page indicates that the game is recruiting players")
@@ -219,7 +249,7 @@ public class GameSteps {
 
    @Then("The game page indicates that the game has a player")
    public void game_page_indicates_that_game_has_player() {
-      assertThat("Game players list not empty", gamePlayers.getUsers(),
+      assertThat("Game players list not empty", gamePlayers.getUsers().values(),
                not(empty()));
    }
 
@@ -235,8 +265,8 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       final var userId = world.loggedInUser.getId();
-      assertThat("User is not listed as a player", gamePlayers.getUsers(),
-               not(hasItem(userId)));
+      assertThat("User is not listed as a player",
+               gamePlayers.getUsers().values(), not(hasItem(userId)));
    }
 
    @Then("The game page indicates that the user is playing the game")
@@ -245,7 +275,7 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       final var userId = world.loggedInUser.getId();
-      assertThat("User is listed as a player", gamePlayers.getUsers(),
+      assertThat("User is listed as a player", gamePlayers.getUsers().values(),
                hasItem(userId));
    }
 
@@ -277,12 +307,40 @@ public class GameSteps {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
       assertThat("Has a collection of users for the game",
-               gamePlayers.getUsers(), anything());
+               gamePlayers.getUsers().values(), anything());
    }
 
    @Then("The game page indicates whether the user may join the game")
    public void game_page_indicates_whether_user_may_join_game() {
       assertThat(mayJoinGame.booleanValue(), anything());
+   }
+
+   @Then("The game page indicates which character \\(if any) the user is playing")
+   public void game_page_indicates_which_character_user_is_playing() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var currentUserId = world.loggedInUser.getId();
+      final var gameManager = world.loggedInUser.getAuthorities()
+               .contains(Authority.ROLE_MANAGE_GAMES);
+      final var expectedUsers = gamePlayersService
+               .getGamePlayersAsGameManager(gameId).get().getUsers().values();
+      final var allOtherUsers = expectedUsers.stream()
+               .filter(user -> !user.equals(currentUserId))
+               .collect(toUnmodifiableSet());
+      final var otherUsers = gamePlayers.getUsers().values().stream()
+               .filter(user -> !user.equals(currentUserId))
+               .collect(toUnmodifiableSet());
+      assertAll(() -> assertGamePagePlayersInvariants(), () -> assertThat(
+               "Collection of players of characters lists other users only if game manager",
+               otherUsers, gameManager ? is(allOtherUsers) : empty()));
+   }
+
+   @Then("The game page indicates which characters are played by which users")
+   public void game_page_indicates_which_characters_are_played_by_which_users() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+
+      assertGamePagePlayersInvariants();
    }
 
    private void getGames() throws Exception {
@@ -359,7 +417,8 @@ public class GameSteps {
 
       final var location = world.getResponse().andReturn().getResponse()
                .getHeader("Location");
-      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
+               .get();
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header")); // guard
       final var gameRedirectedTo = parseGamePlayersPath(location);
@@ -424,15 +483,39 @@ public class GameSteps {
    public void navigate_to_one_game_page() {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+
       final var creationTime = gameCreationTimes.stream().findAny().get();
       gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
+
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
+         // Tough test: the current user is playing the game
+         final var currentUser = world.loggedInUser;
+         if (currentUser != null
+                  && currentUser.getAuthorities()
+                           .contains(Authority.ROLE_PLAYER)
+                  && gamePlayersService
+                           .getCurrentGameOfUser(currentUser.getId())
+                           .isEmpty()) {
+            gamePlayersService.userJoinsGame(currentUser.getId(), gameId);
+         }
+      }
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
+         // Tough test: the game has other player
+         final var otherUser = userService.add(new BasicUserDetails(
+                  "Other Player", "password2",
+                  EnumSet.of(Authority.ROLE_PLAYER), true, true, true, true));
+         gamePlayersService.userJoinsGame(otherUser.getId(), gameId);
+      }
    }
 
    private void prepareNewGame() {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
-      gamePlayers = gamePlayersService.getGamePlayers(gameId).get();
+      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
+               .get();
       mayJoinGame = null;
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
@@ -532,4 +615,5 @@ public class GameSteps {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
+
 }

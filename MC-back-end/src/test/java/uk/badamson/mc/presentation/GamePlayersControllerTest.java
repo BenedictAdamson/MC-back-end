@@ -159,6 +159,48 @@ public class GamePlayersControllerTest {
    @Nested
    public class GetGamePlayers {
 
+      @Nested
+      public class Valid {
+
+         @Test
+         public void asGamesManager() throws Exception {
+            test(Authority.ROLE_MANAGE_GAMES, true);
+         }
+
+         @Test
+         public void asPlayer() throws Exception {
+            test(Authority.ROLE_PLAYER, false);
+         }
+
+         private void test(final Authority authority,
+                  final boolean expectListsOtherPlayer) throws Exception {
+            // Tough test: user has a minimum set of authorities
+            final var user = createUser(EnumSet.of(authority));
+            final var player = userService.add(new BasicUserDetails(USER_NAME_B,
+                     "letmein", EnumSet.of(Authority.ROLE_PLAYER), true, true,
+                     true, true));
+            final var id = createGame();
+            gamePlayersService.userJoinsGame(player.getId(), id);
+            final var expectedPlayers = expectListsOtherPlayer
+                     ? Set.of(player.getId())
+                     : Set.of();
+
+            final var response = GetGamePlayers.this.test(id, user);
+
+            response.andExpect(status().isOk());
+            final var jsonResponse = response.andReturn().getResponse()
+                     .getContentAsString();
+            final var gamePlayers = objectMapper.readValue(jsonResponse,
+                     GamePlayers.class);
+            assertAll("game-players",
+                     () -> assertThat("gameID", gamePlayers.getGame(), is(id)),
+                     () -> assertThat("players",
+                              Set.copyOf(gamePlayers.getUsers().values()),
+                              is(expectedPlayers)));
+         }
+
+      }// class
+
       @Test
       public void absent() throws Exception {
          final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
@@ -167,16 +209,6 @@ public class GamePlayersControllerTest {
          final var response = test(game, user);
 
          response.andExpect(status().isNotFound());
-      }
-
-      @Test
-      public void asGamesManager() throws Exception {
-         valid(Authority.ROLE_MANAGE_GAMES);
-      }
-
-      @Test
-      public void asPlayer() throws Exception {
-         valid(Authority.ROLE_PLAYER);
       }
 
       @Test
@@ -213,23 +245,6 @@ public class GamePlayersControllerTest {
          return mockMvc.perform(request);
       }
 
-      private void valid(final Authority authority) throws Exception {
-         final var id = createGame();
-         // Tough test: user has a minimum set of authorities
-         final var authorities = EnumSet.of(authority);
-         final var user = createUser(authorities);
-
-         final var response = test(id, user);
-
-         response.andExpect(status().isOk());
-         final var jsonResponse = response.andReturn().getResponse()
-                  .getContentAsString();
-         final var gamePlayers = objectMapper.readValue(jsonResponse,
-                  GamePlayers.class);
-         assertEquals(id, gamePlayers.getGame(),
-                  "game-players has the requested ID");
-      }
-
    }// class
 
    @Nested
@@ -264,9 +279,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, false);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       @Test
@@ -283,9 +299,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       @Test
@@ -301,9 +318,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isConflict());
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
-         assertThat("User not added to players of game", gamePlayers.getUsers(),
-                  not(hasItem(user.getId())));
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
+         assertThat("User not added to players of game",
+                  gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
 
       private ResultActions performRequest(final Game.Identifier game,
@@ -335,10 +353,12 @@ public class GamePlayersControllerTest {
 
          final var response = performRequest(gameB, user, true);
 
-         final var gamePlayers = gamePlayersService.getGamePlayers(gameB).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(gameB).get();
          assertAll(() -> response.andExpect(status().isConflict()),
                   () -> assertThat("User not added to players of game",
-                           gamePlayers.getUsers(), not(hasItem(user.getId()))));
+                           gamePlayers.getUsers().values(),
+                           not(hasItem(user.getId()))));
       }
 
       @Test
@@ -354,14 +374,16 @@ public class GamePlayersControllerTest {
 
          final var location = response.andReturn().getResponse()
                   .getHeaderValue("Location");
-         final var gamePlayers = gamePlayersService.getGamePlayers(game).get();
+         final var gamePlayers = gamePlayersService
+                  .getGamePlayersAsGameManager(game).get();
          final var currentGame = gamePlayersService
                   .getCurrentGameOfUser(user.getId());
          assertAll(() -> response.andExpect(status().isFound()),
                   () -> assertEquals(expectedRedirectionLocation, location,
                            "redirection location"),
                   () -> assertThat("User added to players of game",
-                           gamePlayers.getUsers(), hasItem(user.getId())),
+                           gamePlayers.getUsers().values(),
+                           hasItem(user.getId())),
                   () -> assertThat("User has a current game",
                            currentGame.isPresent(), is(true)));
       }
@@ -452,6 +474,10 @@ public class GamePlayersControllerTest {
 
    }// class
 
+   private static final String USER_NAME_A = "Allan";
+
+   private static final String USER_NAME_B = "Rob";
+
    @Autowired
    GameRepository gameRepository;
 
@@ -481,7 +507,7 @@ public class GamePlayersControllerTest {
    }
 
    private User createUser(final Set<Authority> authorities) {
-      return userService.add(new BasicUserDetails("Allan", "letmein",
+      return userService.add(new BasicUserDetails(USER_NAME_A, "letmein",
                authorities, true, true, true, true));
    }
 }

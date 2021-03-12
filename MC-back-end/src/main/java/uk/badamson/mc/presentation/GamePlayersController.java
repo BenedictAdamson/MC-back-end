@@ -22,6 +22,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -99,7 +100,7 @@ public class GamePlayersController {
     * </p>
     * <p>
     * The created value is consistent with the path used for
-    * {@link #getGamePlayers(UUID, Instant)}.
+    * {@link #getGamePlayers(User, UUID, Instant)}.
     * </p>
     *
     *
@@ -258,6 +259,8 @@ public class GamePlayersController {
     * creation time</li>
     * </ul>
     *
+    * @param user
+    *           The authenticated identity of the current user
     * @param scenario
     *           The unique ID of the scenario of the game.
     * @param created
@@ -265,9 +268,14 @@ public class GamePlayersController {
     * @return The response.
     * @throws NullPointerException
     *            <ul>
+    *            <li>If {@code user} is null.</li>
     *            <li>If {@code scenario} is null.</li>
     *            <li>If {@code created} is null.</li>
     *            </ul>
+    * @throws IllegalArgumentException
+    *            If the {@code user} does not have the
+    *            {@link Authority#ROLE_MANAGE_GAMES} or
+    *            {@link Authority#ROLE_PLAYER} roles.
     * @throws ResponseStatusException
     *            With a {@linkplain ResponseStatusException#getStatus() status}
     *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
@@ -279,11 +287,24 @@ public class GamePlayersController {
    @RolesAllowed({ "PLAYER", "MANAGE_GAMES" })
    @Nonnull
    public GamePlayers getGamePlayers(
+            @Nonnull @AuthenticationPrincipal final User user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
       final var id = new Game.Identifier(scenario, created);
+
+      final Optional<GamePlayers> gamePlayers;
+      if (user.getAuthorities().contains(Authority.ROLE_MANAGE_GAMES)) {
+         gamePlayers = gamePlayersService.getGamePlayersAsGameManager(id);
+      } else if (user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
+         gamePlayers = gamePlayersService.getGamePlayersAsNonGameManager(id,
+                  user.getId());
+      } else {
+         throw new IllegalArgumentException("Request not permitted for role");
+      }
+
       try {
-         return gamePlayersService.getGamePlayers(id).get();
+         return gamePlayers.get();
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
@@ -324,6 +345,8 @@ public class GamePlayersController {
     * </li>
     * </ul>
     *
+    * @param user
+    *           The authenticated identity of the current user
     * @param scenario
     *           The unique ID of the scenario of the game.
     * @param created
@@ -331,6 +354,7 @@ public class GamePlayersController {
     * @return The response.
     * @throws NullPointerException
     *            <ul>
+    *            <li>If {@code user} is null.</li>
     *            <li>If {@code scenario} is null.</li>
     *            <li>If {@code created} is null.</li>
     *            </ul>
@@ -430,7 +454,7 @@ public class GamePlayersController {
       Objects.requireNonNull(user, "user");
       final var game = new Game.Identifier(scenario, created);
       try {
-         gamePlayersService.getGamePlayers(game).get();
+         gamePlayersService.getGamePlayersAsGameManager(game).get();
          return gamePlayersService.mayUserJoinGame(user.getId(), game);
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
