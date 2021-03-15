@@ -378,6 +378,17 @@ public class GameSteps {
                EnumSet.of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
    }
 
+   private void joinGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GamePlayersController.createPathForJoining(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
    @Then("the list of games includes the new game")
    public void list_of_games_includes_new_game() {
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
@@ -438,6 +449,17 @@ public class GameSteps {
       chooseScenario();
       requestEndRecruitmentForGame();
       world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("MC provides a current-game page")
+   public void mc_provides_current_game_page() {
+      try {
+         requestGetCurrentGame();
+         // FIXME currentGame = expectEncodedResponse(world.getResponse(),
+         // CurrentGame.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can GET CurrentGame resource", e);
+      }
    }
 
    @Then("MC provides a game page")
@@ -533,6 +555,15 @@ public class GameSteps {
       world.performRequest(request);
    }
 
+   private void requestGetCurrentGame() throws Exception {
+      /*
+       * FIXME final var path = CurrentGame.PATH; var request =
+       * get(path).accept(MediaType.APPLICATION_JSON); if (world.loggedInUser !=
+       * null) { request = request.with(user(world.loggedInUser)); }
+       * world.performRequest(request);
+       */
+   }
+
    private void requestGetGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
 
@@ -595,14 +626,13 @@ public class GameSteps {
 
    @When("the user joins the game")
    public void user_joins_game() throws Exception {
-      Objects.requireNonNull(gameId, "gameId");
+      joinGame();
+   }
 
-      final var path = GamePlayersController.createPathForJoining(gameId);
-      var request = post(path).with(csrf());
-      if (world.loggedInUser != null) {
-         request = request.with(user(world.loggedInUser));
-      }
-      world.performRequest(request);
+   @Given("user is playing a game")
+   public void user_playing_game() throws Exception {
+      prepareNewGame();
+      joinGame();
    }
 
    @Given("viewing a game that is recruiting players")
@@ -615,5 +645,4 @@ public class GameSteps {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
-
 }
