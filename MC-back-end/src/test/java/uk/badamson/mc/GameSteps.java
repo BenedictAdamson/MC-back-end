@@ -343,6 +343,43 @@ public class GameSteps {
       assertGamePagePlayersInvariants();
    }
 
+   private void getGamePage() throws AssertionFailedError {
+      Objects.requireNonNull(gameId, "gameId");
+      try {
+         requestGetGame();
+         game = expectEncodedResponse(world.getResponse(), Game.class);
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can GET Game resource", e);
+      }
+
+      try {
+         requestGetGamePlayers();
+         if (isPlayerOrGameManager()) {
+            gamePlayers = expectEncodedResponse(world.getResponse(),
+                     GamePlayers.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            gamePlayers = null;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET GamePlayers resource", e);
+      }
+      try {
+         requestGetMayUserJoinGame();
+         if (isPlayer()) {
+            mayJoinGame = expectEncodedResponse(world.getResponse(),
+                     Boolean.class);
+         } else {
+            world.getResponse().andExpect(status().is4xxClientError());
+            mayJoinGame = Boolean.FALSE;
+         }
+      } catch (final Exception e) {
+         throw new AssertionFailedError(
+                  "Correct behaviour for GET MayJoinGame resource", e);
+      }
+   }
+
    private void getGames() throws Exception {
       Objects.requireNonNull(scenario, "scenario");
       final var path = GameController
@@ -453,9 +490,19 @@ public class GameSteps {
 
    @Then("MC provides a current-game page")
    public void mc_provides_current_game_page() {
+      getGamePage();
+   }
+
+   @Then("MC provides a game page")
+   public void mc_provides_game_page() {
+      getGamePage();
+   }
+
+   @When("navigate to the current-game page")
+   public void navigate_current_game() {
       try {
          requestGetCurrentGame();
-         var response = world.getResponse();
+         final var response = world.getResponse();
          try {
             final var location = response.andReturn().getResponse()
                      .getHeader("Location");
@@ -464,49 +511,12 @@ public class GameSteps {
                      () -> assertNotNull(location, "has Location header"));// guard
             gameId = parseGamePath(location);
          } catch (final Exception e) {
-            throw new AssertionFailedError("Expected OK response encoding a ");
+            throw new AssertionFailedError("Expected redirect to a game page");
          }
+         getGamePage();
       } catch (final Exception e) {
-         throw new AssertionFailedError("Can GET current-game resource", e);
-      }
-   }
-
-   @Then("MC provides a game page")
-   public void mc_provides_game_page() {
-      Objects.requireNonNull(gameId, "gameId");
-
-      try {
-         requestGetGame();
-         game = expectEncodedResponse(world.getResponse(), Game.class);
-      } catch (final Exception e) {
-         throw new AssertionFailedError("Can GET Game resource", e);
-      }
-
-      try {
-         requestGetGamePlayers();
-         if (isPlayerOrGameManager()) {
-            gamePlayers = expectEncodedResponse(world.getResponse(),
-                     GamePlayers.class);
-         } else {
-            world.getResponse().andExpect(status().is4xxClientError());
-            gamePlayers = null;
-         }
-      } catch (final Exception e) {
-         throw new AssertionFailedError(
-                  "Correct behaviour for GET GamePlayers resource", e);
-      }
-      try {
-         requestGetMayUserJoinGame();
-         if (isPlayer()) {
-            mayJoinGame = expectEncodedResponse(world.getResponse(),
-                     Boolean.class);
-         } else {
-            world.getResponse().andExpect(status().is4xxClientError());
-            mayJoinGame = Boolean.FALSE;
-         }
-      } catch (final Exception e) {
-         throw new AssertionFailedError(
-                  "Correct behaviour for GET MayJoinGame resource", e);
+         throw new AssertionFailedError("Can navigate to current-game resource",
+                  e);
       }
    }
 
