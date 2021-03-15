@@ -497,11 +497,6 @@ public class GameSteps {
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
-   @Then("MC provides a current-game page")
-   public void mc_provides_current_game_page() {
-      getGamePage();
-   }
-
    @Then("MC provides a game page")
    public void mc_provides_game_page() {
       getGamePage();
