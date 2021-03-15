@@ -34,8 +34,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +43,6 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.User;
 import uk.badamson.mc.service.GameService;
 
 /**
@@ -55,8 +52,6 @@ import uk.badamson.mc.service.GameService;
  */
 @RestController
 public class GameController {
-
-   public static final String CURRENT_GAME_PATH = "/api/self/current-game";
 
    /**
     * <p>
@@ -243,14 +238,6 @@ public class GameController {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
       }
-   }
-
-   // TODO Add JavaDoc
-   @GetMapping(CURRENT_GAME_PATH)
-   @PreAuthorize("isAuthenticated()")
-   public void getCurrentGame(@Nonnull @AuthenticationPrincipal final User user)
-            throws ResponseStatusException {
-      // FIXME
    }
 
    /**

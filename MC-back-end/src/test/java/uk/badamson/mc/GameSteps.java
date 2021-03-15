@@ -584,7 +584,7 @@ public class GameSteps {
    }
 
    private void requestGetCurrentGame() throws Exception {
-      final var path = GameController.CURRENT_GAME_PATH;
+      final var path = GamePlayersController.CURRENT_GAME_PATH;
       var request = get(path).accept(MediaType.APPLICATION_JSON);
       if (world.loggedInUser != null) {
          request = request.with(user(world.loggedInUser));

@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +56,8 @@ import uk.badamson.mc.service.UserAlreadyPlayingException;
  */
 @RestController
 public class GamePlayersController {
+
+   public static final String CURRENT_GAME_PATH = "/api/self/current-game";
 
    /**
     * <p>
@@ -241,6 +244,21 @@ public class GamePlayersController {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
       }
+   }
+
+   // TODO Add JavaDoc
+   @GetMapping(CURRENT_GAME_PATH)
+   @PreAuthorize("isAuthenticated()")
+   @Nonnull
+   public ResponseEntity<Void> getCurrentGame(
+            @Nonnull @AuthenticationPrincipal final User user) {
+      Objects.requireNonNull(user, "user");
+      // FIXME handle the case of no current game
+      final var gameId = gamePlayersService.getCurrentGameOfUser(user.getId())
+               .get();
+      final var headers = new HttpHeaders();
+      headers.setLocation(URI.create(GameController.createPathFor(gameId)));
+      return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
    }
 
    /**
@@ -461,5 +479,4 @@ public class GamePlayersController {
                   "unrecognized IDs", e);
       }
    }
-
 }
