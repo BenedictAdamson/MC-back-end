@@ -124,6 +124,8 @@ public class GameSteps {
 
    private Game.Identifier gameId;
 
+   private Game.Identifier joinedGameId;
+
    private Game game;
 
    private GamePlayers gamePlayers;
@@ -180,6 +182,12 @@ public class GameSteps {
    public void creating_game() throws Exception {
       chooseScenario();
       createGame();
+   }
+
+   @Then("The current-game page indicates that the current-game is the game joined")
+   public void current_game_page_indicates_current_game_is_game_joined() {
+      assertThat("game ID is the ID of the joined game", gameId,
+               is(joinedGameId));
    }
 
    @When("examining a game recruiting players")
@@ -424,6 +432,7 @@ public class GameSteps {
          request = request.with(user(world.loggedInUser));
       }
       world.performRequest(request);
+      joinedGameId = gameId;
    }
 
    @Then("the list of games includes the new game")
