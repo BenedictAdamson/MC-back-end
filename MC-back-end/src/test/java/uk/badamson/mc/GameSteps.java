@@ -455,10 +455,19 @@ public class GameSteps {
    public void mc_provides_current_game_page() {
       try {
          requestGetCurrentGame();
-         // FIXME currentGame = expectEncodedResponse(world.getResponse(),
-         // CurrentGame.class);
+         var response = world.getResponse();
+         try {
+            final var location = response.andReturn().getResponse()
+                     .getHeader("Location");
+            assertAll(
+                     () -> world.expectResponse(status().isTemporaryRedirect()),
+                     () -> assertNotNull(location, "has Location header"));// guard
+            gameId = parseGamePath(location);
+         } catch (final Exception e) {
+            throw new AssertionFailedError("Expected OK response encoding a ");
+         }
       } catch (final Exception e) {
-         throw new AssertionFailedError("Can GET CurrentGame resource", e);
+         throw new AssertionFailedError("Can GET current-game resource", e);
       }
    }
 
@@ -556,12 +565,12 @@ public class GameSteps {
    }
 
    private void requestGetCurrentGame() throws Exception {
-      /*
-       * FIXME final var path = CurrentGame.PATH; var request =
-       * get(path).accept(MediaType.APPLICATION_JSON); if (world.loggedInUser !=
-       * null) { request = request.with(user(world.loggedInUser)); }
-       * world.performRequest(request);
-       */
+      final var path = GameController.CURRENT_GAME_PATH;
+      var request = get(path).accept(MediaType.APPLICATION_JSON);
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    private void requestGetGame() throws Exception {

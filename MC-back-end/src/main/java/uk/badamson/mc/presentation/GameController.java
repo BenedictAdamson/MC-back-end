@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -52,6 +52,8 @@ import uk.badamson.mc.service.GameService;
  */
 @RestController
 public class GameController {
+
+   public static final String CURRENT_GAME_PATH = "/api/self/current-game";
 
    /**
     * <p>
