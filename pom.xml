@@ -32,11 +32,11 @@
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<MC.cucumber.version>6.9.1</MC.cucumber.version>
-		<MC.node.version>v14.13.1</MC.node.version>
-		<MC.npm.version>6.14.8</MC.npm.version>
+		<MC.cucumber.version>6.10.2</MC.cucumber.version>
+		<MC.node.version>v14.16.0</MC.node.version>
+		<MC.npm.version>6.14.11</MC.npm.version>
 		<MC.spotbugs.version>4.2.0</MC.spotbugs.version>
-		<MC.spring-boot.version>2.4.2</MC.spring-boot.version>
+		<MC.spring-boot.version>2.4.3</MC.spring-boot.version>
 		<helm.init.add-default-repo>false</helm.init.add-default-repo>
 	</properties>
 	<build>
@@ -51,7 +51,7 @@
 				<plugin>
 					<groupId>com.github.eirslett</groupId>
 					<artifactId>frontend-maven-plugin</artifactId>
-					<version>1.11.0</version>
+					<version>1.11.2</version>
 					<configuration>
 						<nodeVersion>${MC.node.version}</nodeVersion>
 						<npmVersion>${MC.npm.version}</npmVersion>
@@ -260,7 +260,7 @@
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
-				<version>5.7.0</version>
+				<version>5.7.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -281,7 +281,7 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-bom</artifactId>
-				<version>1.15.1</version>
+				<version>1.15.2</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
