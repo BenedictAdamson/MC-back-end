@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -30,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -149,6 +150,57 @@ public class GamePlayersControllerTest {
          }
          if (hasCsrfToken) {
             request = request.with(csrf());
+         }
+
+         return mockMvc.perform(request);
+      }
+
+   }// class
+
+   @Nested
+   public class GetCurrentGame {
+
+      @Test
+      public void hasCurrentGame() throws Exception {
+         final var game = createGame();
+         // Tough test: user has a minimum set of authorities
+         final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
+         gamePlayersService.userJoinsGame(user.getId(), game);
+
+         final var response = test(user);
+
+         response.andExpect(status().isTemporaryRedirect()).andExpect(header()
+                  .string("Location", GameController.createPathFor(game)));
+      }
+
+      @Test
+      public void noAuthentication() throws Exception {
+         // Tough test: a game exists
+         createGame();
+
+         final var response = test(null);
+
+         /*
+          * Must return Not Found rather than Unauthorized, because otherwise
+          * web browsers will pop up an authentication dialogue
+          */
+         response.andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void noGames() throws Exception {
+         // Tough test: user has all authorities
+         final var user = createUser(Authority.ALL);
+         final var response = test(user);
+
+         response.andExpect(status().isNotFound());
+      }
+
+      private ResultActions test(final User user) throws Exception {
+         var request = get(GamePlayersController.CURRENT_GAME_PATH)
+                  .with(csrf());
+         if (user != null) {
+            request = request.with(user(user));
          }
 
          return mockMvc.perform(request);

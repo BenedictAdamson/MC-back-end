@@ -56,6 +56,8 @@ import uk.badamson.mc.service.UserAlreadyPlayingException;
 @RestController
 public class GamePlayersController {
 
+   public static final String CURRENT_GAME_PATH = "/api/self/current-game";
+
    /**
     * <p>
     * The format of URI paths for
@@ -241,6 +243,31 @@ public class GamePlayersController {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized IDs", e);
       }
+   }
+
+   @GetMapping(CURRENT_GAME_PATH)
+   @Nonnull
+   public ResponseEntity<Void> getCurrentGame(
+            @AuthenticationPrincipal final User user) {
+      if (user == null) {
+         /*
+          * Must return Not Found rather than Unauthorized, because otherwise
+          * web browsers will pop up an authentication dialogue
+          */
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "Not Found Because Unauthorized");
+
+      }
+      final Identifier gameId;
+      try {
+         gameId = gamePlayersService.getCurrentGameOfUser(user.getId()).get();
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "No current game", e);
+      }
+      final var headers = new HttpHeaders();
+      headers.setLocation(URI.create(GameController.createPathFor(gameId)));
+      return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
    }
 
    /**
@@ -461,5 +488,4 @@ public class GamePlayersController {
                   "unrecognized IDs", e);
       }
    }
-
 }
