@@ -425,12 +425,11 @@ public class GameSteps {
 
    private void joinGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       final var path = GamePlayersController.createPathForJoining(gameId);
       var request = post(path).with(csrf());
-      if (world.loggedInUser != null) {
-         request = request.with(user(world.loggedInUser));
-      }
+      request = request.with(user(world.loggedInUser));
       world.performRequest(request);
       joinedGameId = gameId;
    }
