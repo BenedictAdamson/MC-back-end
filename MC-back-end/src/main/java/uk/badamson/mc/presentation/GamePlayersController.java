@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -246,16 +245,26 @@ public class GamePlayersController {
       }
    }
 
-   // TODO Add JavaDoc
    @GetMapping(CURRENT_GAME_PATH)
-   @PreAuthorize("isAuthenticated()")
    @Nonnull
    public ResponseEntity<Void> getCurrentGame(
-            @Nonnull @AuthenticationPrincipal final User user) {
-      Objects.requireNonNull(user, "user");
-      // FIXME handle the case of no current game
-      final var gameId = gamePlayersService.getCurrentGameOfUser(user.getId())
-               .get();
+            @AuthenticationPrincipal final User user) {
+      if (user == null) {
+         /*
+          * Must return Not Found rather than Unauthorized, because otherwise
+          * web browsers will pop up an authentication dialogue
+          */
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "Not Found Because Unauthorized");
+
+      }
+      final Identifier gameId;
+      try {
+         gameId = gamePlayersService.getCurrentGameOfUser(user.getId()).get();
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "No current game", e);
+      }
       final var headers = new HttpHeaders();
       headers.setLocation(URI.create(GameController.createPathFor(gameId)));
       return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
