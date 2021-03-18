@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -200,7 +200,7 @@ public class UserSteps {
       world.responseIsOk();
    }
 
-   @When("Navigate to one user page")
+   @When("navigate to one user page")
    public void navigate_to_one_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
 
@@ -240,7 +240,7 @@ public class UserSteps {
       }
    }
 
-   @When("Trying to navigate to a user page")
+   @When("trying to navigate to a user page")
    public void trying_to_navigate_to_user_page() {
       // Do nothing
       Objects.requireNonNull(userList, "userList");
@@ -277,7 +277,7 @@ public class UserSteps {
       // Do nothing: implied because create each user afresh.
    }
 
-   @Then("The user page includes the user name")
+   @Then("the user page includes the user name")
    public void user_page_includes_user_name() {
       Objects.requireNonNull(expectedUser, "expectedUser");
       Objects.requireNonNull(user, "user");
@@ -285,7 +285,7 @@ public class UserSteps {
       assertEquals(expectedUser.getUsername(), user.getUsername());
    }
 
-   @Then("The user page lists the roles of the user")
+   @Then("the user page lists the roles of the user")
    public void user_page_lists_roles_of_user() {
       Objects.requireNonNull(expectedUser, "expectedUser");
       Objects.requireNonNull(user, "user");
@@ -298,7 +298,7 @@ public class UserSteps {
                true, true, true, true));
    }
 
-   @Given("Viewing the list of users")
+   @Given("viewing the list of users")
    public void viewing_list_of_users() {
       userList = service.getUsers().collect(toList());
    }

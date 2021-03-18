@@ -184,7 +184,7 @@ public class GameSteps {
       createGame();
    }
 
-   @Then("The current-game page indicates that the current-game is the game joined")
+   @Then("the current-game page indicates that the current-game is the game joined")
    public void current_game_page_indicates_current_game_is_game_joined() {
       assertThat("game ID is the ID of the joined game", gameId,
                is(joinedGameId));
@@ -209,7 +209,7 @@ public class GameSteps {
       }
    }
 
-   @Then("The game page does not indicate which characters are played by which \\(other) users")
+   @Then("the game page does not indicate which characters are played by which \\(other) users")
    public void game_page_does_not_indicate_which_characters_are_played_by_which_other_users() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
@@ -221,23 +221,23 @@ public class GameSteps {
       assertThat("No other users listed as users", otherUsers, empty());
    }
 
-   @Then("The game page includes the scenario description")
+   @Then("the game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // Do nothing
    }
 
-   @Then("The game page includes the scenario title")
+   @Then("the game page includes the scenario title")
    public void game_page_includes_scenario_title() {
       assertEquals(scenario.getIdentifier(), game.getIdentifier().getScenario(),
                "scenario ID");
    }
 
-   @Then("The game page includes the date and time that the game was set up")
+   @Then("the game page includes the date and time that the game was set up")
    public void game_page_includes_timestamp() {
       assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
    }
 
-   @Then("The game page indicates that the game has no players")
+   @Then("the game page indicates that the game has no players")
    public void game_page_indicates_game_has_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().values(), empty());
@@ -249,13 +249,13 @@ public class GameSteps {
       assertTrue(gamePlayers.isRecruiting());
    }
 
-   @Then("The game page indicates the number of players of the game")
+   @Then("the game page indicates the number of players of the game")
    public void game_page_indicates_number_of_players_of_game() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("The game page indicates that the game has a player")
+   @Then("the game page indicates that the game has a player")
    public void game_page_indicates_that_game_has_player() {
       assertThat("Game players list not empty", gamePlayers.getUsers().values(),
                not(empty()));
@@ -267,7 +267,7 @@ public class GameSteps {
       assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
    }
 
-   @Then("The game page indicates that the user is not playing the game")
+   @Then("the game page indicates that the user is not playing the game")
    public void game_page_indicates_user_is_not_playing_game() {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       Objects.requireNonNull(gamePlayers, "gamePlayers");
@@ -277,7 +277,7 @@ public class GameSteps {
                gamePlayers.getUsers().values(), not(hasItem(userId)));
    }
 
-   @Then("The game page indicates that the user is playing the game")
+   @Then("the game page indicates that the user is playing the game")
    public void game_page_indicates_user_is_playing_game() {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       Objects.requireNonNull(gamePlayers, "gamePlayers");
@@ -292,24 +292,24 @@ public class GameSteps {
       assertTrue(mayJoinGame, "may join game");
    }
 
-   @Then("The game page indicates that the user may not join the game")
+   @Then("the game page indicates that the user may not join the game")
    public void game_page_indicates_user_may_not_join_game() {
       assertFalse(mayJoinGame, "may not join game");
    }
 
-   @Then("The game page indicates whether the game has players")
+   @Then("the game page indicates whether the game has players")
    public void game_page_indicates_whether_game_has_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("The game page indicates whether the game is recruiting players")
+   @Then("the game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
    }
 
-   @Then("The game page indicates whether the user is playing the game")
+   @Then("the game page indicates whether the user is playing the game")
    public void game_page_indicates_whether_user_is_playing_game() {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
       Objects.requireNonNull(gamePlayers, "gamePlayers");
@@ -318,12 +318,12 @@ public class GameSteps {
                gamePlayers.getUsers().values(), anything());
    }
 
-   @Then("The game page indicates whether the user may join the game")
+   @Then("the game page indicates whether the user may join the game")
    public void game_page_indicates_whether_user_may_join_game() {
       assertThat(mayJoinGame.booleanValue(), anything());
    }
 
-   @Then("The game page indicates which character \\(if any) the user is playing")
+   @Then("the game page indicates which character \\(if any) the user is playing")
    public void game_page_indicates_which_character_user_is_playing() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
@@ -344,7 +344,7 @@ public class GameSteps {
                otherUsers, gameManager ? is(allOtherUsers) : empty()));
    }
 
-   @Then("The game page indicates which characters are played by which users")
+   @Then("the game page indicates which characters are played by which users")
    public void game_page_indicates_which_characters_are_played_by_which_users() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
 
@@ -523,7 +523,7 @@ public class GameSteps {
       }
    }
 
-   @When("Navigate to one game page")
+   @When("navigate to one game page")
    public void navigate_to_one_game_page() {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
@@ -619,7 +619,7 @@ public class GameSteps {
       world.performRequest(request);
    }
 
-   @When("A scenario has games")
+   @When("a scenario has games")
    public void scenario_has_games() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
@@ -662,7 +662,7 @@ public class GameSteps {
       prepareNewGame();
    }
 
-   @Given("Viewing the games of the scenario")
+   @Given("viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");

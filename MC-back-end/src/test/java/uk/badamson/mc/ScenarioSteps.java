@@ -118,7 +118,7 @@ public class ScenarioSteps {
       world.responseIsOk();
    }
 
-   @When("Navigate to a scenario with games")
+   @When("navigate to a scenario with games")
    public void navigate_to_a_scenario_with_games() throws Exception {
       chooseScenario();
       world.performRequest(
@@ -154,7 +154,7 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("The scenario page allows navigation to game pages")
+   @Then("the scenario page allows navigation to game pages")
    public void scenario_page_allows_navigation_to_game_pages()
             throws Exception {
       final var game = chooseGameOfScenario();
@@ -174,7 +174,7 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("The scenario page does not allow navigation to game pages")
+   @Then("the scenario page does not allow navigation to game pages")
    public void scenario_page_does_not_allow_navigation_to_game_pages()
             throws Exception {
       final var game = chooseGameOfScenario();
@@ -194,13 +194,13 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("The scenario page includes the list of games of that scenario")
+   @Then("the scenario page includes the list of games of that scenario")
    public void scenario_page_includes_games() {
       Objects.requireNonNull(id, "id");
       assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
    }
 
-   @Then("The scenario page includes the list of playable characters of that scenario")
+   @Then("the scenario page includes the list of playable characters of that scenario")
    public void scenario_page_includes_list_of_playable_characters_of_that_scenario() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
@@ -211,7 +211,7 @@ public class ScenarioSteps {
                is(expectedScenario.getCharacters()));
    }
 
-   @Then("The scenario page includes the scenario description")
+   @Then("the scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
@@ -222,7 +222,7 @@ public class ScenarioSteps {
                is(expectedScenario.getDescription()));
    }
 
-   @When("Viewing the scenarios")
+   @When("viewing the scenarios")
    public void viewing_scenarios() {
       scenarioService.getScenarioIdentifiers().collect(toUnmodifiableSet());
    }
