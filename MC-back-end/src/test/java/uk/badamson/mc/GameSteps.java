@@ -124,8 +124,6 @@ public class GameSteps {
 
    private Game.Identifier gameId;
 
-   private Game.Identifier joinedGameId;
-
    private Game game;
 
    private GamePlayers gamePlayers;
@@ -184,9 +182,65 @@ public class GameSteps {
       createGame();
    }
 
+   @When("examine the current-game")
+   public void examine_current_game() {
+      try {
+         requestGetCurrentGame();
+         final var response = world.getResponse();
+         try {
+            final var location = response.andReturn().getResponse()
+                     .getHeader("Location");
+            assertAll(
+                     () -> world.expectResponse(status().isTemporaryRedirect()),
+                     () -> assertNotNull(location, "has Location header"));// guard
+            gameId = parseGamePath(location);
+         } catch (final Exception e) {
+            throw new AssertionFailedError(
+                     "Expected redirect to a game resource");
+         }
+         getGamePage();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can navigate to current-game resource",
+                  e);
+      }
+   }
+
+   @When("examine a game")
+   public void examine_game() {
+      Objects.requireNonNull(scenario, "scenario");
+      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
+
+      final var creationTime = gameCreationTimes.stream().findAny().get();
+      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
+
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
+         // Tough test: the current user is playing the game
+         final var currentUser = world.loggedInUser;
+         if (currentUser != null
+                  && currentUser.getAuthorities()
+                           .contains(Authority.ROLE_PLAYER)
+                  && gamePlayersService
+                           .getCurrentGameOfUser(currentUser.getId())
+                           .isEmpty()) {
+            gamePlayersService.userJoinsGame(currentUser.getId(), gameId);
+         }
+      }
+      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
+               .isRecruiting()) {
+         // Tough test: the game has other player
+         final var otherUser = userService.add(new BasicUserDetails(
+                  "Other Player", "password2",
+                  EnumSet.of(Authority.ROLE_PLAYER), true, true, true, true));
+         gamePlayersService.userJoinsGame(otherUser.getId(), gameId);
+      }
+      getGamePage();
+   }
+
    @When("examining a game recruiting players")
    public void examining_game_recruiting_players() {
       prepareNewGame();
+      getGamePage();
    }
 
    private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
@@ -425,7 +479,6 @@ public class GameSteps {
       var request = post(path).with(csrf());
       request = request.with(user(world.loggedInUser));
       world.performRequest(request);
-      joinedGameId = gameId;
    }
 
    @Then("the list of games includes the new game")
@@ -453,11 +506,13 @@ public class GameSteps {
                () -> assertTrue(indicatedGame.isPresent(),
                         "identified game exists"));// guard
       game = indicatedGame.get();
+      getGamePage();
    }
 
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recruitment_for_game() throws Exception {
       world.getResponse().andExpect(status().isFound());
+      getGamePage();
    }
 
    @Then("MC accepts joining the game")
@@ -474,6 +529,7 @@ public class GameSteps {
       final var gameRedirectedTo = parseGamePlayersPath(location);
       assertThat("Redirected to the list of players of the current game",
                gameRedirectedTo, is(gameId));
+      getGamePage();
    }
 
    @Then("MC does not allow creating a game")
@@ -488,64 +544,6 @@ public class GameSteps {
       chooseScenario();
       requestEndRecruitmentForGame();
       world.getResponse().andExpect(status().is4xxClientError());
-   }
-
-   @Then("it provides a game")
-   public void provides_game() {
-      getGamePage();
-   }
-
-   @When("examine the current-game")
-   public void examine_current_game() {
-      try {
-         requestGetCurrentGame();
-         final var response = world.getResponse();
-         try {
-            final var location = response.andReturn().getResponse()
-                     .getHeader("Location");
-            assertAll(
-                     () -> world.expectResponse(status().isTemporaryRedirect()),
-                     () -> assertNotNull(location, "has Location header"));// guard
-            gameId = parseGamePath(location);
-         } catch (final Exception e) {
-            throw new AssertionFailedError("Expected redirect to a game resource");
-         }
-         getGamePage();
-      } catch (final Exception e) {
-         throw new AssertionFailedError("Can navigate to current-game resource",
-                  e);
-      }
-   }
-
-   @When("navigate to one game")
-   public void navigate_to_one_game_page() {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
-
-      final var creationTime = gameCreationTimes.stream().findAny().get();
-      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
-
-      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
-               .isRecruiting()) {
-         // Tough test: the current user is playing the game
-         final var currentUser = world.loggedInUser;
-         if (currentUser != null
-                  && currentUser.getAuthorities()
-                           .contains(Authority.ROLE_PLAYER)
-                  && gamePlayersService
-                           .getCurrentGameOfUser(currentUser.getId())
-                           .isEmpty()) {
-            gamePlayersService.userJoinsGame(currentUser.getId(), gameId);
-         }
-      }
-      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
-               .isRecruiting()) {
-         // Tough test: the game has other player
-         final var otherUser = userService.add(new BasicUserDetails(
-                  "Other Player", "password2",
-                  EnumSet.of(Authority.ROLE_PLAYER), true, true, true, true));
-         gamePlayersService.userJoinsGame(otherUser.getId(), gameId);
-      }
    }
 
    private void prepareNewGame() {
@@ -654,11 +652,5 @@ public class GameSteps {
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recruiting_players() {
       prepareNewGame();
-   }
-
-   @Given("viewing the games of the scenario")
-   public void viewing_games_of_scenario() {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
    }
 }
