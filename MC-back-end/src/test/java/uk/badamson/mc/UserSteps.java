@@ -170,7 +170,7 @@ public class UserSteps {
                () -> world.expectResponse(header().string("Location", "/")));
    }
 
-   @Then("MC does not allow navigating to a user page")
+   @Then("MC does not allow navigating to a user")
    public void mc_does_not_alllow_navigating_to_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
 
@@ -185,7 +185,7 @@ public class UserSteps {
       world.expectResponse(status().isForbidden());
    }
 
-   @Then("MC serves the user page")
+   @Then("MC serves the user")
    public void mc_serves_user_page() throws Exception {
       world.responseIsOk();
       try {
@@ -195,12 +195,12 @@ public class UserSteps {
       }
    }
 
-   @Then("MC serves the users page")
-   public void mc_serves_users_page() throws Exception {
+   @Then("it serves the users")
+   public void serves_users() throws Exception {
       world.responseIsOk();
    }
 
-   @When("navigate to one user page")
+   @When("navigate to one user")
    public void navigate_to_one_user_page() throws Exception {
       Objects.requireNonNull(userList, "userList");
 
@@ -240,7 +240,7 @@ public class UserSteps {
       }
    }
 
-   @When("trying to navigate to a user page")
+   @When("trying to navigate to a user")
    public void trying_to_navigate_to_user_page() {
       // Do nothing
       Objects.requireNonNull(userList, "userList");
@@ -277,16 +277,16 @@ public class UserSteps {
       // Do nothing: implied because create each user afresh.
    }
 
-   @Then("the user page includes the user name")
-   public void user_page_includes_user_name() {
+   @Then("the user includes the user name")
+   public void user_includes_user_name() {
       Objects.requireNonNull(expectedUser, "expectedUser");
       Objects.requireNonNull(user, "user");
 
       assertEquals(expectedUser.getUsername(), user.getUsername());
    }
 
-   @Then("the user page lists the roles of the user")
-   public void user_page_lists_roles_of_user() {
+   @Then("the user lists the roles of the user")
+   public void user_lists_roles_of_user() {
       Objects.requireNonNull(expectedUser, "expectedUser");
       Objects.requireNonNull(user, "user");
 
