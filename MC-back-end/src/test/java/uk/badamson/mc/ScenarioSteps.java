@@ -105,7 +105,7 @@ public class ScenarioSteps {
       getScenarios();
    }
 
-   @When("MC serves the scenario page")
+   @When("MC serves the scenario")
    public void mc_serves_scenario_page() throws Exception {
       final var responseText = world.getResponseBodyAsString();
       responseScenario = objectMapper.readValue(responseText, Scenario.class);
@@ -154,8 +154,8 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("the scenario page allows navigation to game pages")
-   public void scenario_page_allows_navigation_to_game_pages()
+   @Then("the scenario allows navigation to game pages")
+   public void scenario_allows_navigation_to_game_pages()
             throws Exception {
       final var game = chooseGameOfScenario();
 
@@ -174,8 +174,8 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("the scenario page does not allow navigation to game pages")
-   public void scenario_page_does_not_allow_navigation_to_game_pages()
+   @Then("the scenario does not allow navigation to game pages")
+   public void scenario_does_not_allow_navigation_to_game_pages()
             throws Exception {
       final var game = chooseGameOfScenario();
 
@@ -194,14 +194,14 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("the scenario page includes the list of games of that scenario")
-   public void scenario_page_includes_games() {
+   @Then("the scenario includes the list of games of that scenario")
+   public void scenario_includes_games() {
       Objects.requireNonNull(id, "id");
       assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
    }
 
-   @Then("the scenario page includes the list of playable characters of that scenario")
-   public void scenario_page_includes_list_of_playable_characters_of_that_scenario() {
+   @Then("the scenario includes the list of playable characters of that scenario")
+   public void scenario_includes_list_of_playable_characters_of_that_scenario() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
@@ -211,8 +211,8 @@ public class ScenarioSteps {
                is(expectedScenario.getCharacters()));
    }
 
-   @Then("the scenario page includes the scenario description")
-   public void scenario_page_includes_scenario_description() {
+   @Then("the scenario includes the scenario description")
+   public void scenario_includes_scenario_description() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
