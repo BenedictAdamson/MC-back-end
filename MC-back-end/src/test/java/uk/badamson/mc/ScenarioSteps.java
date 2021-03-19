@@ -18,7 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,6 +83,28 @@ public class ScenarioSteps {
                .findAny().get();
    }
 
+   @When("a scenario that has a game")
+   public void scenario_has_game() {
+      chooseScenario();
+      gameService.create(id);
+   }
+   
+   @When("examine the scenario")
+   public void examine_scenario() throws Exception {
+      world.performRequest(
+               get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
+      final var responseText = world.getResponseBodyAsString();
+      responseScenario = objectMapper.readValue(responseText, Scenario.class);
+      assertEquals(id, responseScenario.getIdentifier(),
+               "scenario has the requested ID");
+   }
+
+   @When("examine scenarios")
+   public void examine_scenarios() throws Exception {
+      getScenarios();
+      world.responseIsOk();
+   }
+
    @Given("examining scenario")
    public void examining_scenario() {
       chooseScenario();
@@ -98,27 +119,6 @@ public class ScenarioSteps {
    private void getScenarios() throws Exception {
       world.performRequest(
                get("/api/scenario").accept(MediaType.APPLICATION_JSON));
-   }
-
-   @When("examine scenarios")
-   public void examine_scenarios() throws Exception {
-      getScenarios();
-      world.responseIsOk();
-   }
-
-   @When("MC serves the scenario")
-   public void mc_serves_scenario_page() throws Exception {
-      final var responseText = world.getResponseBodyAsString();
-      responseScenario = objectMapper.readValue(responseText, Scenario.class);
-      assertEquals(id, responseScenario.getIdentifier(),
-               "scenario has the requested ID");
-   }
-
-   @When("navigate to a scenario with games")
-   public void navigate_to_a_scenario_with_games() throws Exception {
-      chooseScenario();
-      world.performRequest(
-               get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
    }
 
    private void requestGameOfScenario(final Game.Identifier game)
@@ -151,8 +151,7 @@ public class ScenarioSteps {
    }
 
    @Then("the scenario allows navigation to game pages")
-   public void scenario_allows_navigation_to_game_pages()
-            throws Exception {
+   public void scenario_allows_navigation_to_game_pages() throws Exception {
       final var game = chooseGameOfScenario();
 
       /* The game page is rendered using data from two end-points. */
@@ -216,10 +215,5 @@ public class ScenarioSteps {
       final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
-   }
-
-   @When("viewing the scenarios")
-   public void viewing_scenarios() {
-      scenarioService.getScenarioIdentifiers().collect(toUnmodifiableSet());
    }
 }

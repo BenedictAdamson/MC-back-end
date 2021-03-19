@@ -611,8 +611,8 @@ public class GameSteps {
       world.performRequest(request);
    }
 
-   @When("a scenario has games")
-   public void scenario_has_games() {
+   @When("has a game")
+   public void has_game() {
       chooseScenario();
       gameService.create(scenario.getIdentifier());
       updateGameCreationTimes();
