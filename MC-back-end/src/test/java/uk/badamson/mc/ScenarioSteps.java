@@ -100,9 +100,10 @@ public class ScenarioSteps {
                get("/api/scenario").accept(MediaType.APPLICATION_JSON));
    }
 
-   @When("getting the scenarios")
-   public void getting_scenarios() throws Exception {
+   @When("examine scenarios")
+   public void examine_scenarios() throws Exception {
       getScenarios();
+      world.responseIsOk();
    }
 
    @When("MC serves the scenario")
@@ -111,11 +112,6 @@ public class ScenarioSteps {
       responseScenario = objectMapper.readValue(responseText, Scenario.class);
       assertEquals(id, responseScenario.getIdentifier(),
                "scenario has the requested ID");
-   }
-
-   @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() throws Exception {
-      world.responseIsOk();
    }
 
    @When("navigate to a scenario with games")
