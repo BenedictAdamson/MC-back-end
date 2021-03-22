@@ -73,6 +73,25 @@ public class ScenarioSteps {
 
    private Scenario responseScenario;
 
+   @Then("it allows examination of games of the scenario")
+   public void allows_examination_of_games_of_scenario() throws Exception {
+      final var game = chooseGameOfScenario();
+
+      /* The game information is from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Allows GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Allows GET of game-players resource", e);
+      }
+   }
+
    private Identifier chooseGameOfScenario() {
       return gameService.getCreationTimesOfGamesOfScenario(id)
                .map(t -> new Game.Identifier(id, t)).findAny().get();
@@ -83,12 +102,26 @@ public class ScenarioSteps {
                .findAny().get();
    }
 
-   @When("a scenario that has a game")
-   public void scenario_has_game() {
-      chooseScenario();
-      gameService.create(id);
+   @Then("it does not allow examination of games of the scenario")
+   public void does_not_allow_examination_of_games_of_scenario()
+            throws Exception {
+      final var game = chooseGameOfScenario();
+
+      /* The games information is from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
    }
-   
+
    @When("examine the scenario")
    public void examine_scenario() throws Exception {
       world.performRequest(
@@ -150,43 +183,10 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("the scenario allows navigation to game pages")
-   public void scenario_allows_navigation_to_game_pages() throws Exception {
-      final var game = chooseGameOfScenario();
-
-      /* The game page is rendered using data from two end-points. */
-      try {
-         requestGameOfScenario(game);
-         world.getResponse().andExpect(status().isOk());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Allows GET of game resource", e);
-      }
-      try {
-         requestGamePlayersOfScenario(game);
-         world.getResponse().andExpect(status().isOk());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Allows GET of game-players resource", e);
-      }
-   }
-
-   @Then("the scenario does not allow navigation to game pages")
-   public void scenario_does_not_allow_navigation_to_game_pages()
-            throws Exception {
-      final var game = chooseGameOfScenario();
-
-      /* The game page is rendered using data from two end-points. */
-      try {
-         requestGameOfScenario(game);
-         world.getResponse().andExpect(status().is4xxClientError());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Does not allow GET of game resource", e);
-      }
-      try {
-         requestGamePlayersOfScenario(game);
-         world.getResponse().andExpect(status().is4xxClientError());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Does not allow GET of game resource", e);
-      }
+   @When("a scenario that has a game")
+   public void scenario_has_game() {
+      chooseScenario();
+      gameService.create(id);
    }
 
    @Then("the scenario includes the list of games of that scenario")
