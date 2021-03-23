@@ -258,7 +258,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
          if (allUsers.size() == filteredUsers.size()) {
             return fullInformation;
          } else {
-            return Optional.of(new GamePlayers(id, false, filteredUsers));// FIXME
+            return Optional.of(new GamePlayers(id, false, filteredUsers));
          }
       }
    }

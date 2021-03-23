@@ -97,7 +97,7 @@ public class GameServiceImpl implements GameService {
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
       final var identifier = new Game.Identifier(scenario, getNow());
-      final var game = new Game(identifier);// FIXME
+      final var game = new Game(identifier);
       return repository.save(game);// write
    }
 

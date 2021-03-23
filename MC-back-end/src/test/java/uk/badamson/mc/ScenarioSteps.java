@@ -18,7 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,6 +73,25 @@ public class ScenarioSteps {
 
    private Scenario responseScenario;
 
+   @Then("it allows examination of games of the scenario")
+   public void allows_examination_of_games_of_scenario() throws Exception {
+      final var game = chooseGameOfScenario();
+
+      /* The game information is from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Allows GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().isOk());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Allows GET of game-players resource", e);
+      }
+   }
+
    private Identifier chooseGameOfScenario() {
       return gameService.getCreationTimesOfGamesOfScenario(id)
                .map(t -> new Game.Identifier(id, t)).findAny().get();
@@ -82,6 +100,42 @@ public class ScenarioSteps {
    private void chooseScenario() {
       id = gameService.getGameIdentifiers().map(game -> game.getScenario())
                .findAny().get();
+   }
+
+   @Then("it does not allow examination of games of the scenario")
+   public void does_not_allow_examination_of_games_of_scenario()
+            throws Exception {
+      final var game = chooseGameOfScenario();
+
+      /* The games information is from two end-points. */
+      try {
+         requestGameOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
+      try {
+         requestGamePlayersOfScenario(game);
+         world.getResponse().andExpect(status().is4xxClientError());
+      } catch (final AssertionError e) {
+         throw new AssertionError("Does not allow GET of game resource", e);
+      }
+   }
+
+   @When("examine the scenario")
+   public void examine_scenario() throws Exception {
+      world.performRequest(
+               get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
+      final var responseText = world.getResponseBodyAsString();
+      responseScenario = objectMapper.readValue(responseText, Scenario.class);
+      assertEquals(id, responseScenario.getIdentifier(),
+               "scenario has the requested ID");
+   }
+
+   @When("examine scenarios")
+   public void examine_scenarios() throws Exception {
+      getScenarios();
+      world.responseIsOk();
    }
 
    @Given("examining scenario")
@@ -98,31 +152,6 @@ public class ScenarioSteps {
    private void getScenarios() throws Exception {
       world.performRequest(
                get("/api/scenario").accept(MediaType.APPLICATION_JSON));
-   }
-
-   @When("getting the scenarios")
-   public void getting_scenarios() throws Exception {
-      getScenarios();
-   }
-
-   @When("MC serves the scenario page")
-   public void mc_serves_scenario_page() throws Exception {
-      final var responseText = world.getResponseBodyAsString();
-      responseScenario = objectMapper.readValue(responseText, Scenario.class);
-      assertEquals(id, responseScenario.getIdentifier(),
-               "scenario has the requested ID");
-   }
-
-   @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() throws Exception {
-      world.responseIsOk();
-   }
-
-   @When("Navigate to a scenario with games")
-   public void navigate_to_a_scenario_with_games() throws Exception {
-      chooseScenario();
-      world.performRequest(
-               get("/api/scenario/" + id).accept(MediaType.APPLICATION_JSON));
    }
 
    private void requestGameOfScenario(final Game.Identifier game)
@@ -154,54 +183,20 @@ public class ScenarioSteps {
       }
    }
 
-   @Then("The scenario page allows navigation to game pages")
-   public void scenario_page_allows_navigation_to_game_pages()
-            throws Exception {
-      final var game = chooseGameOfScenario();
-
-      /* The game page is rendered using data from two end-points. */
-      try {
-         requestGameOfScenario(game);
-         world.getResponse().andExpect(status().isOk());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Allows GET of game resource", e);
-      }
-      try {
-         requestGamePlayersOfScenario(game);
-         world.getResponse().andExpect(status().isOk());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Allows GET of game-players resource", e);
-      }
+   @When("a scenario that has a game")
+   public void scenario_has_game() {
+      chooseScenario();
+      gameService.create(id);
    }
 
-   @Then("The scenario page does not allow navigation to game pages")
-   public void scenario_page_does_not_allow_navigation_to_game_pages()
-            throws Exception {
-      final var game = chooseGameOfScenario();
-
-      /* The game page is rendered using data from two end-points. */
-      try {
-         requestGameOfScenario(game);
-         world.getResponse().andExpect(status().is4xxClientError());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Does not allow GET of game resource", e);
-      }
-      try {
-         requestGamePlayersOfScenario(game);
-         world.getResponse().andExpect(status().is4xxClientError());
-      } catch (final AssertionError e) {
-         throw new AssertionError("Does not allow GET of game resource", e);
-      }
-   }
-
-   @Then("The scenario page includes the list of games of that scenario")
-   public void scenario_page_includes_games() {
+   @Then("the scenario includes the list of games of that scenario")
+   public void scenario_includes_games() {
       Objects.requireNonNull(id, "id");
       assertNotNull(gameService.getCreationTimesOfGamesOfScenario(id));
    }
 
-   @Then("The scenario page includes the list of playable characters of that scenario")
-   public void scenario_page_includes_list_of_playable_characters_of_that_scenario() {
+   @Then("the scenario includes the list of playable characters of that scenario")
+   public void scenario_includes_list_of_playable_characters_of_that_scenario() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
@@ -211,8 +206,8 @@ public class ScenarioSteps {
                is(expectedScenario.getCharacters()));
    }
 
-   @Then("The scenario page includes the scenario description")
-   public void scenario_page_includes_scenario_description() {
+   @Then("the scenario includes the scenario description")
+   public void scenario_includes_scenario_description() {
       Objects.requireNonNull(scenarioService, "service");
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
@@ -220,10 +215,5 @@ public class ScenarioSteps {
       final var expectedScenario = scenarioService.getScenario(id).get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
-   }
-
-   @When("Viewing the scenarios")
-   public void viewing_scenarios() {
-      scenarioService.getScenarioIdentifiers().collect(toUnmodifiableSet());
    }
 }
