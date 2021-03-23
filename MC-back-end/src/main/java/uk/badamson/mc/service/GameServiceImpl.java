@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -97,7 +97,7 @@ public class GameServiceImpl implements GameService {
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
       final var identifier = new Game.Identifier(scenario, getNow());
-      final var game = new Game(identifier);
+      final var game = new Game(identifier, Game.RunState.WAITING_TO_START);
       return repository.save(game);// write
    }
 
