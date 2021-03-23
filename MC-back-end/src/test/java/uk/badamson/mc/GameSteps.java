@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,6 +45,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
+import org.opentest4j.MultipleFailuresError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -243,9 +245,31 @@ public class GameSteps {
       getGameResources();
    }
 
+   @Then("the game accepts starting")
+   public void game_accepts_starting() {
+      gameAcceptsChange();
+   }
+
+   @Then("the game accepts stopping")
+   public void game_accepts_stopping() {
+      gameAcceptsChange();
+   }
+
    @Then("the game does not allow ending recruitment")
    public void game_does_not_allow_ending_recuitment() throws Exception {
       requestEndRecruitmentForGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("the game does not allow starting")
+   public void game_does_not_allow_starting() throws Exception {
+      requestStartForGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("the game does not allow stopping")
+   public void game_does_not_allow_stopping() throws Exception {
+      requestStopGame();
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
@@ -289,10 +313,22 @@ public class GameSteps {
       assertTrue(gamePlayers.isRecruiting());
    }
 
+   @Then("the game indicates that it is not running")
+   public void game_indicates_not_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), not(Game.RunState.RUNNING));
+   }
+
    @Then("the game indicates the number of players of the game")
    public void game_indicates_number_of_players_of_game() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
+   }
+
+   @Then("the game indicates that it is running")
+   public void game_indicates_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), is(Game.RunState.RUNNING));
    }
 
    @Then("the game indicates that it has a player")
@@ -349,6 +385,12 @@ public class GameSteps {
       assertThat(gamePlayers.isRecruiting(), anything());
    }
 
+   @Then("the game indicates whether it is running")
+   public void game_indicates_whether_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), notNullValue(Game.RunState.class));
+   }
+
    @Then("the game indicates whether the user is playing the game")
    public void game_indicates_whether_user_is_playing_game() {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
@@ -394,6 +436,35 @@ public class GameSteps {
    @Given("a game is recruiting players")
    public void game_recruiting_players() {
       prepareNewGame();
+      BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
+   }
+
+   @Given("a game is running")
+   public void game_running() {
+      prepareNewGame();
+      // FIXME change runState
+      BackEndWorld.require(game.getRunState() == Game.RunState.RUNNING,
+               "game is running");
+   }
+
+   @Given("a game is waiting to start")
+   public void game_waiting_to_start() {
+      prepareNewGame();
+      BackEndWorld.require(game.getRunState() == Game.RunState.WAITING_TO_START,
+               "game is waiting to start");
+   }
+
+   private void gameAcceptsChange()
+            throws MultipleFailuresError, AssertionFailedError {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var location = world.getResponse().andReturn().getResponse()
+               .getHeader("Location");
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header")); // guard
+      final var gameRedirectedTo = parseGamePath(location);
+      assertThat("Redirected to the game", gameRedirectedTo, is(gameId));
+      getGameResources();
    }
 
    private void getGameResources() throws AssertionFailedError {
@@ -578,6 +649,39 @@ public class GameSteps {
       world.performRequest(request);
    }
 
+   private void requestStartForGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      /*
+       * FIXME final var path = GameController .createPathForStartOf(gameId);
+       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
+       * { request = request.with(user(world.loggedInUser)); }
+       * world.performRequest(request);
+       */
+   }
+
+   private void requestStartGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      /*
+       * FIXME final var path = GameController .createPathForStarting(gameId);
+       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
+       * { request = request.with(user(world.loggedInUser)); }
+       * world.performRequest(request);
+       */
+   }
+
+   private void requestStopGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      /*
+       * FIXME final var path = GameController .createPathForStopping(gameId);
+       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
+       * { request = request.with(user(world.loggedInUser)); }
+       * world.performRequest(request);
+       */
+   }
+
    @Then("the scenario does not allow creating a game")
    public void scenario_not_allow_creating_game() throws Exception {
       chooseScenario();
@@ -614,5 +718,27 @@ public class GameSteps {
    public void user_playing_game() throws Exception {
       prepareNewGame();
       joinGame();
+   }
+
+   @When("user starts the game")
+   public void user_starts_game() {
+      try {
+         requestStartGame();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to stop the game",
+                  e);
+      }
+      game = null;// local copy is out of date
+   }
+
+   @When("user stops the game")
+   public void user_stops_game() {
+      try {
+         requestStopGame();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to stop the game",
+                  e);
+      }
+      game = null;// local copy is out of date
    }
 }
