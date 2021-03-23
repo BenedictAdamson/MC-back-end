@@ -277,13 +277,13 @@ public class GameSteps {
       assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
    }
 
-   @Then("the game indicates that the game has no players")
+   @Then("the game indicates that it has no players")
    public void game_indicates_game_has_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().values(), empty());
    }
 
-   @Then("the game indicates that the game is recruiting players")
+   @Then("the game indicates that it is recruiting players")
    public void game_indicates_game_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertTrue(gamePlayers.isRecruiting());
@@ -295,13 +295,13 @@ public class GameSteps {
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("the game indicates that the game has a player")
+   @Then("the game indicates that it has a player")
    public void game_indicates_that_game_has_player() {
       assertThat("Game players list not empty", gamePlayers.getUsers().values(),
                not(empty()));
    }
 
-   @Then("the game indicates that the game is not recruiting players")
+   @Then("the game indicates that it is not recruiting players")
    public void game_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
