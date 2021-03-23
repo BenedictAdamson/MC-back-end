@@ -337,13 +337,13 @@ public class GameSteps {
       assertFalse(mayJoinGame, "may not join game");
    }
 
-   @Then("the game indicates whether the game has players")
+   @Then("the game indicates whether it has players")
    public void game_indicates_whether_game_has_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("the game indicates whether the game is recruiting players")
+   @Then("the game indicates whether it is recruiting players")
    public void game_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
