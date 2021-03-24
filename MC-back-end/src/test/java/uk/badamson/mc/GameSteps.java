@@ -442,7 +442,7 @@ public class GameSteps {
    @Given("a game is running")
    public void game_running() {
       prepareNewGame();
-      // FIXME change runState
+      game = gameService.startGame(gameId);
       BackEndWorld.require(game.getRunState() == Game.RunState.RUNNING,
                "game is running");
    }
