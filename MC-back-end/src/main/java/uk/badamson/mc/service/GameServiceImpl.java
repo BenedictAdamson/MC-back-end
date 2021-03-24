@@ -194,4 +194,23 @@ public class GameServiceImpl implements GameService {
       }
    }
 
+   @Override
+   @Nonnull
+   public Game stopGame(@Nonnull final Game.Identifier id)
+            throws NoSuchElementException {
+      var game = get(id).get();// read
+      switch (game.getRunState()) {
+      case WAITING_TO_START:
+      case RUNNING:
+         game = new Game(game);
+         game.setRunState(Game.RunState.STOPPED);
+         return repository.save(game);// write
+      case STOPPED:
+         // do nothing
+         return new Game(game);
+      default:// never happens
+         throw new AssertionError("Valid game state");
+      }
+   }
+
 }

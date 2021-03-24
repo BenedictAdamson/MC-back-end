@@ -82,6 +82,8 @@ public class GameController {
 
    public static final String START_PARAM = "start";
 
+   public static final String STOP_PARAM = "stop";
+
    /**
     * <p>
     * Create a valid path for a game resource for a game that has a given
@@ -127,6 +129,10 @@ public class GameController {
 
    public static String createPathForStarting(final Game.Identifier id) {
       return createPathFor(id) + "?" + START_PARAM;
+   }
+
+   public static String createPathForStopping(final Game.Identifier id) {
+      return createPathFor(id) + "?" + STOP_PARAM;
    }
 
    private final GameService gameService;
@@ -318,6 +324,30 @@ public class GameController {
       final var gameId = new Game.Identifier(scenario, created);
       try {
          gameService.startGame(gameId);
+         final var location = URI.create(createPathFor(gameId));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized game ID", e);
+      } catch (final IllegalGameStateException e) {
+         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                  e);
+      }
+   }
+
+   @PostMapping(path = GAME_PATH_PATTERN, params = { STOP_PARAM })
+   @RolesAllowed("MANAGE_GAMES")
+   @Nonnull
+   public ResponseEntity<Void> stopGame(
+            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @PathVariable("scenario") final UUID scenario,
+            @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
+      final var gameId = new Game.Identifier(scenario, created);
+      try {
+         gameService.stopGame(gameId);
          final var location = URI.create(createPathFor(gameId));
          final var headers = new HttpHeaders();
          headers.setLocation(location);

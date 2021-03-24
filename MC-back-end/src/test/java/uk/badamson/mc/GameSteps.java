@@ -664,13 +664,13 @@ public class GameSteps {
 
    private void requestStopGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
+      final var path = GameController.createPathForStopping(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
 
-      /*
-       * FIXME final var path = GameController .createPathForStopping(gameId);
-       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
-       * { request = request.with(user(world.loggedInUser)); }
-       * world.performRequest(request);
-       */
    }
 
    @Then("the scenario does not allow creating a game")

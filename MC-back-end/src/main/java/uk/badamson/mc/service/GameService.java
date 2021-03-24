@@ -199,4 +199,7 @@ public interface GameService {
    @Nonnull
    Game startGame(@Nonnull Game.Identifier id)
             throws NoSuchElementException, IllegalGameStateException;
+
+   @Nonnull
+   Game stopGame(@Nonnull Game.Identifier id) throws NoSuchElementException;
 }
