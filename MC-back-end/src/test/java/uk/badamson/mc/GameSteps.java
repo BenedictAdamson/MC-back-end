@@ -263,7 +263,7 @@ public class GameSteps {
 
    @Then("the game does not allow starting")
    public void game_does_not_allow_starting() throws Exception {
-      requestStartForGame();
+      requestStartGame();
       world.getResponse().andExpect(status().is4xxClientError());
    }
 
@@ -649,17 +649,6 @@ public class GameSteps {
          request = request.with(user(world.loggedInUser));
       }
       world.performRequest(request);
-   }
-
-   private void requestStartForGame() throws Exception {
-      Objects.requireNonNull(gameId, "gameId");
-
-      /*
-       * FIXME final var path = GameController .createPathForStartOf(gameId);
-       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
-       * { request = request.with(user(world.loggedInUser)); }
-       * world.performRequest(request);
-       */
    }
 
    private void requestStartGame() throws Exception {
