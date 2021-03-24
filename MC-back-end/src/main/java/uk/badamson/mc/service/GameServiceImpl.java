@@ -101,6 +101,11 @@ public class GameServiceImpl implements GameService {
       return repository.save(game);// write
    }
 
+   private Optional<Game> get(final Game.Identifier id) {
+      Objects.requireNonNull(id, "id");
+      return repository.findById(id);
+   }
+
    @Nonnull
    @Override
    public final Clock getClock() {
@@ -120,7 +125,7 @@ public class GameServiceImpl implements GameService {
    @Override
    @Nonnull
    public Optional<Game> getGame(@Nonnull final Game.Identifier id) {
-      return repository.findById(id);
+      return get(id);
    }
 
    @Override
@@ -166,6 +171,26 @@ public class GameServiceImpl implements GameService {
       if (!scenarioService.getScenarioIdentifiers()
                .anyMatch(id -> scenario.equals(id))) {
          throw new NoSuchElementException("unknown scenario");
+      }
+   }
+
+   @Override
+   @Nonnull
+   public Game startGame(@Nonnull final Game.Identifier id)
+            throws NoSuchElementException, IllegalGameStateException {
+      var game = get(id).get();// read
+      switch (game.getRunState()) {
+      case WAITING_TO_START:
+         game = new Game(game);
+         game.setRunState(Game.RunState.RUNNING);
+         return repository.save(game);// write
+      case RUNNING:
+         // do nothing
+         return new Game(game);
+      case STOPPED:
+         throw new IllegalGameStateException("Game stopped");
+      default:// never happens
+         throw new AssertionError("Valid game state");
       }
    }
 

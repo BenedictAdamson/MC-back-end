@@ -457,8 +457,10 @@ public class GameSteps {
    private void gameAcceptsChange()
             throws MultipleFailuresError, AssertionFailedError {
       Objects.requireNonNull(gameId, "gameId");
+      final var response = Objects.requireNonNull(world.getResponse(),
+               "response");
 
-      final var location = world.getResponse().andReturn().getResponse()
+      final var location = response.andReturn().getResponse()
                .getHeader("Location");
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header")); // guard
@@ -663,12 +665,12 @@ public class GameSteps {
    private void requestStartGame() throws Exception {
       Objects.requireNonNull(gameId, "gameId");
 
-      /*
-       * FIXME final var path = GameController .createPathForStarting(gameId);
-       * var request = post(path).with(csrf()); if (world.loggedInUser != null)
-       * { request = request.with(user(world.loggedInUser)); }
-       * world.performRequest(request);
-       */
+      final var path = GameController.createPathForStarting(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
    }
 
    private void requestStopGame() throws Exception {
@@ -725,7 +727,7 @@ public class GameSteps {
       try {
          requestStartGame();
       } catch (final Exception e) {
-         throw new AssertionFailedError("Can ask the server to stop the game",
+         throw new AssertionFailedError("Can ask the server to start the game",
                   e);
       }
       game = null;// local copy is out of date

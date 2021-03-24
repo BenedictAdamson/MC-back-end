@@ -34,6 +34,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +44,9 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.User;
 import uk.badamson.mc.service.GameService;
+import uk.badamson.mc.service.IllegalGameStateException;
 
 /**
  * <p>
@@ -76,6 +79,8 @@ public class GameController {
     * </p>
     */
    public static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
+
+   public static final String START_PARAM = "start";
 
    /**
     * <p>
@@ -118,6 +123,10 @@ public class GameController {
     */
    public static String createPathForGames(final UUID scenario) {
       return ScenarioController.createPathFor(scenario) + "/game/";
+   }
+
+   public static String createPathForStarting(final Game.Identifier id) {
+      return createPathFor(id) + "?" + START_PARAM;
    }
 
    private final GameService gameService;
@@ -296,5 +305,29 @@ public class GameController {
    @Nonnull
    public final GameService getGameService() {
       return gameService;
+   }
+
+   @PostMapping(path = GAME_PATH_PATTERN, params = { START_PARAM })
+   @RolesAllowed("MANAGE_GAMES")
+   @Nonnull
+   public ResponseEntity<Void> startGame(
+            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @PathVariable("scenario") final UUID scenario,
+            @Nonnull @PathVariable("created") final Instant created) {
+      Objects.requireNonNull(user, "user");
+      final var gameId = new Game.Identifier(scenario, created);
+      try {
+         gameService.startGame(gameId);
+         final var location = URI.create(createPathFor(gameId));
+         final var headers = new HttpHeaders();
+         headers.setLocation(location);
+         return new ResponseEntity<>(headers, HttpStatus.FOUND);
+      } catch (final NoSuchElementException e) {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                  "unrecognized game ID", e);
+      } catch (final IllegalGameStateException e) {
+         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                  e);
+      }
    }
 }

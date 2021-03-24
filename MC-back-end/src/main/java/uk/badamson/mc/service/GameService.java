@@ -195,4 +195,8 @@ public interface GameService {
     */
    @Nonnull
    ScenarioService getScenarioService();
+
+   @Nonnull
+   Game startGame(@Nonnull Game.Identifier id)
+            throws NoSuchElementException, IllegalGameStateException;
 }
