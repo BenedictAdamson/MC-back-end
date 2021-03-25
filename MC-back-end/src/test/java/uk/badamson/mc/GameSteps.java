@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,6 +45,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
+import org.opentest4j.MultipleFailuresError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -61,7 +63,6 @@ import uk.badamson.mc.presentation.GamePlayersController;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
-import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -111,9 +112,6 @@ public class GameSteps {
 
    @Autowired
    private GamePlayersService gamePlayersService;
-
-   @Autowired
-   private UserService userService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -198,49 +196,16 @@ public class GameSteps {
             throw new AssertionFailedError(
                      "Expected redirect to a game resource");
          }
-         getGamePage();
+         getGameResources();
       } catch (final Exception e) {
          throw new AssertionFailedError("Can navigate to current-game resource",
                   e);
       }
    }
 
-   @When("examine a game")
-   public void examine_game() {
-      Objects.requireNonNull(scenario, "scenario");
-      Objects.requireNonNull(gameCreationTimes, "gameCreationTimes");
-
-      final var creationTime = gameCreationTimes.stream().findAny().get();
-      gameId = new Game.Identifier(scenario.getIdentifier(), creationTime);
-
-      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
-               .isRecruiting()) {
-         // Tough test: the current user is playing the game
-         final var currentUser = world.loggedInUser;
-         if (currentUser != null
-                  && currentUser.getAuthorities()
-                           .contains(Authority.ROLE_PLAYER)
-                  && gamePlayersService
-                           .getCurrentGameOfUser(currentUser.getId())
-                           .isEmpty()) {
-            gamePlayersService.userJoinsGame(currentUser.getId(), gameId);
-         }
-      }
-      if (gamePlayersService.getGamePlayersAsGameManager(gameId).get()
-               .isRecruiting()) {
-         // Tough test: the game has other player
-         final var otherUser = userService.add(new BasicUserDetails(
-                  "Other Player", "password2",
-                  EnumSet.of(Authority.ROLE_PLAYER), true, true, true, true));
-         gamePlayersService.userJoinsGame(otherUser.getId(), gameId);
-      }
-      getGamePage();
-   }
-
-   @When("examining a game recruiting players")
-   public void examining_game_recruiting_players() {
-      prepareNewGame();
-      getGamePage();
+   @When("examining the game")
+   public void examining_game() {
+      getGameResources();
    }
 
    private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
@@ -255,6 +220,57 @@ public class GameSteps {
                   "Expected OK response encoding a " + clazz.getSimpleName(),
                   e);
       }
+   }
+
+   @Then("the game accepts ending recruitment")
+   public void game_accepts_ending_recruitment() throws Exception {
+      world.getResponse().andExpect(status().isFound());
+      getGameResources();
+   }
+
+   @Then("the game accepts joining")
+   public void game_accepts_joining() {
+      Objects.requireNonNull(gameId, "gameId");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var location = world.getResponse().andReturn().getResponse()
+               .getHeader("Location");
+      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
+               .get();
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header")); // guard
+      final var gameRedirectedTo = parseGamePlayersPath(location);
+      assertThat("Redirected to the list of players of the current game",
+               gameRedirectedTo, is(gameId));
+      getGameResources();
+   }
+
+   @Then("the game accepts starting")
+   public void game_accepts_starting() {
+      gameAcceptsChange();
+   }
+
+   @Then("the game accepts stopping")
+   public void game_accepts_stopping() {
+      gameAcceptsChange();
+   }
+
+   @Then("the game does not allow ending recruitment")
+   public void game_does_not_allow_ending_recuitment() throws Exception {
+      requestEndRecruitmentForGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("the game does not allow starting")
+   public void game_does_not_allow_starting() throws Exception {
+      requestStartGame();
+      world.getResponse().andExpect(status().is4xxClientError());
+   }
+
+   @Then("the game does not allow stopping")
+   public void game_does_not_allow_stopping() throws Exception {
+      requestStopGame();
+      world.getResponse().andExpect(status().is4xxClientError());
    }
 
    @Then("the game does not indicate which characters are played by which \\(other) users")
@@ -285,16 +301,22 @@ public class GameSteps {
       assertEquals(gameId.getCreated(), game.getIdentifier().getCreated());
    }
 
-   @Then("the game indicates that the game has no players")
+   @Then("the game indicates that it has no players")
    public void game_indicates_game_has_no_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().values(), empty());
    }
 
-   @Then("the game indicates that the game is recruiting players")
+   @Then("the game indicates that it is recruiting players")
    public void game_indicates_game_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertTrue(gamePlayers.isRecruiting());
+   }
+
+   @Then("the game indicates that it is not running")
+   public void game_indicates_not_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), not(Game.RunState.RUNNING));
    }
 
    @Then("the game indicates the number of players of the game")
@@ -303,13 +325,19 @@ public class GameSteps {
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("the game indicates that the game has a player")
+   @Then("the game indicates that it is running")
+   public void game_indicates_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), is(Game.RunState.RUNNING));
+   }
+
+   @Then("the game indicates that it has a player")
    public void game_indicates_that_game_has_player() {
       assertThat("Game players list not empty", gamePlayers.getUsers().values(),
                not(empty()));
    }
 
-   @Then("the game indicates that the game is not recruiting players")
+   @Then("the game indicates that it is not recruiting players")
    public void game_indicates_that_game_is_not_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertFalse(gamePlayers.isRecruiting(), "game is not recruiting players");
@@ -345,16 +373,22 @@ public class GameSteps {
       assertFalse(mayJoinGame, "may not join game");
    }
 
-   @Then("the game indicates whether the game has players")
+   @Then("the game indicates whether it has players")
    public void game_indicates_whether_game_has_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.getUsers().size(), anything());
    }
 
-   @Then("the game indicates whether the game is recruiting players")
+   @Then("the game indicates whether it is recruiting players")
    public void game_indicates_whether_recuiting_players() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       assertThat(gamePlayers.isRecruiting(), anything());
+   }
+
+   @Then("the game indicates whether it is running")
+   public void game_indicates_whether_running() {
+      Objects.requireNonNull(game, "game");
+      assertThat(game.getRunState(), notNullValue(Game.RunState.class));
    }
 
    @Then("the game indicates whether the user is playing the game")
@@ -399,7 +433,43 @@ public class GameSteps {
       assertGamePagePlayersInvariants();
    }
 
-   private void getGamePage() throws AssertionFailedError {
+   @Given("a game is recruiting players")
+   public void game_recruiting_players() {
+      prepareNewGame();
+      BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
+   }
+
+   @Given("a game is running")
+   public void game_running() {
+      prepareNewGame();
+      game = gameService.startGame(gameId);
+      BackEndWorld.require(game.getRunState() == Game.RunState.RUNNING,
+               "game is running");
+   }
+
+   @Given("a game is waiting to start")
+   public void game_waiting_to_start() {
+      prepareNewGame();
+      BackEndWorld.require(game.getRunState() == Game.RunState.WAITING_TO_START,
+               "game is waiting to start");
+   }
+
+   private void gameAcceptsChange()
+            throws MultipleFailuresError, AssertionFailedError {
+      Objects.requireNonNull(gameId, "gameId");
+      final var response = Objects.requireNonNull(world.getResponse(),
+               "response");
+
+      final var location = response.andReturn().getResponse()
+               .getHeader("Location");
+      assertAll(() -> world.expectResponse(status().isFound()),
+               () -> assertNotNull(location, "has Location header")); // guard
+      final var gameRedirectedTo = parseGamePath(location);
+      assertThat("Redirected to the game", gameRedirectedTo, is(gameId));
+      getGameResources();
+   }
+
+   private void getGameResources() throws AssertionFailedError {
       Objects.requireNonNull(gameId, "gameId");
       try {
          requestGetGame();
@@ -448,6 +518,13 @@ public class GameSteps {
       gameCreationTimes = objectMapper.readValue(response,
                new TypeReference<Set<Instant>>() {
                });
+   }
+
+   @When("has a game")
+   public void has_game() {
+      chooseScenario();
+      gameId = gameService.create(scenario.getIdentifier()).getIdentifier();
+      updateGameCreationTimes();
    }
 
    private boolean hasAnyAuthorities(final Set<Authority> options) {
@@ -506,44 +583,7 @@ public class GameSteps {
                () -> assertTrue(indicatedGame.isPresent(),
                         "identified game exists"));// guard
       game = indicatedGame.get();
-      getGamePage();
-   }
-
-   @Then("MC accepts ending recruitment for the game")
-   public void mc_accepts_ending_recruitment_for_game() throws Exception {
-      world.getResponse().andExpect(status().isFound());
-      getGamePage();
-   }
-
-   @Then("MC accepts joining the game")
-   public void mc_accepts_joining_game() {
-      Objects.requireNonNull(gameId, "gameId");
-      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
-
-      final var location = world.getResponse().andReturn().getResponse()
-               .getHeader("Location");
-      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
-               .get();
-      assertAll(() -> world.expectResponse(status().isFound()),
-               () -> assertNotNull(location, "has Location header")); // guard
-      final var gameRedirectedTo = parseGamePlayersPath(location);
-      assertThat("Redirected to the list of players of the current game",
-               gameRedirectedTo, is(gameId));
-      getGamePage();
-   }
-
-   @Then("MC does not allow creating a game")
-   public void mc_does_not_allow_creating_game() throws Exception {
-      chooseScenario();
-      createGame();
-      world.getResponse().andExpect(status().is4xxClientError());
-   }
-
-   @Then("MC does not allow ending recruitment for the game")
-   public void mc_does_not_allow_ending_recuitment_for_game() throws Exception {
-      chooseScenario();
-      requestEndRecruitmentForGame();
-      world.getResponse().andExpect(status().is4xxClientError());
+      getGameResources();
    }
 
    private void prepareNewGame() {
@@ -611,11 +651,33 @@ public class GameSteps {
       world.performRequest(request);
    }
 
-   @When("has a game")
-   public void has_game() {
+   private void requestStartGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+
+      final var path = GameController.createPathForStarting(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+   }
+
+   private void requestStopGame() throws Exception {
+      Objects.requireNonNull(gameId, "gameId");
+      final var path = GameController.createPathForStopping(gameId);
+      var request = post(path).with(csrf());
+      if (world.loggedInUser != null) {
+         request = request.with(user(world.loggedInUser));
+      }
+      world.performRequest(request);
+
+   }
+
+   @Then("the scenario does not allow creating a game")
+   public void scenario_not_allow_creating_game() throws Exception {
       chooseScenario();
-      gameService.create(scenario.getIdentifier());
-      updateGameCreationTimes();
+      createGame();
+      world.getResponse().andExpect(status().is4xxClientError());
    }
 
    private void updateGameCreationTimes() {
@@ -649,8 +711,25 @@ public class GameSteps {
       joinGame();
    }
 
-   @Given("viewing a game that is recruiting players")
-   public void viewing_game_recruiting_players() {
-      prepareNewGame();
+   @When("user starts the game")
+   public void user_starts_game() {
+      try {
+         requestStartGame();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to start the game",
+                  e);
+      }
+      game = null;// local copy is out of date
+   }
+
+   @When("user stops the game")
+   public void user_stops_game() {
+      try {
+         requestStopGame();
+      } catch (final Exception e) {
+         throw new AssertionFailedError("Can ask the server to stop the game",
+                  e);
+      }
+      game = null;// local copy is out of date
    }
 }

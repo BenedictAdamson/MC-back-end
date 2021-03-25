@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -202,7 +202,7 @@ public class GameServiceImplTest {
       @Test
       public void present() {
          final var id = IDENTIFIER_A;
-         final var game = new Game(id);
+         final var game = new Game(id, Game.RunState.RUNNING);
          gameRepositoryA.save(game);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
@@ -230,7 +230,7 @@ public class GameServiceImplTest {
       @Test
       public void one() {
          final var id = IDENTIFIER_A;
-         gameRepositoryA.save(new Game(id));
+         gameRepositoryA.save(new Game(id, Game.RunState.RUNNING));
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
