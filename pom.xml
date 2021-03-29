@@ -32,6 +32,8 @@
    </scm>
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <!-- Debian package names may not have a -SNAPSHOT suffix. -->
+      <debian-package.version>2.21.0~SNAPSHOT</debian-package.version>
       <MC.cucumber.version>6.10.2</MC.cucumber.version>
       <MC.node.version>v14.16.0</MC.node.version>
       <MC.npm.version>6.14.11</MC.npm.version>
