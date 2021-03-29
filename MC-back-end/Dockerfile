@@ -1,7 +1,7 @@
 # Dockerfile for the MC project,
 # to produce the MC back-end server in a container.
 
-# © Copyright Benedict Adamson 2018-20.
+# © Copyright Benedict Adamson 2018-21.
 # 
 # This file is part of MC.
 #
@@ -21,14 +21,18 @@
 
 FROM openjdk:11
 ARG VERSION
+ARG PACKAGEVERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game back-end server."
 LABEL maintainer="badamson@spamcop.net"
 EXPOSE 8080
 RUN groupadd -g 1024 mc
 RUN useradd -c "Mission Command server" --create-home -u 1024 -g 1024 mc
+COPY target/MC-back-end_${PACKAGEVERSION}_all.deb MC-back-end.deb
+RUN dpkg -i MC-back-end.deb
+RUN rm MC-back-end.deb
+RUN ln -s /usr/share/lib/MC-back-end-${VERSION}.jar /usr/share/lib/MC-back-end.jar
 USER mc
 WORKDIR /home/mc
-COPY target/MC-back-end-${VERSION}.jar MC-back-end.jar
-ENTRYPOINT ["java","-jar","MC-back-end.jar"]
+ENTRYPOINT ["java","-jar","/usr/share/lib/MC-back-end.jar"]
 CMD []

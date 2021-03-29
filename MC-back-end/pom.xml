@@ -56,7 +56,7 @@
                      <goal>jdeb</goal>
                   </goals>
                   <configuration>
-                     <controlDir>src/main/deb</controlDir>
+                     <deb>target/MC-back-end_${debian-package.version}_all.deb</deb>
                      <dataSet>
                         <data>
                            <src>${project.build.directory}/${project.build.finalName}.jar</src>
@@ -72,10 +72,8 @@
             </executions>
          </plugin>
          <plugin>
-            <!-- This MUST be after spring-boot-maven-plugin, so it can use 
-               the repackaged JAR. Otherwise the JAR will not be an executable JAR, and 
-               attempting to run the Docker image will result in an error message such as 
-               "no main manifest attribute". -->
+            <!-- This MUST be after jdeb, so it can use 
+               the repackaged .deb package. -->
             <groupId>com.spotify</groupId>
             <artifactId>dockerfile-maven-plugin</artifactId>
             <executions>
@@ -93,6 +91,7 @@
                <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                <buildArgs>
                   <VERSION>${project.version}</VERSION>
+                  <PACKAGEVERSION>${debian-package.version}</PACKAGEVERSION>
                </buildArgs>
             </configuration>
          </plugin>
