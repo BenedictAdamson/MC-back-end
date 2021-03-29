@@ -44,6 +44,32 @@
 					</execution>
 				</executions>
 			</plugin>
+         <plugin>
+            <!-- This MUST be after spring-boot-maven-plugin, so it can use 
+               the repackaged JAR. Otherwise the JAR will not be an executable JAR. -->
+            <artifactId>jdeb</artifactId>
+            <groupId>org.vafer</groupId>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>jdeb</goal>
+                  </goals>
+                  <configuration>
+                     <dataSet>
+                        <data>
+                           <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                           <type>file</type>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/lib</prefix>
+                           </mapper>
+                        </data>
+                     </dataSet>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
 			<plugin>
 				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
 					JAR. Otherwise the JAR will not be an executable JAR, and attempting to run 

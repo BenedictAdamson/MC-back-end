@@ -1,0 +1,10 @@
+Package: [[name]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends: jdk (>= 11.0)
+Maintainer: Benedict Adamson <badamson@spamcop.net>
+Description: back-end of the MC game server
+Distribution: development
+Depends: default-jre | java11-runtime
