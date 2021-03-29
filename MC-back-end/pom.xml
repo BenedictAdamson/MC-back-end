@@ -1,49 +1,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>uk.badamson.mc</groupId>
-		<artifactId>MC</artifactId>
-		<version>2.21.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>MC-back-end</artifactId>
-	<packaging>jar</packaging>
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>com.github.spotbugs</groupId>
-				<artifactId>spotbugs-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<xmlOutput>true</xmlOutput>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>uk.badamson.mc</groupId>
+      <artifactId>MC</artifactId>
+      <version>2.21.0-SNAPSHOT</version>
+   </parent>
+   <artifactId>MC-back-end</artifactId>
+   <packaging>jar</packaging>
+   <build>
+      <resources>
+         <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+         </resource>
+      </resources>
+      <plugins>
+         <plugin>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>check</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <effort>Max</effort>
+               <threshold>Low</threshold>
+               <xmlOutput>true</xmlOutput>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>repackage</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
          <plugin>
             <!-- This MUST be after spring-boot-maven-plugin, so it can use 
                the repackaged JAR. Otherwise the JAR will not be an executable JAR. -->
@@ -56,6 +56,7 @@
                      <goal>jdeb</goal>
                   </goals>
                   <configuration>
+                     <controlDir>src/main/deb</controlDir>
                      <dataSet>
                         <data>
                            <src>${project.build.directory}/${project.build.finalName}.jar</src>
@@ -70,232 +71,235 @@
                </execution>
             </executions>
          </plugin>
-			<plugin>
-				<!-- This MUST be after spring-boot-maven-plugin, so it can use the repackaged 
-					JAR. Otherwise the JAR will not be an executable JAR, and attempting to run 
-					the Docker image will result in an error message such as "no main manifest 
-					attribute". -->
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>build</goal>
-							<goal>push</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<repository>index.docker.io/benedictadamson/mc-back-end</repository>
-					<tag>${project.version}</tag>
-					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-					<buildArgs>
-						<VERSION>${project.version}</VERSION>
-					</buildArgs>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
-					functionality of JUnit 5 -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Cucumber-integration-test</id>
-						<phase>integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<target>
-						<java classname="org.junit.platform.console.ConsoleLauncher"
-							fork="true" failonerror="true" newenvironment="true"
-							maxmemory="512m" classpathref="maven.test.classpath">
-							<arg value="--include-engine" />
-							<arg value="cucumber" />
-							<arg value="--select-package=uk.badamson.mc" />
-							<arg value="--include-tag" />
-							<arg value="back-end" />
-							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
-						</java>
-					</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<rulesets>
-						<ruleset>src/test/resources/pmd-ruleset.xml</ruleset>
-					</rulesets>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
-							functionality of JUnit 5 -->
-						<exclude>**/*Cucumber*.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
-	<dependencies>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-model</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-spec</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- Third-party dependencies: -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.github.spotbugs</groupId>
-			<artifactId>spotbugs-annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.cucumber</groupId>
-			<artifactId>cucumber-java</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.cucumber</groupId>
-			<artifactId>cucumber-junit-platform-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.cucumber</groupId>
-			<artifactId>cucumber-spring</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Enables Surefire to run JUnit 5 tests -->
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-console</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
-			it is in the classpath, the Surefire plugin will think we want to run onlt 
-			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
-		<dependency>
-			<groupId>org.opentest4j</groupId>
-			<artifactId>opentest4j</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-json</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<exclusions>
-				<exclusion>
-					<!-- The presence of the JUnit Vintage engine can confuse Surefire into 
-						thinking we are using JUnit 4. -->
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-		</dependency>
-	</dependencies>
+         <plugin>
+            <!-- This MUST be after spring-boot-maven-plugin, so it can use 
+               the repackaged JAR. Otherwise the JAR will not be an executable JAR, and 
+               attempting to run the Docker image will result in an error message such as 
+               "no main manifest attribute". -->
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>default</id>
+                  <goals>
+                     <goal>build</goal>
+                     <goal>push</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <repository>index.docker.io/benedictadamson/mc-back-end</repository>
+               <tag>${project.version}</tag>
+               <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+               <buildArgs>
+                  <VERSION>${project.version}</VERSION>
+               </buildArgs>
+            </configuration>
+         </plugin>
+         <plugin>
+            <!--Work around Failsafe/Surefire not yet using Test Engine discovery 
+               functionality of JUnit 5 -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>Cucumber-integration-test</id>
+                  <phase>integration-test</phase>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <target>
+                  <java
+                     classname="org.junit.platform.console.ConsoleLauncher"
+                     fork="true" failonerror="true"
+                     newenvironment="true" maxmemory="512m"
+                     classpathref="maven.test.classpath">
+                     <arg value="--include-engine" />
+                     <arg value="cucumber" />
+                     <arg value="--select-package=uk.badamson.mc" />
+                     <arg value="--include-tag" />
+                     <arg value="back-end" />
+                     <arg
+                        value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
+                  </java>
+               </target>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>attach-javadocs</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>jar</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>check</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <rulesets>
+                  <ruleset>src/test/resources/pmd-ruleset.xml</ruleset>
+               </rulesets>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>attach-javadocs</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>jar</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+               <excludes>
+                  <!--Work around Failsafe/Surefire not yet using Test Engine 
+                     discovery functionality of JUnit 5 -->
+                  <exclude>**/*Cucumber*.java</exclude>
+               </excludes>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
+   <reporting>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jxr-plugin</artifactId>
+         </plugin>
+      </plugins>
+   </reporting>
+   <dependencies>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-model</artifactId>
+         <version>${project.parent.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-spec</artifactId>
+         <version>${project.parent.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <!-- Third-party dependencies: -->
+      <dependency>
+         <groupId>com.fasterxml.jackson.datatype</groupId>
+         <artifactId>jackson-datatype-jsr310</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.github.spotbugs</groupId>
+         <artifactId>spotbugs-annotations</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>de.flapdoodle.embed</groupId>
+         <artifactId>de.flapdoodle.embed.mongo</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.cucumber</groupId>
+         <artifactId>cucumber-java</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.cucumber</groupId>
+         <artifactId>cucumber-junit-platform-engine</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.cucumber</groupId>
+         <artifactId>cucumber-spring</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.hamcrest</groupId>
+         <artifactId>hamcrest</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter-api</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <!-- Enables Surefire to run JUnit 5 tests -->
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter-engine</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.junit.platform</groupId>
+         <artifactId>junit-platform-console</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; 
+         if it is in the classpath, the Surefire plugin will think we want to run 
+         only JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
+      <dependency>
+         <groupId>org.opentest4j</groupId>
+         <artifactId>opentest4j</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-actuator</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-mongodb</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-json</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-security</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <exclusions>
+            <exclusion>
+               <!-- The presence of the JUnit Vintage engine can confuse 
+                  Surefire into thinking we are using JUnit 4. -->
+               <groupId>org.junit.vintage</groupId>
+               <artifactId>junit-vintage-engine</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.security</groupId>
+         <artifactId>spring-security-test</artifactId>
+      </dependency>
+   </dependencies>
 </project>
