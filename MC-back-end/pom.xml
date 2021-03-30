@@ -56,7 +56,7 @@
                      <goal>jdeb</goal>
                   </goals>
                   <configuration>
-                     <deb>target/MC-back-end_${debian-package.version}_all.deb</deb>
+                     <deb>${project.build.directory}/MC-back-end_${debian-package.version}_all.deb</deb>
                      <dataSet>
                         <data>
                            <src>${project.build.directory}/${project.build.finalName}.jar</src>
@@ -66,14 +66,19 @@
                               <prefix>/usr/share/lib</prefix>
                            </mapper>
                         </data>
+                        <data>
+                           <linkName>/usr/share/lib/MC-back-end.jar</linkName>
+                           <linkTarget>${project.build.finalName}.jar</linkTarget>
+                           <type>link</type>
+                           <symlink>true</symlink>
+                        </data>
                      </dataSet>
                   </configuration>
                </execution>
             </executions>
          </plugin>
          <plugin>
-            <!-- This MUST be after jdeb, so it can use 
-               the repackaged .deb package. -->
+            <!-- This MUST be after jdeb, so it can use the .deb package. -->
             <groupId>com.spotify</groupId>
             <artifactId>dockerfile-maven-plugin</artifactId>
             <executions>

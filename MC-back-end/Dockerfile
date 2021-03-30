@@ -31,7 +31,6 @@ RUN useradd -c "Mission Command server" --create-home -u 1024 -g 1024 mc
 COPY target/MC-back-end_${PACKAGEVERSION}_all.deb MC-back-end.deb
 RUN dpkg -i MC-back-end.deb
 RUN rm MC-back-end.deb
-RUN ln -s /usr/share/lib/MC-back-end-${VERSION}.jar /usr/share/lib/MC-back-end.jar
 USER mc
 WORKDIR /home/mc
 ENTRYPOINT ["java","-jar","/usr/share/lib/MC-back-end.jar"]
