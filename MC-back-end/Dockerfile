@@ -33,5 +33,5 @@ RUN dpkg -i MC-back-end.deb
 RUN rm MC-back-end.deb
 USER mc
 WORKDIR /home/mc
-ENTRYPOINT ["java","-jar","/usr/share/lib/MC-back-end.jar"]
+ENTRYPOINT ["/usr/bin/mcbe"]
 CMD []

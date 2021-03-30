@@ -1,0 +1,4 @@
+#!/bin/sh
+# mcbe: run the back-end server of the Mission Command game
+ROOT="${ROOT:-}"
+exec java -jar "$ROOT"/usr/share/lib/MC-back-end.jar "$@"
