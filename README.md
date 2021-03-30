@@ -75,8 +75,8 @@ MC is available from these public repositories:
     * [Docker](https://www.docker.com/)
     * [Jenkins](https://jenkins.io/)
     * [Maven](https://maven.apache.org/), including various Maven plugins provided by the Maven project
-        * [JDeb Plugin](https://github.com/tcurdt/jdeb) for building Debian packages
         * [Helm Maven Plugin](https://github.com/kiwigrid/helm-maven-plugin)
+        * [JDeb Plugin](https://github.com/tcurdt/jdeb) for building Debian packages
         * [Maven Frontend Plugin](https://github.com/eirslett/frontend-maven-plugin)
         * [Spring Boot Maven Plugin](https://docs.spring.io/spring-boot/docs/2.1.3.RELEASE/maven-plugin/)
         * [SpotBugs Maven Plugin](https://spotbugs.github.io/spotbugs-maven-plugin/index.html)
