@@ -1,4 +1,4 @@
-Package: [[name]]
+Package: missioncommand-be
 Version: [[version]]
 Section: contrib/games
 Priority: optional
