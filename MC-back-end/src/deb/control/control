@@ -6,4 +6,5 @@ Architecture: all
 Maintainer: Benedict Adamson <badamson@spamcop.net>
 Description: back-end of the MC game server
 Distribution: stable
-Depends: 
+Depends: java11-runtime-headless
+Recommends: openjdk-11-jre11-headless
