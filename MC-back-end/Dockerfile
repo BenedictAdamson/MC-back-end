@@ -30,6 +30,8 @@ COPY target/missioncommand-be_${PACKAGEVERSION}_all.deb missioncommand-be.deb
 # Although the openjdk:11 base image provides a Java 11 JRE, it does not do so by installing a .deb,
 # so dpkg will complain of a missing dependency unless we tell it to --force-depends
 RUN dpkg -i --force-depends missioncommand-be.deb
+# The Debian package installs files that are not useful within a Docker container; remove them to save space:
+RUN rm -rf /etc/mission-command
 RUN rm missioncommand-be.deb
 USER mission-command
 WORKDIR /home/mission-command

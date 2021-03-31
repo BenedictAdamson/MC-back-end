@@ -67,8 +67,8 @@
                            </mapper>
                         </data>
                         <data>
-                           <src>${project.basedir}/src/main/sh/mcbe</src>
                            <type>file</type>
+                           <src>${project.basedir}/src/main/sh/mcbe</src>
                            <mapper>
                               <type>perm</type>
                               <prefix>/usr/bin</prefix>
@@ -76,9 +76,43 @@
                            </mapper>
                         </data>
                         <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/systemd/mission-command-be.service</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/lib/systemd/user</prefix>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/systemd/be.env</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/etc/mission-command</prefix>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/systemd/adminpsswd.secret</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/etc/mission-command</prefix>
+                              <filemode>700</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/systemd/mongodbpsswd.secret</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/etc/mission-command</prefix>
+                              <filemode>700</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>link</type>
                            <linkName>/usr/share/lib/MC-back-end.jar</linkName>
                            <linkTarget>${project.build.finalName}.jar</linkTarget>
-                           <type>link</type>
                            <symlink>true</symlink>
                         </data>
                      </dataSet>

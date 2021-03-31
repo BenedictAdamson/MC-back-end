@@ -1,4 +1,15 @@
 #!/bin/sh
 # mcbe: run the back-end server of the Mission Command game
 ROOT="${ROOT:-}"
+if [ -n "$CREDENTIALS_DIRECTORY" ]; then
+  # Read secrets from files (for example, set up by systemd)
+  if [ -f "$CREDENTIALS_DIRECTORY"/mongodbpsswd ]; then
+    SPRING_DATA_MONGODB_PASSWORD=`cat "$CREDENTIALS_DIRECTORY"/mongodbpsswd`
+    export SPRING_DATA_MONGODB_PASSWORD
+  fi
+  if [ -f "$CREDENTIALS_DIRECTORY"/adminpsswd ]; then
+    ADMINISTRATOR_PASSWORD=`cat "$CREDENTIALS_DIRECTORY"/adminpsswd`
+    export ADMINISTRATOR_PASSWORD
+  fi
+fi
 exec java -jar "$ROOT"/usr/share/lib/MC-back-end.jar "$@"

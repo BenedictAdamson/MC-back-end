@@ -1,0 +1,58 @@
+# /usr/lib/systemd/user/mission-command-be.service
+# systemd unit file for the Back-End service of the Mission Command game
+
+[Unit]
+
+Description="Back-end web-server of the Mission Command game"
+Documentation=https://github.com/BenedictAdamson/MC
+
+# This provides a network service, so it is of little use without a network,
+# and the system should try to cleanly shut-down this service before shutting down the network.
+# It need not make out-going network connections, so it does not require a dependency on
+# network-online.target.
+# However, if the MongoDB data-store it uses *is* on a different host, this service will make
+# an out-going network connection. In that case, should add an "After=network-online.target"
+# dependency in an extra configuration file,
+# /usr/lib/systemd/user/mission-command-be.service.d/mongodb.conf
+# (See https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/)
+After=network.target
+
+# Can not run if the installation is corrupt or purged:
+ConditionFileIsExecutable=/usr/bin/mcbe
+ConditionPathIsDirectory=/home/mission-command
+ConditionUser=mission-command
+# Can not run if not configured:
+ConditionFileNotEmpty=/etc/mission-command/adminpsswd.secret
+ConditionFileNotEmpty=/etc/mission-command/mongodbpsswd.secret
+
+# exec configuration
+
+WorkingDirectory=/home/mission-command
+User=mission-command
+NoNewPrivileges=true
+Nice=5
+ProtectSystem=full
+ProtectHome=tmpfs
+LogsDirectory=mission-command
+PrivateTmp=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+EnvironmentFile=-/etc/mission-command/be.env
+StandardInput=null
+StandardOutput=append:/var/log/mission-command/be.log
+StandardError=inherit
+LoadCredential=adminpsswd:/etc/mission-command/adminpsswd.secret
+LoadCredential=mongodbpsswd:/etc/mission-command/mongodbpsswd.secret
+
+# kill configuration: use the defaults
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/mcbe
+TimeoutStartSec=13
