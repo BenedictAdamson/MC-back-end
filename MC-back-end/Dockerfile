@@ -31,7 +31,7 @@ COPY target/missioncommand-be_${PACKAGEVERSION}_all.deb missioncommand-be.deb
 # so dpkg will complain of a missing dependency unless we tell it to --force-depends
 RUN dpkg -i --force-depends missioncommand-be.deb
 # The Debian package installs files that are not useful within a Docker container; remove them to save space:
-RUN rm -rf /etc/mission-command
+RUN rm -rf /etc/mission-command /usr/lib/systemd
 RUN rm missioncommand-be.deb
 USER mission-command
 WORKDIR /home/mission-command

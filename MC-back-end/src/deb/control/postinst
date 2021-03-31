@@ -23,7 +23,13 @@ configure) # preinst was successful and files have been unpacked
   fi
   
   # adduser will do the right thing if the account already exists
-  adduser --system -c "Mission Command server" "$MC_USERNAME" 
+  adduser --system -c "Mission Command server" "$MC_USERNAME"
+  
+  if [ $HAVE_CONFIG_FILES = N ] && which systemctl; then
+    systemctl enable mission-command-be.service
+  # else no systemd (probably because a Docker container)
+  # or user might have deactivated the service: do not enable
+  fi 
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
   NEW_VERSION="$1"
@@ -36,6 +42,6 @@ abort-remove) # "prerm remove" failed during a remove or remove+purge
   # Do nothing
   ;;
 *)
-  echo "unrecognised preinst mode \"$MODE\"" 1>&2
+  echo "unrecognised postinst mode \"$MODE\"" 1>&2
   exit 2;;
 esac
