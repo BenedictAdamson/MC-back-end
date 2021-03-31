@@ -56,7 +56,7 @@
                      <goal>jdeb</goal>
                   </goals>
                   <configuration>
-                     <deb>${project.build.directory}/MC-back-end_${debian-package.version}_all.deb</deb>
+                     <deb>${project.build.directory}/mc-be_${debian-package.version}_all.deb</deb>
                      <dataSet>
                         <data>
                            <src>${project.build.directory}/${project.build.finalName}.jar</src>

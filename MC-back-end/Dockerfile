@@ -28,11 +28,11 @@ LABEL maintainer="badamson@spamcop.net"
 EXPOSE 8080
 RUN groupadd -g 1024 mc
 RUN useradd -c "Mission Command server" --create-home -u 1024 -g 1024 mc
-COPY target/MC-back-end_${PACKAGEVERSION}_all.deb MC-back-end.deb
+COPY target/mc-be_${PACKAGEVERSION}_all.deb mc-be.deb
 # Although the openjdk:11 base image provides a Java 11 JRE, it does not do so by installing a .deb,
 # so dpkg will complain of a missing dependency unless we tell it to --force-depends
-RUN dpkg -i --force-depends MC-back-end.deb
-RUN rm MC-back-end.deb
+RUN dpkg -i --force-depends mc-be.deb
+RUN rm mc-be.deb
 USER mc
 WORKDIR /home/mc
 ENTRYPOINT ["/usr/bin/mcbe"]
