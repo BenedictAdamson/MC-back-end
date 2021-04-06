@@ -97,16 +97,7 @@
                            <mapper>
                               <type>perm</type>
                               <prefix>/etc/mission-command</prefix>
-                              <filemode>700</filemode>
-                           </mapper>
-                        </data>
-                        <data>
-                           <type>file</type>
-                           <src>${project.basedir}/src/main/systemd/mongodbpsswd.secret</src>
-                           <mapper>
-                              <type>perm</type>
-                              <prefix>/etc/mission-command</prefix>
-                              <filemode>700</filemode>
+                              <filemode>600</filemode>
                            </mapper>
                         </data>
                         <data>
