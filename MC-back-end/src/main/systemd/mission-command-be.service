@@ -23,7 +23,7 @@ ConditionPathIsDirectory=/home/mission-command
 ConditionUser=mission-command
 # Can not run if not configured:
 ConditionFileNotEmpty=/etc/mission-command/adminpsswd.secret
-ConditionFileNotEmpty=/etc/mission-command/mongodbpsswd.secret
+ConditionFileNotEmpty=/etc/mission-command/mongodb-mc-psswd.secret
 
 # exec configuration
 
@@ -46,7 +46,7 @@ StandardInput=null
 StandardOutput=append:/var/log/mission-command/be.log
 StandardError=inherit
 LoadCredential=adminpsswd:/etc/mission-command/adminpsswd.secret
-LoadCredential=mongodbpsswd:/etc/mission-command/mongodbpsswd.secret
+LoadCredential=mongodb-mc-psswd:/etc/mission-command/mongodb-mc-psswd.secret
 
 # kill configuration: use the defaults
 
