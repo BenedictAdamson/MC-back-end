@@ -1,0 +1,31 @@
+#!/bin/sh
+# missioncommand-be .deb preinst
+
+MODE="$1"
+shift
+case "$MODE" in
+install)
+  if [ $# -gt 0 ]; then
+    OLD_VERSION="$1"
+    shift
+    HAS_CONFIG_FILES=Y
+    # installing from the "Config-Files" state:
+    # package was previously removed but not purged
+  else
+    HAS_CONFIG_FILES=N
+  fi
+  ;;
+upgrade)
+  OLD_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+abort-upgrade)
+  NEW_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+*)
+  echo "unrecognised preinst mode \"$MODE\"" 1>&2
+  exit 2;;
+esac

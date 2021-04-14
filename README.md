@@ -76,6 +76,7 @@ MC is available from these public repositories:
     * [Jenkins](https://jenkins.io/)
     * [Maven](https://maven.apache.org/), including various Maven plugins provided by the Maven project
         * [Helm Maven Plugin](https://github.com/kiwigrid/helm-maven-plugin)
+        * [JDeb Plugin](https://github.com/tcurdt/jdeb) for building Debian packages
         * [Maven Frontend Plugin](https://github.com/eirslett/frontend-maven-plugin)
         * [Spring Boot Maven Plugin](https://docs.spring.io/spring-boot/docs/2.1.3.RELEASE/maven-plugin/)
         * [SpotBugs Maven Plugin](https://spotbugs.github.io/spotbugs-maven-plugin/index.html)
@@ -89,7 +90,6 @@ MC is available from these public repositories:
     * [Jasmine](https://jasmine.github.io/index.html)
     * [JUnit 5](https://junit.org/junit5/)
     * [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)
-    * [Karma](https://karma-runner.github.io/latest/index.html)
     * [Open Test Alliance for the JVM](https://github.com/ota4j-team/opentest4j)
     * [PMD](https://pmd.github.io/)
     * [SpotBugs](https://spotbugs.github.io/)

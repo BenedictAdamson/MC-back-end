@@ -1,0 +1,21 @@
+#!/bin/sh
+# missioncommand-be .deb prerm
+
+MODE="$1"
+shift
+case "$MODE" in
+remove) # removal or removal+purge
+  if which systemctl; then
+    systemctl disable mission-command-be.service
+  # else no systemd (probably because a Docker container)
+  fi 
+  ;;
+upgrade)
+  NEW_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+*)
+  echo "unrecognised prerm mode \"$MODE\"" 1>&2
+  exit 2;;
+esac
