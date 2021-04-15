@@ -101,10 +101,10 @@ pipeline {
         }
         success {
             archiveArtifacts artifacts: 'MC-back-end/target/MC-back-end-*.jar', fingerprint: true
-            archiveArtifacts artifacts: 'MC-back-end/target/missioncommand-be_-*.deb', fingerprint: true
-            archiveArtifacts artifacts: 'MC-database/target/missioncommand-db_-*.deb', fingerprint: true
+            archiveArtifacts artifacts: 'MC-back-end/target/missioncommand-be_*.deb', fingerprint: true
+            archiveArtifacts artifacts: 'MC-database/target/missioncommand-db_*.deb', fingerprint: true
             archiveArtifacts artifacts: 'MC-front-end/target/MC-front-end-*.tgz', fingerprint: true
-            archiveArtifacts artifacts: 'MC-front-end/target/missioncommand-fe_-*.deb', fingerprint: true
+            archiveArtifacts artifacts: 'MC-front-end/target/missioncommand-fe_*.deb', fingerprint: true
             archiveArtifacts artifacts: 'MC-integration/target/helm/repo/mc-*.tgz', fingerprint: true
             archiveArtifacts artifacts: 'MC-model/target/MC-model-*.jar', fingerprint: true
             archiveArtifacts artifacts: 'MC-spec/target/MC-spec-*.jar', fingerprint: true
