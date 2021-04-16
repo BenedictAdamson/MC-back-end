@@ -41,8 +41,10 @@ abort-upgrade) # "prerm upgrade" failed during an upgrade
   # Do nothing
   ;;
 abort-remove) # "prerm remove" failed during a remove or remove+purge
-  NEW_VERSION="$1"
-  shift
+  if [ $# -gt 0 ]; then
+    NEW_VERSION="$1"
+    shift
+  fi
   # Do nothing
   ;;
 *)
