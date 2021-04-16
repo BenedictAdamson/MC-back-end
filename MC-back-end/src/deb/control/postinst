@@ -25,7 +25,7 @@ configure) # preinst was successful and files have been unpacked
   # adduser will do the right thing if the account already exists
   adduser --system -c "Mission Command server" "$MC_USERNAME"
   
-  if [ $HAVE_CONFIG_FILES = N ] && which systemctl; then
+  if [ $HAVE_CONFIG_FILES = N ] && which systemctl > /dev/null; then
     if [ ! -e etc/mission-command/adminpsswd.secret ]; then
     (
       umask go-rwx

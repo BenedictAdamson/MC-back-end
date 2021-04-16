@@ -5,7 +5,7 @@ MODE="$1"
 shift
 case "$MODE" in
 remove) # removal or removal+purge
-  if which systemctl; then
+  if which systemctl > /dev/null; then
     systemctl disable mission-command-be.service
   # else no systemd (probably because a Docker container)
   fi 
