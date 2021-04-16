@@ -28,7 +28,7 @@ configure) # preinst was successful and files have been unpacked
   if [ $HAVE_CONFIG_FILES = N ] && which systemctl; then
     if [ ! -e etc/mission-command/adminpsswd.secret ]; then
     (
-      umask 600
+      umask go-rwx
       hexdump -v -e '"%02X"' -n 16 /dev/random > /etc/mission-command/adminpsswd.secret
     )
     fi
