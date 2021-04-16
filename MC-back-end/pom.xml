@@ -92,15 +92,6 @@
                            </mapper>
                         </data>
                         <data>
-                           <type>file</type>
-                           <src>${project.basedir}/src/main/systemd/adminpsswd.secret</src>
-                           <mapper>
-                              <type>perm</type>
-                              <prefix>/etc/mission-command</prefix>
-                              <filemode>600</filemode>
-                           </mapper>
-                        </data>
-                        <data>
                            <type>link</type>
                            <linkName>/usr/share/lib/MC-back-end.jar</linkName>
                            <linkTarget>${project.build.finalName}.jar</linkTarget>
