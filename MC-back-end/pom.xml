@@ -94,6 +94,7 @@
                         <data>
                            <type>file</type>
                            <src>${project.basedir}/src/main/systemd/adminpsswd.secret</src>
+                           <conffile>true</conffile>
                            <mapper>
                               <type>perm</type>
                               <prefix>/etc/mission-command</prefix>
