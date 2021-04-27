@@ -5,7 +5,7 @@
    <parent>
       <groupId>uk.badamson.mc</groupId>
       <artifactId>MC</artifactId>
-      <version>2.21.0-SNAPSHOT</version>
+      <version>2.21.0</version>
    </parent>
    <artifactId>MC-back-end</artifactId>
    <packaging>jar</packaging>
@@ -94,6 +94,7 @@
                         <data>
                            <type>file</type>
                            <src>${project.basedir}/src/main/systemd/adminpsswd.secret</src>
+                           <conffile>true</conffile>
                            <mapper>
                               <type>perm</type>
                               <prefix>/etc/mission-command</prefix>

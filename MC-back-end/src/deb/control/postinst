@@ -25,14 +25,15 @@ configure) # preinst was successful and files have been unpacked
   # adduser will do the right thing if the account already exists
   adduser --system -c "Mission Command server" "$MC_USERNAME"
   
-  if [ $HAVE_CONFIG_FILES = N ] && which systemctl; then
-    (
-      umask 600
+  if ! which systemctl > /dev/null; then
+    # no systemd (probably because a Docker container)
+    rm /etc/mission-command/adminpsswd.secret
+  elif [ $HAVE_CONFIG_FILES = N ]; then
+    ( #replace the dummy conf file with a random password
+      umask go-rwx
       hexdump -v -e '"%02X"' -n 16 /dev/random > /etc/mission-command/adminpsswd.secret
     )
     systemctl enable mission-command-be.service
-  # else no systemd (probably because a Docker container)
-  # or user might have deactivated the service: do not enable
   fi 
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
@@ -41,8 +42,10 @@ abort-upgrade) # "prerm upgrade" failed during an upgrade
   # Do nothing
   ;;
 abort-remove) # "prerm remove" failed during a remove or remove+purge
-  NEW_VERSION="$1"
-  shift
+  if [ $# -gt 0 ]; then
+    NEW_VERSION="$1"
+    shift
+  fi
   # Do nothing
   ;;
 *)
