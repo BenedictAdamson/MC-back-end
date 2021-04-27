@@ -1,0 +1,54 @@
+#!/bin/sh
+# missioncommand-be .deb postinst
+
+# See https://wiki.debian.org/AccountHandlingInMaintainerScripts
+# * Needed UIDs should be allocated in postinst
+# * Account names should be unlikely to collide with user account names
+# * adduser enforces account names that match a regular expression,
+#   which is lower-case alphanumeric with - and _ permitted as word separators.
+MC_USERNAME="mission-command"
+
+MODE="$1"
+shift
+case "$MODE" in
+configure) # preinst was successful and files have been unpacked
+  if [ $# -gt 0 ]; then
+    # upgrading, or installing from the "Config Files" state
+    # (package was installed, then removed, but not purged)
+    OLD_VERSION="$1"
+    shift
+    HAVE_CONFIG_FILES=Y
+  else
+    HAVE_CONFIG_FILES=N
+  fi
+  
+  # adduser will do the right thing if the account already exists
+  adduser --system -c "Mission Command server" "$MC_USERNAME"
+  
+  if ! which systemctl > /dev/null; then
+    # no systemd (probably because a Docker container)
+    rm /etc/mission-command/adminpsswd.secret
+  elif [ $HAVE_CONFIG_FILES = N ]; then
+    ( #replace the dummy conf file with a random password
+      umask go-rwx
+      hexdump -v -e '"%02X"' -n 16 /dev/random > /etc/mission-command/adminpsswd.secret
+    )
+    systemctl enable mission-command-be.service
+  fi 
+  ;;
+abort-upgrade) # "prerm upgrade" failed during an upgrade
+  NEW_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+abort-remove) # "prerm remove" failed during a remove or remove+purge
+  if [ $# -gt 0 ]; then
+    NEW_VERSION="$1"
+    shift
+  fi
+  # Do nothing
+  ;;
+*)
+  echo "unrecognised postinst mode \"$MODE\"" 1>&2
+  exit 2;;
+esac

@@ -1,3 +1,6 @@
 /target/
 *.tgz
 *.log
+*.iso
+*.lock
+packer_cache/
