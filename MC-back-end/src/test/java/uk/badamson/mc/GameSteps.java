@@ -21,6 +21,7 @@ package uk.badamson.mc;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -406,16 +407,16 @@ public class GameSteps {
    }
 
    @Then("the game indicates which character \\(if any) the user is playing")
-   public void game_indicates_which_character_user_is_playing() {
+   public void game_indicates_which_character_if_any_user_is_playing() {
       Objects.requireNonNull(gamePlayers, "gamePlayers");
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       final var currentUserId = world.loggedInUser.getId();
       final var gameManager = world.loggedInUser.getAuthorities()
                .contains(Authority.ROLE_MANAGE_GAMES);
-      final var expectedUsers = gamePlayersService
+      final var allUsers = gamePlayersService
                .getGamePlayersAsGameManager(gameId).get().getUsers().values();
-      final var allOtherUsers = expectedUsers.stream()
+      final var allOtherUsers = allUsers.stream()
                .filter(user -> !user.equals(currentUserId))
                .collect(toUnmodifiableSet());
       final var otherUsers = gamePlayers.getUsers().values().stream()
@@ -424,6 +425,18 @@ public class GameSteps {
       assertAll(() -> assertGamePagePlayersInvariants(), () -> assertThat(
                "Collection of players of characters lists other users only if game manager",
                otherUsers, gameManager ? is(allOtherUsers) : empty()));
+   }
+
+   @Then("the game indicates which character the user is playing")
+   public void game_indicates_which_character_user_is_playing() {
+      Objects.requireNonNull(gamePlayers, "gamePlayers");
+      Objects.requireNonNull(world.loggedInUser, "loggedInUser");
+
+      final var currentUserId = world.loggedInUser.getId();
+      final var allUsers = gamePlayersService
+               .getGamePlayersAsGameManager(gameId).get().getUsers().values();
+      assertThat("List of users includes current user", allUsers,
+               contains(currentUserId));
    }
 
    @Then("the game indicates which characters are played by which users")
