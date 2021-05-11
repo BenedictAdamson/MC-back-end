@@ -34,11 +34,11 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
       <debian-package.version>2.23.0~SNAPSHOT</debian-package.version>
-      <MC.cucumber.version>6.10.2</MC.cucumber.version>
+      <MC.cucumber.version>6.10.3</MC.cucumber.version>
       <MC.node.version>v14.16.0</MC.node.version>
       <MC.npm.version>6.14.11</MC.npm.version>
-      <MC.spotbugs.version>4.2.0</MC.spotbugs.version>
-      <MC.spring-boot.version>2.4.3</MC.spring-boot.version>
+      <MC.spotbugs.version>4.2.3</MC.spotbugs.version>
+      <MC.spring-boot.version>2.4.5</MC.spring-boot.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
    </properties>
    <build>
@@ -47,13 +47,13 @@
             <plugin>
                <groupId>com.kiwigrid</groupId>
                <artifactId>helm-maven-plugin</artifactId>
-               <version>5.7</version>
+               <version>5.8</version>
                <extensions>true</extensions> <!-- Allow POM to have helm packaging -->
             </plugin>
             <plugin>
                <groupId>com.github.eirslett</groupId>
                <artifactId>frontend-maven-plugin</artifactId>
-               <version>1.11.2</version>
+               <version>1.11.3</version>
                <configuration>
                   <nodeVersion>${MC.node.version}</nodeVersion>
                   <npmVersion>${MC.npm.version}</npmVersion>
@@ -110,7 +110,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-jxr-plugin</artifactId>
-               <version>3.0.0</version>
+               <version>3.1.1</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -286,7 +286,7 @@
          <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-bom</artifactId>
-            <version>1.15.2</version>
+            <version>1.15.3</version>
             <type>pom</type>
             <scope>import</scope>
          </dependency>
