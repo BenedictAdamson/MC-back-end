@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,9 +82,9 @@ public class UserServiceImpl implements UserService {
     *            </ul>
     */
    @Autowired
-   public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final UserRepository userRepository,
-            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+   public UserServiceImpl(@Nonnull final PasswordEncoder passwordEncoder,
+            @Nonnull final UserRepository userRepository,
+            @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");
