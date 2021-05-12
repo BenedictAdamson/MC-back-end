@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -23,12 +23,6 @@ import org.springframework.data.repository.CrudRepository;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
 
-/**
- * <p>
- * Interface for generic CRUD operations on a repository for {@link GamePlayers}
- * objects.
- * </p>
- */
 public interface GamePlayersRepository
          extends CrudRepository<GamePlayers, Game.Identifier> {
 

@@ -75,34 +75,14 @@ public class GamePlayersServiceImplTest {
 
       @Test
       public void a() {
-         test(gamePlayersRepositoryA, currentUserGameRepositoryA, gameServiceA,
-                  userServiceA);
+         constructor(gamePlayersRepositoryA, currentUserGameRepositoryA,
+                  gameServiceA, userServiceA);
       }
 
       @Test
       public void b() {
-         test(gamePlayersRepositoryB, currentUserGameRepositoryB, gameServiceB,
-                  userServiceB);
-      }
-
-      private void test(final GamePlayersRepository gamePlayersRepository,
-               final CurrentUserGameRepository currentUserGameRepository,
-               final GameService gameService, final UserService userService) {
-         final var service = new GamePlayersServiceImpl(gamePlayersRepository,
-                  currentUserGameRepository, gameService, userService);
-
-         assertInvariants(service);
-         assertAll("Has the given assoications",
-                  () -> assertSame(gamePlayersRepository,
-                           service.getGamePlayersRepository(),
-                           "gamePlayersRepository"),
-                  () -> assertSame(currentUserGameRepository,
-                           service.getCurrentUserGameRepository(),
-                           "currentUserGameRepository"),
-                  () -> assertSame(gameService, service.getGameService(),
-                           "gameService"),
-                  () -> assertSame(userService, service.getUserService(),
-                           "userService"));
+         constructor(gamePlayersRepositoryB, currentUserGameRepositoryB,
+                  gameServiceB, userServiceB);
       }
    }// class
 
@@ -882,7 +862,8 @@ public class GamePlayersServiceImplTest {
    public static void assertInvariants(final GamePlayersServiceImpl service) {
       GamePlayersServiceTest.assertInvariants(service);// inherited
 
-      assertNotNull(service.getGamePlayersRepository(), "Not null, repository");
+      assertNotNull(service.getGamePlayersRepository(),
+               "Not null, gamePlayersRepository");
    }
 
    private static void assertIsDefault(final GamePlayers gamePlayers) {
@@ -890,6 +871,29 @@ public class GamePlayersServiceImplTest {
                () -> assertTrue(gamePlayers.isRecruiting(), "recruiting"),
                () -> assertThat("users", gamePlayers.getUsers().entrySet(),
                         empty()));
+   }
+
+   private static GamePlayersServiceImpl constructor(
+            final GamePlayersRepository gamePlayersRepository,
+            final CurrentUserGameRepository currentUserGameRepository,
+            final GameService gameService, final UserService userService) {
+      final var service = new GamePlayersServiceImpl(gamePlayersRepository,
+               currentUserGameRepository, gameService, userService);
+
+      assertInvariants(service);
+      assertAll("Has the given assoications",
+               () -> assertSame(gamePlayersRepository,
+                        service.getGamePlayersRepository(),
+                        "gamePlayersRepository"),
+               () -> assertSame(currentUserGameRepository,
+                        service.getCurrentUserGameRepository(),
+                        "currentUserGameRepository"),
+               () -> assertSame(gameService, service.getGameService(),
+                        "gameService"),
+               () -> assertSame(userService, service.getUserService(),
+                        "userService"));
+
+      return service;
    }
 
    public static GamePlayers endRecruitment(
@@ -916,9 +920,19 @@ public class GamePlayersServiceImplTest {
 
    public static Optional<GamePlayers> getGamePlayersAsGameManager(
             final GamePlayersServiceImpl service, final Game.Identifier id) {
+      final boolean gameExists = service.getGameService().getGame(id)
+               .isPresent();
+
       final var result = GamePlayersServiceTest
                .getGamePlayersAsGameManager(service, id);// inherited
+
       assertInvariants(service);
+      final var repositoryResult = service.getGamePlayersRepository()
+               .findById(id);
+      assertThat("Uses value from the repository, if there is one",
+               !gameExists || repositoryResult.isEmpty()
+                        || result.equals(repositoryResult));
+
       return result;
    }
 

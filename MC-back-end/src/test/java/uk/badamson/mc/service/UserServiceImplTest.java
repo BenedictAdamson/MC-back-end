@@ -40,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -259,11 +260,7 @@ public class UserServiceImplTest {
          final var service = new UserServiceImpl(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
 
-         final var result = getUser(service, User.ADMINISTRATOR_ID);
-
-         assertTrue(result.isPresent(), "present");// guard
-         assertThat("Has full authority", result.get().getAuthorities(),
-                  is(Authority.ALL));
+         getUser_administrator(service);
       }
 
       @Test
@@ -278,6 +275,39 @@ public class UserServiceImplTest {
 
          assertTrue(result.isPresent(), "present");
       }
+   }// class
+
+   @Nested
+   public class LoadUserByUserName {
+
+      @Test
+      public void absent() {
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+
+         assertThrows(UsernameNotFoundException.class,
+                  () -> loadUserByUsername(service, USERNAME_A));
+      }
+
+      @Test
+      public void administrator() {
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+
+         loadUserByUsername_administrator(service);
+      }
+
+      @Test
+      public void present() {
+         final var userDetails = new BasicUserDetails(USERNAME_A, PASSWORD_A,
+                  Authority.ALL, true, true, true, true);
+         final var service = new UserServiceImpl(passwordEncoderA,
+                  userRepositoryA, PASSWORD_A);
+         final var user = service.add(userDetails);
+
+         loadUserByUsername(service, user.getUsername());
+      }
+
    }// class
 
    @Nested
@@ -379,6 +409,13 @@ public class UserServiceImplTest {
       return result;
    }
 
+   public static User getUser_administrator(final UserServiceImpl service) {
+      final var result = UserServiceTest.getUser_administrator(service);// inherited
+
+      assertInvariants(service);
+      return result;
+   }
+
    public static Stream<User> getUsers(final UserServiceImpl service) {
       final var users = UserServiceTest.getUsers(service);// inherited
 
@@ -394,6 +431,15 @@ public class UserServiceImplTest {
 
       assertInvariants(service);
 
+      return user;
+   }
+
+   public static User loadUserByUsername_administrator(
+            final UserServiceImpl service) {
+      final var user = UserServiceTest
+               .loadUserByUsername_administrator(service);// inherited
+
+      assertInvariants(service);
       return user;
    }
 

@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,25 +47,17 @@ import uk.badamson.mc.repository.UserRepository;
 @Service
 public class UserServiceImpl implements UserService {
 
+   @Nonnull
    private final PasswordEncoder passwordEncoder;
+   @Nonnull
    private final UserRepository userRepository;
+   @Nonnull
    private final User administrator;
 
    /**
     * <p>
     * Construct a service layer instance that uses a given repository.
     * </p>
-    * <ul>
-    * <li>The {@linkplain #getUserRepository() user repository} of this service
-    * is the given user repository.</li>
-    * <li>The {@linkplain #getPasswordEncoder() password encoder} of this
-    * service is the given password encoder.</li>
-    * <li>The {@linkplain User#getPassword() password} of the
-    * {@linkplain User#ADMINISTRATOR_USERNAME administrator}
-    * {@linkplain #loadUserByUsername(String) user details found through this
-    * service} is {@linkplain String#equals(Object) equal to} the given
-    * administrator password encrypted by the given password encoder.</li>
-    * </ul>
     *
     * @param passwordEncoder
     *           The encoder that this service uses to encrypt passwords.
@@ -83,9 +74,9 @@ public class UserServiceImpl implements UserService {
     *            </ul>
     */
    @Autowired
-   public UserServiceImpl(@NonNull final PasswordEncoder passwordEncoder,
-            @NonNull final UserRepository userRepository,
-            @NonNull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+   public UserServiceImpl(@Nonnull final PasswordEncoder passwordEncoder,
+            @Nonnull final UserRepository userRepository,
+            @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");
@@ -116,11 +107,13 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
+   @Nonnull
    public final PasswordEncoder getPasswordEncoder() {
       return passwordEncoder;
    }
 
    @Override
+   @Nonnull
    public Optional<User> getUser(final UUID id) {
       Objects.requireNonNull(id, "id");
       if (User.ADMINISTRATOR_ID.equals(id)) {
@@ -130,21 +123,12 @@ public class UserServiceImpl implements UserService {
       }
    }
 
-   /**
-    * <p>
-    * The {@link User} repository that this service layer instance uses.
-    * </p>
-    * <ul>
-    * <li>Always have a (non null) user repository.</li>
-    * </ul>
-    *
-    * @return the repository.
-    */
    public final UserRepository getUserRepository() {
       return userRepository;
    }
 
    @Override
+   @Nonnull
    public Stream<User> getUsers() {
       final var repositoryIterable = userRepository.findAll();
       final var adminUses = Stream.of(administrator);
@@ -156,7 +140,8 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
-   public User loadUserByUsername(final String username)
+   @Nonnull
+   public User loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {
       Objects.requireNonNull(username, "username");
       if (BasicUserDetails.ADMINISTRATOR_USERNAME.equals(username)) {

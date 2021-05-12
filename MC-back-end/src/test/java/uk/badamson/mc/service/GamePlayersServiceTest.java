@@ -18,9 +18,11 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.AccessControlException;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +41,7 @@ import java.util.UUID;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.NamedUUID;
 
 /**
  * <p>
@@ -131,6 +136,24 @@ public class GamePlayersServiceTest {
             final UUID user, final Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
+      final var scenarioId = game.getScenario();
+
+      final var scenarioService = service.getGameService().getScenarioService();
+      final var scenario0 = scenarioService.getScenario(scenarioId);
+      final var scenarioCharacters = scenario0.isPresent()
+               ? scenario0.get().getCharacters()
+               : List.<NamedUUID>of();
+      final Set<UUID> scenarioCharacterIds = scenarioCharacters.stream()
+               .map(namedID -> namedID.getId()).collect(toUnmodifiableSet());
+      final var gamePlayers0 = service.getGamePlayersAsGameManager(game);
+      final var users0 = gamePlayers0.isPresent()
+               ? gamePlayers0.get().getUsers()
+               : Map.of();
+      final var alreadyPlaying = users0.containsValue(user);
+      final var firstUnplayedCharacterId0 = scenarioCharacters.stream()
+               .sequential().map(namedId -> namedId.getId())
+               .filter(id -> !users0.containsKey(id)).findFirst();
+
       try {
          service.userJoinsGame(user, game);
       } catch (UserAlreadyPlayingException | IllegalGameStateException
@@ -139,5 +162,38 @@ public class GamePlayersServiceTest {
          throw e;
       }
       assertInvariants(service);
+
+      try {
+         scenarioService.getScenario(scenarioId).get();
+      } catch (final NoSuchElementException e) {
+         throw new AssertionError(
+                  "If completes, the scenario is a recognized scenario", e);
+      }
+      final var currentGame = service.getCurrentGameOfUser(user);
+      final var gamePlayers = service.getGamePlayersAsGameManager(game).get();
+      final var users = gamePlayers.getUsers();
+      final var characterPlayed = users.entrySet().stream()
+               .filter(entry -> user.equals(entry.getValue()))
+               .map(entry -> entry.getKey()).findAny();
+      assertThat("The game had a previously unplayed character",
+               firstUnplayedCharacterId0.isPresent());// guard
+      assertThat("The players of the game includes the user.",
+               characterPlayed.isPresent());// guard
+      assertThat("The current game of the user is the given game.", currentGame,
+               is(Optional.of(game)));
+      assertThat(
+               "The character played by the player is one of the characters of the scenario of the game.",
+               scenarioCharacterIds, hasItem(characterPlayed.get()));
+      assertThat(
+               "The user is already a player, or the character played by the player did not previously have a player.",
+               alreadyPlaying || !users0.containsKey(characterPlayed.get()));
+      assertThat(
+               "The user is already a player, or the character played by the player is the first character that did not previously have a player.",
+               alreadyPlaying || characterPlayed.get()
+                        .equals(firstUnplayedCharacterId0.get()));
+      assertThat(
+               "If the scenario can not allow any more players, the game is no longer recruiting players.",
+               gamePlayers.isRecruiting() == users.size() < scenarioCharacters
+                        .size());
    }
 }

@@ -20,10 +20,13 @@ package uk.badamson.mc.service;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -44,15 +47,28 @@ public class ScenarioServiceTest {
 
    public static Stream<NamedUUID> getNamedScenarioIdentifiers(
             final ScenarioService service) {
+      final Set<UUID> expectedIdentifiers = service.getScenarioIdentifiers()
+               .collect(toUnmodifiableSet());
+
       final var scenarios = service.getNamedScenarioIdentifiers();
 
       assertInvariants(service);
       assertNotNull(scenarios, "Always returns a (non null) stream.");// guard
       final var scenariosList = scenarios.collect(toList());
-      final var scenariosSet = scenariosList.stream()
-               .collect(toUnmodifiableSet());
+      final Set<NamedUUID> scenariosSet;
+      try {
+         scenariosSet = scenariosList.stream().collect(toUnmodifiableSet());
+      } catch (final NullPointerException e) {
+         throw new AssertionError(
+                  "The returned stream will not include a null element", e);
+      }
       assertEquals(scenariosSet.size(), scenariosList.size(),
                "Does not contain duplicates.");
+      final var identifiersOfScenarios = scenariosSet.stream()
+               .map(namedId -> namedId.getId()).collect(toUnmodifiableSet());
+      assertThat(
+               "Contains a named identifier corresponding to each scenario identifier",
+               identifiersOfScenarios, is(expectedIdentifiers));
 
       return scenariosList.stream();
    }
@@ -76,8 +92,13 @@ public class ScenarioServiceTest {
       assertInvariants(service);
       assertNotNull(scenarios, "Always returns a (non null) stream.");// guard
       final var scenariosList = scenarios.collect(toList());
-      final var scenariosSet = scenariosList.stream()
-               .collect(toUnmodifiableSet());
+      final Set<UUID> scenariosSet;
+      try {
+         scenariosSet = scenariosList.stream().collect(toUnmodifiableSet());
+      } catch (final NullPointerException e) {
+         throw new AssertionError(
+                  "The returned stream will not include a null element", e);
+      }
       assertEquals(scenariosSet.size(), scenariosList.size(),
                "Does not contain duplicates.");
 

@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -21,16 +21,12 @@ package uk.badamson.mc.repository;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.data.repository.CrudRepository;
 
 import uk.badamson.mc.User;
 
-/**
- * <p>
- * Interface for generic CRUD operations on a repository for {@link User}
- * objects.
- * </p>
- */
 public interface UserRepository extends CrudRepository<User, UUID> {
 
    /**
@@ -39,13 +35,10 @@ public interface UserRepository extends CrudRepository<User, UUID> {
     * username}.
     * </p>
     *
-    * @param username
-    *           the username used to authenticate the user
-    * @return the entity with the given {@code username} or
-    *         {@literal Optional#empty()} if none found.
     * @throws NullPointerException
     *            If {@code username} is null
     */
-   Optional<User> findByUsername(String username);
+   @Nonnull
+   Optional<User> findByUsername(@Nonnull String username);
 
 }

@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2018-21.
  *
  * This file is part of MC.
  *
@@ -20,11 +20,6 @@ package uk.badamson.mc.repository;
 
 import org.springframework.context.annotation.ComponentScan;
 
-/**
- * <p>
- * The Spring Boot configuration of the Mission Command game.
- * </p>
- */
 @ComponentScan("uk.badamson.mc.repository")
 public class RepositoryLayerSpringConfiguration {
 
