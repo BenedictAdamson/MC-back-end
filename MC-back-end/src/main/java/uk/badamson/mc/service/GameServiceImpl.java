@@ -55,16 +55,8 @@ public class GameServiceImpl implements GameService {
 
    /**
     * <p>
-    * Construct a service with give associations.
+    * Construct a service with given associations.
     * </p>
-    * <ul>
-    * <li>The created service has the given {@code repository} as its
-    * {@linkplain #getRepository() repository}.</li>
-    * <li>The created service has the given {@code clock} as its
-    * {@linkplain #getClock() clock}.</li>
-    * <li>The created service has the given {@code scenarioService} as its
-    * {@linkplain #getScenarioService() scenario service}.</li>
-    * </ul>
     *
     * @param repository
     *           The repository that this service uses for persistent storage.
@@ -144,16 +136,6 @@ public class GameServiceImpl implements GameService {
       return clock.instant().truncatedTo(ChronoUnit.MILLIS);
    }
 
-   /**
-    * <p>
-    * The repository that this service uses for persistent storage.
-    * </p>
-    * <ul>
-    * <li>Always have a (non null) repository.</li>
-    * </ul>
-    *
-    * @return the repository
-    */
    @Nonnull
    public final GameRepository getRepository() {
       return repository;

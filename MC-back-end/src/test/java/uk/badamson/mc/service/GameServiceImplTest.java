@@ -59,26 +59,12 @@ public class GameServiceImplTest {
 
       @Test
       public void a() {
-         test(gameRepositoryA, CLOCK_A, scenarioServiceA);
+         constructor(gameRepositoryA, CLOCK_A, scenarioServiceA);
       }
 
       @Test
       public void b() {
-         test(gameRepositoryB, CLOCK_B, scenarioServiceB);
-      }
-
-      private void test(final GameRepository repository, final Clock clock,
-               final ScenarioService scenarioService) {
-         final var service = new GameServiceImpl(repository, clock,
-                  scenarioService);
-
-         assertInvariants(service);
-         assertAll("Has the given assoications",
-                  () -> assertSame(repository, service.getRepository(),
-                           "repository"),
-                  () -> assertSame(clock, service.getClock(), "clock"),
-                  () -> assertSame(scenarioService,
-                           service.getScenarioService(), "scenarioService"));
+         constructor(gameRepositoryB, CLOCK_B, scenarioServiceB);
       }
    }// class
 
@@ -257,6 +243,22 @@ public class GameServiceImplTest {
       GameServiceTest.assertInvariants(service);// inherited
 
       assertNotNull(service.getRepository(), "Not null, repository");
+   }
+
+   private static GameServiceImpl constructor(final GameRepository repository,
+            final Clock clock, final ScenarioService scenarioService) {
+      final var service = new GameServiceImpl(repository, clock,
+               scenarioService);
+
+      assertInvariants(service);
+      assertAll("Has the given assoications",
+               () -> assertSame(repository, service.getRepository(),
+                        "repository"),
+               () -> assertSame(clock, service.getClock(), "clock"),
+               () -> assertSame(scenarioService, service.getScenarioService(),
+                        "scenarioService"));
+
+      return service;
    }
 
    public static Game create(final GameServiceImpl service, final UUID scenario)
