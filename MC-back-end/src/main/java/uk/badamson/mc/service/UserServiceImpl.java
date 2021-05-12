@@ -155,7 +155,8 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
-   public User loadUserByUsername(final String username)
+   @Nonnull
+   public User loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {
       Objects.requireNonNull(username, "username");
       if (BasicUserDetails.ADMINISTRATOR_USERNAME.equals(username)) {

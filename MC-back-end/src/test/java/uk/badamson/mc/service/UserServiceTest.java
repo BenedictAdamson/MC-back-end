@@ -20,7 +20,6 @@ package uk.badamson.mc.service;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
@@ -58,6 +58,10 @@ public class UserServiceTest {
                         user.getAuthorities(), "authorities"),
                () -> assertEquals(userDetails.getUsername(), user.getUsername(),
                         "username"),
+               () -> assertTrue(
+                        service.getPasswordEncoder().matches(
+                                 userDetails.getPassword(), user.getPassword()),
+                        "password (encrypted)"),
                () -> assertEquals(userDetails.isAccountNonExpired(),
                         user.isAccountNonExpired(), "accountNonExpired"),
                () -> assertEquals(userDetails.isAccountNonLocked(),
@@ -67,6 +71,13 @@ public class UserServiceTest {
                         "credentialsNonExpired"),
                () -> assertEquals(userDetails.isEnabled(), user.isEnabled(),
                         "enabled"));
+
+      try {
+         service.loadUserByUsername(userDetails.getUsername());
+      } catch (final UsernameNotFoundException e) {
+         throw new AssertionError(
+                  "Can subsequently load the user using the username", e);
+      }
 
       return user;
    }
@@ -124,7 +135,7 @@ public class UserServiceTest {
    }
 
    public static void assertInvariants(final UserService service) {
-      // Do nothing
+      assertNotNull(service.getPasswordEncoder(), "Not null, passwordEncoder");
    }
 
    public static Optional<User> getUser(final UserService service,
@@ -134,8 +145,19 @@ public class UserServiceTest {
       assertInvariants(service);
       assertTrue(result.isEmpty() || id.equals(result.get().getId()),
                "Returns either an empty value, "
-                        + "or a value for which the {@linkplain User#getId() identifier is equivalent to the given ID");
+                        + "or a value for which the identifier is equivalent to the given ID");
       return result;
+   }
+
+   public static User getUser_administrator(final UserService service) {
+      final var result = getUser(service, User.ADMINISTRATOR_ID);
+
+      assertThat("Can always get user information for the administrator.",
+               result.isPresent());// guard
+      final var administrator = result.get();
+      assertThat("Administrator has full authority",
+               administrator.getAuthorities(), is(Authority.ALL));
+      return administrator;
    }
 
    public static Stream<User> getUsers(final UserService service) {
@@ -144,6 +166,8 @@ public class UserServiceTest {
       assertInvariants(service);
       assertNotNull(users, "Always returns a (non null) stream.");// guard
       final var usersList = users.collect(toList());
+      assertThat("The sequence of users has no null elements",
+               !usersList.stream().anyMatch(user -> user == null));// guard
       final var userNames = usersList.stream().map(user -> user.getUsername())
                .collect(toUnmodifiableSet());
       assertThat("The list of users always has an administrator.", userNames,
@@ -155,22 +179,33 @@ public class UserServiceTest {
    }
 
    public static User loadUserByUsername(final UserService service,
-            final String username) {
-      final var administrator = BasicUserDetails.ADMINISTRATOR_USERNAME
-               .equals(username);
-
-      final var user = service.loadUserByUsername(username);
+            final String username) throws UsernameNotFoundException {
+      final User user;
+      try {
+         user = service.loadUserByUsername(username);
+      } catch (final UsernameNotFoundException e) {
+         assertInvariants(service);
+         throw e;
+      }
 
       assertInvariants(service);
       assertNotNull(user, "Non null user");// guard
 
-      assertTrue(!(administrator && user == null),
-               "Always have user details for the administrator.");
-      if (user != null) {
-         assertThat("The administrator has a complete set of authorities.",
-                  user.getAuthorities(),
-                  administrator ? is(Authority.ALL) : anything());
+      return user;
+   }
+
+   public static User loadUserByUsername_administrator(
+            final UserService service) {
+      final User user;
+      try {
+         user = loadUserByUsername(service,
+                  BasicUserDetails.ADMINISTRATOR_USERNAME);
+      } catch (final UsernameNotFoundException e) {
+         throw new AssertionError(
+                  "Always have user details for the administrator.", e);
       }
+      assertThat("The administrator has a complete set of authorities.",
+               user.getAuthorities(), is(Authority.ALL));
       return user;
    }
 }
