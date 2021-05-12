@@ -40,19 +40,6 @@ public interface ScenarioService {
     * Retrieve a stream of the {@linkplain NamedUUID named identifiers} of the
     * scenarios of this instance of the Mission Command game.
     * </p>
-    * <ul>
-    * <li>Always returns a (non null) stream.</li>
-    * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain NamedUUID#equals(Object) duplicate} named
-    * identifiers.</li>
-    * <li>Contains a named identifier corresponding to each
-    * {@linkplain #getScenarioIdentifiers() scenario identifier}. That is, for
-    * each scenario identifier there is a named identifier that has an
-    * {@linkplain UUID#equals(Object) equivalent} {@linkplain NamedUUID#getId()
-    * ID}.</li>
-    * </ul>
-    *
-    * @return a {@linkplain Stream stream} of the named identifiers.
     */
    @Nonnull
    Stream<NamedUUID> getNamedScenarioIdentifiers();
@@ -61,14 +48,6 @@ public interface ScenarioService {
     * <p>
     * Retrieve the scenario that has a given unique ID.
     * </p>
-    * <ul>
-    * <li>Returns a (non null) optional value.</li>
-    * <li>Returns an {@linkplain Optional#isEmpty() empty} value, or a value for
-    * which the {@linkplain NamedUUID#getId() unique identifier} of the
-    * {@linkplain Scenario#getIdentifier() identification information} of the
-    * given scenario {@linkplain UUID#equals(Object) is equivalent to} the given
-    * ID</li>
-    * </ul>
     *
     * @param id
     *           The unique ID of the wanted scenario.
@@ -79,20 +58,6 @@ public interface ScenarioService {
    @Nonnull
    Optional<Scenario> getScenario(@Nonnull final UUID id);
 
-   /**
-    * <p>
-    * Retrieve a stream of the {@linkplain UUID unique identifiers} of the
-    * scenarios of this instance of the Mission Command game.
-    * </p>
-    * <ul>
-    * <li>Always returns a (non null) stream.</li>
-    * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain UUID#equals(Object) duplicate} named
-    * identifiers.</li>
-    * </ul>
-    *
-    * @return a {@linkplain Stream stream} of the identifiers.
-    */
    @Nonnull
    Stream<UUID> getScenarioIdentifiers();
 
