@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -20,6 +20,8 @@ package uk.badamson.mc.service;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -60,9 +63,22 @@ public class GameServiceTest {
 
       assertInvariants(service);
       assertNotNull(game, "Always returns a (non null) game.");// guard
-      assertAll("The returned game", () -> assertEquals(scenario,
-               game.getIdentifier().getScenario(),
-               "The returned game has the given scenario as the scenario of its identifier"));
+      final var gameId = game.getIdentifier();
+      assertAll("The identifier of the returned game",
+               () -> assertEquals(scenario, gameId.getScenario(),
+                        "has the given scenario"),
+               () -> assertThat("has the current time as its creation time.",
+                        gameId.getCreated(),
+                        /*
+                         * because of a clock race hazard, should not compare
+                         * for equality
+                         */
+                        lessThanOrEqualTo(service.getNow())));
+
+      final var subsequentRetrieval = service.getGame(gameId);
+      assertThat(
+               "The returned game can be retrieved later, using its identifier.",
+               subsequentRetrieval.isPresent());
 
       return game;
    }
@@ -81,7 +97,13 @@ public class GameServiceTest {
       assertInvariants(service);
       assertNotNull(times, "Always returns a (non null) stream.");// guard
       final var timesList = times.collect(toList());
-      final var timesSet = timesList.stream().collect(toUnmodifiableSet());
+      final Set<Instant> timesSet;
+      try {
+         timesSet = timesList.stream().collect(toUnmodifiableSet());
+      } catch (final NullPointerException e) {
+         throw new AssertionError(
+                  "The returned stream will not include a null element", e);
+      }
       assertEquals(timesSet.size(), timesList.size(),
                "Does not contain duplicates.");
 
@@ -107,7 +129,13 @@ public class GameServiceTest {
       assertInvariants(service);
       assertNotNull(games, "Always returns a (non null) stream.");// guard
       final var gamesList = games.collect(toList());
-      final var gamesSet = gamesList.stream().collect(toUnmodifiableSet());
+      final Set<Game.Identifier> gamesSet;
+      try {
+         gamesSet = gamesList.stream().collect(toUnmodifiableSet());
+      } catch (final NullPointerException e) {
+         throw new AssertionError(
+                  "The returned stream will not include a null element", e);
+      }
       assertEquals(gamesSet.size(), gamesList.size(),
                "Does not contain duplicates.");
 

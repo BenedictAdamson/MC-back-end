@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -30,7 +30,6 @@ import javax.annotation.Nonnull;
 import org.springframework.dao.DataAccessException;
 
 import uk.badamson.mc.Game;
-import uk.badamson.mc.Game.Identifier;
 
 /**
  * <p>
@@ -43,19 +42,6 @@ public interface GameService {
     * <p>
     * Create a new game for a given scenario.
     * </p>
-    *
-    * <h2>Post Conditions</h2>
-    * <ul>
-    * <li>Always return a (non null) game.</li>
-    * <li>The returned game has the given {@code scenario} as the
-    * {@linkplain Identifier#getScenario() scenario} of its
-    * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game has the {@linkplain #getNow() current time} as the
-    * {@linkplain Identifier#getCreated() creation time} of its
-    * {@linkplain Game#getIdentifier() identifier}.</li>
-    * <li>The returned game can be {@linkplain #getGame(Identifier) retrieved}
-    * later, using its {@linkplain Game#getIdentifier() identifier}.</li>
-    * </ul>
     *
     * @param scenario
     *           The unique ID of the scenario of interest.
@@ -77,15 +63,7 @@ public interface GameService {
             throws DataAccessException, NoSuchElementException;
 
    /**
-    * <p>
-    * The clock that this service uses to access to the current
-    * {@linkplain Instant instant} (point in time).
-    * </p>
-    * <ul>
-    * <li>Not null.</li>
-    * </ul>
-    *
-    * @return the clock
+    * @see #getNow()
     */
    @Nonnull
    Clock getClock();
@@ -97,19 +75,11 @@ public interface GameService {
     * </p>
     * <p>
     * The given {@code scenario} ID could be combined with the returned creation
-    * times to create the {@linkplain Identifier identifiers} of the games for
-    * the given scenario.
+    * times to create the identifiers of the games for the given scenario.
     * </p>
-    * <ul>
-    * <li>Always returns a (non null) stream.</li>
-    * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain Instant#equals(Object) duplicate}
-    * identifiers.</li>
-    * </ul>
     *
     * @param scenario
     *           The unique ID of the scenario of interest.
-    * @return The creation times
     * @throws NullPointerException
     *            If {@code scenario} is null.
     * @throws NoSuchElementException
@@ -127,16 +97,9 @@ public interface GameService {
     * <p>
     * Retrieve the game that has a given unique ID.
     * </p>
-    * <ul>
-    * <li>Returns a (non null) optional value.</li>
-    * <li>Returns either an {@linkplain Optional#isEmpty() empty} value, or a
-    * value for which the {@linkplain Game#getIdentifier() identifier}
-    * {@linkplain Identifier#equals(Object) is equivalent to} the given ID</li>
-    * </ul>
     *
     * @param id
     *           The unique ID of the wanted game.
-    * @return The game.
     * @throws NullPointerException
     *            If {@code id} is null.
     */
@@ -148,14 +111,6 @@ public interface GameService {
     * Retrieve a stream of the identifiers of all the games of this instance of
     * the Mission Command game.
     * </p>
-    * <ul>
-    * <li>Always returns a (non null) stream.</li>
-    * <li>The returned stream will not include a null element</li>
-    * <li>Does not contain {@linkplain Identifier#equals(Object) duplicate}
-    * identifiers.</li>
-    * </ul>
-    *
-    * @return a {@linkplain Stream stream} of the game identifiers.
     */
    @Nonnull
    Stream<Game.Identifier> getGameIdentifiers();
@@ -165,9 +120,6 @@ public interface GameService {
     * Retrieve the current point in time, using the {@linkplain #getClock()
     * clock} associated with this service, truncated to practical precision.
     * </p>
-    * <ul>
-    * <li>Not null</li>
-    * </ul>
     * <p>
     * Ideally, we would simply delegate to {@link Clock#instant()}.
     * Unfortunately, some repository implementations (including the MongoDB
@@ -175,24 +127,11 @@ public interface GameService {
     * are limited to millisecond precision. So we must truncate any excess
     * precision in some cases.
     * </p>
-    *
-    * @return the current time.
     */
 
    @Nonnull
    Instant getNow();
 
-   /**
-    * <p>
-    * The part of the service layer that this service uses for information about
-    * scenarios.
-    * </p>
-    * <ul>
-    * <li>Not null.</li>
-    * </ul>
-    *
-    * @return the scenario service
-    */
    @Nonnull
    ScenarioService getScenarioService();
 
