@@ -89,19 +89,15 @@ public class GameController {
     * Create a valid path for a game resource for a game that has a given
     * identifier.
     * </p>
-    * <p>
-    * The created value is consistent with the path used for
-    * {@link #getGame(UUID, Instant)}.
-    * </p>
-    *
     *
     * @param id
     *           The identifier of the game
-    * @return The path.
     * @throws NullPointerException
     *            If {@code id} is null.
+    *            @see #getGame(UUID, Instant)
     */
-   public static String createPathFor(final Game.Identifier id) {
+   @Nonnull 
+   public static String createPathFor(@Nonnull final Game.Identifier id) {
       Objects.requireNonNull(id, "id");
       return createPathForGames(id.getScenario())
                + URI_DATETIME_FORMATTER.format(id.getCreated());
@@ -114,7 +110,7 @@ public class GameController {
     * </p>
     * <p>
     * The created value is consistent with the path used for
-    * {@link #create(UUID)} and {@link #getCreationTimes(UUID)}.
+    * {@link #createGameForScenario(UUID)} and {@link #getCreationTimes(UUID)}.
     * </p>
     *
     * @param scenario
@@ -123,18 +119,22 @@ public class GameController {
     * @throws NullPointerException
     *            If {@code scenario} is null.
     */
-   public static String createPathForGames(final UUID scenario) {
+   @Nonnull 
+   public static String createPathForGames(@Nonnull  final UUID scenario) {
       return ScenarioController.createPathFor(scenario) + "/game/";
    }
 
-   public static String createPathForStarting(final Game.Identifier id) {
+   @Nonnull
+   public static String createPathForStarting(@Nonnull final Game.Identifier id) {
       return createPathFor(id) + "?" + START_PARAM;
    }
 
-   public static String createPathForStopping(final Game.Identifier id) {
+   @Nonnull
+   public static String createPathForStopping(@Nonnull final Game.Identifier id) {
       return createPathFor(id) + "?" + STOP_PARAM;
    }
 
+   @Nonnull
    private final GameService gameService;
 
    /**
@@ -155,9 +155,6 @@ public class GameController {
    /**
     * <p>
     * Create a game for a given scenario.
-    * </p>
-    * <p>
-    * The behaviour of the POST verb for a games collection resource.
     * </p>
     * <ul>
     * <li>Creates a new game for the given scenario.</li>
@@ -194,7 +191,7 @@ public class GameController {
    @PostMapping(GAMES_PATH_PATTERN)
    @Nonnull
    @RolesAllowed("MANAGE_GAMES")
-   public ResponseEntity<Void> create(
+   public ResponseEntity<Void> createGameForScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
       try {
          final var game = gameService.create(scenario);
@@ -218,21 +215,9 @@ public class GameController {
     * Get the creation times of the games for a given scenario, formatted in a
     * manner suitable for use in URIs used by this controller.
     * </p>
-    * <p>
-    * The behaviour of the GET verb for a games collection resource.
-    * </p>
-    * <ul>
-    * <li>Always returns a (non null) collection.</li>
-    * <li>The returned collection has no null elements.</li>
-    * <li>The returned collection has no duplicate elements.</li>
-    * <li>The returned collection contains strings
-    * {@linkplain #URI_DATETIME_FORMATTER suitably formatted for use as URI
-    * paths of this controller}.</li>
-    * </ul>
     *
     * @param scenario
     *           The unique ID of the scenario for which to create a game.
-    * @return The response.
     * @throws NullPointerException
     *            If {@code scenario} is null.
     * @throws ResponseStatusException
@@ -256,22 +241,11 @@ public class GameController {
    }
 
    /**
-    * <p>
-    * Behaviour of the GET verb for a game resource.
-    * </p>
-    * <ul>
-    * <li>Returns a (non null) game.</li>
-    * <li>The {@linkplain Identifier#getScenario() scenario identifier} of the
-    * {@linkplain Game#getIdentifier() identification information} of the game
-    * {@linkplain UUID#equals(Object) is equivalent to} the given scenario
-    * ID</li>
-    * </ul>
     *
     * @param scenario
     *           The unique ID of the scenario of the wanted game.
     * @param created
     *           The creation time of the wanted game.
-    * @return The response.
     * @throws NullPointerException
     *            <ul>
     *            <li>If {@code scenario} is null.</li>
@@ -302,11 +276,6 @@ public class GameController {
     * <p>
     * The part of the service layer instance that this uses.
     * </p>
-    * <ul>
-    * <li>Always associates with a (non null) service.</li>
-    * </ul>
-    *
-    * @return the service
     */
    @Nonnull
    public final GameService getGameService() {
