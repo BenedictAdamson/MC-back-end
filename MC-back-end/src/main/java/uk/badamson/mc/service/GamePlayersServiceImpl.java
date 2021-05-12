@@ -88,17 +88,6 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     * <p>
     * Construct a service with given associations.
     * </p>
-    * <ul>
-    * <li>The created service has the given {@code gamePlayersRepository} as its
-    * {@linkplain #getGamePlayersRepository() game players repository}.</li>
-    * <li>The created service has the given {@code gamePlayersRepository} as its
-    * {@linkplain #getCurrentUserGameRepository() current user game
-    * repository}.</li>
-    * <li>The created service has the given {@code gameService} as its
-    * {@linkplain #getGameService() game service}.</li>
-    * <li>The created service has the given {@code userService} as its
-    * {@linkplain #getUserService() user service}.</li>
-    * </ul>
     *
     * @param gamePlayersRepository
     *           The repository that this service uses for persistent storage of
@@ -178,41 +167,11 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       }
    }
 
-   /**
-    * <p>
-    * The repository that this service uses for persistent storage of
-    * {@link UserGameAssociation} objects that indicate the current game of each
-    * user.
-    * </p>
-    * <ul>
-    * <li>Always have a (non null) repository.</li>
-    * </ul>
-    *
-    * @return the repository
-    */
    @Nonnull
    public final CurrentUserGameRepository getCurrentUserGameRepository() {
       return currentUserGameRepository;
    }
 
-   /**
-    * {@inheritDoc}
-    * <p>
-    * Furthermore:
-    * </p>
-    * <ul>
-    * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
-    * associated {@linkplain #getGamePlayersRepository() repository} has a
-    * stored value with the given ID, that returned value is the value retrieved
-    * from the repository.</li>
-    * </ul>
-    *
-    * @param id
-    *           {@inheritDoc}
-    * @return {@inheritDoc}
-    * @throws NullPointerException
-    *            {@inheritDoc}
-    */
    @Override
    @Nonnull
    public Optional<GamePlayers> getGamePlayersAsGameManager(
@@ -220,26 +179,6 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return get(id);
    }
 
-   /**
-    * {@inheritDoc}
-    * <p>
-    * Furthermore:
-    * </p>
-    * <ul>
-    * <li>If returns a {@linkplain Optional#isPresent() present} value, and the
-    * associated {@linkplain #getGamePlayersRepository() repository} has a
-    * stored value with the given ID, that returned value is the value retrieved
-    * from the repository.</li>
-    * </ul>
-    *
-    * @param id
-    *           {@inheritDoc}
-    * @param user
-    *           {@inheritDoc}
-    * @return {@inheritDoc}
-    * @throws NullPointerException
-    *            {@inheritDoc}
-    */
    @Override
    @Nonnull
    public Optional<GamePlayers> getGamePlayersAsNonGameManager(
@@ -263,17 +202,6 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       }
    }
 
-   /**
-    * <p>
-    * The repository that this service uses for persistent storage of
-    * {@link GamePlayers} objects.
-    * </p>
-    * <ul>
-    * <li>Always have a (non null) repository.</li>
-    * </ul>
-    *
-    * @return the repository
-    */
    @Nonnull
    public final GamePlayersRepository getGamePlayersRepository() {
       return gamePlayersRepository;
