@@ -920,14 +920,18 @@ public class GamePlayersServiceImplTest {
 
    public static Optional<GamePlayers> getGamePlayersAsGameManager(
             final GamePlayersServiceImpl service, final Game.Identifier id) {
+      final boolean gameExists = service.getGameService().getGame(id)
+               .isPresent();
+
       final var result = GamePlayersServiceTest
                .getGamePlayersAsGameManager(service, id);// inherited
 
       assertInvariants(service);
       final var repositoryResult = service.getGamePlayersRepository()
                .findById(id);
-      assertThat("Fetches a value from the repository", result,
-               is(repositoryResult));
+      assertThat("Uses value from the repository, if there is one",
+               !gameExists || repositoryResult.isEmpty()
+                        || result.equals(repositoryResult));
 
       return result;
    }
