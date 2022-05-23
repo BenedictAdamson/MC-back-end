@@ -4,7 +4,7 @@
    <modelVersion>4.0.0</modelVersion>
    <!-- This POM declares two Maven repository servers, with IDs MC.repo 
       (the release repository) and MC-SNAPSHOT.repo (the SNAPSHOT repository). 
-      Therefore if you use this POM to deploy artifacts, your settings.xml configuration 
+      Therefore, if you use this POM to deploy artifacts, your settings.xml configuration
       file should contain credentials (in a servers/server element) for those servers. -->
    <!-- This POM provides plugin management for dockerfile-maven-plugin. 
       Using that plugin will require credentials (in a servers/server element) 
@@ -170,7 +170,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore></ignore>
+                              <ignore/>
                            </action>
                         </pluginExecution>
                      </pluginExecutions>
