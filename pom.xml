@@ -13,7 +13,7 @@
       credentials for the server index.docker.io. -->
    <groupId>uk.badamson.mc</groupId>
    <artifactId>MC</artifactId>
-   <version>2.22.2</version>
+   <version>2.22.3-SNAPSHOT</version>
    <packaging>pom</packaging>
    <organization>
       <name>Benedict Adamson</name>
