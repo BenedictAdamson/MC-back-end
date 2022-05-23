@@ -150,34 +150,6 @@
                <!-- For running unit tests. -->
             </plugin>
             <plugin>
-               <groupId>org.eclipse.m2e</groupId>
-               <artifactId>lifecycle-mapping</artifactId>
-               <version>1.0.0</version>
-               <configuration>
-                  <lifecycleMappingMetadata>
-                     <pluginExecutions>
-                        <pluginExecution>
-                           <pluginExecutionFilter>
-                              <groupId>com.kiwigrid</groupId>
-                              <artifactId>
-                                 helm-maven-plugin
-                              </artifactId>
-                              <versionRange>
-                                 [5.5,)
-                              </versionRange>
-                              <goals>
-                                 <goal>init</goal>
-                              </goals>
-                           </pluginExecutionFilter>
-                           <action>
-                              <ignore/>
-                           </action>
-                        </pluginExecution>
-                     </pluginExecutions>
-                  </lifecycleMappingMetadata>
-               </configuration>
-            </plugin>
-            <plugin>
                <groupId>org.springframework.boot</groupId>
                <artifactId>spring-boot-maven-plugin</artifactId>
                <version>${MC.spring-boot.version}</version>
