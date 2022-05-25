@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -196,6 +197,7 @@ public class UserController {
     *
     * @return the service
     */
+   @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="reference semantics")
    public final UserService getService() {
       return service;
    }

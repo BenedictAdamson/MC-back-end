@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020-1.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -30,6 +30,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -261,6 +262,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
                endRecruitment);
    }
 
+   @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="reference semantics")
    @Override
    @Nonnull
    public UserService getUserService() {

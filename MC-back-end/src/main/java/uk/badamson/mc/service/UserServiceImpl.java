@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -27,6 +27,7 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -139,6 +140,7 @@ public class UserServiceImpl implements UserService {
       return Stream.concat(adminUses, normalUsers);
    }
 
+   @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="reference semantics")
    @Override
    @Nonnull
    public User loadUserByUsername(@Nonnull final String username)

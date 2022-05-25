@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,6 +34,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
       http.authorizeRequests().antMatchers("/api/user/**").authenticated();
@@ -42,17 +44,20 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
    }
 
+   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    private static void configureCsrfProtection(final HttpSecurity http)
             throws Exception {
       http.csrf().csrfTokenRepository(
                CookieCsrfTokenRepository.withHttpOnlyFalse());
    }
 
+   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
       http.httpBasic();
    }
 
+   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    @Override
    protected void configure(final HttpSecurity http) throws Exception {
       configureHttpBasic(http);
