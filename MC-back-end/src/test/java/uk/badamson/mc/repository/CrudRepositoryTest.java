@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -84,6 +84,14 @@ public class CrudRepositoryTest {
       public final void deleteById(final ID identifier) {
          requireNonNull(identifier, "identifier");
          entities.remove(identifier);
+      }
+
+      @Override
+      public void deleteAllById(Iterable<? extends ID> identifiers) {
+         requireNonNull(identifiers, "identifiers");
+         for (final ID identifier: identifiers) {
+            entities.remove(identifier);
+         }
       }
 
       @Override
