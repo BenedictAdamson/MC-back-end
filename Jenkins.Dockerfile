@@ -1,7 +1,7 @@
 # Dockerfile for the use in the Jenkinsfile for the MC project,
 # to set up the build environment for Jenkins to use.
 
-# © Copyright Benedict Adamson 2018-21.
+# © Copyright Benedict Adamson 2018-22.
 # 
 # This file is part of MC.
 #
@@ -23,7 +23,7 @@
 # Also need nodejs, npm and Angular,
 # but the frontend-maven-plugin installs those.
 
-FROM debian:10
+FROM debian:11
 RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
