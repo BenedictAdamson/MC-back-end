@@ -4,4 +4,4 @@
 *.iso
 *.lock
 packer_cache/
-/.idea/workspace.xml
+/.idea
