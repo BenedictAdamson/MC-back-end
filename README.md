@@ -3,7 +3,7 @@ The Mission Command game.
 
 ## License
 
-© Copyright Benedict Adamson 2018-21.
+© Copyright Benedict Adamson 2018-22.
  
 ![AGPLV3](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)
 
@@ -66,14 +66,9 @@ MC is available from these public repositories:
     * [NGINX](https://www.nginx.com/)
 * Java Annotations:
     * [JCIP annotations](http://jcip.net/annotations/doc/net/jcip/annotations/package-summary.html)
-    * [SpotBugs annotations](https://javadoc.io/doc/com.github.spotbugs/spotbugs-annotations/3.1.8)
+    * [SpotBugs annotations](https://github.com/spotbugs/spotbugs/tree/master/spotbugs-annotations)
 * Development environment:
-    * [Eclipse IDE](https://www.eclipse.org/ide/)
-    * [Cucumber Eclipse Plugin](https://marketplace.eclipse.org/content/cucumber-eclipse-plugin)
-    * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
-    * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
-    * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
-    * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
+    * [IntelliJ IDEA](https://www.jetbrains.com/idea/)
     * [Minikube](https://github.com/kubernetes/minikube)
 * Software configuration management:
      * [Chartmuseum](https://github.com/helm/chartmuseum)
@@ -112,4 +107,11 @@ MC is available from these public repositories:
     * [Docker Hub](https://hub.docker.com/)
     * [Helm](https://helm.sh/)
     * [Kubernetes](https://kubernetes.io/)
+* Previously used:
+    * [Eclipse IDE](https://www.eclipse.org/ide/)
+    * [Cucumber Eclipse Plugin](https://marketplace.eclipse.org/content/cucumber-eclipse-plugin)
+    * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
+    * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
+    * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
+    * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
  
