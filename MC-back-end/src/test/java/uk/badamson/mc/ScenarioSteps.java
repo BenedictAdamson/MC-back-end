@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020-21.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -98,8 +98,7 @@ public class ScenarioSteps {
    }
 
    private void chooseScenario() {
-      id = gameService.getGameIdentifiers().map(game -> game.getScenario())
-               .findAny().get();
+      id = scenarioService.getScenarioIdentifiers().findAny().get();
    }
 
    @Then("it does not allow examination of games of the scenario")
