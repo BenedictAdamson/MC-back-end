@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2018-20,22.
  *
  * This file is part of MC.
  *
@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -37,6 +38,9 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
          PresentationLayerSpringConfiguration.class,
          ServiceLayerSpringConfiguration.class,
          RepositoryLayerSpringConfiguration.class })
+@DataMongoTest(
+        excludeAutoConfiguration = org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration.class
+)
 public class TestConfiguration {
 
 }

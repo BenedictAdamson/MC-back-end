@@ -37,7 +37,7 @@
       <MC.cucumber.version>6.11.0</MC.cucumber.version>
       <MC.node.version>v16.15.0</MC.node.version>
       <MC.npm.version>8.5.5</MC.npm.version>
-      <MC.spring-boot.version>2.5.14</MC.spring-boot.version>
+      <MC.spring-boot.version>2.6.8</MC.spring-boot.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
    </properties>
    <build>
@@ -185,6 +185,12 @@
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <version>3.4.6</version>
             <type>bundle</type>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo.spring</artifactId>
+            <version>1.1.0-spring26x</version>
             <scope>test</scope>
          </dependency>
          <dependency>
