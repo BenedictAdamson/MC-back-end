@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -73,16 +73,16 @@ public class UserControllerTest {
 
          @Test
          public void a() throws Exception {
-            test(USER_B);
+            test(Fixtures.createUserWithPlayerRole());
          }
 
          @Test
          public void b() throws Exception {
-            test(USER_C);
+            test(Fixtures.createUserWithManageGamesRole());
          }
 
          private void test(final BasicUserDetails addedUser) throws Exception {
-            final var performingUser = USER_A;
+            final var performingUser = Fixtures.createUserWithAllRoles();
             assert performingUser.getAuthorities()
                      .contains(Authority.ROLE_MANAGE_USERS);
             final var response = Add.this.test(performingUser, addedUser);
@@ -108,18 +108,17 @@ public class UserControllerTest {
 
       @Test
       public void administrator() throws Exception {
-         final var performingUser = USER_A;
-         final var addedUser = ADMINISTRATOR;
+         final var performingUser = Fixtures.createUserWithAllRoles();
 
-         final var response = test(performingUser, addedUser);
+         final var response = test(performingUser, Fixtures.ADMINISTRATOR);
 
          response.andExpect(status().isBadRequest());
       }
 
       @Test
       public void duplicate() throws Exception {
-         final var performingUser = USER_A;
-         final var addedUser = USER_B;
+         final var performingUser = Fixtures.createUserWithAllRoles();
+         final var addedUser = Fixtures.createUserWithPlayerRole();
 
          service.add(addedUser);
          final var response = test(performingUser, addedUser);
@@ -129,8 +128,8 @@ public class UserControllerTest {
 
       @Test
       public void noAuthentication() throws Exception {
-         final var performingUser = USER_A;
-         final var addedUser = USER_B;
+         final var performingUser = Fixtures.createUserWithAllRoles();
+         final var addedUser = Fixtures.createUserWithPlayerRole();
          service.add(performingUser);
          final var encoded = objectMapper.writeValueAsString(addedUser);
          final var request = post("/api/user")
@@ -147,8 +146,8 @@ public class UserControllerTest {
 
       @Test
       public void noCsrfToken() throws Exception {
-         final var performingUser = USER_A;
-         final var addedUser = USER_B;
+         final var performingUser = Fixtures.createUserWithAllRoles();
+         final var addedUser = Fixtures.createUserWithPlayerRole();
          service.add(performingUser);
          final var encoded = objectMapper.writeValueAsString(addedUser);
          final var request = post("/api/user")
@@ -183,12 +182,12 @@ public class UserControllerTest {
 
       @Test
       public void a() throws Exception {
-         test(USER_A);
+         test(Fixtures.createUserWithAllRoles());
       }
 
       @Test
       public void b() throws Exception {
-         test(USER_B);
+         test(Fixtures.createUserWithPlayerRole());
       }
 
       private void test(final User user) throws Exception {
@@ -220,7 +219,7 @@ public class UserControllerTest {
 
       @Test
       public void twice() throws Exception {
-         final var user = USER_A;
+         final var user = Fixtures.createUserWithAllRoles();
          service.add(user);
          final var request1 = get("/api/self")
                   .accept(MediaType.APPLICATION_JSON).with(user(user))
@@ -252,7 +251,7 @@ public class UserControllerTest {
 
       @Test
       public void unknownUser() throws Exception {
-         final var user = USER_A;
+         final var user = Fixtures.createUserWithAllRoles();
          final var headers = new HttpHeaders();
          headers.setBasicAuth(user.getUsername(), user.getPassword());
          final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
@@ -265,7 +264,7 @@ public class UserControllerTest {
 
       @Test
       public void wrongPassword() throws Exception {
-         final var user = USER_A;
+         final var user = Fixtures.createUserWithAllRoles();
          final var wrongPassword = "****";
          final var headers = new HttpHeaders();
          headers.setBasicAuth(user.getUsername(), wrongPassword);
@@ -287,18 +286,18 @@ public class UserControllerTest {
 
          @Test
          public void a() throws Exception {
-            testNonAdministrator(USER_A.getUsername(), USER_B);
+            testNonAdministrator(Fixtures.createUserName(), Fixtures.createUserWithPlayerRole());
          }
 
          @Test
          public void administrator() throws Exception {
-            test(USER_A.getUsername(),
+            test(Fixtures.createUserName(),
                      service.getUser(User.ADMINISTRATOR_ID).get());
          }
 
          @Test
          public void b() throws Exception {
-            testNonAdministrator(USER_B.getUsername(), USER_A);
+            testNonAdministrator(Fixtures.createUserName(), Fixtures.createUserWithAllRoles());
          }
 
          private void test(final String requestingUserName, final User user)
@@ -335,16 +334,16 @@ public class UserControllerTest {
 
       @Test
       public void forbidden() throws Exception {
-         // Tough test: user exists, requester has all other permissinos, and
+         // Tough test: user exists, requester has all other permissions, and
          // request hasCSRF token
          // Tough test: requesting user has minimum authority
-         final var requestingUserName = USER_C.getUsername();
+         final var requestingUserName = Fixtures.createUserName();
          final var authorities = EnumSet.allOf(Authority.class);
          authorities.remove(Authority.ROLE_MANAGE_USERS);
          final var requestingUser = service
                   .add(new BasicUserDetails(requestingUserName, "password1",
                            authorities, true, true, true, true));
-         final var user = service.add(USER_A);
+         final var user = service.add(Fixtures.createUserWithAllRoles());
          final var response = perform(user.getId(), requestingUser);
 
          response.andExpect(status().isForbidden());
@@ -353,7 +352,7 @@ public class UserControllerTest {
       @Test
       public void notLoggedIn() throws Exception {
          // Tough test: exists and has CSRF token
-         final var user = USER_A;
+         final var user = Fixtures.createUserWithAllRoles();
          service.add(user);
          final var response = perform(user.getId(), null);
 
@@ -374,22 +373,11 @@ public class UserControllerTest {
       @Test
       public void unknownUser() throws Exception {
          // Tough test: has permission and CSRF token
-         final var response = perform(USER_A.getId(), ADMINISTRATOR);
+         final var response = perform(Fixtures.createUserWithAllRoles().getId(), Fixtures.ADMINISTRATOR);
 
          response.andExpect(status().isNotFound());
       }
    }// class
-
-   private static final User ADMINISTRATOR = User
-            .createAdministrator("password");
-   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
-            "letmein", Authority.ALL, true, true, true, true);
-   private static final User USER_B = new User(UUID.randomUUID(), "allan",
-            "password1", Set.of(Authority.ROLE_PLAYER), false, false, false,
-            false);
-   private static final User USER_C = new User(UUID.randomUUID(), "john",
-            "password2", Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true,
-            true);
 
    @Autowired
    private UserService service;

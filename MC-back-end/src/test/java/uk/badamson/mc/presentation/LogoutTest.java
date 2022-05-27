@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -54,9 +54,6 @@ public class LogoutTest {
 
    private static final String PATH = "/logout";
 
-   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
-            "letmein", Authority.ALL, true, true, true, true);
-
    @Autowired
    private UserService service;
 
@@ -65,7 +62,7 @@ public class LogoutTest {
 
    @Test
    public void logout_noAuthentication() throws Exception {
-      service.add(USER_A);
+      service.add(Fixtures.createUserWithAllRoles());
       final var request = post(PATH).with(csrf());
 
       final var response = mockMvc.perform(request);
@@ -75,7 +72,7 @@ public class LogoutTest {
 
    @Test
    public void logout_noCsrfToken() throws Exception {
-      final var user = USER_A;
+      final var user = Fixtures.createUserWithAllRoles();
       service.add(user);
       final var session = new MockHttpSession();
       final var request = post(PATH).with(user(user)).session(session);
@@ -89,8 +86,8 @@ public class LogoutTest {
 
    @Test
    public void logout_noSession() throws Exception {
-      service.add(USER_A);
-      final var request = post(PATH).with(user(USER_A)).with(csrf());
+      service.add(Fixtures.createUserWithAllRoles());
+      final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf());
 
       final var response = mockMvc.perform(request);
 
@@ -99,9 +96,9 @@ public class LogoutTest {
 
    @Test
    public void logout_withSession() throws Exception {
-      service.add(USER_A);
+      service.add(Fixtures.createUserWithAllRoles());
       final var session = new MockHttpSession();
-      final var request = post(PATH).with(user(USER_A)).with(csrf())
+      final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf())
                .session(session);
 
       final var response = mockMvc.perform(request);

@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020-21.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -228,7 +228,7 @@ public class GamePlayersControllerTest {
                   final boolean expectListsOtherPlayer) throws Exception {
             // Tough test: user has a minimum set of authorities
             final var user = createUser(EnumSet.of(authority));
-            final var player = userService.add(new BasicUserDetails(USER_NAME_B,
+            final var player = userService.add(new BasicUserDetails(Fixtures.createUserName(),
                      "letmein", EnumSet.of(Authority.ROLE_PLAYER), true, true,
                      true, true));
             final var id = createGame();
@@ -526,10 +526,6 @@ public class GamePlayersControllerTest {
 
    }// class
 
-   private static final String USER_NAME_A = "Allan";
-
-   private static final String USER_NAME_B = "Rob";
-
    @Autowired
    GameRepository gameRepository;
 
@@ -559,7 +555,7 @@ public class GamePlayersControllerTest {
    }
 
    private User createUser(final Set<Authority> authorities) {
-      return userService.add(new BasicUserDetails(USER_NAME_A, "letmein",
+      return userService.add(new BasicUserDetails(Fixtures.createUserName(), "letmein",
                authorities, true, true, true, true));
    }
 }

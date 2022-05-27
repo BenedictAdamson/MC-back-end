@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -19,8 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +35,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -75,15 +75,19 @@ public class GameControllerTest {
    @Nested
    public class Create {
       @Test
-      public void knowScenario() throws Exception {
+      public void knownScenario() throws Exception {
          final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                   .get();
+         final var gamesForScenario0 = gameService.getGameIdentifiers()
+                 .filter(gi -> scenario.equals(gi.getScenario())).collect(Collectors.toUnmodifiableSet());
 
          final var response = testAuthenticated(scenario,
                   USER_WITH_ALL_AUTHORITIES);
 
          final var id = gameService.getGameIdentifiers()
-                  .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+                  .filter(gi -> scenario.equals(gi.getScenario()))
+                 .filter(gi -> !gamesForScenario0.contains(gi))
+                 .findAny();
          final var location = response.andReturn().getResponse()
                   .getHeaderValue("Location");
          assertAll(
@@ -98,16 +102,15 @@ public class GameControllerTest {
       public void noAuthentication() throws Exception {
          final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                   .get();
+         final var nGames0 = gameService.getGameIdentifiers().count();
          final var request = post(GameController.createPathForGames(scenario))
                   .with(csrf());
 
          final var response = mockMvc.perform(request);
 
-         final var id = gameService.getGameIdentifiers()
-                  .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+         final var nGames = gameService.getGameIdentifiers().count();
          assertAll(
-                  () -> assertTrue(id.isEmpty(),
-                           "Did not create a game for the scenario"),
+                 () -> assertThat("Did not create a game", nGames, is(nGames0)),
                   () -> response.andExpect(status().isUnauthorized()));
       }
 
@@ -115,16 +118,15 @@ public class GameControllerTest {
       public void noCsrfToken() throws Exception {
          final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                   .get();
+         final var nGames0 = gameService.getGameIdentifiers().count();
          final var request = post(GameController.createPathForGames(scenario))
                   .with(user(USER_WITH_ALL_AUTHORITIES));
 
          final var response = mockMvc.perform(request);
 
-         final var id = gameService.getGameIdentifiers()
-                  .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+         final var nGames = gameService.getGameIdentifiers().count();
          assertAll(
-                  () -> assertTrue(id.isEmpty(),
-                           "Did not create a game for the scenario"),
+                  () -> assertThat("Did not create a game", nGames, is(nGames0)),
                   () -> response.andExpect(status().isForbidden()));
       }
 
@@ -136,14 +138,13 @@ public class GameControllerTest {
                   .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
          final var user = new User(ID_A, "allan", "letmein", authorities, true,
                   true, true, true);
+         final var nGames0 = gameService.getGameIdentifiers().count();
 
          final var response = testAuthenticated(scenario, user);
 
-         final var id = gameService.getGameIdentifiers()
-                  .filter(gi -> scenario.equals(gi.getScenario())).findAny();
+         final var nGames = gameService.getGameIdentifiers().count();
          assertAll(
-                  () -> assertTrue(id.isEmpty(),
-                           "Did not create a game for the scenario"),
+                 () -> assertThat("Did not create a game", nGames, is(nGames0)),
                   () -> response.andExpect(status().is4xxClientError()));
       }
 
@@ -258,21 +259,6 @@ public class GameControllerTest {
       }
 
       @Test
-      public void none() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
-
-         final var response = perform(scenario);
-
-         response.andExpect(status().isOk());
-         final var jsonResponse = response.andReturn().getResponse()
-                  .getContentAsString();
-         final var creationTimes = objectMapper.readValue(jsonResponse,
-                  INSTANT_LIST);
-         assertThat("creation times", creationTimes, empty());
-      }
-
-      @Test
       public void one() throws Exception {
          final var scenario = scenarioService.getScenarioIdentifiers().findAny()
                   .get();
@@ -288,7 +274,7 @@ public class GameControllerTest {
                   containsString(created.toString()));
          final var creationTimes = objectMapper.readValue(jsonResponse,
                   INSTANT_LIST);
-         assertEquals(List.of(created), creationTimes, "creation times");
+         assertThat("creation times", creationTimes, hasItem(created));
       }
 
       private ResultActions perform(final UUID scenario) throws Exception {
