@@ -149,6 +149,11 @@
                <!-- For running unit tests. -->
             </plugin>
             <plugin>
+               <groupId>org.codehaus.gmavenplus</groupId>
+               <artifactId>gmavenplus-plugin</artifactId>
+               <version>1.13.1</version>
+            </plugin>
+            <plugin>
                <groupId>org.springframework.boot</groupId>
                <artifactId>spring-boot-maven-plugin</artifactId>
                <version>${MC.spring-boot.version}</version>
@@ -229,6 +234,13 @@
             <version>4.7.0</version>
          </dependency>
          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>3.0.10</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
             <version>2.2</version>
@@ -242,10 +254,23 @@
             <scope>import</scope>
          </dependency>
          <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+            <version>5.13.2</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
             <groupId>org.opentest4j</groupId>
             <artifactId>opentest4j</artifactId>
             <version>1.2.0</version>
             <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-bom</artifactId>
+            <version>2.1-groovy-3.0</version>
+            <type>pom</type>
+            <scope>import</scope>
          </dependency>
          <dependency>
             <!-- Import dependency management from Spring Boot -->
