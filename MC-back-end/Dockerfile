@@ -1,7 +1,7 @@
 # Dockerfile for the MC project,
 # to produce the MC back-end server in a container.
 
-# © Copyright Benedict Adamson 2018-22.
+# © Copyright Benedict Adamson 2018-21.
 # 
 # This file is part of MC.
 #
@@ -25,7 +25,7 @@ ARG PACKAGEVERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game back-end server."
 LABEL maintainer="badamson@spamcop.net"
-EXPOSE 80
+EXPOSE 8080
 COPY target/missioncommand-be_${PACKAGEVERSION}_all.deb missioncommand-be.deb
 # Although the openjdk:11 base image provides a Java 11 JRE, it does not do so by installing a .deb,
 # so dpkg will complain of a missing dependency unless we tell it to --force-depends
