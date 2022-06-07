@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /* 
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  * 
  * This file is part of MC.
  *
@@ -24,7 +24,6 @@ package uk.badamson.mc.service;
  * because a user already exists.
  * </p>
  */
-@SuppressWarnings("serial")
 public final class UserExistsException extends IllegalPlayerStateException {
 
    public UserExistsException() {

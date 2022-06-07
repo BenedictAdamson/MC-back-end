@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -116,9 +116,7 @@ public class GameServiceTest {
 
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
-         assertEquals(id, result.get().getIdentifier(), "identifier");
-      }
+      result.ifPresent(game -> assertEquals(id, game.getIdentifier(), "identifier"));
       return result;
    }
 

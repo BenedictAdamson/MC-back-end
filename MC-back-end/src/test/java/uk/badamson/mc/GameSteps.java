@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020-21.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -40,10 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.opentest4j.AssertionFailedError;
 import org.opentest4j.MultipleFailuresError;
@@ -64,6 +61,8 @@ import uk.badamson.mc.presentation.GamePlayersController;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
+
+import javax.annotation.Nonnull;
 
 /**
  * <p>
@@ -158,9 +157,10 @@ public class GameSteps {
    }
 
    private void chooseScenario() {
-      final var scenarioId = scenarioService.getScenarioIdentifiers().findAny()
-               .get();
-      scenario = scenarioService.getScenario(scenarioId).get();
+      final var scenarioId = getAScenarioId(scenarioService);
+      Optional<Scenario> scenarioOptional = scenarioService.getScenario(scenarioId);
+      assertThat("scenario", scenarioOptional.isPresent());
+      scenario = scenarioOptional.get();
       updateGameCreationTimes();
    }
 
@@ -210,7 +210,7 @@ public class GameSteps {
    }
 
    private <TYPE> TYPE expectEncodedResponse(final ResultActions response,
-            final Class<? extends TYPE> clazz) throws Exception {
+            final Class<? extends TYPE> clazz) {
       try {
          response.andExpect(status().isOk());
          final var responseText = response.andReturn().getResponse()
@@ -236,8 +236,9 @@ public class GameSteps {
 
       final var location = world.getResponse().andReturn().getResponse()
                .getHeader("Location");
-      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
-               .get();
+      final Optional<GamePlayers> gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      gamePlayers = gamePlayersOptional.get();
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> assertNotNull(location, "has Location header")); // guard
       final var gameRedirectedTo = parseGamePlayersPath(location);
@@ -403,7 +404,7 @@ public class GameSteps {
 
    @Then("the game indicates whether the user may join the game")
    public void game_indicates_whether_user_may_join_game() {
-      assertThat(mayJoinGame.booleanValue(), anything());
+      assertThat(mayJoinGame, anything());
    }
 
    @Then("the game indicates which character \\(if any) the user is playing")
@@ -414,15 +415,17 @@ public class GameSteps {
       final var currentUserId = world.loggedInUser.getId();
       final var gameManager = world.loggedInUser.getAuthorities()
                .contains(Authority.ROLE_MANAGE_GAMES);
-      final var allUsers = gamePlayersService
-               .getGamePlayersAsGameManager(gameId).get().getUsers().values();
+      final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+              .getGamePlayersAsGameManager(gameId);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      final var allUsers = gamePlayersOptional.get().getUsers().values();
       final var allOtherUsers = allUsers.stream()
                .filter(user -> !user.equals(currentUserId))
                .collect(toUnmodifiableSet());
       final var otherUsers = gamePlayers.getUsers().values().stream()
                .filter(user -> !user.equals(currentUserId))
                .collect(toUnmodifiableSet());
-      assertAll(() -> assertGamePagePlayersInvariants(), () -> assertThat(
+      assertAll(this::assertGamePagePlayersInvariants, () -> assertThat(
                "Collection of players of characters lists other users only if game manager",
                otherUsers, gameManager ? is(allOtherUsers) : empty()));
    }
@@ -433,8 +436,10 @@ public class GameSteps {
       Objects.requireNonNull(world.loggedInUser, "loggedInUser");
 
       final var currentUserId = world.loggedInUser.getId();
-      final var allUsers = gamePlayersService
-               .getGamePlayersAsGameManager(gameId).get().getUsers().values();
+      final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+              .getGamePlayersAsGameManager(gameId);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      final var allUsers = gamePlayersOptional.get().getUsers().values();
       assertThat("List of users includes current user", allUsers,
                contains(currentUserId));
    }
@@ -529,8 +534,8 @@ public class GameSteps {
    private void getResponseAsGameCreationTimes() throws IOException {
       final var response = world.getResponseBodyAsString();
       gameCreationTimes = objectMapper.readValue(response,
-               new TypeReference<Set<Instant>>() {
-               });
+              new TypeReference<>() {
+              });
    }
 
    @When("has a game")
@@ -547,8 +552,7 @@ public class GameSteps {
          return false;
       } else {
          return world.loggedInUser.getAuthorities().stream()
-                  .map(a -> options.contains(a)).filter(present -> present)
-                  .findAny().isPresent();
+                  .anyMatch(options::contains);
       }
    }
 
@@ -603,8 +607,9 @@ public class GameSteps {
       chooseScenario();
       game = gameService.create(scenario.getIdentifier());
       gameId = game.getIdentifier();
-      gamePlayers = gamePlayersService.getGamePlayersAsGameManager(gameId)
-               .get();
+      final Optional<GamePlayers> gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      gamePlayers = gamePlayersOptional.get();
       mayJoinGame = null;
       BackEndWorld.require(gamePlayers.isRecruiting(), "game is recruiting");
    }
@@ -744,5 +749,11 @@ public class GameSteps {
                   e);
       }
       game = null;// local copy is out of date
+   }
+
+   private static UUID getAScenarioId(@Nonnull ScenarioService scenarioService) {
+      final Optional<UUID> scenarioIdOptional = scenarioService.getScenarioIdentifiers().findAny();
+      assertThat("scenarioId", scenarioIdOptional.isPresent());
+      return scenarioIdOptional.get();
    }
 }

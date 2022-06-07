@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -54,7 +54,6 @@ public class UnknownPageSteps {
    public void modifying_the_unknown_resource_with_a(final String verb,
             final String path) throws Exception {
       final var method = HttpMethod.valueOf(verb);
-      assert method != null;
       world.exchangeJson(method, path);
    }
 

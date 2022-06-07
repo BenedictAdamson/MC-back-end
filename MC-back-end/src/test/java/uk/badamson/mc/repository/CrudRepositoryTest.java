@@ -62,7 +62,7 @@ public class CrudRepositoryTest {
       }
 
       @Override
-      public final void delete(final T entity) {
+      public final void delete(@Nonnull final T entity) {
          requireNonNull(entity, "entity");
          deleteById(getId(entity));
       }
@@ -73,7 +73,7 @@ public class CrudRepositoryTest {
       }
 
       @Override
-      public final void deleteAll(final Iterable<? extends T> entities) {
+      public final void deleteAll(@Nonnull final Iterable<? extends T> entities) {
          requireNonNull(entities, "entities");
          for (final T entity : entities) {
             this.entities.remove(getId(entity));
@@ -81,13 +81,13 @@ public class CrudRepositoryTest {
       }
 
       @Override
-      public final void deleteById(final ID identifier) {
+      public final void deleteById(@Nonnull final ID identifier) {
          requireNonNull(identifier, "identifier");
          entities.remove(identifier);
       }
 
       @Override
-      public void deleteAllById(Iterable<? extends ID> identifiers) {
+      public void deleteAllById(@Nonnull Iterable<? extends ID> identifiers) {
          requireNonNull(identifiers, "identifiers");
          for (final ID identifier: identifiers) {
             entities.remove(identifier);
@@ -95,32 +95,35 @@ public class CrudRepositoryTest {
       }
 
       @Override
-      public final boolean existsById(final ID identifier) {
+      public final boolean existsById(@Nonnull final ID identifier) {
          requireNonNull(identifier, "identifier");
          return entities.containsKey(identifier);
       }
 
+      @Nonnull
       @Override
       public final Iterable<T> findAll() {
-         // Return copies of the entities so we are isolated from downstream
+         // Return copies of the entities, so we are isolated from downstream
          // mutations
-         return entities.values().stream().map(entity -> copy(entity))
+         return entities.values().stream().map(this::copy)
                   .collect(toList());
       }
 
+      @Nonnull
       @Override
-      public final Iterable<T> findAllById(final Iterable<ID> identifiers) {
+      public final Iterable<T> findAllById(@Nonnull final Iterable<ID> identifiers) {
          requireNonNull(identifiers, "identifiers");
-         // Return copies of the entities so we are isolated from downstream
+         // Return copies of the entities, so we are isolated from downstream
          // mutations
          return StreamSupport.stream(identifiers.spliterator(), false)
-                  .distinct().filter(id -> id != null)
-                  .map(id -> entities.get(id)).map(entity -> copy(entity))
+                  .distinct().filter(Objects::nonNull)
+                  .map(entities::get).map(this::copy)
                   .collect(toUnmodifiableList());
       }
 
+      @Nonnull
       @Override
-      public final Optional<T> findById(final ID identifier) {
+      public final Optional<T> findById(@Nonnull final ID identifier) {
          requireNonNull(identifier, "identifier");
          var entity = entities.get(identifier);
          // Return copy so we are isolated from downstream mutations
@@ -132,8 +135,9 @@ public class CrudRepositoryTest {
 
       protected abstract ID getId(T entity);
 
+      @Nonnull
       @Override
-      public final <T1 extends T> T1 save(final T1 entity) {
+      public final <T1 extends T> T1 save(@Nonnull final T1 entity) {
          requireNonNull(entity, "entity");
          // Save a copy to we are insulated from changes to the given entity
          // object.
@@ -141,9 +145,10 @@ public class CrudRepositoryTest {
          return entity;
       }
 
+      @Nonnull
       @Override
       public final <T1 extends T> Iterable<T1> saveAll(
-               final Iterable<T1> entities) {
+              @Nonnull final Iterable<T1> entities) {
          requireNonNull(entities, "entities");
          for (final T1 entity : entities) {
             save(entity);
@@ -153,7 +158,7 @@ public class CrudRepositoryTest {
 
    }// class
 
-   public static final <T, ID> void assertInvariants(
+   public static <T, ID> void assertInvariants(
             final CrudRepository<T, ID> repository) {
       // Do nothing
    }

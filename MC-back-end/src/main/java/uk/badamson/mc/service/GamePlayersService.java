@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -51,7 +51,7 @@ public interface GamePlayersService {
     *
     * @param id
     *           The unique ID of the game to mutate.
-    * @return The mutated game players information.
+    * @return The mutated game players' information.
     * @throws NullPointerException
     *            If {@code id} is null.
     * @throws NoSuchElementException

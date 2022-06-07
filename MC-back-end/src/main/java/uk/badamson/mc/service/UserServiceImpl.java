@@ -18,15 +18,6 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.annotation.Nonnull;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,10 +25,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserRepository;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * <p>
@@ -115,7 +112,7 @@ public class UserServiceImpl implements UserService {
 
    @Override
    @Nonnull
-   public Optional<User> getUser(final UUID id) {
+   public Optional<User> getUser(@Nonnull final UUID id) {
       Objects.requireNonNull(id, "id");
       if (User.ADMINISTRATOR_ID.equals(id)) {
          return Optional.of(administrator);
@@ -124,6 +121,7 @@ public class UserServiceImpl implements UserService {
       }
    }
 
+   @Nonnull
    public final UserRepository getUserRepository() {
       return userRepository;
    }
@@ -149,10 +147,11 @@ public class UserServiceImpl implements UserService {
       if (BasicUserDetails.ADMINISTRATOR_USERNAME.equals(username)) {
          return administrator;
       } else {
-         try {
-            return userRepository.findByUsername(username).get();
-         } catch (final NoSuchElementException e) {
-            throw new UsernameNotFoundException("No such user, " + username, e);
+         final Optional<User> userOptional = userRepository.findByUsername(username);
+         if (userOptional.isPresent()) {
+            return userOptional.get();
+         } else {
+            throw new UsernameNotFoundException("No such user, " + username);
          }
       }
    }

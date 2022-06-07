@@ -34,9 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -331,8 +329,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, false);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService
-                  .getGamePlayersAsGameManager(game).get();
+         final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+                 .getGamePlayersAsGameManager(game);
+         assertThat("gamePlayers", gamePlayersOptional.isPresent());
+         final var gamePlayers = gamePlayersOptional.get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -351,8 +351,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isForbidden());
-         final var gamePlayers = gamePlayersService
-                  .getGamePlayersAsGameManager(game).get();
+         final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+                 .getGamePlayersAsGameManager(game);
+         assertThat("gamePlayers", gamePlayersOptional.isPresent());
+         final var gamePlayers = gamePlayersOptional.get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -370,8 +372,10 @@ public class GamePlayersControllerTest {
          final var response = performRequest(game, user, true);
 
          response.andExpect(status().isConflict());
-         final var gamePlayers = gamePlayersService
-                  .getGamePlayersAsGameManager(game).get();
+         Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+                 .getGamePlayersAsGameManager(game);
+         assertThat("gamePlayers", gamePlayersOptional.isPresent());
+         final var gamePlayers = gamePlayersOptional.get();
          assertThat("User not added to players of game",
                   gamePlayers.getUsers().values(), not(hasItem(user.getId())));
       }
@@ -405,8 +409,10 @@ public class GamePlayersControllerTest {
 
          final var response = performRequest(gameB, user, true);
 
-         final var gamePlayers = gamePlayersService
-                  .getGamePlayersAsGameManager(gameB).get();
+         final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+                 .getGamePlayersAsGameManager(gameB);
+         assertThat("gamePlayers", gamePlayersOptional.isPresent());
+         final var gamePlayers = gamePlayersOptional.get();
          assertAll(() -> response.andExpect(status().isConflict()),
                   () -> assertThat("User not added to players of game",
                            gamePlayers.getUsers().values(),
@@ -426,8 +432,10 @@ public class GamePlayersControllerTest {
 
          final var location = response.andReturn().getResponse()
                   .getHeaderValue("Location");
-         final var gamePlayers = gamePlayersService
-                  .getGamePlayersAsGameManager(game).get();
+         final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+                 .getGamePlayersAsGameManager(game);
+         assertThat("gamePlayers", gamePlayersOptional.isPresent());
+         final var gamePlayers = gamePlayersOptional.get();
          final var currentGame = gamePlayersService
                   .getCurrentGameOfUser(user.getId());
          assertAll(() -> response.andExpect(status().isFound()),
@@ -548,8 +556,11 @@ public class GamePlayersControllerTest {
    private MockMvc mockMvc;
 
    private Game.Identifier createGame() {
-      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-               .get();
+      final Optional<UUID> gameOptional = scenarioService.getScenarioIdentifiers().findAny();
+      if (gameOptional.isEmpty()) {
+         throw new NoSuchElementException();
+      }
+      final var scenario = gameOptional.get();
       final var game = gameService.create(scenario);
       return game.getIdentifier();
    }

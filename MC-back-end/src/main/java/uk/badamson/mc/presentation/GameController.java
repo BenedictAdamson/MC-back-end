@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -233,7 +234,7 @@ public class GameController {
             @Nonnull @PathVariable("scenario") final UUID scenario) {
       try {
          return gameService.getCreationTimesOfGamesOfScenario(scenario)
-                  .map(t -> URI_DATETIME_FORMATTER.format(t));
+                  .map(URI_DATETIME_FORMATTER::format);
       } catch (final NoSuchElementException e) {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                   "unrecognized ID", e);
@@ -264,22 +265,12 @@ public class GameController {
    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
       final var id = new Game.Identifier(scenario, created);
-      try {
-         return gameService.getGame(id).get();
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized IDs", e);
-      }
-   }
-
-   /**
-    * <p>
-    * The part of the service layer instance that this uses.
-    * </p>
-    */
-   @Nonnull
-   public final GameService getGameService() {
-      return gameService;
+         final Optional<Game> game = gameService.getGame(id);
+         if (game.isPresent()) {
+            return game.get();
+         } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
+         }
    }
 
    @PostMapping(path = GAME_PATH_PATTERN, params = { START_PARAM })

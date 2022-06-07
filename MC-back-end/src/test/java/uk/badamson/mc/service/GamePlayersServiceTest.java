@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -42,6 +42,7 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.NamedUUID;
+import uk.badamson.mc.Scenario;
 
 /**
  * <p>
@@ -73,7 +74,9 @@ public class GamePlayersServiceTest {
       assertNotNull(result, "Returns a (non null) value.");// guard
       assertAll(() -> assertEquals(id, result.getGame(), "game"),
                () -> assertFalse(result.isRecruiting(), "recruiting"));
-      assertFalse(service.getGamePlayersAsGameManager(id).get().isRecruiting(),
+      final Optional<GamePlayers> gamePlayersOptional = service.getGamePlayersAsGameManager(id);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      assertFalse(gamePlayersOptional.get().isRecruiting(),
                "Subsequent retrieval of game players using an identifier equivalent to the given ID returns "
                         + "a value that is also not recruiting.");
       return result;
@@ -140,18 +143,17 @@ public class GamePlayersServiceTest {
 
       final var scenarioService = service.getGameService().getScenarioService();
       final var scenario0 = scenarioService.getScenario(scenarioId);
-      final var scenarioCharacters = scenario0.isPresent()
-               ? scenario0.get().getCharacters()
-               : List.<NamedUUID>of();
+      final var scenarioCharacters = scenario0.map(Scenario::getCharacters)
+              .orElseGet(List::of);
       final Set<UUID> scenarioCharacterIds = scenarioCharacters.stream()
-               .map(namedID -> namedID.getId()).collect(toUnmodifiableSet());
+               .map(NamedUUID::getId).collect(toUnmodifiableSet());
       final var gamePlayers0 = service.getGamePlayersAsGameManager(game);
       final var users0 = gamePlayers0.isPresent()
                ? gamePlayers0.get().getUsers()
                : Map.of();
       final var alreadyPlaying = users0.containsValue(user);
       final var firstUnplayedCharacterId0 = scenarioCharacters.stream()
-               .sequential().map(namedId -> namedId.getId())
+               .sequential().map(NamedUUID::getId)
                .filter(id -> !users0.containsKey(id)).findFirst();
 
       try {
@@ -163,18 +165,16 @@ public class GamePlayersServiceTest {
       }
       assertInvariants(service);
 
-      try {
-         scenarioService.getScenario(scenarioId).get();
-      } catch (final NoSuchElementException e) {
-         throw new AssertionError(
-                  "If completes, the scenario is a recognized scenario", e);
-      }
+      final Optional<Scenario> scenarioOptional = scenarioService.getScenario(scenarioId);
+      assertThat("If completes, the scenario is a recognized scenario", scenarioOptional.isPresent());
       final var currentGame = service.getCurrentGameOfUser(user);
-      final var gamePlayers = service.getGamePlayersAsGameManager(game).get();
+      final Optional<GamePlayers> gamePlayersOptional = service.getGamePlayersAsGameManager(game);
+      assertThat("gamePlayers", gamePlayersOptional.isPresent());
+      final var gamePlayers = gamePlayersOptional.get();
       final var users = gamePlayers.getUsers();
       final var characterPlayed = users.entrySet().stream()
                .filter(entry -> user.equals(entry.getValue()))
-               .map(entry -> entry.getKey()).findAny();
+               .map(Map.Entry::getKey).findAny();
       assertThat("The game had a previously unplayed character",
                firstUnplayedCharacterId0.isPresent());// guard
       assertThat("The players of the game includes the user.",

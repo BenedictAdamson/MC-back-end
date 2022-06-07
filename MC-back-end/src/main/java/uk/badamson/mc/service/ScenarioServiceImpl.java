@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -53,7 +53,7 @@ public class ScenarioServiceImpl implements ScenarioService {
    @Override
    @Nonnull
    public Stream<NamedUUID> getNamedScenarioIdentifiers() {
-      return SCENARIOS.values().stream().map(s -> s.getNamedUUID());
+      return SCENARIOS.values().stream().map(Scenario::getNamedUUID);
    }
 
    @Override

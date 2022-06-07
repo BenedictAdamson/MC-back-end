@@ -18,25 +18,8 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.UnsupportedEncodingException;
-import java.time.Instant;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +30,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
@@ -60,6 +37,19 @@ import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
+
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * <p>
@@ -76,8 +66,9 @@ public class GameControllerTest {
    public class Create {
       @Test
       public void knownScenario() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
+         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+         assertThat("scenario", scenarioOptional.isPresent());
+         final var scenario = scenarioOptional.get();
          final var gamesForScenario0 = gameService.getGameIdentifiers()
                  .filter(gi -> scenario.equals(gi.getScenario())).collect(Collectors.toUnmodifiableSet());
 
@@ -93,14 +84,16 @@ public class GameControllerTest {
          assertAll(
                   () -> assertTrue(id.isPresent(),
                            "created a game for the scenario"),
-                  () -> response.andExpect(status().isFound()),
-                  () -> assertEquals(GameController.createPathFor(id.get()),
-                           location, "redirection location"));
+                  () -> response.andExpect(status().isFound()));
+         assertEquals(GameController.createPathFor(id.get()),
+                 location, "redirection location");
       }
 
       @Test
       public void noAuthentication() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
+         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+         assertThat("scenario", scenarioOptional.isPresent());
+         final var scenario = scenarioOptional
                   .get();
          final var nGames0 = gameService.getGameIdentifiers().count();
          final var request = post(GameController.createPathForGames(scenario))
@@ -116,8 +109,9 @@ public class GameControllerTest {
 
       @Test
       public void noCsrfToken() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
+         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+         assertThat("scenario", scenarioOptional.isPresent());
+         final var scenario = scenarioOptional.get();
          final var nGames0 = gameService.getGameIdentifiers().count();
          final var request = post(GameController.createPathForGames(scenario))
                   .with(user(USER_WITH_ALL_AUTHORITIES));
@@ -132,8 +126,9 @@ public class GameControllerTest {
 
       @Test
       public void notPermitted() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
+         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+         assertThat("scenario", scenarioOptional.isPresent());
+         final var scenario = scenarioOptional.get();
          final var authorities = EnumSet
                   .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
          final var user = new User(ID_A, "allan", "letmein", authorities, true,
@@ -185,8 +180,7 @@ public class GameControllerTest {
          }
 
          private void test(final Authority authority)
-                  throws Exception, UnsupportedEncodingException,
-                  JsonProcessingException, JsonMappingException {
+                  throws Exception {
             final var id = createGame();
             final var user = createUser(EnumSet.of(authority));
 
@@ -260,8 +254,9 @@ public class GameControllerTest {
 
       @Test
       public void one() throws Exception {
-         final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-                  .get();
+         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+         assertThat("scenario", scenarioOptional.isPresent());
+         final var scenario = scenarioOptional.get();
          final var created = gameService.create(scenario).getIdentifier()
                   .getCreated();
 
@@ -311,14 +306,14 @@ public class GameControllerTest {
    private MockMvc mockMvc;
 
    private Game.Identifier createGame() {
-      final var scenario = scenarioService.getScenarioIdentifiers().findAny()
-               .get();
-      final var id = gameService.create(scenario).getIdentifier();
-      return id;
+      final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+      assertThat("scenario", scenarioOptional.isPresent());
+      final var scenario = scenarioOptional.get();
+      return gameService.create(scenario).getIdentifier();
    }
 
-   private User createUser(final Set<Authority> authoritities) {
-      return new User(ID_A, "Allan", "letmein", authoritities, true, true, true,
+   private User createUser(final Set<Authority> authorities) {
+      return new User(ID_A, "Allan", "secret", authorities, true, true, true,
                true);
    }
 }

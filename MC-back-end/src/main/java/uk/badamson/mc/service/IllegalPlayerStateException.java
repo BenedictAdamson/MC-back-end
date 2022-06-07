@@ -1,9 +1,7 @@
 package uk.badamson.mc.service;
 
-import javax.annotation.Nullable;
-
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -27,14 +25,7 @@ import javax.annotation.Nullable;
  * because the current state of a player does not allow the operation.
  * </p>
  */
-@SuppressWarnings("serial")
 public class IllegalPlayerStateException extends IllegalStateException {
-
-   private static final String DEFAULT_MESSAGE = "Illegal player state";
-
-   public IllegalPlayerStateException() {
-      super(DEFAULT_MESSAGE);
-   }
 
    /**
     * <p>
@@ -47,39 +38,6 @@ public class IllegalPlayerStateException extends IllegalStateException {
     */
    public IllegalPlayerStateException(final String message) {
       super(message);
-   }
-
-   /**
-    * <p>
-    * Constructs a new exception with a given {@linkplain #getMessage() detail
-    * message} and {@linkplain Throwable#getCause() cause}.
-    * </p>
-    *
-    * @param message
-    *           the detail message
-    * @param cause
-    *           the cause
-    */
-   public IllegalPlayerStateException(final String message,
-            final Throwable cause) {
-      super(message, cause);
-   }
-
-   /**
-    * <p>
-    * Constructs a new exception with a given {@linkplain #getCause() cause}.
-    * </p>
-    * <ul>
-    * <li>If the given cause is not null, this exception has the
-    * {@linkplain Throwable#getMessage() detail message} of the given cause as
-    * its cause.</li>
-    * </ul>
-    *
-    * @param cause
-    *           the cause
-    */
-   public IllegalPlayerStateException(@Nullable final Throwable cause) {
-      super(cause);
    }
 
 }

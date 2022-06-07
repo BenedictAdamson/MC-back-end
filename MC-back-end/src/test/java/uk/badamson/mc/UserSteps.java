@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -18,40 +18,33 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.opentest4j.AssertionFailedError;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import uk.badamson.mc.presentation.UserController;
+import uk.badamson.mc.service.UserService;
+
+import java.io.IOException;
+import java.util.*;
+
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
-import org.opentest4j.AssertionFailedError;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import uk.badamson.mc.presentation.UserController;
-import uk.badamson.mc.service.UserService;
 
 /**
  * <p>
@@ -126,8 +119,8 @@ public class UserSteps {
    private void getResponseAsUserList() throws IOException {
       final var response = world.getResponseBodyAsString();
       userList = objectMapper.readValue(response,
-               new TypeReference<List<User>>() {
-               });
+              new TypeReference<>() {
+              });
    }
 
    @When("getting the users")
@@ -165,7 +158,7 @@ public class UserSteps {
    }
 
    @Then("MC accepts the login")
-   public void mc_accepts_the_login() throws Exception {
+   public void mc_accepts_the_login() {
       assertAll(() -> world.expectResponse(status().isFound()),
                () -> world.expectResponse(header().string("Location", "/")));
    }
@@ -227,8 +220,8 @@ public class UserSteps {
    @Then("the list of users includes a user named {string}")
    public void the_list_of_users_includes_a_user_named(final String name) {
       Objects.requireNonNull(userList, "user list");
-      assertTrue(userList.stream().filter(u -> u.getUsername().equals(name))
-               .count() == 1);
+      assertEquals(1, userList.stream().filter(u -> u.getUsername().equals(name))
+              .count());
    }
 
    @Then("the response is a list of users")

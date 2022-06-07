@@ -1,7 +1,6 @@
 package uk.badamson.mc.presentation;
 
 import uk.badamson.mc.Authority;
-import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
@@ -25,7 +24,7 @@ final class Fixtures {
     static User createUserWithAllRoles() {
         final var id = UUID.randomUUID();
         return new User(id, createUserName(id),
-                "letmein", Authority.ALL, true, true, true, true);
+                "secret", Authority.ALL, true, true, true, true);
     }
 
     static User createUserWithPlayerRole() {

@@ -24,6 +24,8 @@ import java.util.UUID;
 
 import uk.badamson.mc.User;
 
+import javax.annotation.Nonnull;
+
 /**
  * <p>
  * Auxiliary test code for classes that implement the {@link UserRepository}
@@ -41,8 +43,9 @@ public class UserRepositoryTest {
          return new User(user.getId(), user);
       }
 
+      @Nonnull
       @Override
-      public Optional<User> findByUsername(final String username) {
+      public Optional<User> findByUsername(@Nonnull final String username) {
          requireNonNull(username, "username");
          return entities.values().stream()
                   .filter(u -> username.equals(u.getUsername())).findAny();

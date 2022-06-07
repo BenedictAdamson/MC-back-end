@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -19,11 +19,13 @@ package uk.badamson.mc.presentation;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -82,7 +84,9 @@ public class ScenarioControllerTest {
 
       @Test
       public void present() throws Exception {
-         final var id = service.getScenarioIdentifiers().findAny().get();
+         final Optional<UUID> idOptional = service.getScenarioIdentifiers().findAny();
+         assertThat("id", idOptional.isPresent());
+         final var id = idOptional.get();
 
          final var response = perform(id);
 

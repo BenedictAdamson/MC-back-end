@@ -35,12 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.Game;
+import uk.badamson.mc.*;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.GamePlayers;
-import uk.badamson.mc.User;
-import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.repository.CurrentUserGameRepository;
 import uk.badamson.mc.repository.GamePlayersRepository;
 
@@ -129,9 +125,12 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    @Nonnull
    public GamePlayers endRecruitment(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      final var players = get(id).get();
-      players.endRecruitment();
-      return gamePlayersRepository.save(players);
+      final var players = get(id);
+      if (players.isEmpty()) {
+         throw new NoSuchElementException();
+      }
+      players.get().endRecruitment();
+      return gamePlayersRepository.save(players.get());
    }
 
    private Optional<GamePlayers> get(final Game.Identifier id) {
@@ -193,8 +192,8 @@ public class GamePlayersServiceImpl implements GamePlayersService {
          final var allUsers = fullInformation.get().getUsers();
          final Map<UUID, UUID> filteredUsers = allUsers.entrySet().stream()
                   .filter(entry -> user.equals(entry.getValue()))
-                  .collect(toUnmodifiableMap(entry -> entry.getKey(),
-                           entry -> entry.getValue()));
+                  .collect(toUnmodifiableMap(Map.Entry::getKey,
+                          Map.Entry::getValue));
          if (allUsers.size() == filteredUsers.size()) {
             return fullInformation;
          } else {
@@ -222,8 +221,16 @@ public class GamePlayersServiceImpl implements GamePlayersService {
             final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, AccessControlException {
-      final var user = getUser(userId).get();
-      final var gamePlayers = get(gameId).get();
+      final var userOptional = getUser(userId);
+      if (userOptional.isEmpty()) {
+         throw new NoSuchElementException("user");
+      }
+      final var user = userOptional.get();
+      final var gamePlayersOptional = get(gameId);
+      if (gamePlayersOptional.isEmpty()) {
+         throw new NoSuchElementException("game");
+      }
+      final var gamePlayers = gamePlayersOptional.get();
       final var current = getCurrent(userId);
 
       if (!user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
@@ -237,9 +244,12 @@ public class GamePlayersServiceImpl implements GamePlayersService {
          throw new UserAlreadyPlayingException();
       } else if (current.isPresent()) {// && gameId.equals(current.get())
          alreadyJoined = true;
-         character = gamePlayers.getUsers().entrySet().stream()
-                  .filter(entry -> userId.equals(entry.getValue())).findAny()
-                  .get().getKey();
+         final var characterEntryOptional = gamePlayers.getUsers().entrySet().stream()
+                 .filter(entry -> userId.equals(entry.getValue())).findAny();
+         if (characterEntryOptional.isEmpty()) {
+            throw new NoSuchElementException("character");
+         }
+         character = characterEntryOptional.get().getKey();
          endRecruitment = false;
       } else {
          if (!gamePlayers.isRecruiting()) {
@@ -247,14 +257,21 @@ public class GamePlayersServiceImpl implements GamePlayersService {
          }
          alreadyJoined = false;
          final var scenarioId = gamePlayers.getGame().getScenario();
-         final var scenario = gameService.getScenarioService()
-                  .getScenario(scenarioId).get();
+         final var scenarioOptional = gameService.getScenarioService()
+                 .getScenario(scenarioId);
+         if (scenarioOptional.isEmpty()) {
+            throw new NoSuchElementException("scenario");
+         }
+         final var scenario = scenarioOptional.get();
          final var characters = scenario.getCharacters();
          final var playedCharacters = gamePlayers.getUsers().keySet();
-         final var firstUnplayedCharacter = characters.stream().sequential()
-                  .map(namedId -> namedId.getId())
-                  .filter(c -> !playedCharacters.contains(c)).findFirst().get();
-         character = firstUnplayedCharacter;
+         final var characterOptional = characters.stream().sequential()
+                 .map(NamedUUID::getId)
+                 .filter(c -> !playedCharacters.contains(c)).findFirst();
+         if (characterOptional.isEmpty()) {
+            throw new NoSuchElementException("character");
+         }
+         character = characterOptional.get();
          endRecruitment = characters.size() - 1 <= playedCharacters.size();
       }
 
@@ -271,7 +288,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
 
    @Override
    @Transactional
-   public boolean mayUserJoinGame(final UUID user, final Identifier game) {
+   public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final Identifier game) {
       try {
          getUserJoinsGameState(user, game);
       } catch (UserAlreadyPlayingException | IllegalGameStateException

@@ -18,15 +18,6 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.net.URI;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -34,18 +25,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserService;
+
+import javax.annotation.Nonnull;
+import javax.annotation.security.RolesAllowed;
+import java.net.URI;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -228,11 +221,11 @@ public class UserController {
    @RolesAllowed("MANAGE_USERS")
    @Nonnull
    public User getUser(@Nonnull @PathVariable final UUID id) {
-      try {
-         return service.getUser(id).get();
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized ID", e);
+      final Optional<User> user = service.getUser(id);
+      if (user.isPresent()) {
+         return user.get();
+      } else {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
       }
    }
 }

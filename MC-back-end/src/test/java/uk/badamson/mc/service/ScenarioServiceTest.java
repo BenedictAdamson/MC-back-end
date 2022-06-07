@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -65,7 +65,7 @@ public class ScenarioServiceTest {
       assertEquals(scenariosSet.size(), scenariosList.size(),
                "Does not contain duplicates.");
       final var identifiersOfScenarios = scenariosSet.stream()
-               .map(namedId -> namedId.getId()).collect(toUnmodifiableSet());
+               .map(NamedUUID::getId).collect(toUnmodifiableSet());
       assertThat(
                "Contains a named identifier corresponding to each scenario identifier",
                identifiersOfScenarios, is(expectedIdentifiers));
@@ -79,9 +79,7 @@ public class ScenarioServiceTest {
 
       assertInvariants(service);
       assertNotNull(result, "Returns a (non null) optional value.");// guard
-      if (result.isPresent()) {
-         assertEquals(id, result.get().getIdentifier(), "identifier");
-      }
+      result.ifPresent(scenario -> assertEquals(id, scenario.getIdentifier(), "identifier"));
       return result;
    }
 

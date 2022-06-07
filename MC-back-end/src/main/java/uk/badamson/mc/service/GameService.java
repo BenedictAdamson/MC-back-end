@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -139,6 +139,5 @@ public interface GameService {
    Game startGame(@Nonnull Game.Identifier id)
             throws NoSuchElementException, IllegalGameStateException;
 
-   @Nonnull
-   Game stopGame(@Nonnull Game.Identifier id) throws NoSuchElementException;
+   void stopGame(@Nonnull Game.Identifier id) throws NoSuchElementException;
 }

@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -18,23 +18,21 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.service.ScenarioService;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -46,7 +44,7 @@ public class ScenarioController {
 
    /**
     * <p>
-    * Create a valid path for a scenario resource for a scenariothat has a given
+    * Create a valid path for a scenario resource for a scenario that has a given
     * identifier.
     * </p>
     * <p>
@@ -130,11 +128,11 @@ public class ScenarioController {
    @GetMapping("/api/scenario/{id}")
    @Nonnull
    public Scenario getScenario(@Nonnull @PathVariable final UUID id) {
-      try {
-         return service.getScenario(id).get();
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized ID", e);
+      final Optional<Scenario> scenario = service.getScenario(id);
+      if (scenario.isPresent()) {
+         return scenario.get();
+      } else {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
       }
    }
 

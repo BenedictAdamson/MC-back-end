@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -24,7 +24,6 @@ package uk.badamson.mc.service;
  * because a user is already playing a game.
  * </p>
  */
-@SuppressWarnings("serial")
 public final class UserAlreadyPlayingException extends IllegalPlayerStateException {
 
    public UserAlreadyPlayingException() {

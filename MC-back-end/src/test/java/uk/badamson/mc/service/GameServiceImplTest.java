@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -48,6 +48,8 @@ import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.GameRepository;
 import uk.badamson.mc.repository.GameRepositoryTest;
 
+import javax.annotation.Nonnull;
+
 /**
  * <p>
  * Unit tests and auxiliary test code for the {@link GameServiceImpl} class.
@@ -87,8 +89,7 @@ public class GameServiceImplTest {
          private void test(final Instant now) {
             final var clock = Clock.fixed(now, UTC);
             final var scenarioService = scenarioServiceA;
-            final var scenario = scenarioService.getScenarioIdentifiers()
-                     .findAny().get();
+            final var scenario = getAScenarioId(scenarioService);
             final var service = new GameServiceImpl(gameRepositoryA, clock,
                      scenarioService);
             final var truncatedNow = service.getNow();
@@ -116,10 +117,9 @@ public class GameServiceImplTest {
 
       @Test
       public void unknownScenario() {
-         final var scenarioService = scenarioServiceA;
          final var scenario = UUID.randomUUID();
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
-                  scenarioService);
+                 scenarioServiceA);
 
          assertThrows(NoSuchElementException.class,
                   () -> create(service, scenario));
@@ -133,8 +133,7 @@ public class GameServiceImplTest {
       public void none() {
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
-         final var scenario = scenarioServiceA.getScenarioIdentifiers()
-                  .findAny().get();
+         final var scenario = getAScenarioId(scenarioServiceA);
 
          final var result = getCreationTimesOfGamesOfScenario(service,
                   scenario);
@@ -144,8 +143,7 @@ public class GameServiceImplTest {
 
       @Test
       public void one() {
-         final var scenario = scenarioServiceA.getScenarioIdentifiers()
-                  .findAny().get();
+         final var scenario = getAScenarioId(scenarioServiceA);
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
          final var created = service.create(scenario).getIdentifier()
@@ -178,9 +176,8 @@ public class GameServiceImplTest {
       public void absent() {
          final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
-         final var id = IDENTIFIER_A;
 
-         final var result = getGame(service, id);
+         final var result = getGame(service, IDENTIFIER_A);
 
          assertTrue(result.isEmpty(), "absent");
       }
@@ -245,20 +242,19 @@ public class GameServiceImplTest {
       assertNotNull(service.getRepository(), "Not null, repository");
    }
 
-   private static GameServiceImpl constructor(final GameRepository repository,
-            final Clock clock, final ScenarioService scenarioService) {
+   private static void constructor(final GameRepository repository,
+                                   final Clock clock, final ScenarioService scenarioService) {
       final var service = new GameServiceImpl(repository, clock,
                scenarioService);
 
       assertInvariants(service);
-      assertAll("Has the given assoications",
+      assertAll("Has the given associations",
                () -> assertSame(repository, service.getRepository(),
                         "repository"),
                () -> assertSame(clock, service.getClock(), "clock"),
                () -> assertSame(scenarioService, service.getScenarioService(),
                         "scenarioService"));
 
-      return service;
    }
 
    public static Game create(final GameServiceImpl service, final UUID scenario)
@@ -317,6 +313,13 @@ public class GameServiceImplTest {
    private final ScenarioService scenarioServiceA = new ScenarioServiceImpl();
 
    private final ScenarioService scenarioServiceB = new ScenarioServiceImpl();
+
+   private static UUID getAScenarioId(@Nonnull ScenarioService scenarioService) {
+      final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers()
+              .findAny();
+      assertThat("scenario", scenarioOptional.isPresent());
+      return scenarioOptional.get();
+   }
 
    @BeforeEach
    public void createRepositories() {

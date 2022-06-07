@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -140,7 +141,7 @@ public class UserControllerTest {
          final var response = mockMvc.perform(request);
 
          response.andExpect(status().is4xxClientError());
-         assertThat("User not added", !service.getUsers().anyMatch(
+         assertThat("User not added", service.getUsers().noneMatch(
                   u -> u.getUsername().equals(addedUser.getUsername())));
       }
 
@@ -159,8 +160,8 @@ public class UserControllerTest {
 
          assertAll(() -> response.andExpect(status().isForbidden()),
                   () -> assertThat("User not added",
-                           !service.getUsers().anyMatch(u -> u.getUsername()
-                                    .equals(addedUser.getUsername()))));
+                          service.getUsers().noneMatch(u -> u.getUsername()
+                                   .equals(addedUser.getUsername()))));
       }
 
       private ResultActions test(final User performingUser,
@@ -291,8 +292,9 @@ public class UserControllerTest {
 
          @Test
          public void administrator() throws Exception {
-            test(Fixtures.createUserName(),
-                     service.getUser(User.ADMINISTRATOR_ID).get());
+            final Optional<User> userOptional = service.getUser(User.ADMINISTRATOR_ID);
+            assertThat("user", userOptional.isPresent());
+            test(Fixtures.createUserName(), userOptional.get());
          }
 
          @Test

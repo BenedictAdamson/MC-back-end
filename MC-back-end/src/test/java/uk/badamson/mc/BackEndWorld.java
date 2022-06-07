@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -18,19 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.Objects;
-
+import io.cucumber.java.Before;
+import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,12 +31,16 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.cucumber.java.Before;
-import io.cucumber.spring.ScenarioScope;
 import uk.badamson.mc.repository.UserRepository;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.Objects;
+
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * <p>
@@ -73,9 +66,6 @@ public class BackEndWorld {
    @Autowired
    private UserRepository userRepository;
 
-   @Autowired
-   private ObjectMapper objectMapper;
-
    private MockMvc mockMvc;
 
    private ResultActions response;
@@ -95,19 +85,10 @@ public class BackEndWorld {
       response.andExpect(expectation);
    }
 
-   public void getHtml(final String path) throws Exception {
-      getResource(path, MediaType.TEXT_HTML);
-   }
-
    public void getJson(final String path) throws Exception {
-      getResource(path, MediaType.APPLICATION_JSON);
-   }
-
-   private void getResource(final String path, final MediaType mediaType)
-            throws Exception {
       Objects.requireNonNull(context, "context");
       Objects.requireNonNull(mockMvc, "mockMvc");
-      performRequest(get(path).accept(mediaType));
+      performRequest(get(path).accept(MediaType.APPLICATION_JSON));
    }
 
    public ResultActions getResponse() {
@@ -121,28 +102,6 @@ public class BackEndWorld {
    public void performRequest(final RequestBuilder requestBuilder)
             throws Exception {
       response = mockMvc.perform(requestBuilder);
-   }
-
-   public void postResource(final String path, final Object body)
-            throws Exception {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(mockMvc, "mockMvc");
-
-      final var encodedBody = objectMapper.writeValueAsString(body);
-      performRequest(post(path).contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).content(encodedBody));
-   }
-
-   public void putResource(final String path, final Object body)
-            throws Exception {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(mockMvc, "mockMvc");
-
-      final var encodedBody = objectMapper.writeValueAsString(body);
-      final var request = put(path).contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON).content(encodedBody)
-               .with(csrf()).with(user(loggedInUser));
-      performRequest(request);
    }
 
    public void responseIsOk() throws Exception {

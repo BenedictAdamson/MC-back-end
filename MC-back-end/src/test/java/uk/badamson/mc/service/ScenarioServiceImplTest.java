@@ -19,6 +19,7 @@ package uk.badamson.mc.service;
  */
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,7 +61,9 @@ public class ScenarioServiceImplTest {
       @Test
       public void present() {
          final var service = new ScenarioServiceImpl();
-         final var id = getIds(service).stream().findAny().get();
+         final Optional<UUID> idOptional = getIds(service).stream().findAny();
+         assertThat("id", idOptional.isPresent());
+         final var id = idOptional.get();
 
          final var result = getScenario(service, id);
 
@@ -117,7 +120,7 @@ public class ScenarioServiceImplTest {
 
       final var namedIds = getNamedScenarioIdentifiers(service);
 
-      final var idsOfNamedIds = namedIds.map(ni -> ni.getId())
+      final var idsOfNamedIds = namedIds.map(NamedUUID::getId)
                .collect(toUnmodifiableSet());
       assertEquals(ids, idsOfNamedIds,
                "Contains a named identifier corresponding to each scenario identifier.");

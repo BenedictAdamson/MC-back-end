@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -320,8 +320,8 @@ public class UserServiceImplTest {
       public void get_users_of_fresh_instance() {
          given_a_fresh_instance_of_MC();
          when_getting_the_users();
-         assertAll(() -> then_the_list_of_users_has_one_user(),
-                  () -> then_the_list_of_users_includes_a_user_named_Administrator());
+         assertAll(this::then_the_list_of_users_has_one_user,
+                 this::then_the_list_of_users_includes_a_user_named_Administrator);
       }
 
       private void given_a_fresh_instance_of_MC() {
@@ -335,7 +335,7 @@ public class UserServiceImplTest {
 
       private void then_the_list_of_users_includes_a_user_named_Administrator() {
          assertThat(users, not(hasItem((User) null)));// guard
-         final var usernames = users.stream().map(u -> u.getUsername())
+         final var usernames = users.stream().map(BasicUserDetails::getUsername)
                   .collect(toUnmodifiableSet());
          assertThat("the list of users includes a user named \"Administrator\"",
                   usernames, hasItem(BasicUserDetails.ADMINISTRATOR_USERNAME));
@@ -378,7 +378,7 @@ public class UserServiceImplTest {
       UserRepositoryTest.assertInvariants(userRepository);
    }
 
-   private static UserServiceImpl constructor(
+   private static void constructor(
             final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
             final String administratorPassword) {
@@ -398,7 +398,6 @@ public class UserServiceImplTest {
                         encryptedAdminPassword),
                "The password of the administrator user details found through this service is equal to the given administrator password encrypted by the given password encoder.");
 
-      return service;
    }
 
    public static Optional<User> getUser(final UserServiceImpl service,
@@ -461,9 +460,8 @@ public class UserServiceImplTest {
 
    @Test
    public void administratorInRepository() {
-      final var passwordEncoder = passwordEncoderA;
       final var repository = userRepositoryA;
-      final var service = new UserServiceImpl(passwordEncoder, repository,
+      final var service = new UserServiceImpl(passwordEncoderA, repository,
                PASSWORD_A);
       repository.save(User.createAdministrator(PASSWORD_B));
 

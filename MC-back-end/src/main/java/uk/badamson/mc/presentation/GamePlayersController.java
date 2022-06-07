@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -258,16 +258,15 @@ public class GamePlayersController {
                   "Not Found Because Unauthorized");
 
       }
-      final Identifier gameId;
-      try {
-         gameId = gamePlayersService.getCurrentGameOfUser(user.getId()).get();
-      } catch (final NoSuchElementException e) {
+      final Optional<Identifier> gameId  = gamePlayersService.getCurrentGameOfUser(user.getId());
+      if (gameId.isPresent()) {
+         final var headers = new HttpHeaders();
+         headers.setLocation(URI.create(GameController.createPathFor(gameId.get())));
+         return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
+      } else {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "No current game", e);
+                 "No current game");
       }
-      final var headers = new HttpHeaders();
-      headers.setLocation(URI.create(GameController.createPathFor(gameId)));
-      return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
    }
 
    /**
@@ -330,27 +329,11 @@ public class GamePlayersController {
          throw new IllegalArgumentException("Request not permitted for role");
       }
 
-      try {
+      if (gamePlayers.isPresent()) {
          return gamePlayers.get();
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized IDs", e);
+      } else {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
       }
-   }
-
-   /**
-    * <p>
-    * The part of the service layer instance that this uses.
-    * </p>
-    * <ul>
-    * <li>Always associates with a (non null) service.</li>
-    * </ul>
-    *
-    * @return the service
-    */
-   @Nonnull
-   public final GamePlayersService getGamePlayersService() {
-      return gamePlayersService;
    }
 
    /**
@@ -480,12 +463,10 @@ public class GamePlayersController {
             @Nonnull @PathVariable("created") final Instant created) {
       Objects.requireNonNull(user, "user");
       final var game = new Game.Identifier(scenario, created);
-      try {
-         gamePlayersService.getGamePlayersAsGameManager(game).get();
+      if(gamePlayersService.getGamePlayersAsGameManager(game).isPresent()){
          return gamePlayersService.mayUserJoinGame(user.getId(), game);
-      } catch (final NoSuchElementException e) {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  "unrecognized IDs", e);
+      } else {
+         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
       }
    }
 }

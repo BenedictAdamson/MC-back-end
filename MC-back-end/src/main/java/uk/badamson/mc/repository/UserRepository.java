@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *

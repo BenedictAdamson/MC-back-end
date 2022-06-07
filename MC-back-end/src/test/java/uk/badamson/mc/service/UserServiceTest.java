@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -116,7 +117,7 @@ public class UserServiceTest {
                         service.getPasswordEncoder().matches(
                                  userDetails.getPassword(),
                                  userDetailsAfter.getPassword()),
-                        "Recorded password has been encrypted using the pasword encoder of this service."));
+                        "Recorded password has been encrypted using the password encoder of this service."));
    }
 
    public static void add_2(final UserService service, final User userDetails1,
@@ -167,8 +168,8 @@ public class UserServiceTest {
       assertNotNull(users, "Always returns a (non null) stream.");// guard
       final var usersList = users.collect(toList());
       assertThat("The sequence of users has no null elements",
-               !usersList.stream().anyMatch(user -> user == null));// guard
-      final var userNames = usersList.stream().map(user -> user.getUsername())
+              usersList.stream().noneMatch(Objects::isNull));// guard
+      final var userNames = usersList.stream().map(BasicUserDetails::getUsername)
                .collect(toUnmodifiableSet());
       assertThat("The list of users always has an administrator.", userNames,
                hasItem(BasicUserDetails.ADMINISTRATOR_USERNAME));

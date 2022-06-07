@@ -25,15 +25,12 @@ import java.util.Properties;
 
 /**
  * <p>
- * The version ofthe SUT
+ * The version of the SUT
  * </p>
  */
 public final class Version {
 
    public static final String VERSION = getVersion();
-
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
-            + VERSION;
 
    private static Properties getApplicationProperties() throws IOException {
       final InputStream stream = Thread.currentThread().getContextClassLoader()

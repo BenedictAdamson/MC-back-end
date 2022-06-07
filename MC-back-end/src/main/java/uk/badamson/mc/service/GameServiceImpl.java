@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2020-21.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -75,8 +75,8 @@ public class GameServiceImpl implements GameService {
     */
    @Autowired
    public GameServiceImpl(@Nonnull final GameRepository repository,
-            @Nonnull final Clock clock,
-            @Nonnull final ScenarioService scenarioService) {
+                          @Nonnull final Clock clock,
+                          @Nonnull final ScenarioService scenarioService) {
       this.repository = Objects.requireNonNull(repository, "repository");
       this.clock = Objects.requireNonNull(clock, "clock");
       this.scenarioService = Objects.requireNonNull(scenarioService,
@@ -88,12 +88,12 @@ public class GameServiceImpl implements GameService {
    @Transactional
    public Game create(@Nonnull final UUID scenario) {
       requireKnownScenario(scenario);// read-and-check
-      final var identifier = new Game.Identifier(scenario, getNow());
+      final var identifier = new Identifier(scenario, getNow());
       final var game = new Game(identifier, Game.RunState.WAITING_TO_START);
       return repository.save(game);// write
    }
 
-   private Optional<Game> get(final Game.Identifier id) {
+   private Optional<Game> get(final Identifier id) {
       Objects.requireNonNull(id, "id");
       return repository.findById(id);
    }
@@ -104,26 +104,27 @@ public class GameServiceImpl implements GameService {
       return clock;
    }
 
+   @Nonnull
    @Override
    @Transactional
-   public Stream<Instant> getCreationTimesOfGamesOfScenario(final UUID scenario)
+   public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
       requireKnownScenario(scenario);// read-and-check
       return getGameIdentifiers()// read
                .filter(id -> scenario.equals(id.getScenario()))
-               .map(gameId -> gameId.getCreated());
+               .map(Identifier::getCreated);
    }
 
    @Override
    @Nonnull
-   public Optional<Game> getGame(@Nonnull final Game.Identifier id) {
+   public Optional<Game> getGame(@Nonnull final Identifier id) {
       return get(id);
    }
 
    @Override
    @Nonnull
    public Stream<Identifier> getGameIdentifiers() {
-      return getGames().map(game -> game.getIdentifier());
+      return getGames().map(Game::getIdentifier);
    }
 
    private Stream<Game> getGames() {
@@ -150,17 +151,21 @@ public class GameServiceImpl implements GameService {
    private void requireKnownScenario(final UUID scenario)
             throws NoSuchElementException {
       Objects.requireNonNull(scenario, "scenario");
-      if (!scenarioService.getScenarioIdentifiers()
-               .anyMatch(id -> scenario.equals(id))) {
+      if (scenarioService.getScenarioIdentifiers()
+               .noneMatch(scenario::equals)) {
          throw new NoSuchElementException("unknown scenario");
       }
    }
 
    @Override
    @Nonnull
-   public Game startGame(@Nonnull final Game.Identifier id)
+   public Game startGame(@Nonnull final Identifier id)
             throws NoSuchElementException, IllegalGameStateException {
-      var game = get(id).get();// read
+      Optional<Game> gameOptional = get(id);
+      if (gameOptional.isEmpty()) {
+         throw new NoSuchElementException("game");
+      }
+      var game = gameOptional.get();// read
       switch (game.getRunState()) {
       case WAITING_TO_START:
          game = new Game(game);
@@ -177,19 +182,24 @@ public class GameServiceImpl implements GameService {
    }
 
    @Override
-   @Nonnull
-   public Game stopGame(@Nonnull final Game.Identifier id)
+   public void stopGame(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      var game = get(id).get();// read
+      Optional<Game> gameOptional = get(id);
+      if (gameOptional.isEmpty()) {
+         throw new NoSuchElementException("game");
+      }
+      var game = gameOptional.get();// read
       switch (game.getRunState()) {
       case WAITING_TO_START:
       case RUNNING:
          game = new Game(game);
          game.setRunState(Game.RunState.STOPPED);
-         return repository.save(game);// write
+         repository.save(game);
+         return;// write
       case STOPPED:
          // do nothing
-         return new Game(game);
+         new Game(game);
+         return;
       default:// never happens
          throw new AssertionError("Valid game state");
       }

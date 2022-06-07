@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.opentest4j.AssertionFailedError;
@@ -93,12 +94,16 @@ public class ScenarioSteps {
    }
 
    private Identifier chooseGameOfScenario() {
-      return gameService.getCreationTimesOfGamesOfScenario(id)
-               .map(t -> new Game.Identifier(id, t)).findAny().get();
+      final Optional<Identifier> optional = gameService.getCreationTimesOfGamesOfScenario(id)
+              .map(t -> new Identifier(id, t)).findAny();
+      assertThat("game", optional.isPresent());
+      return optional.get();
    }
 
    private void chooseScenario() {
-      id = scenarioService.getScenarioIdentifiers().findAny().get();
+      final Optional<UUID> optional = scenarioService.getScenarioIdentifiers().findAny();
+      assertThat("scenario", optional.isPresent());
+      id = optional.get();
    }
 
    @Then("it does not allow examination of games of the scenario")
@@ -106,7 +111,7 @@ public class ScenarioSteps {
             throws Exception {
       final var game = chooseGameOfScenario();
 
-      /* The games information is from two end-points. */
+      /* The game's information is from two end-points. */
       try {
          requestGameOfScenario(game);
          world.getResponse().andExpect(status().is4xxClientError());
@@ -200,7 +205,9 @@ public class ScenarioSteps {
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
 
-      final var expectedScenario = scenarioService.getScenario(id).get();
+      final Optional<Scenario> scenarioOptional = scenarioService.getScenario(id);
+      assertThat("scenario", scenarioOptional.isPresent());
+      final var expectedScenario = scenarioOptional.get();
       assertThat("characters", responseScenario.getCharacters(),
                is(expectedScenario.getCharacters()));
    }
@@ -211,7 +218,9 @@ public class ScenarioSteps {
       Objects.requireNonNull(id, "id");
       Objects.requireNonNull(responseScenario, "responseScenario");
 
-      final var expectedScenario = scenarioService.getScenario(id).get();
+      final Optional<Scenario> scenarioOptional = scenarioService.getScenario(id);
+      assertThat("scenario", scenarioOptional.isPresent());
+      final var expectedScenario = scenarioOptional.get();
       assertThat("description", responseScenario.getDescription(),
                is(expectedScenario.getDescription()));
    }
