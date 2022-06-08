@@ -19,10 +19,11 @@ package uk.badamson.mc.presentation;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
@@ -32,9 +33,10 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
  */
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
+        justification="delegates to framework method that does so")
+public class SecurityConfiguration {
 
-   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
       http.authorizeRequests().antMatchers("/api/user/**").authenticated();
@@ -44,26 +46,25 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
    }
 
-   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
+
    private static void configureCsrfProtection(final HttpSecurity http)
             throws Exception {
       http.csrf().csrfTokenRepository(
                CookieCsrfTokenRepository.withHttpOnlyFalse());
    }
 
-   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
       http.httpBasic();
    }
 
-   @SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification="delegates to framework method that does so")
-   @Override
-   protected void configure(final HttpSecurity http) throws Exception {
+   @Bean
+   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       configureHttpBasic(http);
       configureCsrfProtection(http);
       configureAuthorizedRequests(http);
       // login and logout pages are configured by default
+      return http.build();
    }
 
 }

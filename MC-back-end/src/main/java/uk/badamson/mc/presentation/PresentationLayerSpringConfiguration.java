@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @ComponentScan("uk.badamson.mc.presentation")
 @EnableWebMvc
-@Import(value = { WebSecurityConfiguration.class })
+@Import(value = { SecurityConfiguration.class })
 public class PresentationLayerSpringConfiguration {
 
    @Bean
