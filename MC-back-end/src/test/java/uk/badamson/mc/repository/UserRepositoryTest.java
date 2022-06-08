@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
@@ -60,6 +61,7 @@ public class UserRepositoryTest {
    }// class
 
    public static void assertInvariants(final UserRepository repository) {
+      ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 

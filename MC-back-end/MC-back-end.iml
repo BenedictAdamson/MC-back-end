@@ -135,5 +135,6 @@
     <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-websocket:9.0.63" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-webmvc:5.3.20" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.security:spring-security-test:5.7.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: uk.badamson:DBC-assertions:3.0.1" level="project" />
   </component>
 </module>

@@ -18,6 +18,7 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Game;
 
 /**
@@ -44,6 +45,7 @@ public class GameRepositoryTest {
    }// class
 
    public static void assertInvariants(final GameRepository repository) {
+      ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 

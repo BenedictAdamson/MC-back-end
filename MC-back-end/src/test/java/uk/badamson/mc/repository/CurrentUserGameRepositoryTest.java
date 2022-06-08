@@ -20,6 +20,7 @@ package uk.badamson.mc.repository;
 
 import java.util.UUID;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.UserGameAssociation;
 
 /**
@@ -48,6 +49,7 @@ public class CurrentUserGameRepositoryTest {
 
    public static void assertInvariants(
             final CurrentUserGameRepository repository) {
+      ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 

@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.*;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.CurrentUserGameRepository;
@@ -851,6 +852,7 @@ public class GamePlayersServiceImplTest {
             UUID.randomUUID(), Instant.now());
 
    public static void assertInvariants(final GamePlayersServiceImpl service) {
+      ObjectVerifier.assertInvariants(service);// inherited
       GamePlayersServiceTest.assertInvariants(service);// inherited
 
       assertNotNull(service.getGamePlayersRepository(),

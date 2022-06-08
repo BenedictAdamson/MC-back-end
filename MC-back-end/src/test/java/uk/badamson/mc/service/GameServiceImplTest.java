@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.repository.GameRepository;
@@ -237,6 +238,7 @@ public class GameServiceImplTest {
             SCENARIO_ID_A, Instant.now());
 
    public static void assertInvariants(final GameServiceImpl service) {
+      ObjectVerifier.assertInvariants(service);// inherited
       GameServiceTest.assertInvariants(service);// inherited
 
       assertNotNull(service.getRepository(), "Not null, repository");

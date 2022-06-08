@@ -44,6 +44,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
@@ -370,6 +371,7 @@ public class UserServiceImplTest {
    }
 
    public static void assertInvariants(final UserServiceImpl service) {
+      ObjectVerifier.assertInvariants(service);// inherited
       UserServiceTest.assertInvariants(service);// inherited
 
       final var userRepository = service.getUserRepository();

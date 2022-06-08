@@ -287,6 +287,12 @@
             <type>pom</type>
             <scope>import</scope>
          </dependency>
+         <dependency>
+            <groupId>uk.badamson</groupId>
+            <artifactId>DBC-assertions</artifactId>
+            <version>3.0.1</version>
+            <scope>test</scope>
+         </dependency>
       </dependencies>
    </dependencyManagement>
    <modules>

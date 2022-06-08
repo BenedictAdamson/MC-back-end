@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
@@ -72,6 +73,7 @@ public class ScenarioServiceImplTest {
    }// class
 
    public static void assertInvariants(final ScenarioServiceImpl service) {
+      ObjectVerifier.assertInvariants(service);// inherited
       ScenarioServiceTest.assertInvariants(service);// inherited
    }
 

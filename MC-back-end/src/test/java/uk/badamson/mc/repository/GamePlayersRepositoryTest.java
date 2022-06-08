@@ -20,6 +20,7 @@ package uk.badamson.mc.repository;
 
 import java.util.Objects;
 
+import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
 
@@ -49,6 +50,7 @@ public class GamePlayersRepositoryTest {
    }// class
 
    public static void assertInvariants(final GameRepository repository) {
+      ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }
 
