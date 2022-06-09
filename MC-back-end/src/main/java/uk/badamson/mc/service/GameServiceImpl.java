@@ -190,18 +190,16 @@ public class GameServiceImpl implements GameService {
       }
       var game = gameOptional.get();// read
       switch (game.getRunState()) {
-      case WAITING_TO_START:
-      case RUNNING:
-         game = new Game(game);
-         game.setRunState(Game.RunState.STOPPED);
-         repository.save(game);
-         return;// write
-      case STOPPED:
-         // do nothing
-         new Game(game);
-         return;
-      default:// never happens
-         throw new AssertionError("Valid game state");
+         case WAITING_TO_START, RUNNING -> {
+            game = new Game(game);
+            game.setRunState(Game.RunState.STOPPED);
+            repository.save(game);
+            // write
+         }
+         case STOPPED -> // do nothing
+                 new Game(game);
+         default ->// never happens
+                 throw new AssertionError("Valid game state");
       }
    }
 

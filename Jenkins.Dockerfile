@@ -30,8 +30,9 @@ RUN apt-get -y update && apt-get -y install \
    curl \
    gnupg-agent \
    maven \
-   openjdk-11-jdk-headless \
+   openjdk-17-jdk-headless \
    software-properties-common
+RUN apt-get remove -y openjdk-11-jre-headless
 # Add Chrome repository
 RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN add-apt-repository -y \

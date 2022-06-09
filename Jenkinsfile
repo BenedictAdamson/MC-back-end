@@ -1,7 +1,7 @@
 // Jenkinsfile for the MC project
 
 /* 
- * © Copyright Benedict Adamson 2018-21.
+ * © Copyright Benedict Adamson 2018-22.
  * 
  * This file is part of MC.
  *
@@ -44,7 +44,7 @@ pipeline {
         pollSCM('H */4 * * *')
     }
     environment {
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
+        JAVA_HOME = '/usr/lib/jvm/java-1.17.0-openjdk-amd64'
     }
     stages {
         stage('Clean') { 

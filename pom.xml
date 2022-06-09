@@ -84,7 +84,7 @@
                <artifactId>maven-compiler-plugin</artifactId>
                <version>3.10.1</version>
                <configuration>
-                  <release>11</release>
+                  <release>17</release>
                   <testIncludes>
                      <include>**/*.java</include>
                   </testIncludes>
@@ -101,9 +101,7 @@
                <artifactId>maven-javadoc-plugin</artifactId>
                <version>3.4.0</version>
                <configuration>
-                  <additionalJOptions>
-                     <additionalJOption>-html5</additionalJOption>
-                  </additionalJOptions>
+                  <doclint>all,-missing</doclint>
                </configuration>
             </plugin>
             <plugin>
@@ -116,7 +114,7 @@
                <artifactId>maven-pmd-plugin</artifactId>
                <version>3.16.0</version>
                <configuration>
-                  <targetJdk>11</targetJdk>
+                  <targetJdk>17</targetJdk>
                   <failurePriority>2</failurePriority>
                   <excludeRoots>
                      <excludeRoot>target/</excludeRoot>

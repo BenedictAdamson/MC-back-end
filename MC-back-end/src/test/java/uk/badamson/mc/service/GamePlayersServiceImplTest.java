@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.security.AccessControlException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -613,8 +612,7 @@ public class GamePlayersServiceImplTest {
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
             final var characterIds = scenario.getCharacters().stream()
-                     .sequential().map(NamedUUID::getId)
-                     .collect(toUnmodifiableList());
+                    .sequential().map(NamedUUID::getId).toList();
             final Optional<GamePlayers> gamePlayers0Optional = gamePlayersService
                     .getGamePlayersAsGameManager(game);
             assertThat("gamePlayers", gamePlayers0Optional.isPresent());
@@ -789,7 +787,7 @@ public class GamePlayersServiceImplTest {
          final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
 
-         assertThrows(AccessControlException.class,
+         assertThrows(SecurityException.class,
                   () -> userJoinsGame(service, user, game));
       }
 
@@ -942,11 +940,11 @@ public class GamePlayersServiceImplTest {
    public static void userJoinsGame(final GamePlayersServiceImpl service,
             final UUID user, final Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
-            IllegalGameStateException, AccessControlException {
+            IllegalGameStateException, SecurityException {
       try {
          GamePlayersServiceTest.userJoinsGame(service, user, game);// inherited
       } catch (UserAlreadyPlayingException | IllegalGameStateException
-               | AccessControlException | NoSuchElementException e) {
+               | SecurityException | NoSuchElementException e) {
          assertInvariants(service);
          throw e;
       }

@@ -18,7 +18,6 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.security.AccessControlException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,7 +46,6 @@ public interface GamePlayersService {
     * <p>
     * This mutator is idempotent: the mutator does not have the precondition
     * that the game is recruiting.
-    * <ul>
     *
     * @param id
     *           The unique ID of the game to mutate.
@@ -187,7 +185,7 @@ public interface GamePlayersService {
     *            </ul>
     * @throws UserAlreadyPlayingException
     *            If the {@code user} is already playing a different game.
-    * @throws AccessControlException
+    * @throws SecurityException
     *            If the {@code user} does not {@linkplain User#getAuthorities()
     *            have} {@linkplain Authority#ROLE_PLAYER permission} to play
     *            games. Note that the given user need not be the current user.
@@ -200,5 +198,5 @@ public interface GamePlayersService {
     */
    void userJoinsGame(@Nonnull UUID user, @Nonnull Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
-            IllegalGameStateException, AccessControlException;
+            IllegalGameStateException, SecurityException;
 }

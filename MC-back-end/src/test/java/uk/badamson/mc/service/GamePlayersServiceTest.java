@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.security.AccessControlException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -138,7 +137,7 @@ public class GamePlayersServiceTest {
    public static void userJoinsGame(final GamePlayersService service,
             final UUID user, final Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
-            IllegalGameStateException, AccessControlException {
+            IllegalGameStateException, SecurityException {
       final var scenarioId = game.getScenario();
 
       final var scenarioService = service.getGameService().getScenarioService();
@@ -159,7 +158,7 @@ public class GamePlayersServiceTest {
       try {
          service.userJoinsGame(user, game);
       } catch (UserAlreadyPlayingException | IllegalGameStateException
-               | AccessControlException | NoSuchElementException e) {
+               | SecurityException | NoSuchElementException e) {
          assertInvariants(service);
          throw e;
       }

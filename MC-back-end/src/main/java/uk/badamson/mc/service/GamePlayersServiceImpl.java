@@ -20,7 +20,6 @@ package uk.badamson.mc.service;
 
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
-import java.security.AccessControlException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -220,7 +219,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    private UserJoinsGameState getUserJoinsGameState(final UUID userId,
             final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
-            IllegalGameStateException, AccessControlException {
+            IllegalGameStateException, SecurityException {
       final var userOptional = getUser(userId);
       if (userOptional.isEmpty()) {
          throw new NoSuchElementException("user");
@@ -234,7 +233,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       final var current = getCurrent(userId);
 
       if (!user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
-         throw new AccessControlException("User does not have the player role");
+         throw new SecurityException("User does not have the player role");
       }
 
       final boolean alreadyJoined;
@@ -292,7 +291,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       try {
          getUserJoinsGameState(user, game);
       } catch (UserAlreadyPlayingException | IllegalGameStateException
-               | AccessControlException | NoSuchElementException e) {
+               | SecurityException | NoSuchElementException e) {
          return false;
       }
       return true;
@@ -303,7 +302,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    public void userJoinsGame(@Nonnull final UUID userId,
             @Nonnull final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
-            IllegalGameStateException, AccessControlException {
+            IllegalGameStateException, SecurityException {
       // read and check:
       final var state = getUserJoinsGameState(userId, gameId);
       if (state.alreadyJoined) {

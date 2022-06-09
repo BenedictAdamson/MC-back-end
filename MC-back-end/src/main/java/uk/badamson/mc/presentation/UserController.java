@@ -106,6 +106,8 @@ public class UserController {
     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
     * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
     * </ul>
+    * </li>
+    * </ul>
     *
     * @param userDetails
     *           The body of the request

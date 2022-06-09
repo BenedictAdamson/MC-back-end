@@ -19,7 +19,7 @@
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-FROM openjdk:11
+FROM openjdk:17-buster
 ARG VERSION
 ARG PACKAGEVERSION
 LABEL version="${VERSION}"

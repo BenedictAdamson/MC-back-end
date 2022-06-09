@@ -385,7 +385,6 @@ public class GamePlayersController {
     *            recruiting} players.
     *            </ul>
     *            </li>
-    *            <ul>
     *            <li>With a {@linkplain ResponseStatusException#getStatus()
     *            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
     *            the {@code user} does not {@linkplain User#getAuthorities()
