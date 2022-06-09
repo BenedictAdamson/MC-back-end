@@ -51,11 +51,6 @@ import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
 
-/**
- * <p>
- * Unit tests and auxiliary test code for the {@link UserServiceImpl} class.
- * </p>
- */
 public class UserServiceImplTest {
 
    @Nested

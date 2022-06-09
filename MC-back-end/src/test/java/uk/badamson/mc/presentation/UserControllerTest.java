@@ -55,11 +55,6 @@ import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserService;
 
-/**
- * <p>
- * Unit tests of the {@link UserController} class.
- * <p>
- */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc

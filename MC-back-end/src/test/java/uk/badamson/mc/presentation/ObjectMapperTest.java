@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -30,11 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.TestConfiguration;
 
-/**
- * <p>
- * Unit tests of the configured {@link ObjectMapper}.
- * <p>
- */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectMapperTest {

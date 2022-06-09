@@ -51,11 +51,6 @@ import uk.badamson.mc.repository.GameRepositoryTest;
 
 import javax.annotation.Nonnull;
 
-/**
- * <p>
- * Unit tests and auxiliary test code for the {@link GameServiceImpl} class.
- * </p>
- */
 public class GameServiceImplTest {
    @Nested
    public class Constructor {

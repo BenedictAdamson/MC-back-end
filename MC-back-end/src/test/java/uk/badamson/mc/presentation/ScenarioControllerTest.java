@@ -47,11 +47,6 @@ import uk.badamson.mc.Scenario;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.ScenarioService;
 
-/**
- * <p>
- * Unit tests of the {@link ScenarioController} class.
- * <p>
- */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc

@@ -35,11 +35,6 @@ import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
-/**
- * <p>
- * Unit tests and auxiliary test code for the {@link ScenarioServiceImpl} class.
- * </p>
- */
 public class ScenarioServiceImplTest {
 
    @Nested

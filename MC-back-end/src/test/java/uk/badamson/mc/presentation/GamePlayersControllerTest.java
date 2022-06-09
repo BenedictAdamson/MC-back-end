@@ -61,11 +61,6 @@ import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 import uk.badamson.mc.service.UserService;
 
-/**
- * <p>
- * Unit tests of the {@link GamePlayersController} class.
- * <p>
- */
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
