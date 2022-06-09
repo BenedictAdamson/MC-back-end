@@ -161,7 +161,7 @@ public class GameControllerTest {
          response.andExpect(status().is4xxClientError());
       }
 
-   }// class
+   }
 
    @Nested
    public class GetGame {
@@ -193,7 +193,7 @@ public class GameControllerTest {
             assertEquals(id, game.getIdentifier(), "game has the requested ID");
          }
 
-      }// class
+      }
 
       @Test
       public void absent() throws Exception {
@@ -238,7 +238,7 @@ public class GameControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    @Nested
    public class GetGames {
@@ -279,7 +279,7 @@ public class GameControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    private static final UUID ID_A = UUID.randomUUID();
 

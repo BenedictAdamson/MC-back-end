@@ -153,7 +153,7 @@ public class GamePlayersControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    @Nested
    public class GetCurrentGame {
@@ -204,7 +204,7 @@ public class GamePlayersControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    @Nested
    public class GetGamePlayers {
@@ -249,7 +249,7 @@ public class GamePlayersControllerTest {
                               is(expectedPlayers)));
          }
 
-      }// class
+      }
 
       @Test
       public void absent() throws Exception {
@@ -295,7 +295,7 @@ public class GamePlayersControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    @Nested
    public class JoinGame {
@@ -448,7 +448,7 @@ public class GamePlayersControllerTest {
                            currentGame.isPresent(), is(true)));
       }
 
-   }// class
+   }
 
    @Nested
    public class MayJoinGame {
@@ -532,7 +532,7 @@ public class GamePlayersControllerTest {
          response.andExpect(status().isForbidden());
       }
 
-   }// class
+   }
 
    @Autowired
    GameRepository gameRepository;

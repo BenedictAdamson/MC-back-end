@@ -105,7 +105,7 @@ public class UserControllerTest {
                               "Added user has the given attributes", addedUser,
                               newUser));
          }
-      }// class
+      }
 
       @Test
       public void administrator() throws Exception {
@@ -176,7 +176,7 @@ public class UserControllerTest {
          return mockMvc.perform(request);
       }
 
-   }// class
+   }
 
    @Nested
    public class GetSelf {
@@ -278,7 +278,7 @@ public class UserControllerTest {
          response.andExpect(status().isUnauthorized());
       }
 
-   }// class
+   }
 
    @Nested
    public class GetUser {
@@ -332,7 +332,7 @@ public class UserControllerTest {
             final var user = service.add(userDetails);
             test(requestingUserName, user);
          }
-      }// class
+      }
 
       @Test
       public void forbidden() throws Exception {
@@ -379,7 +379,7 @@ public class UserControllerTest {
 
          response.andExpect(status().isNotFound());
       }
-   }// class
+   }
 
    @Autowired
    private UserService service;

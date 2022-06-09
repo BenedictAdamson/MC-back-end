@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -70,7 +70,7 @@ public class ScenarioServiceImplTest {
 
          assertTrue(result.isPresent(), "present");
       }
-   }// class
+   }
 
    public static void assertInvariants(final ScenarioServiceImpl service) {
       ObjectVerifier.assertInvariants(service);// inherited

@@ -99,7 +99,7 @@ public class ScenarioControllerTest {
                   "scenario has the requested ID");
       }
 
-   }// class
+   }
 
    @Autowired
    private MockMvc mockMvc;

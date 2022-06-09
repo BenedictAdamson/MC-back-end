@@ -65,7 +65,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
          this.endRecruitment = endRecruitment;
       }
 
-   }// class
+   }
 
    private static final Map<UUID, UUID> NO_USERS = Map.of();
 

@@ -156,7 +156,7 @@ public class CrudRepositoryTest {
          return entities;
       }
 
-   }// class
+   }
 
    public static <T, ID> void assertInvariants(
             final CrudRepository<T, ID> repository) {

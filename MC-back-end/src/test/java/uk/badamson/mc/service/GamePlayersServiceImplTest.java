@@ -83,7 +83,7 @@ public class GamePlayersServiceImplTest {
          constructor(gamePlayersRepositoryB, currentUserGameRepositoryB,
                   gameServiceB, userServiceB);
       }
-   }// class
+   }
 
    @Nested
    public class EndRecruitment {
@@ -131,7 +131,7 @@ public class GamePlayersServiceImplTest {
                      () -> assertThat("users", gamePlayers.getUsers(),
                               is(users)));
          }
-      }// class
+      }
 
       @Nested
       public class NoSuchGame {
@@ -174,7 +174,7 @@ public class GamePlayersServiceImplTest {
                      () -> endRecruitment(service, id));
          }
 
-      }// class
+      }
 
       @Test
       public void notInRepository() {
@@ -193,7 +193,7 @@ public class GamePlayersServiceImplTest {
                   () -> assertThat("users", gamePlayers.getUsers().entrySet(),
                            empty()));
       }
-   }// class
+   }
 
    @Nested
    public class GetCurrentGameOfUser {
@@ -221,7 +221,7 @@ public class GamePlayersServiceImplTest {
 
          assertTrue(result.isEmpty(), "empty");
       }
-   }// class
+   }
 
    @Nested
    public class GetGamePlayersAsGameManager {
@@ -264,7 +264,7 @@ public class GamePlayersServiceImplTest {
                      () -> assertThat("users", gamePlayers.getUsers(),
                               is(users)));
          }
-      }// class
+      }
 
       @Nested
       public class NoSuchGame {
@@ -307,7 +307,7 @@ public class GamePlayersServiceImplTest {
             assertTrue(result.isEmpty(), "empty");
          }
 
-      }// class
+      }
 
       @Test
       public void notInRepository() {
@@ -323,7 +323,7 @@ public class GamePlayersServiceImplTest {
          final var gamePlayers = result.get();
          assertIsDefault(gamePlayers);
       }
-   }// class
+   }
 
    @Nested
    public class GetGamePlayersAsNonGameManager {
@@ -374,7 +374,7 @@ public class GamePlayersServiceImplTest {
                      () -> assertThat("users", gamePlayers.getUsers(),
                               is(expectedUsers)));
          }
-      }// class
+      }
 
       @Nested
       public class NoSuchGame {
@@ -419,7 +419,7 @@ public class GamePlayersServiceImplTest {
             assertTrue(result.isEmpty(), "empty");
          }
 
-      }// class
+      }
 
       @Test
       public void notInRepository() {
@@ -436,7 +436,7 @@ public class GamePlayersServiceImplTest {
          final var gamePlayers = result.get();
          assertIsDefault(gamePlayers);
       }
-   }// class
+   }
 
    @Nested
    public class MayUserJoinGame {
@@ -551,7 +551,7 @@ public class GamePlayersServiceImplTest {
 
          assertFalse(mayUserJoinGame(service, user, game));
       }
-   }// class
+   }
 
    @Nested
    public class UserJoinsGame {
@@ -687,7 +687,7 @@ public class GamePlayersServiceImplTest {
                      hasItem(userA));
          }
 
-      }// class
+      }
 
       @Test
       public void gameNotRecuiting() {
@@ -799,7 +799,7 @@ public class GamePlayersServiceImplTest {
                   () -> userJoinsGame(service, user, game));
       }
 
-   }// class
+   }
 
    private static final ZoneId UTC = ZoneId.from(ZoneOffset.UTC);
 

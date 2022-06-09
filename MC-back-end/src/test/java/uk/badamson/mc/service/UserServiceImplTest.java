@@ -82,7 +82,7 @@ public class UserServiceImplTest {
                      () -> UserServiceTest.add(service, user));
          }
 
-      }// class
+      }
 
       @Nested
       public class One {
@@ -205,7 +205,7 @@ public class UserServiceImplTest {
          public void usesPasswordEncoder() {
             test(userA, passwordEncoderB);
          }
-      }// class
+      }
 
       @Nested
       public class Two {
@@ -226,8 +226,8 @@ public class UserServiceImplTest {
             UserServiceTest.add_2(service, user1, user2);
             assertThat("Added user", service.getUsers().count(), is(3L));
          }
-      }// class
-   }// class
+      }
+   }
 
    @Nested
    public class Constructor {
@@ -241,7 +241,7 @@ public class UserServiceImplTest {
       public void b() {
          constructor(passwordEncoderB, userRepositoryB, PASSWORD_B);
       }
-   }// class
+   }
 
    @Nested
    public class GetUser {
@@ -276,7 +276,7 @@ public class UserServiceImplTest {
 
          assertTrue(result.isPresent(), "present");
       }
-   }// class
+   }
 
    @Nested
    public class LoadUserByUserName {
@@ -309,7 +309,7 @@ public class UserServiceImplTest {
          loadUserByUsername(service, user.getUsername());
       }
 
-   }// class
+   }
 
    @Nested
    public class Scenario {
@@ -345,7 +345,7 @@ public class UserServiceImplTest {
       private void when_getting_the_users() {
          users = getUsers(service).collect(toList());
       }
-   }// class
+   }
 
    private static final String USERNAME_C = "Gweezer";
 

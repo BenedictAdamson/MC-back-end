@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -42,7 +42,7 @@ public class GameRepositoryTest {
          return game.getIdentifier();
       }
 
-   }// class
+   }
 
    public static void assertInvariants(final GameRepository repository) {
       ObjectVerifier.assertInvariants(repository);// inherited

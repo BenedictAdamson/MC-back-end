@@ -69,7 +69,7 @@ public class GameServiceImplTest {
       public void b() {
          constructor(gameRepositoryB, CLOCK_B, scenarioServiceB);
       }
-   }// class
+   }
 
    @Nested
    public class Create {
@@ -114,7 +114,7 @@ public class GameServiceImplTest {
                               retrievedIdentifier.getCreated(),
                               is(truncatedNow)));
          }
-      }// class
+      }
 
       @Test
       public void unknownScenario() {
@@ -125,7 +125,7 @@ public class GameServiceImplTest {
          assertThrows(NoSuchElementException.class,
                   () -> create(service, scenario));
       }
-   }// class
+   }
 
    @Nested
    public class GetCreationTimesOfGamesOfScenario {
@@ -168,7 +168,7 @@ public class GameServiceImplTest {
          assertThrows(NoSuchElementException.class,
                   () -> getCreationTimesOfGamesOfScenario(service, scenario));
       }
-   }// class
+   }
 
    @Nested
    public class GetGame {
@@ -196,7 +196,7 @@ public class GameServiceImplTest {
          assertTrue(result.isPresent(), "present");// guard
          assertEquals(game, result.get(), "game");
       }
-   }// class
+   }
 
    @Nested
    public class GetGameIdentifiers {
@@ -224,7 +224,7 @@ public class GameServiceImplTest {
          assertAll(() -> assertEquals(1L, list.size(), "count"),
                   () -> assertThat("has ID", list, hasItem(id)));
       }
-   }// class
+   }
 
    private static final ZoneId UTC = ZoneId.from(ZoneOffset.UTC);
 
