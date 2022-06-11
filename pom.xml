@@ -295,6 +295,7 @@
    </dependencyManagement>
    <modules>
       <module>MC-back-end</module>
+      <module>MC-core</module>
       <module>MC-database</module>
       <module>MC-front-end</module>
       <module>MC-integration</module>

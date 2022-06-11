@@ -237,7 +237,7 @@
    <dependencies>
       <dependency>
          <groupId>uk.badamson.mc</groupId>
-         <artifactId>MC-model</artifactId>
+         <artifactId>MC-core</artifactId>
          <version>${project.parent.version}</version>
       </dependency>
       <dependency>
