@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,7 @@ public class UserController {
 
    private final UserSpringService service;
 
+   @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="reference semantics")
    @Autowired
    public UserController(@Nonnull final UserSpringService service) {
       this.service = Objects.requireNonNull(service);
