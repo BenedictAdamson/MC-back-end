@@ -18,18 +18,6 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.net.URI;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -41,13 +29,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.User;
-import uk.badamson.mc.service.GameService;
+import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
+
+import javax.annotation.Nonnull;
+import javax.annotation.security.RolesAllowed;
+import java.net.URI;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -136,20 +134,9 @@ public class GameController {
    }
 
    @Nonnull
-   private final GameService gameService;
+   private final GameSpringService gameService;
 
-   /**
-    * <p>
-    * Construct a controller.
-    * </p>
-    *
-    * @param gameService
-    *           The part of the service layer instance that this uses.
-    * @throws NullPointerException
-    *            If {@code scenarioService} is null.
-    */
-   @Autowired
-   public GameController(@Nonnull final GameService gameService) {
+   GameController(@Nonnull final GameSpringService gameService) {
       this.gameService = Objects.requireNonNull(gameService, "gameService");
    }
 

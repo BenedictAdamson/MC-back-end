@@ -18,7 +18,6 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserExistsException;
-import uk.badamson.mc.service.UserService;
+import uk.badamson.mc.service.UserSpringService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -70,26 +69,11 @@ public class UserController {
       return "/api/user/" + id;
    }
 
-   private final UserService service;
+   private final UserSpringService service;
 
-   /**
-    * <p>
-    * Construct a controller that associates with a given service layer
-    * instance.
-    * </p>
-    * <ul>
-    * <li>The {@linkplain #getService() service layer} of this controller is the
-    * given service layer.</li>
-    * </ul>
-    *
-    * @param service
-    *           The service layer instance that this uses.
-    * @throws NullPointerException
-    *            If {@code service} is null
-    */
    @Autowired
-   public UserController(final UserService service) {
-      this.service = Objects.requireNonNull(service, "service");
+   public UserController(@Nonnull final UserSpringService service) {
+      this.service = Objects.requireNonNull(service);
    }
 
    /**
@@ -180,21 +164,6 @@ public class UserController {
    public User getSelf(@Nonnull @AuthenticationPrincipal final User user) {
       Objects.requireNonNull(user, "user");
       return user;
-   }
-
-   /**
-    * <p>
-    * The service layer instance that this uses.
-    * </p>
-    * <ul>
-    * <li>Always associates with a (non null) service.</li>
-    * </ul>
-    *
-    * @return the service
-    */
-   @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="reference semantics")
-   public final UserService getService() {
-      return service;
    }
 
    /**

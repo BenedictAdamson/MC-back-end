@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.ScenarioSpringService;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -64,26 +65,11 @@ public class ScenarioController {
       return "/api/scenario/" + id;
    }
 
-   private final ScenarioService service;
+   private final ScenarioSpringService service;
 
-   /**
-    * <p>
-    * Construct a controller that associates with a given service layer
-    * instance.
-    * </p>
-    * <ul>
-    * <li>The {@linkplain #getService() service layer} of this controller is the
-    * given service layer.</li>
-    * </ul>
-    *
-    * @param service
-    *           The service layer instance that this uses.
-    * @throws NullPointerException
-    *            If {@code service} is null
-    */
    @Autowired
-   public ScenarioController(@Nonnull final ScenarioService service) {
-      this.service = Objects.requireNonNull(service, "service");
+   public ScenarioController(@Nonnull final ScenarioSpringService service) {
+      this.service = Objects.requireNonNull(service);
    }
 
    /**
@@ -134,20 +120,5 @@ public class ScenarioController {
       } else {
          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
       }
-   }
-
-   /**
-    * <p>
-    * The service layer instance that this uses.
-    * </p>
-    * <ul>
-    * <li>Always associates with a (non null) service.</li>
-    * </ul>
-    *
-    * @return the service
-    */
-   @Nonnull
-   public final ScenarioService getService() {
-      return service;
    }
 }
