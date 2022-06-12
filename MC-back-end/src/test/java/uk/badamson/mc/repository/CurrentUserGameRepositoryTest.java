@@ -26,13 +26,13 @@ import uk.badamson.mc.UserGameAssociation;
 /**
  * <p>
  * Auxiliary test code for classes that implement the
- * {@link CurrentUserGameRepository} interface.
+ * {@link CurrentUserGameSpringRepository} interface.
  */
 public class CurrentUserGameRepositoryTest {
 
    public static final class Fake
             extends CrudRepositoryTest.AbstractFake<UserGameAssociation, UUID>
-            implements CurrentUserGameRepository {
+            implements CurrentUserGameSpringRepository {
 
       @Override
       protected UserGameAssociation copy(
@@ -48,7 +48,7 @@ public class CurrentUserGameRepositoryTest {
    }
 
    public static void assertInvariants(
-            final CurrentUserGameRepository repository) {
+            final CurrentUserGameSpringRepository repository) {
       ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }

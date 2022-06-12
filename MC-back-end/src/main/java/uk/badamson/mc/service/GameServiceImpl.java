@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.repository.GameRepository;
+import uk.badamson.mc.repository.GameSpringRepository;
 
 /**
  * <p>
@@ -47,7 +47,7 @@ import uk.badamson.mc.repository.GameRepository;
 @Service
 public class GameServiceImpl implements GameService {
 
-   private final GameRepository repository;
+   private final GameSpringRepository repository;
 
    private final Clock clock;
 
@@ -74,7 +74,7 @@ public class GameServiceImpl implements GameService {
     *            </ul>
     */
    @Autowired
-   public GameServiceImpl(@Nonnull final GameRepository repository,
+   public GameServiceImpl(@Nonnull final GameSpringRepository repository,
                           @Nonnull final Clock clock,
                           @Nonnull final ScenarioService scenarioService) {
       this.repository = Objects.requireNonNull(repository, "repository");
@@ -138,7 +138,7 @@ public class GameServiceImpl implements GameService {
    }
 
    @Nonnull
-   public final GameRepository getRepository() {
+   public final GameSpringRepository getRepository() {
       return repository;
    }
 

@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserSpringRepository;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -64,7 +64,7 @@ public class BackEndWorld {
    private WebApplicationContext context;
 
    @Autowired
-   private UserRepository userRepository;
+   private UserSpringRepository userRepository;
 
    private MockMvc mockMvc;
 

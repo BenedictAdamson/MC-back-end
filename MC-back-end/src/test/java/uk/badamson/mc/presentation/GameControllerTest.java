@@ -34,7 +34,7 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
-import uk.badamson.mc.repository.GameRepository;
+import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.ScenarioService;
 
@@ -286,7 +286,7 @@ public class GameControllerTest {
             true, true);
 
    @Autowired
-   GameRepository gameRepository;
+   GameSpringRepository gameRepository;
 
    @Autowired
    ScenarioService scenarioService;

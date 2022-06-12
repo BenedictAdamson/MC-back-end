@@ -36,8 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.badamson.mc.*;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.repository.CurrentUserGameRepository;
-import uk.badamson.mc.repository.GamePlayersRepository;
+import uk.badamson.mc.repository.CurrentUserGameSpringRepository;
+import uk.badamson.mc.repository.GamePlayersSpringRepository;
 
 /**
  * <p>
@@ -72,9 +72,9 @@ public class GamePlayersServiceImpl implements GamePlayersService {
       return new GamePlayers(id, true, NO_USERS);
    }
 
-   private final GamePlayersRepository gamePlayersRepository;
+   private final GamePlayersSpringRepository gamePlayersRepository;
 
-   private final CurrentUserGameRepository currentUserGameRepository;
+   private final CurrentUserGameSpringRepository currentUserGameRepository;
 
    private final GameService gameService;
 
@@ -108,8 +108,8 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     */
    @Autowired
    public GamePlayersServiceImpl(
-            @Nonnull final GamePlayersRepository gamePlayersRepository,
-            @Nonnull final CurrentUserGameRepository currentUserGameRepository,
+            @Nonnull final GamePlayersSpringRepository gamePlayersRepository,
+            @Nonnull final CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull final GameService gameService,
             @Nonnull final UserService userService) {
       this.gamePlayersRepository = Objects.requireNonNull(gamePlayersRepository,
@@ -167,7 +167,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    }
 
    @Nonnull
-   public final CurrentUserGameRepository getCurrentUserGameRepository() {
+   public final CurrentUserGameSpringRepository getCurrentUserGameRepository() {
       return currentUserGameRepository;
    }
 
@@ -202,7 +202,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
    }
 
    @Nonnull
-   public final GamePlayersRepository getGamePlayersRepository() {
+   public final GamePlayersSpringRepository getGamePlayersRepository() {
       return gamePlayersRepository;
    }
 

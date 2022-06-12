@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2020-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -18,10 +18,27 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+
 import org.springframework.data.repository.CrudRepository;
 
-import uk.badamson.mc.Game;
+import uk.badamson.mc.User;
 
-public interface GameRepository extends CrudRepository<Game, Game.Identifier> {
+public interface UserSpringRepository extends CrudRepository<User, UUID> {
+
+   /**
+    * <p>
+    * Retrieve a {@linkplain User user} by its {@linkplain User#getUsername()
+    * username}.
+    * </p>
+    *
+    * @throws NullPointerException
+    *            If {@code username} is null
+    */
+   @Nonnull
+   Optional<User> findByUsername(@Nonnull String username);
 
 }

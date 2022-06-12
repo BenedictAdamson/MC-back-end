@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
-import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserSpringRepository;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
    @Nonnull
    private final PasswordEncoder passwordEncoder;
    @Nonnull
-   private final UserRepository userRepository;
+   private final UserSpringRepository userRepository;
    @Nonnull
    private final User administrator;
 
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     */
    @Autowired
    public UserServiceImpl(@Nonnull final PasswordEncoder passwordEncoder,
-            @Nonnull final UserRepository userRepository,
+            @Nonnull final UserSpringRepository userRepository,
             @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
    }
 
    @Nonnull
-   public final UserRepository getUserRepository() {
+   public final UserSpringRepository getUserRepository() {
       return userRepository;
    }
 

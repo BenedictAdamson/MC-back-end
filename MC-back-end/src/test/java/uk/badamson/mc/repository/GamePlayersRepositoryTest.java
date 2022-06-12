@@ -27,14 +27,14 @@ import uk.badamson.mc.GamePlayers;
 /**
  * <p>
  * Auxiliary test code for classes that implement the
- * {@link GamePlayersRepository} interface.
+ * {@link GamePlayersSpringRepository} interface.
  * </p>
  */
 public class GamePlayersRepositoryTest {
 
    public static final class Fake extends
             CrudRepositoryTest.AbstractFake<GamePlayers, Game.Identifier>
-            implements GamePlayersRepository {
+            implements GamePlayersSpringRepository {
 
       @Override
       protected GamePlayers copy(final GamePlayers players) {
@@ -49,7 +49,7 @@ public class GamePlayersRepositoryTest {
 
    }
 
-   public static void assertInvariants(final GameRepository repository) {
+   public static void assertInvariants(final GameSpringRepository repository) {
       ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }

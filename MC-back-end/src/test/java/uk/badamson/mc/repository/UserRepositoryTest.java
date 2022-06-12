@@ -29,14 +29,14 @@ import javax.annotation.Nonnull;
 
 /**
  * <p>
- * Auxiliary test code for classes that implement the {@link UserRepository}
+ * Auxiliary test code for classes that implement the {@link UserSpringRepository}
  * interface.
  */
 public class UserRepositoryTest {
 
    public static final class Fake
             extends CrudRepositoryTest.AbstractFake<User, UUID>
-            implements UserRepository {
+            implements UserSpringRepository {
 
       @Override
       protected User copy(final User user) {
@@ -60,7 +60,7 @@ public class UserRepositoryTest {
 
    }
 
-   public static void assertInvariants(final UserRepository repository) {
+   public static void assertInvariants(final UserSpringRepository repository) {
       ObjectVerifier.assertInvariants(repository);// inherited
       CrudRepositoryTest.assertInvariants(repository);// inherited
    }

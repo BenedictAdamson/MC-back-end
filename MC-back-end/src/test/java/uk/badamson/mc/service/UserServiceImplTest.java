@@ -48,7 +48,7 @@ import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
-import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserSpringRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
 
 public class UserServiceImplTest {
@@ -377,7 +377,7 @@ public class UserServiceImplTest {
 
    private static void constructor(
             final PasswordEncoder passwordEncoder,
-            final UserRepository userRepository,
+            final UserSpringRepository userRepository,
             final String administratorPassword) {
       final var service = new UserServiceImpl(passwordEncoder, userRepository,
                administratorPassword);
@@ -445,9 +445,9 @@ public class UserServiceImplTest {
    private final PasswordEncoder passwordEncoderB = new BCryptPasswordEncoder(
             5);
 
-   private UserRepository userRepositoryA;
+   private UserSpringRepository userRepositoryA;
 
-   private UserRepository userRepositoryB;
+   private UserSpringRepository userRepositoryB;
 
    private User userA;
 

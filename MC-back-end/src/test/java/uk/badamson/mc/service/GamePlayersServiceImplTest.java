@@ -18,7 +18,6 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
@@ -51,12 +50,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.*;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.repository.CurrentUserGameRepository;
+import uk.badamson.mc.repository.CurrentUserGameSpringRepository;
 import uk.badamson.mc.repository.CurrentUserGameRepositoryTest;
-import uk.badamson.mc.repository.GamePlayersRepository;
+import uk.badamson.mc.repository.GamePlayersSpringRepository;
 import uk.badamson.mc.repository.GamePlayersRepositoryTest;
 import uk.badamson.mc.repository.GameRepositoryTest;
-import uk.badamson.mc.repository.UserRepository;
+import uk.badamson.mc.repository.UserSpringRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
 
 import javax.annotation.Nonnull;
@@ -859,8 +858,8 @@ public class GamePlayersServiceImplTest {
    }
 
    private static void constructor(
-            final GamePlayersRepository gamePlayersRepository,
-            final CurrentUserGameRepository currentUserGameRepository,
+            final GamePlayersSpringRepository gamePlayersRepository,
+            final CurrentUserGameSpringRepository currentUserGameRepository,
             final GameService gameService, final UserService userService) {
       final var service = new GamePlayersServiceImpl(gamePlayersRepository,
                currentUserGameRepository, gameService, userService);
@@ -992,8 +991,8 @@ public class GamePlayersServiceImplTest {
       gamePlayersRepositoryB = new GamePlayersRepositoryTest.Fake();
       currentUserGameRepositoryA = new CurrentUserGameRepositoryTest.Fake();
       currentUserGameRepositoryB = new CurrentUserGameRepositoryTest.Fake();
-      UserRepository userRepositoryA = new UserRepositoryTest.Fake();
-      UserRepository userRepositoryB = new UserRepositoryTest.Fake();
+      UserSpringRepository userRepositoryA = new UserRepositoryTest.Fake();
+      UserSpringRepository userRepositoryB = new UserRepositoryTest.Fake();
 
       gameServiceA = new GameServiceImpl(gameRepositoryA, CLOCK_A,
                scenarioServiceA);

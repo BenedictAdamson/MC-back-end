@@ -46,7 +46,7 @@ import org.springframework.dao.DataAccessException;
 import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.repository.GameRepository;
+import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.repository.GameRepositoryTest;
 
 import javax.annotation.Nonnull;
@@ -239,7 +239,7 @@ public class GameServiceImplTest {
       assertNotNull(service.getRepository(), "Not null, repository");
    }
 
-   private static void constructor(final GameRepository repository,
+   private static void constructor(final GameSpringRepository repository,
                                    final Clock clock, final ScenarioService scenarioService) {
       final var service = new GameServiceImpl(repository, clock,
                scenarioService);
