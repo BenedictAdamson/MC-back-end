@@ -35,14 +35,14 @@ import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
-public class ScenarioServiceImplTest {
+public class ScenarioSpringServiceTest {
 
    @Nested
    public class GetScenario {
 
       @Test
       public void absent() {
-         final var service = new ScenarioServiceImpl();
+         final var service = new ScenarioSpringService();
          final var ids = getIds(service);
          var id = UUID.randomUUID();
          while (ids.contains(id)) {
@@ -56,7 +56,7 @@ public class ScenarioServiceImplTest {
 
       @Test
       public void present() {
-         final var service = new ScenarioServiceImpl();
+         final var service = new ScenarioSpringService();
          final Optional<UUID> idOptional = getIds(service).stream().findAny();
          assertThat("id", idOptional.isPresent());
          final var id = idOptional.get();
@@ -67,7 +67,7 @@ public class ScenarioServiceImplTest {
       }
    }
 
-   public static void assertInvariants(final ScenarioServiceImpl service) {
+   public static void assertInvariants(final ScenarioSpringService service) {
       ObjectVerifier.assertInvariants(service);// inherited
       ScenarioServiceTest.assertInvariants(service);// inherited
    }
@@ -77,7 +77,7 @@ public class ScenarioServiceImplTest {
    }
 
    public static Stream<NamedUUID> getNamedScenarioIdentifiers(
-            final ScenarioServiceImpl service) {
+            final ScenarioSpringService service) {
       final var scenarios = ScenarioServiceTest
                .getNamedScenarioIdentifiers(service);// inherited
 
@@ -87,7 +87,7 @@ public class ScenarioServiceImplTest {
    }
 
    public static Optional<Scenario> getScenario(
-            final ScenarioServiceImpl service, final UUID id) {
+           final ScenarioSpringService service, final UUID id) {
       final var result = ScenarioServiceTest.getScenario(service, id);
 
       assertInvariants(service);
@@ -95,7 +95,7 @@ public class ScenarioServiceImplTest {
    }
 
    public static Stream<UUID> getScenarioIdentifiers(
-            final ScenarioServiceImpl service) {
+            final ScenarioSpringService service) {
       final var scenarios = ScenarioServiceTest.getScenarioIdentifiers(service);// inherited
 
       assertInvariants(service);
@@ -105,14 +105,14 @@ public class ScenarioServiceImplTest {
 
    @Test
    public void constructor() {
-      final var service = new ScenarioServiceImpl();
+      final var service = new ScenarioSpringService();
 
       assertInvariants(service);
    }
 
    @Test
    public void getNamedScenarioIdentifiers() {
-      final var service = new ScenarioServiceImpl();
+      final var service = new ScenarioSpringService();
       final var ids = getIds(service);
 
       final var namedIds = getNamedScenarioIdentifiers(service);

@@ -51,7 +51,7 @@ import uk.badamson.mc.User;
 import uk.badamson.mc.repository.UserSpringRepository;
 import uk.badamson.mc.repository.UserRepositoryTest;
 
-public class UserServiceImplTest {
+public class UserSpringServiceTest {
 
    @Nested
    public class Add {
@@ -70,7 +70,7 @@ public class UserServiceImplTest {
          }
 
          private void test(final User user) {
-            final var service = new UserServiceImpl(passwordEncoderA,
+            final var service = new UserSpringService(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
             add(service, user);
             assertThrows(UserExistsException.class,
@@ -175,7 +175,7 @@ public class UserServiceImplTest {
 
          private void test(final BasicUserDetails userDetails,
                   final PasswordEncoder passwordEncoder) {
-            final var service = new UserServiceImpl(passwordEncoder,
+            final var service = new UserSpringService(passwordEncoder,
                      userRepositoryA, PASSWORD_A);
 
             UserServiceTest.add_1(service, userDetails);
@@ -216,7 +216,7 @@ public class UserServiceImplTest {
          }
 
          private void test(final User user1, final User user2) {
-            final var service = new UserServiceImpl(passwordEncoderA,
+            final var service = new UserSpringService(passwordEncoderA,
                      userRepositoryA, PASSWORD_A);
             UserServiceTest.add_2(service, user1, user2);
             assertThat("Added user", service.getUsers().count(), is(3L));
@@ -243,7 +243,7 @@ public class UserServiceImplTest {
 
       @Test
       public void absent() {
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
 
          final var result = getUser(service, USER_ID_A);
@@ -253,7 +253,7 @@ public class UserServiceImplTest {
 
       @Test
       public void administrator() {
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
 
          getUser_administrator(service);
@@ -263,7 +263,7 @@ public class UserServiceImplTest {
       public void present() {
          final var userDetails = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                   Authority.ALL, true, true, true, true);
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
          final var user = service.add(userDetails);
 
@@ -278,7 +278,7 @@ public class UserServiceImplTest {
 
       @Test
       public void absent() {
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
 
          assertThrows(UsernameNotFoundException.class,
@@ -287,7 +287,7 @@ public class UserServiceImplTest {
 
       @Test
       public void administrator() {
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
 
          loadUserByUsername_administrator(service);
@@ -297,7 +297,7 @@ public class UserServiceImplTest {
       public void present() {
          final var userDetails = new BasicUserDetails(USERNAME_A, PASSWORD_A,
                   Authority.ALL, true, true, true, true);
-         final var service = new UserServiceImpl(passwordEncoderA,
+         final var service = new UserSpringService(passwordEncoderA,
                   userRepositoryA, PASSWORD_A);
          final var user = service.add(userDetails);
 
@@ -309,7 +309,7 @@ public class UserServiceImplTest {
    @Nested
    public class Scenario {
 
-      private UserServiceImpl service;
+      private UserSpringService service;
       private Collection<User> users;
 
       @Test
@@ -321,7 +321,7 @@ public class UserServiceImplTest {
       }
 
       private void given_a_fresh_instance_of_MC() {
-         service = new UserServiceImpl(passwordEncoderA, userRepositoryA,
+         service = new UserSpringService(passwordEncoderA, userRepositoryA,
                   PASSWORD_A);
       }
 
@@ -356,7 +356,7 @@ public class UserServiceImplTest {
 
    private static final UUID USER_ID_A = UUID.randomUUID();
 
-   public static User add(final UserServiceImpl service,
+   public static User add(final UserSpringService service,
             final BasicUserDetails userDetails) {
       final var user = UserServiceTest.add(service, userDetails);// inherited
 
@@ -365,7 +365,7 @@ public class UserServiceImplTest {
       return user;
    }
 
-   public static void assertInvariants(final UserServiceImpl service) {
+   public static void assertInvariants(final UserSpringService service) {
       ObjectVerifier.assertInvariants(service);// inherited
       UserServiceTest.assertInvariants(service);// inherited
 
@@ -379,7 +379,7 @@ public class UserServiceImplTest {
             final PasswordEncoder passwordEncoder,
             final UserSpringRepository userRepository,
             final String administratorPassword) {
-      final var service = new UserServiceImpl(passwordEncoder, userRepository,
+      final var service = new UserSpringService(passwordEncoder, userRepository,
                administratorPassword);
 
       assertInvariants(service);
@@ -397,7 +397,7 @@ public class UserServiceImplTest {
 
    }
 
-   public static Optional<User> getUser(final UserServiceImpl service,
+   public static Optional<User> getUser(final UserSpringService service,
             final UUID id) {
       final var result = UserServiceTest.getUser(service, id);// inherited
 
@@ -405,14 +405,14 @@ public class UserServiceImplTest {
       return result;
    }
 
-   public static User getUser_administrator(final UserServiceImpl service) {
+   public static User getUser_administrator(final UserSpringService service) {
       final var result = UserServiceTest.getUser_administrator(service);// inherited
 
       assertInvariants(service);
       return result;
    }
 
-   public static Stream<User> getUsers(final UserServiceImpl service) {
+   public static Stream<User> getUsers(final UserSpringService service) {
       final var users = UserServiceTest.getUsers(service);// inherited
 
       assertInvariants(service);
@@ -420,7 +420,7 @@ public class UserServiceImplTest {
       return users;
    }
 
-   public static UserDetails loadUserByUsername(final UserServiceImpl service,
+   public static UserDetails loadUserByUsername(final UserSpringService service,
             final String username) {
       final UserDetails user = UserServiceTest.loadUserByUsername(service,
                username);// inherited
@@ -431,7 +431,7 @@ public class UserServiceImplTest {
    }
 
    public static User loadUserByUsername_administrator(
-            final UserServiceImpl service) {
+            final UserSpringService service) {
       final var user = UserServiceTest
                .loadUserByUsername_administrator(service);// inherited
 
@@ -458,7 +458,7 @@ public class UserServiceImplTest {
    @Test
    public void administratorInRepository() {
       final var repository = userRepositoryA;
-      final var service = new UserServiceImpl(passwordEncoderA, repository,
+      final var service = new UserSpringService(passwordEncoderA, repository,
                PASSWORD_A);
       repository.save(User.createAdministrator(PASSWORD_B));
 

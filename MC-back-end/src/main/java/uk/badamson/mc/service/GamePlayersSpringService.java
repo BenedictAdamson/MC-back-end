@@ -46,7 +46,7 @@ import uk.badamson.mc.repository.GamePlayersSpringRepository;
  * </p>
  */
 @Service
-public class GamePlayersServiceImpl implements GamePlayersService {
+public class GamePlayersSpringService implements GamePlayersService {
 
    @Immutable
    private static final class UserJoinsGameState {
@@ -107,7 +107,7 @@ public class GamePlayersServiceImpl implements GamePlayersService {
     *            </ul>
     */
    @Autowired
-   public GamePlayersServiceImpl(
+   public GamePlayersSpringService(
             @Nonnull final GamePlayersSpringRepository gamePlayersRepository,
             @Nonnull final CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull final GameService gameService,

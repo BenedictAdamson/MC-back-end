@@ -43,7 +43,7 @@ import java.util.stream.StreamSupport;
  * </p>
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserSpringService implements UserService {
 
    @Nonnull
    private final PasswordEncoder passwordEncoder;
@@ -72,9 +72,9 @@ public class UserServiceImpl implements UserService {
     *            </ul>
     */
    @Autowired
-   public UserServiceImpl(@Nonnull final PasswordEncoder passwordEncoder,
-            @Nonnull final UserSpringRepository userRepository,
-            @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+   public UserSpringService(@Nonnull final PasswordEncoder passwordEncoder,
+                            @Nonnull final UserSpringRepository userRepository,
+                            @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
       this.userRepository = Objects.requireNonNull(userRepository,
                "userRepository");
       Objects.requireNonNull(administratorPassword, "administratorPassword");

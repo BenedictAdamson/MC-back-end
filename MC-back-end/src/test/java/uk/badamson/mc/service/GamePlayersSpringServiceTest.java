@@ -60,7 +60,7 @@ import uk.badamson.mc.repository.UserRepositoryTest;
 
 import javax.annotation.Nonnull;
 
-public class GamePlayersServiceImplTest {
+public class GamePlayersSpringServiceTest {
    @Nested
    public class Constructor {
 
@@ -110,7 +110,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInRepository = new GamePlayers(id, recruiting0,
                      users);
             gamePlayersRepository.save(gamePlayersInRepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepository,
                      gameService, userServiceA);
 
@@ -149,7 +149,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInrepository = new GamePlayers(id, true,
                      Map.of());
             gamePlayersRepository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepository,
                      gameService, userServiceA);
 
@@ -158,7 +158,7 @@ public class GamePlayersServiceImplTest {
          }
 
          private void test(final Game.Identifier id) {
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameServiceA, userServiceA);
 
@@ -174,7 +174,7 @@ public class GamePlayersServiceImplTest {
          final var scenario = getAScenarioId(gameService);
          final var game = gameService.create(scenario);
          final var id = game.getIdentifier();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
          final var gamePlayers = endRecruitment(service, id);
@@ -192,7 +192,7 @@ public class GamePlayersServiceImplTest {
 
       @Test
       public void unknownUser() {
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameServiceA, userServiceA);
 
          final var result = getCurrentGameOfUser(service, USER_ID_A);
@@ -206,7 +206,7 @@ public class GamePlayersServiceImplTest {
          final var currentUserGameRepository = currentUserGameRepositoryA;
          currentUserGameRepository
                   .save(new UserGameAssociation(userId, GAME_IDENTIFIER_A));
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepository, gameServiceA, userServiceA);
 
          final var result = getCurrentGameOfUser(service, userId);
@@ -241,7 +241,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInrepository = new GamePlayers(id, recruiting,
                      users);
             gamePlayersRepository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
@@ -280,7 +280,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInrepository = new GamePlayers(id, true,
                      Map.of());
             gamePlayersRepository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
@@ -290,7 +290,7 @@ public class GamePlayersServiceImplTest {
          }
 
          private void test(final Game.Identifier id) {
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameServiceA, userServiceA);
 
@@ -306,7 +306,7 @@ public class GamePlayersServiceImplTest {
          final var gameService = gameServiceA;
          final var scenario = getAScenarioId(gameService);
          final var game = gameService.create(scenario).getIdentifier();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
          final var result = getGamePlayersAsGameManager(service, game);
@@ -350,7 +350,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInrepository = new GamePlayers(id, recruiting,
                      users);
             gamePlayersRepository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
@@ -390,7 +390,7 @@ public class GamePlayersServiceImplTest {
             final var gamePlayersInrepository = new GamePlayers(id, true,
                      Map.of());
             gamePlayersRepository.save(gamePlayersInrepository);
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepository, currentUserGameRepositoryA,
                      gameService, userServiceA);
 
@@ -401,7 +401,7 @@ public class GamePlayersServiceImplTest {
          }
 
          private void test(final Game.Identifier id, final UUID user) {
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameServiceA, userServiceA);
 
@@ -418,7 +418,7 @@ public class GamePlayersServiceImplTest {
          final var gameService = gameServiceA;
          final var scenario = getAScenarioId(gameService);
          final var game = gameService.create(scenario).getIdentifier();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
          final var result = getGamePlayersAsNonGameManager(service, game,
@@ -443,7 +443,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.endRecruitment(game);
 
@@ -461,7 +461,7 @@ public class GamePlayersServiceImplTest {
                   PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true, true,
                   true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
 
          assertTrue(mayUserJoinGame(service, user, game));
@@ -473,7 +473,7 @@ public class GamePlayersServiceImplTest {
          // Tough test: user exists and is permitted
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameServiceA, userService);
 
          assertFalse(mayUserJoinGame(service, user, GAME_IDENTIFIER_A));
@@ -485,7 +485,7 @@ public class GamePlayersServiceImplTest {
          final var gameService = gameServiceA;
          final var scenario = getAScenarioId(gameService);
          final var game = gameService.create(scenario).getIdentifier();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
          assertFalse(mayUserJoinGame(service, USER_ID_A, game));
@@ -502,7 +502,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.userJoinsGame(user, gameA);
 
@@ -518,7 +518,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.userJoinsGame(user, game);
 
@@ -538,7 +538,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, authorities, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
 
          assertFalse(mayUserJoinGame(service, user, game));
@@ -562,7 +562,7 @@ public class GamePlayersServiceImplTest {
             final var scenario = scenarioOptional.get();
             final var nCharacters = scenario.getCharacters().size();
             final var game = gameService.create(scenarioId).getIdentifier();
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameService, userService);
             for (var c = 0; c < nCharacters - 1; ++c) {
@@ -596,14 +596,14 @@ public class GamePlayersServiceImplTest {
                      PASSWORD_A, Set.of(Authority.ROLE_PLAYER), true, true,
                      true, true)).getId();
 
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameService, userService);
 
             test(service, user, game);
          }
 
-         private void test(final GamePlayersServiceImpl gamePlayersService,
+         private void test(final GamePlayersSpringService gamePlayersService,
                   final UUID user, final Game.Identifier game) {
             final var scenarioService = gamePlayersService.getGameService()
                      .getScenarioService();
@@ -663,7 +663,7 @@ public class GamePlayersServiceImplTest {
                      PASSWORD_B, Set.of(Authority.ROLE_PLAYER), true, true,
                      true, true)).getId();
 
-            final var service = new GamePlayersServiceImpl(
+            final var service = new GamePlayersSpringService(
                      gamePlayersRepositoryA, currentUserGameRepositoryA,
                      gameService, userService);
             service.userJoinsGame(userA, game);
@@ -690,7 +690,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.endRecruitment(game);
 
@@ -704,7 +704,7 @@ public class GamePlayersServiceImplTest {
          // Tough test: user exists and is permitted
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true));
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameServiceA, userService);
 
          assertThrows(NoSuchElementException.class, () -> userJoinsGame(service,
@@ -717,7 +717,7 @@ public class GamePlayersServiceImplTest {
          final var gameService = gameServiceA;
          final var scenario = getAScenarioId(gameService);
          final var game = gameService.create(scenario).getIdentifier();
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userServiceA);
 
          assertThrows(NoSuchElementException.class,
@@ -735,7 +735,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.userJoinsGame(user, gameA);
 
@@ -752,7 +752,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, Authority.ALL, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
          service.userJoinsGame(user, game);
 
@@ -783,7 +783,7 @@ public class GamePlayersServiceImplTest {
          final var user = userService.add(new BasicUserDetails(USERNAME_A,
                   PASSWORD_A, authorities, true, true, true, true)).getId();
 
-         final var service = new GamePlayersServiceImpl(gamePlayersRepositoryA,
+         final var service = new GamePlayersSpringService(gamePlayersRepositoryA,
                   currentUserGameRepositoryA, gameService, userService);
 
          assertThrows(SecurityException.class,
@@ -842,7 +842,7 @@ public class GamePlayersServiceImplTest {
    private static final Game.Identifier GAME_IDENTIFIER_B = new Game.Identifier(
             UUID.randomUUID(), Instant.now());
 
-   public static void assertInvariants(final GamePlayersServiceImpl service) {
+   public static void assertInvariants(final GamePlayersSpringService service) {
       ObjectVerifier.assertInvariants(service);// inherited
       GamePlayersServiceTest.assertInvariants(service);// inherited
 
@@ -861,7 +861,7 @@ public class GamePlayersServiceImplTest {
             final GamePlayersSpringRepository gamePlayersRepository,
             final CurrentUserGameSpringRepository currentUserGameRepository,
             final GameService gameService, final UserService userService) {
-      final var service = new GamePlayersServiceImpl(gamePlayersRepository,
+      final var service = new GamePlayersSpringService(gamePlayersRepository,
                currentUserGameRepository, gameService, userService);
 
       assertInvariants(service);
@@ -880,7 +880,7 @@ public class GamePlayersServiceImplTest {
    }
 
    public static GamePlayers endRecruitment(
-            final GamePlayersServiceImpl service, final Game.Identifier id)
+           final GamePlayersSpringService service, final Game.Identifier id)
             throws NoSuchElementException {
       final GamePlayers result;
       try {
@@ -894,7 +894,7 @@ public class GamePlayersServiceImplTest {
    }
 
    public static Optional<Game.Identifier> getCurrentGameOfUser(
-            final GamePlayersServiceImpl service, final UUID user) {
+           final GamePlayersSpringService service, final UUID user) {
       final var result = GamePlayersServiceTest.getCurrentGameOfUser(service,
                user);
       assertInvariants(service);
@@ -902,7 +902,7 @@ public class GamePlayersServiceImplTest {
    }
 
    public static Optional<GamePlayers> getGamePlayersAsGameManager(
-            final GamePlayersServiceImpl service, final Game.Identifier id) {
+           final GamePlayersSpringService service, final Game.Identifier id) {
       final boolean gameExists = service.getGameService().getGame(id)
                .isPresent();
 
@@ -920,15 +920,15 @@ public class GamePlayersServiceImplTest {
    }
 
    public static Optional<GamePlayers> getGamePlayersAsNonGameManager(
-            final GamePlayersServiceImpl service, final Game.Identifier id,
-            final UUID user) {
+           final GamePlayersSpringService service, final Game.Identifier id,
+           final UUID user) {
       final var result = GamePlayersServiceTest
                .getGamePlayersAsNonGameManager(service, id, user);// inherited
       assertInvariants(service);
       return result;
    }
 
-   public static boolean mayUserJoinGame(final GamePlayersServiceImpl service,
+   public static boolean mayUserJoinGame(final GamePlayersSpringService service,
             final UUID user, final Identifier game) {
       final var result = GamePlayersServiceTest.mayUserJoinGame(service, user,
                game);// inherited
@@ -936,7 +936,7 @@ public class GamePlayersServiceImplTest {
       return result;
    }
 
-   public static void userJoinsGame(final GamePlayersServiceImpl service,
+   public static void userJoinsGame(final GamePlayersSpringService service,
             final UUID user, final Game.Identifier game)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, SecurityException {
@@ -956,9 +956,9 @@ public class GamePlayersServiceImplTest {
    private final PasswordEncoder passwordEncoderB = new BCryptPasswordEncoder(
             5);
 
-   private final ScenarioService scenarioServiceA = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceA = new ScenarioSpringService();
 
-   private final ScenarioService scenarioServiceB = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceB = new ScenarioSpringService();
 
    private GamePlayersRepositoryTest.Fake gamePlayersRepositoryA;
 
@@ -994,13 +994,13 @@ public class GamePlayersServiceImplTest {
       UserSpringRepository userRepositoryA = new UserRepositoryTest.Fake();
       UserSpringRepository userRepositoryB = new UserRepositoryTest.Fake();
 
-      gameServiceA = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+      gameServiceA = new GameSpringService(gameRepositoryA, CLOCK_A,
                scenarioServiceA);
-      gameServiceB = new GameServiceImpl(gameRepositoryB, CLOCK_B,
+      gameServiceB = new GameSpringService(gameRepositoryB, CLOCK_B,
                scenarioServiceB);
-      userServiceA = new UserServiceImpl(passwordEncoderA, userRepositoryA,
+      userServiceA = new UserSpringService(passwordEncoderA, userRepositoryA,
                PASSWORD_A);
-      userServiceB = new UserServiceImpl(passwordEncoderB, userRepositoryB,
+      userServiceB = new UserSpringService(passwordEncoderB, userRepositoryB,
                PASSWORD_B);
    }
 }

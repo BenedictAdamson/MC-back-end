@@ -39,7 +39,7 @@ import uk.badamson.mc.Scenario;
  * </p>
  */
 @Service
-public class ScenarioServiceImpl implements ScenarioService {
+public class ScenarioSpringService implements ScenarioService {
 
    // TODO have useful scenarios.
    private static final Scenario SCENARIO = new Scenario(UUID.randomUUID(),

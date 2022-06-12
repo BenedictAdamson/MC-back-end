@@ -45,7 +45,7 @@ import uk.badamson.mc.repository.GameSpringRepository;
  * </p>
  */
 @Service
-public class GameServiceImpl implements GameService {
+public class GameSpringService implements GameService {
 
    private final GameSpringRepository repository;
 
@@ -74,9 +74,9 @@ public class GameServiceImpl implements GameService {
     *            </ul>
     */
    @Autowired
-   public GameServiceImpl(@Nonnull final GameSpringRepository repository,
-                          @Nonnull final Clock clock,
-                          @Nonnull final ScenarioService scenarioService) {
+   public GameSpringService(@Nonnull final GameSpringRepository repository,
+                            @Nonnull final Clock clock,
+                            @Nonnull final ScenarioService scenarioService) {
       this.repository = Objects.requireNonNull(repository, "repository");
       this.clock = Objects.requireNonNull(clock, "clock");
       this.scenarioService = Objects.requireNonNull(scenarioService,

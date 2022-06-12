@@ -51,7 +51,7 @@ import uk.badamson.mc.repository.GameRepositoryTest;
 
 import javax.annotation.Nonnull;
 
-public class GameServiceImplTest {
+public class GameSpringServiceTest {
    @Nested
    public class Constructor {
 
@@ -86,7 +86,7 @@ public class GameServiceImplTest {
             final var clock = Clock.fixed(now, UTC);
             final var scenarioService = scenarioServiceA;
             final var scenario = getAScenarioId(scenarioService);
-            final var service = new GameServiceImpl(gameRepositoryA, clock,
+            final var service = new GameSpringService(gameRepositoryA, clock,
                      scenarioService);
             final var truncatedNow = service.getNow();
 
@@ -114,7 +114,7 @@ public class GameServiceImplTest {
       @Test
       public void unknownScenario() {
          final var scenario = UUID.randomUUID();
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                  scenarioServiceA);
 
          assertThrows(NoSuchElementException.class,
@@ -127,7 +127,7 @@ public class GameServiceImplTest {
 
       @Test
       public void none() {
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
          final var scenario = getAScenarioId(scenarioServiceA);
 
@@ -140,7 +140,7 @@ public class GameServiceImplTest {
       @Test
       public void one() {
          final var scenario = getAScenarioId(scenarioServiceA);
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
          final var created = service.create(scenario).getIdentifier()
                   .getCreated();
@@ -156,7 +156,7 @@ public class GameServiceImplTest {
 
       @Test
       public void unknownScenario() {
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
          final var scenario = UUID.randomUUID();
 
@@ -170,7 +170,7 @@ public class GameServiceImplTest {
 
       @Test
       public void absent() {
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
          final var result = getGame(service, IDENTIFIER_A);
@@ -183,7 +183,7 @@ public class GameServiceImplTest {
          final var id = IDENTIFIER_A;
          final var game = new Game(id, Game.RunState.RUNNING);
          gameRepositoryA.save(game);
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
          final var result = getGame(service, id);
@@ -198,7 +198,7 @@ public class GameServiceImplTest {
 
       @Test
       public void none() {
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
          final var result = getGameIdentifiers(service);
@@ -210,7 +210,7 @@ public class GameServiceImplTest {
       public void one() {
          final var id = IDENTIFIER_A;
          gameRepositoryA.save(new Game(id, Game.RunState.RUNNING));
-         final var service = new GameServiceImpl(gameRepositoryA, CLOCK_A,
+         final var service = new GameSpringService(gameRepositoryA, CLOCK_A,
                   scenarioServiceA);
 
          final var result = getGameIdentifiers(service);
@@ -232,7 +232,7 @@ public class GameServiceImplTest {
    private static final Identifier IDENTIFIER_A = new Game.Identifier(
             SCENARIO_ID_A, Instant.now());
 
-   public static void assertInvariants(final GameServiceImpl service) {
+   public static void assertInvariants(final GameSpringService service) {
       ObjectVerifier.assertInvariants(service);// inherited
       GameServiceTest.assertInvariants(service);// inherited
 
@@ -241,7 +241,7 @@ public class GameServiceImplTest {
 
    private static void constructor(final GameSpringRepository repository,
                                    final Clock clock, final ScenarioService scenarioService) {
-      final var service = new GameServiceImpl(repository, clock,
+      final var service = new GameSpringService(repository, clock,
                scenarioService);
 
       assertInvariants(service);
@@ -254,7 +254,7 @@ public class GameServiceImplTest {
 
    }
 
-   public static Game create(final GameServiceImpl service, final UUID scenario)
+   public static Game create(final GameSpringService service, final UUID scenario)
             throws DataAccessException, NoSuchElementException {
       final Game game;
       try {
@@ -270,7 +270,7 @@ public class GameServiceImplTest {
    }
 
    public static Stream<Instant> getCreationTimesOfGamesOfScenario(
-            final GameServiceImpl service, final UUID scenario)
+           final GameSpringService service, final UUID scenario)
             throws NoSuchElementException {
       final Stream<Instant> times;
       try {
@@ -286,7 +286,7 @@ public class GameServiceImplTest {
       return times;
    }
 
-   public static Optional<Game> getGame(final GameServiceImpl service,
+   public static Optional<Game> getGame(final GameSpringService service,
             final Game.Identifier id) {
       final var result = GameServiceTest.getGame(service, id);
 
@@ -295,7 +295,7 @@ public class GameServiceImplTest {
    }
 
    public static Stream<Game.Identifier> getGameIdentifiers(
-            final GameServiceImpl service) {
+            final GameSpringService service) {
       final var games = GameServiceTest.getGameIdentifiers(service);// inherited
 
       assertInvariants(service);
@@ -307,9 +307,9 @@ public class GameServiceImplTest {
 
    private GameRepositoryTest.Fake gameRepositoryB;
 
-   private final ScenarioService scenarioServiceA = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceA = new ScenarioSpringService();
 
-   private final ScenarioService scenarioServiceB = new ScenarioServiceImpl();
+   private final ScenarioService scenarioServiceB = new ScenarioSpringService();
 
    private static UUID getAScenarioId(@Nonnull ScenarioService scenarioService) {
       final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers()
