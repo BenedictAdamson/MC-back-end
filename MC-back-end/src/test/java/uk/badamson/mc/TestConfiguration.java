@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import uk.badamson.mc.presentation.PresentationLayerSpringConfiguration;
 import uk.badamson.mc.repository.RepositoryLayerSpringConfiguration;
 import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
@@ -34,10 +33,10 @@ import uk.badamson.mc.service.ServiceLayerSpringConfiguration;
  */
 @Configuration
 @EnableAutoConfiguration
-@Import(value = { MethodSecurityConfiguration.class,
-         PresentationLayerSpringConfiguration.class,
-         ServiceLayerSpringConfiguration.class,
-         RepositoryLayerSpringConfiguration.class })
+@Import(value = {MethodSecurityConfiguration.class,
+        PresentationLayerSpringConfiguration.class,
+        ServiceLayerSpringConfiguration.class,
+        RepositoryLayerSpringConfiguration.class})
 @DataMongoTest(
         excludeAutoConfiguration = org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration.class
 )

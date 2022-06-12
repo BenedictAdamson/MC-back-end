@@ -18,11 +18,11 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
 import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
+
+import java.util.Objects;
 
 /**
  * <p>
@@ -32,26 +32,26 @@ import uk.badamson.mc.GamePlayers;
  */
 public class GamePlayersRepositoryTest {
 
-   public static final class Fake extends
+    public static void assertInvariants(final GameSpringRepository repository) {
+        ObjectVerifier.assertInvariants(repository);// inherited
+        CrudRepositoryTest.assertInvariants(repository);// inherited
+    }
+
+    public static final class Fake extends
             CrudRepositoryTest.AbstractFake<GamePlayers, Game.Identifier>
             implements GamePlayersSpringRepository {
 
-      @Override
-      protected GamePlayers copy(final GamePlayers players) {
-         return new GamePlayers(players);
-      }
+        @Override
+        protected GamePlayers copy(final GamePlayers players) {
+            return new GamePlayers(players);
+        }
 
-      @Override
-      protected Game.Identifier getId(final GamePlayers players) {
-         Objects.requireNonNull(players, "players");
-         return players.getGame();
-      }
+        @Override
+        protected Game.Identifier getId(final GamePlayers players) {
+            Objects.requireNonNull(players, "players");
+            return players.getGame();
+        }
 
-   }
-
-   public static void assertInvariants(final GameSpringRepository repository) {
-      ObjectVerifier.assertInvariants(repository);// inherited
-      CrudRepositoryTest.assertInvariants(repository);// inherited
-   }
+    }
 
 }

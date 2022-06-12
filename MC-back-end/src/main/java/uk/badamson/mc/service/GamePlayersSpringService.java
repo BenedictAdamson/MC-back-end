@@ -35,65 +35,60 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class GamePlayersSpringService  {
+public class GamePlayersSpringService {
 
-   private final GamePlayersService delegate;
+    private final GamePlayersService delegate;
 
 
-   @Autowired
-   public GamePlayersSpringService(
+    @Autowired
+    public GamePlayersSpringService(
             @Nonnull final GamePlayersSpringRepository gamePlayersRepository,
             @Nonnull final CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull final GameSpringService gameService,
             @Nonnull final UserSpringService userService) {
-      this.delegate = new GamePlayersService(
-              new GamePlayersRepositoryAdapter(gamePlayersRepository),
-              new CurrentUserGameRepositoryAdapter(currentUserGameRepository),
-              gameService.getDelegate(),
-              userService.getDelegate()
-      );
-   }
+        this.delegate = new GamePlayersService(
+                new GamePlayersRepositoryAdapter(gamePlayersRepository),
+                new CurrentUserGameRepositoryAdapter(currentUserGameRepository),
+                gameService.getDelegate(),
+                userService.getDelegate()
+        );
+    }
 
-   @Nonnull
-   final GamePlayersService getDelegate() {
-      return delegate;
-   }
-
-   @Nonnull
-   public GamePlayers endRecruitment(@Nonnull final Identifier id)
+    @Nonnull
+    public void endRecruitment(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      return delegate.endRecruitment(id);
-   }
+        delegate.endRecruitment(id);
+    }
 
-   @Nonnull
-   public Optional<Game.Identifier> getCurrentGameOfUser(
+    @Nonnull
+    public Optional<Game.Identifier> getCurrentGameOfUser(
             @Nonnull final UUID userId) {
-      return delegate.getCurrentGameOfUser(userId);
-   }
+        return delegate.getCurrentGameOfUser(userId);
+    }
 
-   @Nonnull
-   public Optional<GamePlayers> getGamePlayersAsGameManager(
+    @Nonnull
+    public Optional<GamePlayers> getGamePlayersAsGameManager(
             @Nonnull final Game.Identifier id) {
-      return delegate.getGamePlayersAsGameManager(id);
-   }
+        return delegate.getGamePlayersAsGameManager(id);
+    }
 
-   @Nonnull
-   public Optional<GamePlayers> getGamePlayersAsNonGameManager(
+    @Nonnull
+    public Optional<GamePlayers> getGamePlayersAsNonGameManager(
             @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
-      return delegate.getGamePlayersAsNonGameManager(id, user);
-   }
+        return delegate.getGamePlayersAsNonGameManager(id, user);
+    }
 
-   @Transactional
-   public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final Identifier game) {
-      return delegate.mayUserJoinGame(user, game);
-   }
+    @Transactional
+    public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final Identifier game) {
+        return delegate.mayUserJoinGame(user, game);
+    }
 
-   @Transactional
-   public void userJoinsGame(@Nonnull final UUID userId,
-            @Nonnull final Game.Identifier gameId)
+    @Transactional
+    public void userJoinsGame(@Nonnull final UUID userId,
+                              @Nonnull final Game.Identifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, SecurityException {
-      delegate.userJoinsGame(userId, gameId);
-   }
+        delegate.userJoinsGame(userId, gameId);
+    }
 
 }

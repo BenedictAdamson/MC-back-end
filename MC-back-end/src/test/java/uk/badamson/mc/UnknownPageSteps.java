@@ -18,14 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * <p>
@@ -33,28 +32,28 @@ import io.cucumber.java.en.When;
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UnknownPageSteps {
 
-   @Autowired
-   private BackEndWorld world;
+    @Autowired
+    private BackEndWorld world;
 
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path)
+    @When("getting the unknown resource at {string}")
+    public void getting_the_unknown_resource_at(final String path)
             throws Exception {
-      world.getJson(path);
-   }
+        world.getJson(path);
+    }
 
-   @Then("MC replies with Client Error")
-   public void mc_replies_with_client_error() throws Exception {
-      world.getResponse().andExpect(status().is4xxClientError());
-   }
+    @Then("MC replies with Client Error")
+    public void mc_replies_with_client_error() throws Exception {
+        world.getResponse().andExpect(status().is4xxClientError());
+    }
 
-   @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) throws Exception {
-      final var method = HttpMethod.valueOf(verb);
-      world.exchangeJson(method, path);
-   }
+    @When("modifying the unknown resource with a {string} at {string}")
+    public void modifying_the_unknown_resource_with_a(final String verb,
+                                                      final String path) throws Exception {
+        final var method = HttpMethod.valueOf(verb);
+        world.exchangeJson(method, path);
+    }
 
 }

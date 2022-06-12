@@ -27,13 +27,13 @@ import org.springframework.core.env.MutablePropertySources;
 @Configuration
 public class CucumberBeansConfiguration {
 
-   @Bean
-   public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-      final var configurer = new PropertySourcesPlaceholderConfigurer();
-      final var sources = new MutablePropertySources();
-      sources.addFirst(new RandomValuePropertySource());
-      configurer.setPropertySources(sources);
-      return configurer;
-   }
+    @Bean
+    public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        final var configurer = new PropertySourcesPlaceholderConfigurer();
+        final var sources = new MutablePropertySources();
+        sources.addFirst(new RandomValuePropertySource());
+        configurer.setPropertySources(sources);
+        return configurer;
+    }
 
 }

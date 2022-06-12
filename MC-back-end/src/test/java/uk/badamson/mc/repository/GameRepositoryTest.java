@@ -28,25 +28,25 @@ import uk.badamson.mc.Game;
  */
 public class GameRepositoryTest {
 
-   public static final class Fake
+    public static void assertInvariants(final GameSpringRepository repository) {
+        ObjectVerifier.assertInvariants(repository);// inherited
+        CrudRepositoryTest.assertInvariants(repository);// inherited
+    }
+
+    public static final class Fake
             extends CrudRepositoryTest.AbstractFake<Game, Game.Identifier>
             implements GameSpringRepository {
 
-      @Override
-      protected Game copy(final Game game) {
-         return new Game(game);
-      }
+        @Override
+        protected Game copy(final Game game) {
+            return new Game(game);
+        }
 
-      @Override
-      protected Game.Identifier getId(final Game game) {
-         return game.getIdentifier();
-      }
+        @Override
+        protected Game.Identifier getId(final Game game) {
+            return game.getIdentifier();
+        }
 
-   }
-
-   public static void assertInvariants(final GameSpringRepository repository) {
-      ObjectVerifier.assertInvariants(repository);// inherited
-      CrudRepositoryTest.assertInvariants(repository);// inherited
-   }
+    }
 
 }

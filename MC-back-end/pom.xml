@@ -46,7 +46,7 @@
          </plugin>
          <plugin>
             <!-- This MUST be after spring-boot-maven-plugin, so it can use 
-               the repackaged JAR. Otherwise the JAR will not be an executable JAR. -->
+               the repackaged JAR. Otherwise, the JAR will not be an executable JAR. -->
             <artifactId>jdeb</artifactId>
             <groupId>org.vafer</groupId>
             <executions>

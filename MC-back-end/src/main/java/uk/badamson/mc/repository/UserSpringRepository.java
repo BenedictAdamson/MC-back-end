@@ -18,27 +18,24 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.data.repository.CrudRepository;
+import uk.badamson.mc.User;
+
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-
-import org.springframework.data.repository.CrudRepository;
-
-import uk.badamson.mc.User;
-
 public interface UserSpringRepository extends CrudRepository<User, UUID> {
 
-   /**
-    * <p>
-    * Retrieve a {@linkplain User user} by its {@linkplain User#getUsername()
-    * username}.
-    * </p>
-    *
-    * @throws NullPointerException
-    *            If {@code username} is null
-    */
-   @Nonnull
-   Optional<User> findByUsername(@Nonnull String username);
+    /**
+     * <p>
+     * Retrieve a {@linkplain User user} by its {@linkplain User#getUsername()
+     * username}.
+     * </p>
+     *
+     * @throws NullPointerException If {@code username} is null
+     */
+    @Nonnull
+    Optional<User> findByUsername(@Nonnull String username);
 
 }

@@ -38,68 +38,68 @@ import java.util.stream.Stream;
 @Service
 public class UserSpringService implements UserDetailsService {
 
-   private final UserService delegate;
+    private final UserService delegate;
 
-   private record PasswordEncoderAdapter(
-           org.springframework.security.crypto.password.PasswordEncoder springPasswordEncoder) implements PasswordEncoder {
+    @Autowired
+    public UserSpringService(@Nonnull final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+                             @Nonnull final UserSpringRepository userRepository,
+                             @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+        this.delegate = new UserService(
+                new PasswordEncoderAdapter(passwordEncoder),
+                new UserRepositoryAdapter(userRepository),
+                administratorPassword
+        );
+    }
 
-         private PasswordEncoderAdapter(@Nonnull org.springframework.security.crypto.password.PasswordEncoder springPasswordEncoder) {
-            this.springPasswordEncoder = Objects.requireNonNull(springPasswordEncoder);
-         }
+    final UserService getDelegate() {
+        return delegate;
+    }
 
-         @Nonnull
-         @Override
-         public String encode(@Nonnull CharSequence rawPassword) {
-            return springPasswordEncoder.encode(rawPassword);
-         }
+    @Transactional
+    @Nonnull
+    public User add(@Nonnull final BasicUserDetails userDetails) {
+        return delegate.add(userDetails);
+    }
 
-         @Override
-         public boolean matches(@Nonnull CharSequence rawPassword, @Nonnull String encryptedPassword) {
-            return springPasswordEncoder.matches(rawPassword, encryptedPassword);
-         }
-      }
+    @Nonnull
+    public Optional<User> getUser(@Nonnull final UUID id) {
+        return delegate.getUser(id);
+    }
 
-   @Autowired
-   public UserSpringService(@Nonnull final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
-                            @Nonnull final UserSpringRepository userRepository,
-                            @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
-      this.delegate = new UserService(
-              new PasswordEncoderAdapter(passwordEncoder),
-              new UserRepositoryAdapter(userRepository),
-              administratorPassword
-      );
-   }
+    @Nonnull
+    public Stream<User> getUsers() {
+        return delegate.getUsers();
+    }
 
-   final UserService getDelegate() {
-       return delegate;
-   }
-
-   @Transactional
-   @Nonnull
-   public User add(@Nonnull final BasicUserDetails userDetails) {
-      return delegate.add(userDetails);
-   }
-
-   @Nonnull
-   public Optional<User> getUser(@Nonnull final UUID id) {
-      return delegate.getUser(id);
-   }
-
-   @Nonnull
-   public Stream<User> getUsers() {
-      return delegate.getUsers();
-   }
-
-   @Override
-   @Nonnull
-   public User loadUserByUsername(@Nonnull final String username)
+    @Override
+    @Nonnull
+    public User loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {
-      final var userOptional = delegate.getUserByUsername(username);
-      if (userOptional.isPresent()) {
-         return userOptional.get();
-      } else {
-         throw new UsernameNotFoundException(username);
-      }
-   }
+        final var userOptional = delegate.getUserByUsername(username);
+        if (userOptional.isPresent()) {
+            return userOptional.get();
+        } else {
+            throw new UsernameNotFoundException(username);
+        }
+    }
+
+    private record PasswordEncoderAdapter(
+            org.springframework.security.crypto.password.PasswordEncoder springPasswordEncoder) implements PasswordEncoder {
+
+        private PasswordEncoderAdapter(@Nonnull org.springframework.security.crypto.password.PasswordEncoder springPasswordEncoder) {
+            this.springPasswordEncoder = Objects.requireNonNull(springPasswordEncoder);
+        }
+
+        @Nonnull
+        @Override
+        public String encode(@Nonnull CharSequence rawPassword) {
+            return springPasswordEncoder.encode(rawPassword);
+        }
+
+        @Override
+        public boolean matches(@Nonnull CharSequence rawPassword, @Nonnull String encryptedPassword) {
+            return springPasswordEncoder.matches(rawPassword, encryptedPassword);
+        }
+    }
 
 }

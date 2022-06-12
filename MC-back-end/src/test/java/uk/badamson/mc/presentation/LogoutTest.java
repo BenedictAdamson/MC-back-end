@@ -27,7 +27,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.badamson.mc.TestConfiguration;
-import uk.badamson.mc.service.UserService;
 import uk.badamson.mc.service.UserSpringService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,65 +37,65 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class LogoutTest {
 
-   private static final String PATH = "/logout";
+    private static final String PATH = "/logout";
 
-   @Autowired
-   private UserSpringService service;
+    @Autowired
+    private UserSpringService service;
 
-   @Autowired
-   private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-   @Test
-   public void logout_noAuthentication() throws Exception {
-      service.add(Fixtures.createUserWithAllRoles());
-      final var request = post(PATH).with(csrf());
+    @Test
+    public void logout_noAuthentication() throws Exception {
+        service.add(Fixtures.createUserWithAllRoles());
+        final var request = post(PATH).with(csrf());
 
-      final var response = mockMvc.perform(request);
+        final var response = mockMvc.perform(request);
 
-      response.andExpect(status().isNoContent());
-   }
+        response.andExpect(status().isNoContent());
+    }
 
-   @Test
-   public void logout_noCsrfToken() throws Exception {
-      final var user = Fixtures.createUserWithAllRoles();
-      service.add(user);
-      final var session = new MockHttpSession();
-      final var request = post(PATH).with(user(user)).session(session);
+    @Test
+    public void logout_noCsrfToken() throws Exception {
+        final var user = Fixtures.createUserWithAllRoles();
+        service.add(user);
+        final var session = new MockHttpSession();
+        final var request = post(PATH).with(user(user)).session(session);
 
-      final var response = mockMvc.perform(request);
+        final var response = mockMvc.perform(request);
 
-      assertAll(() -> response.andExpect(status().isForbidden()),
-               () -> assertThat("session is still valid",
+        assertAll(() -> response.andExpect(status().isForbidden()),
+                () -> assertThat("session is still valid",
                         !session.isInvalid()));
-   }
+    }
 
-   @Test
-   public void logout_noSession() throws Exception {
-      service.add(Fixtures.createUserWithAllRoles());
-      final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf());
+    @Test
+    public void logout_noSession() throws Exception {
+        service.add(Fixtures.createUserWithAllRoles());
+        final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf());
 
-      final var response = mockMvc.perform(request);
+        final var response = mockMvc.perform(request);
 
-      response.andExpect(status().isNoContent());
-   }
+        response.andExpect(status().isNoContent());
+    }
 
-   @Test
-   public void logout_withSession() throws Exception {
-      service.add(Fixtures.createUserWithAllRoles());
-      final var session = new MockHttpSession();
-      final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf())
-               .session(session);
+    @Test
+    public void logout_withSession() throws Exception {
+        service.add(Fixtures.createUserWithAllRoles());
+        final var session = new MockHttpSession();
+        final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf())
+                .session(session);
 
-      final var response = mockMvc.perform(request);
+        final var response = mockMvc.perform(request);
 
-      assertAll(() -> response.andExpect(status().isNoContent()),
-               () -> assertThat("session is no longer valid",
+        assertAll(() -> response.andExpect(status().isNoContent()),
+                () -> assertThat("session is no longer valid",
                         session.isInvalid()));
-   }
+    }
 
 }

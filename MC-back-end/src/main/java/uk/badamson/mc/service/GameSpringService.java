@@ -37,55 +37,55 @@ import java.util.stream.Stream;
 @Service
 public class GameSpringService {
 
-   private final GameService delegate;
+    private final GameService delegate;
 
-   @Autowired
-   public GameSpringService(@Nonnull final GameSpringRepository repository,
-                            @Nonnull final Clock clock,
-                            @Nonnull final ScenarioSpringService scenarioService) {
-      this.delegate = new GameService(
-              new GameRepositoryAdapter(repository),
-              clock,
-              scenarioService.getDelegate()
-      );
-   }
+    @Autowired
+    public GameSpringService(@Nonnull final GameSpringRepository repository,
+                             @Nonnull final Clock clock,
+                             @Nonnull final ScenarioSpringService scenarioService) {
+        this.delegate = new GameService(
+                new GameRepositoryAdapter(repository),
+                clock,
+                scenarioService.getDelegate()
+        );
+    }
 
-   final GameService getDelegate() {
-      return delegate;
-   }
+    final GameService getDelegate() {
+        return delegate;
+    }
 
-   @Nonnull
-   @Transactional
-   public Game create(@Nonnull final UUID scenario) {
-      return delegate.create(scenario);
-   }
+    @Nonnull
+    @Transactional
+    public Game create(@Nonnull final UUID scenario) {
+        return delegate.create(scenario);
+    }
 
-   @Nonnull
-   @Transactional
-   public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
+    @Nonnull
+    @Transactional
+    public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
-      return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
-   }
+        return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
+    }
 
-   @Nonnull
-   public Optional<Game> getGame(@Nonnull final Identifier id) {
-      return delegate.getGame(id);
-   }
+    @Nonnull
+    public Optional<Game> getGame(@Nonnull final Identifier id) {
+        return delegate.getGame(id);
+    }
 
-   @Nonnull
-   public Stream<Identifier> getGameIdentifiers() {
-      return delegate.getGameIdentifiers();
-   }
+    @Nonnull
+    public Stream<Identifier> getGameIdentifiers() {
+        return delegate.getGameIdentifiers();
+    }
 
-   @Nonnull
-   public Game startGame(@Nonnull final Identifier id)
+    @Nonnull
+    public Game startGame(@Nonnull final Identifier id)
             throws NoSuchElementException, IllegalGameStateException {
-      return delegate.startGame(id);
-   }
+        return delegate.startGame(id);
+    }
 
-   public void stopGame(@Nonnull final Identifier id)
+    public void stopGame(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      delegate.stopGame(id);
-   }
+        delegate.stopGame(id);
+    }
 
 }

@@ -49,69 +49,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </p>
  */
 @SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ScenarioScope
 @AutoConfigureMockMvc
 public class BackEndWorld {
 
-   static void require(final boolean assertion, final String description) {
-      if (!assertion) {
-         throw new IllegalStateException("Not " + description);
-      }
-   }
+    public User loggedInUser;
+    @Autowired
+    private WebApplicationContext context;
 
-   @Autowired
-   private WebApplicationContext context;
+    @Autowired
+    private UserSpringRepository userRepository;
 
-   @Autowired
-   private UserSpringRepository userRepository;
+    private MockMvc mockMvc;
 
-   private MockMvc mockMvc;
+    private ResultActions response;
 
-   private ResultActions response;
+    static void require(final boolean assertion, final String description) {
+        if (!assertion) {
+            throw new IllegalStateException("Not " + description);
+        }
+    }
 
-   public User loggedInUser;
-
-   public void exchangeJson(final HttpMethod method, final String path)
+    public void exchangeJson(final HttpMethod method, final String path)
             throws Exception {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(mockMvc, "mockMvc");
-      final var uri = URI.create(path);
-      performRequest(request(method, uri));
-   }
+        Objects.requireNonNull(context, "context");
+        Objects.requireNonNull(mockMvc, "mockMvc");
+        final var uri = URI.create(path);
+        performRequest(request(method, uri));
+    }
 
-   public void expectResponse(final ResultMatcher expectation)
+    public void expectResponse(final ResultMatcher expectation)
             throws Exception {
-      response.andExpect(expectation);
-   }
+        response.andExpect(expectation);
+    }
 
-   public void getJson(final String path) throws Exception {
-      Objects.requireNonNull(context, "context");
-      Objects.requireNonNull(mockMvc, "mockMvc");
-      performRequest(get(path).accept(MediaType.APPLICATION_JSON));
-   }
+    public void getJson(final String path) throws Exception {
+        Objects.requireNonNull(context, "context");
+        Objects.requireNonNull(mockMvc, "mockMvc");
+        performRequest(get(path).accept(MediaType.APPLICATION_JSON));
+    }
 
-   public ResultActions getResponse() {
-      return response;
-   }
+    public ResultActions getResponse() {
+        return response;
+    }
 
-   public String getResponseBodyAsString() throws UnsupportedEncodingException {
-      return response.andReturn().getResponse().getContentAsString();
-   }
+    public String getResponseBodyAsString() throws UnsupportedEncodingException {
+        return response.andReturn().getResponse().getContentAsString();
+    }
 
-   public void performRequest(final RequestBuilder requestBuilder)
+    public void performRequest(final RequestBuilder requestBuilder)
             throws Exception {
-      response = mockMvc.perform(requestBuilder);
-   }
+        response = mockMvc.perform(requestBuilder);
+    }
 
-   public void responseIsOk() throws Exception {
-      expectResponse(status().isOk());
-   }
+    public void responseIsOk() throws Exception {
+        expectResponse(status().isOk());
+    }
 
-   @Before
-   public void setUp() {
-      mockMvc = MockMvcBuilders.webAppContextSetup(context)
-               .apply(springSecurity()).build();
-      userRepository.deleteAll();
-   }
+    @Before
+    public void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity()).build();
+        userRepository.deleteAll();
+    }
 }

@@ -18,8 +18,6 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.data.repository.CrudRepository;
-import uk.badamson.mc.Game;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;

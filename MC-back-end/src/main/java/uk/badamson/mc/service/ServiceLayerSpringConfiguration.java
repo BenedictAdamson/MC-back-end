@@ -18,13 +18,13 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.time.Clock;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.Clock;
 
 /**
  * <p>
@@ -35,14 +35,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ComponentScan
 public class ServiceLayerSpringConfiguration {
 
-   @Bean
-   public Clock clock() {
-      return Clock.systemUTC();
-   }
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
 
-   @Bean
-   public PasswordEncoder passwordEncoder() {
-      return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-   }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
 }

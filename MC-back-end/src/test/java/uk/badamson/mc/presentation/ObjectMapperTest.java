@@ -18,33 +18,31 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.time.Instant;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.badamson.mc.TestConfiguration;
 
+import java.time.Instant;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectMapperTest {
 
-   @Autowired
-   private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-   @Test
-   public void instant_canDeserialize() {
-      assertTrue(objectMapper
-               .canDeserialize(objectMapper.constructType(Instant.class)));
-   }
+    @Test
+    public void instant_canDeserialize() {
+        assertTrue(objectMapper
+                .canDeserialize(objectMapper.constructType(Instant.class)));
+    }
 
-   @Test
-   public void instant_canSerialize() {
-      assertTrue(objectMapper.canSerialize(Instant.class));
-   }
+    @Test
+    public void instant_canSerialize() {
+        assertTrue(objectMapper.canSerialize(Instant.class));
+    }
 }

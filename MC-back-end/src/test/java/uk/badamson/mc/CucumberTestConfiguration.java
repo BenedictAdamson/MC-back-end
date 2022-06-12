@@ -18,10 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import io.cucumber.spring.CucumberContextConfiguration;
 
 /**
  * <p>
@@ -29,7 +28,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
  * </p>
  */
 @CucumberContextConfiguration
-@Import(value = { TestConfiguration.class, CucumberBeansConfiguration.class })
+@Import(value = {TestConfiguration.class, CucumberBeansConfiguration.class})
 @WebAppConfiguration
 public class CucumberTestConfiguration {
 }

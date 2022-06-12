@@ -48,157 +48,147 @@ import java.util.stream.Stream;
 @RestController
 public class UserController {
 
-   /**
-    * <p>
-    * Create a valid path for a user resource for a user that has a given unique
-    * ID.
-    * </p>
-    * <p>
-    * The created path is consistent with the path used with
-    * {@link #getUser(UUID)}.
-    * </p>
-    *
-    * @param id
-    *           The identifier of the user
-    * @return The path.
-    * @throws NullPointerException
-    *            If {@code id} is null.
-    */
-   @Nonnull
-   public static String createPathForUser(@Nonnull final UUID id) {
-      Objects.requireNonNull(id, "id");
-      return "/api/user/" + id;
-   }
+    private final UserSpringService service;
 
-   private final UserSpringService service;
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "reference semantics")
+    @Autowired
+    public UserController(@Nonnull final UserSpringService service) {
+        this.service = Objects.requireNonNull(service);
+    }
 
-   @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="reference semantics")
-   @Autowired
-   public UserController(@Nonnull final UserSpringService service) {
-      this.service = Objects.requireNonNull(service);
-   }
+    /**
+     * <p>
+     * Create a valid path for a user resource for a user that has a given unique
+     * ID.
+     * </p>
+     * <p>
+     * The created path is consistent with the path used with
+     * {@link #getUser(UUID)}.
+     * </p>
+     *
+     * @param id The identifier of the user
+     * @return The path.
+     * @throws NullPointerException If {@code id} is null.
+     */
+    @Nonnull
+    public static String createPathForUser(@Nonnull final UUID id) {
+        Objects.requireNonNull(id, "id");
+        return "/api/user/" + id;
+    }
 
-   /**
-    * <p>
-    * Behaviour of the POST verb for the user list.
-    * </p>
-    * <ul>
-    * <li>Creates a new user having given user details.</li>
-    * <li>Returns a redirect to the newly created user. That is, a response with
-    * <ul>
-    * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
-    * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
-    * <li>A {@linkplain HttpHeaders#getLocation()
-    * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-    * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
-    * </ul>
-    * </li>
-    * </ul>
-    *
-    * @param userDetails
-    *           The body of the request
-    * @throws NullPointerException
-    *            If {@code userDetails} is null
-    * @throws ResponseStatusException
-    *            <ul>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
-    *            Request)} If the {@linkplain BasicUserDetails#getUsername()
-    *            username} of {@code user} indicates it is the
-    *            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
-    *            <li>With a {@linkplain ResponseStatusException#getStatus()
-    *            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
-    *            the {@linkplain BasicUserDetails#getUsername() username} of
-    *            {@code userDetails} is already the username of a user.</li>
-    *            </ul>
-    * @return The response.
-    */
-   @PostMapping("/api/user")
-   @ResponseStatus(HttpStatus.CREATED)
-   @RolesAllowed("MANAGE_USERS")
-   public ResponseEntity<Void> add(
+    /**
+     * <p>
+     * Behaviour of the POST verb for the user list.
+     * </p>
+     * <ul>
+     * <li>Creates a new user having given user details.</li>
+     * <li>Returns a redirect to the newly created user. That is, a response with
+     * <ul>
+     * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
+     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
+     * <li>A {@linkplain HttpHeaders#getLocation()
+     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+     * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
+     * </ul>
+     * </li>
+     * </ul>
+     *
+     * @param userDetails The body of the request
+     * @return The response.
+     * @throws NullPointerException    If {@code userDetails} is null
+     * @throws ResponseStatusException <ul>
+     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
+     *                                                                            Request)} If the {@linkplain BasicUserDetails#getUsername()
+     *                                                                            username} of {@code user} indicates it is the
+     *                                                                            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
+     *                                                                            the {@linkplain BasicUserDetails#getUsername() username} of
+     *                                                                            {@code userDetails} is already the username of a user.</li>
+     *                                                                            </ul>
+     */
+    @PostMapping("/api/user")
+    @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MANAGE_USERS")
+    public ResponseEntity<Void> add(
             @RequestBody final BasicUserDetails userDetails) {
-      try {
-         final var user = service.add(userDetails);
+        try {
+            final var user = service.add(userDetails);
 
-         final var location = URI.create(createPathForUser(user.getId()));
-         final var headers = new HttpHeaders();
-         headers.setLocation(location);
-         return new ResponseEntity<>(headers, HttpStatus.FOUND);
-      } catch (final UserExistsException e) {
-         throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
-                  e);
-      } catch (final IllegalArgumentException e) {
-         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                  e.getMessage(), e);
-      }
-   }
+            final var location = URI.create(createPathForUser(user.getId()));
+            final var headers = new HttpHeaders();
+            headers.setLocation(location);
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } catch (final UserExistsException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
+                    e);
+        } catch (final IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    e.getMessage(), e);
+        }
+    }
 
-   /**
-    * <p>
-    * Behaviour of the GET verb for the users list.
-    * </p>
-    * <p>
-    * Returns a list of all the users.
-    * </p>
-    *
-    * @return The response.
-    */
-   @GetMapping("/api/user")
-   public Stream<User> getAll() {
-      return service.getUsers();
-   }
+    /**
+     * <p>
+     * Behaviour of the GET verb for the users list.
+     * </p>
+     * <p>
+     * Returns a list of all the users.
+     * </p>
+     *
+     * @return The response.
+     */
+    @GetMapping("/api/user")
+    public Stream<User> getAll() {
+        return service.getUsers();
+    }
 
-   /**
-    * <p>
-    * Behaviour of the GET verb for the self resource.
-    * </p>
-    *
-    * @param user
-    *           The authenticated identity of the current user
-    * @return The user object for the current user.
-    * @throws NullPointerException
-    *            If {@code user} is null
-    */
-   @GetMapping("/api/self")
-   @PreAuthorize("isAuthenticated()")
-   @Nonnull
-   public User getSelf(@Nonnull @AuthenticationPrincipal final User user) {
-      Objects.requireNonNull(user, "user");
-      return user;
-   }
+    /**
+     * <p>
+     * Behaviour of the GET verb for the self resource.
+     * </p>
+     *
+     * @param user The authenticated identity of the current user
+     * @return The user object for the current user.
+     * @throws NullPointerException If {@code user} is null
+     */
+    @GetMapping("/api/self")
+    @PreAuthorize("isAuthenticated()")
+    @Nonnull
+    public User getSelf(@Nonnull @AuthenticationPrincipal final User user) {
+        Objects.requireNonNull(user, "user");
+        return user;
+    }
 
-   /**
-    * <p>
-    * Behaviour of the GET verb for a user resource.
-    * </p>
-    * <ul>
-    * <li>Returns a (non null) user.</li>
-    * <li>The {@linkplain User#getUsername() username} of the returned user
-    * {@linkplain String#equals(Object) is equivalent to} the given ID</li>
-    * </ul>
-    *
-    * @param id
-    *           The unique ID of the wanted user.
-    * @return The response.
-    * @throws NullPointerException
-    *            If {@code id} is null.
-    * @throws ResponseStatusException
-    *            With a {@linkplain ResponseStatusException#getStatus() status}
-    *            of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-    *            is no user with the given {@code id}
-    *            {@linkplain String#equals(Object) equivalent to} its
-    *            {@linkplain User#getUsername() username}.
-    */
-   @GetMapping("/api/user/{id}")
-   @RolesAllowed("MANAGE_USERS")
-   @Nonnull
-   public User getUser(@Nonnull @PathVariable final UUID id) {
-      final Optional<User> user = service.getUser(id);
-      if (user.isPresent()) {
-         return user.get();
-      } else {
-         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
-      }
-   }
+    /**
+     * <p>
+     * Behaviour of the GET verb for a user resource.
+     * </p>
+     * <ul>
+     * <li>Returns a (non null) user.</li>
+     * <li>The {@linkplain User#getUsername() username} of the returned user
+     * {@linkplain String#equals(Object) is equivalent to} the given ID</li>
+     * </ul>
+     *
+     * @param id The unique ID of the wanted user.
+     * @return The response.
+     * @throws NullPointerException    If {@code id} is null.
+     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
+     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
+     *                                 is no user with the given {@code id}
+     *                                 {@linkplain String#equals(Object) equivalent to} its
+     *                                 {@linkplain User#getUsername() username}.
+     */
+    @GetMapping("/api/user/{id}")
+    @RolesAllowed("MANAGE_USERS")
+    @Nonnull
+    public User getUser(@Nonnull @PathVariable final UUID id) {
+        final Optional<User> user = service.getUser(id);
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
+        }
+    }
 }

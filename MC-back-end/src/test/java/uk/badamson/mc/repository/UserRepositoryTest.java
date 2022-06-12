@@ -18,14 +18,13 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
 import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * <p>
@@ -34,35 +33,35 @@ import javax.annotation.Nonnull;
  */
 public class UserRepositoryTest {
 
-   public static final class Fake
+    public static void assertInvariants(final UserSpringRepository repository) {
+        ObjectVerifier.assertInvariants(repository);// inherited
+        CrudRepositoryTest.assertInvariants(repository);// inherited
+    }
+
+    public static final class Fake
             extends CrudRepositoryTest.AbstractFake<User, UUID>
             implements UserSpringRepository {
 
-      @Override
-      protected User copy(final User user) {
-         Objects.requireNonNull(user, "user");
-         return new User(user.getId(), user);
-      }
+        @Override
+        protected User copy(final User user) {
+            Objects.requireNonNull(user, "user");
+            return new User(user.getId(), user);
+        }
 
-      @Nonnull
-      @Override
-      public Optional<User> findByUsername(@Nonnull final String username) {
-         requireNonNull(username, "username");
-         return entities.values().stream()
-                  .filter(u -> username.equals(u.getUsername())).findAny();
-      }
+        @Nonnull
+        @Override
+        public Optional<User> findByUsername(@Nonnull final String username) {
+            requireNonNull(username, "username");
+            return entities.values().stream()
+                    .filter(u -> username.equals(u.getUsername())).findAny();
+        }
 
-      @Override
-      protected UUID getId(final User user) {
-         Objects.requireNonNull(user, "user");
-         return user.getId();
-      }
+        @Override
+        protected UUID getId(final User user) {
+            Objects.requireNonNull(user, "user");
+            return user.getId();
+        }
 
-   }
-
-   public static void assertInvariants(final UserSpringRepository repository) {
-      ObjectVerifier.assertInvariants(repository);// inherited
-      CrudRepositoryTest.assertInvariants(repository);// inherited
-   }
+    }
 
 }

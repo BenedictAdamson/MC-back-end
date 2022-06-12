@@ -33,38 +33,38 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
  */
 @Configuration
 @EnableWebSecurity
-@SuppressFBWarnings(value="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
-        justification="delegates to framework method that does so")
+@SuppressFBWarnings(value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
+        justification = "delegates to framework method that does so")
 public class SecurityConfiguration {
 
-   private static void configureAuthorizedRequests(final HttpSecurity http)
+    private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
-      http.authorizeRequests().antMatchers("/api/user/**").authenticated();
-      http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
-      http.authorizeRequests().antMatchers("/api/scenario/*/game/players")
-               .authenticated();
-      http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
-   }
+        http.authorizeRequests().antMatchers("/api/user/**").authenticated();
+        http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
+        http.authorizeRequests().antMatchers("/api/scenario/*/game/players")
+                .authenticated();
+        http.authorizeRequests().antMatchers("/api/scenario/*/game/").permitAll();
+    }
 
 
-   private static void configureCsrfProtection(final HttpSecurity http)
+    private static void configureCsrfProtection(final HttpSecurity http)
             throws Exception {
-      http.csrf().csrfTokenRepository(
-               CookieCsrfTokenRepository.withHttpOnlyFalse());
-   }
+        http.csrf().csrfTokenRepository(
+                CookieCsrfTokenRepository.withHttpOnlyFalse());
+    }
 
-   private static void configureHttpBasic(final HttpSecurity http)
+    private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
-      http.httpBasic();
-   }
+        http.httpBasic();
+    }
 
-   @Bean
-   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      configureHttpBasic(http);
-      configureCsrfProtection(http);
-      configureAuthorizedRequests(http);
-      // login and logout pages are configured by default
-      return http.build();
-   }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        configureHttpBasic(http);
+        configureCsrfProtection(http);
+        configureAuthorizedRequests(http);
+        // login and logout pages are configured by default
+        return http.build();
+    }
 
 }

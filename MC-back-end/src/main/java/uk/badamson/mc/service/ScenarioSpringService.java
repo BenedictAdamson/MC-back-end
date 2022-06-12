@@ -30,26 +30,26 @@ import java.util.stream.Stream;
 @Service
 public class ScenarioSpringService {
 
-   private final ScenarioService delegate = new ScenarioService();
+    private final ScenarioService delegate = new ScenarioService();
 
-   @Nonnull
-   final ScenarioService getDelegate() {
-      return delegate;
-   }
+    @Nonnull
+    final ScenarioService getDelegate() {
+        return delegate;
+    }
 
-   @Nonnull
-   public Stream<NamedUUID> getNamedScenarioIdentifiers() {
-      return delegate.getNamedScenarioIdentifiers().stream();
-   }
+    @Nonnull
+    public Stream<NamedUUID> getNamedScenarioIdentifiers() {
+        return delegate.getNamedScenarioIdentifiers().stream();
+    }
 
-   @Nonnull
-   public Optional<Scenario> getScenario(@Nonnull final UUID id) {
-      return delegate.getScenario(id);
-   }
+    @Nonnull
+    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
+        return delegate.getScenario(id);
+    }
 
-   @Nonnull
-   public Stream<UUID> getScenarioIdentifiers() {
-      return delegate.getScenarioIdentifiers();
-   }
+    @Nonnull
+    public Stream<UUID> getScenarioIdentifiers() {
+        return delegate.getScenarioIdentifiers();
+    }
 
 }

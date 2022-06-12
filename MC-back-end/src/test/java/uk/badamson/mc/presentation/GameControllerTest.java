@@ -35,9 +35,7 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameSpringRepository;
-import uk.badamson.mc.service.GameService;
 import uk.badamson.mc.service.GameSpringService;
-import uk.badamson.mc.service.ScenarioService;
 import uk.badamson.mc.service.ScenarioSpringService;
 
 import java.time.Instant;
@@ -54,263 +52,256 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class GameControllerTest {
 
-   @Nested
-   public class Create {
-      @Test
-      public void knownScenario() throws Exception {
-         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-         assertThat("scenario", scenarioOptional.isPresent());
-         final var scenario = scenarioOptional.get();
-         final var gamesForScenario0 = gameService.getGameIdentifiers()
-                 .filter(gi -> scenario.equals(gi.getScenario())).collect(Collectors.toUnmodifiableSet());
+    private static final UUID ID_A = UUID.randomUUID();
+    private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
+    };
+    private static final User USER_WITH_ALL_AUTHORITIES = new User(
+            UUID.randomUUID(), "jeff", "password", Authority.ALL, true, true,
+            true, true);
+    @Autowired
+    GameSpringRepository gameRepository;
+    @Autowired
+    ScenarioSpringService scenarioService;
+    @Autowired
+    GameSpringService gameService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
-         final var response = testAuthenticated(scenario,
-                  USER_WITH_ALL_AUTHORITIES);
+    private Game.Identifier createGame() {
+        final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+        assertThat("scenario", scenarioOptional.isPresent());
+        final var scenario = scenarioOptional.get();
+        return gameService.create(scenario).getIdentifier();
+    }
 
-         final var id = gameService.getGameIdentifiers()
-                  .filter(gi -> scenario.equals(gi.getScenario()))
-                 .filter(gi -> !gamesForScenario0.contains(gi))
-                 .findAny();
-         final var location = response.andReturn().getResponse()
-                  .getHeaderValue("Location");
-         assertAll(
-                  () -> assertTrue(id.isPresent(),
-                           "created a game for the scenario"),
-                  () -> response.andExpect(status().isFound()));
-         assertEquals(GameController.createPathFor(id.get()),
-                 location, "redirection location");
-      }
+    private User createUser(final Set<Authority> authorities) {
+        return new User(ID_A, "Allan", "secret", authorities, true, true, true,
+                true);
+    }
 
-      @Test
-      public void noAuthentication() throws Exception {
-         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-         assertThat("scenario", scenarioOptional.isPresent());
-         final var scenario = scenarioOptional
-                  .get();
-         final var nGames0 = gameService.getGameIdentifiers().count();
-         final var request = post(GameController.createPathForGames(scenario))
-                  .with(csrf());
+    @Nested
+    public class Create {
+        @Test
+        public void knownScenario() throws Exception {
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+            final var gamesForScenario0 = gameService.getGameIdentifiers()
+                    .filter(gi -> scenario.equals(gi.getScenario())).collect(Collectors.toUnmodifiableSet());
 
-         final var response = mockMvc.perform(request);
+            final var response = testAuthenticated(scenario,
+                    USER_WITH_ALL_AUTHORITIES);
 
-         final var nGames = gameService.getGameIdentifiers().count();
-         assertAll(
-                 () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                  () -> response.andExpect(status().isUnauthorized()));
-      }
+            final var id = gameService.getGameIdentifiers()
+                    .filter(gi -> scenario.equals(gi.getScenario()))
+                    .filter(gi -> !gamesForScenario0.contains(gi))
+                    .findAny();
+            final var location = response.andReturn().getResponse()
+                    .getHeaderValue("Location");
+            assertAll(
+                    () -> assertTrue(id.isPresent(),
+                            "created a game for the scenario"),
+                    () -> response.andExpect(status().isFound()));
+            assertEquals(GameController.createPathFor(id.get()),
+                    location, "redirection location");
+        }
 
-      @Test
-      public void noCsrfToken() throws Exception {
-         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-         assertThat("scenario", scenarioOptional.isPresent());
-         final var scenario = scenarioOptional.get();
-         final var nGames0 = gameService.getGameIdentifiers().count();
-         final var request = post(GameController.createPathForGames(scenario))
-                  .with(user(USER_WITH_ALL_AUTHORITIES));
+        @Test
+        public void noAuthentication() throws Exception {
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional
+                    .get();
+            final var nGames0 = gameService.getGameIdentifiers().count();
+            final var request = post(GameController.createPathForGames(scenario))
+                    .with(csrf());
 
-         final var response = mockMvc.perform(request);
+            final var response = mockMvc.perform(request);
 
-         final var nGames = gameService.getGameIdentifiers().count();
-         assertAll(
-                  () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                  () -> response.andExpect(status().isForbidden()));
-      }
+            final var nGames = gameService.getGameIdentifiers().count();
+            assertAll(
+                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
+                    () -> response.andExpect(status().isUnauthorized()));
+        }
 
-      @Test
-      public void notPermitted() throws Exception {
-         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-         assertThat("scenario", scenarioOptional.isPresent());
-         final var scenario = scenarioOptional.get();
-         final var authorities = EnumSet
-                  .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-         final var user = new User(ID_A, "allan", "letmein", authorities, true,
-                  true, true, true);
-         final var nGames0 = gameService.getGameIdentifiers().count();
+        @Test
+        public void noCsrfToken() throws Exception {
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+            final var nGames0 = gameService.getGameIdentifiers().count();
+            final var request = post(GameController.createPathForGames(scenario))
+                    .with(user(USER_WITH_ALL_AUTHORITIES));
 
-         final var response = testAuthenticated(scenario, user);
+            final var response = mockMvc.perform(request);
 
-         final var nGames = gameService.getGameIdentifiers().count();
-         assertAll(
-                 () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                  () -> response.andExpect(status().is4xxClientError()));
-      }
+            final var nGames = gameService.getGameIdentifiers().count();
+            assertAll(
+                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
+                    () -> response.andExpect(status().isForbidden()));
+        }
 
-      private ResultActions testAuthenticated(final UUID scenario,
-               final User user) throws Exception {
-         final var request = post(GameController.createPathForGames(scenario))
-                  .with(user(user)).with(csrf());
+        @Test
+        public void notPermitted() throws Exception {
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+            final var authorities = EnumSet
+                    .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
+            final var user = new User(ID_A, "allan", "password", authorities, true,
+                    true, true, true);
+            final var nGames0 = gameService.getGameIdentifiers().count();
 
-         return mockMvc.perform(request);
-      }
+            final var response = testAuthenticated(scenario, user);
 
-      @Test
-      public void unknowScenario() throws Exception {
-         final var scenario = UUID.randomUUID();
+            final var nGames = gameService.getGameIdentifiers().count();
+            assertAll(
+                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
+                    () -> response.andExpect(status().is4xxClientError()));
+        }
 
-         final var response = testAuthenticated(scenario,
-                  USER_WITH_ALL_AUTHORITIES);
+        private ResultActions testAuthenticated(final UUID scenario,
+                                                final User user) throws Exception {
+            final var request = post(GameController.createPathForGames(scenario))
+                    .with(user(user)).with(csrf());
 
-         response.andExpect(status().is4xxClientError());
-      }
+            return mockMvc.perform(request);
+        }
 
-   }
+        @Test
+        public void unknownScenario() throws Exception {
+            final var scenario = UUID.randomUUID();
 
-   @Nested
-   public class GetGame {
+            final var response = testAuthenticated(scenario,
+                    USER_WITH_ALL_AUTHORITIES);
 
-      @Nested
-      public class Valid {
+            response.andExpect(status().is4xxClientError());
+        }
 
-         @Test
-         public void asGamesManager() throws Exception {
-            test(Authority.ROLE_MANAGE_GAMES);
-         }
+    }
 
-         @Test
-         public void asPlayer() throws Exception {
-            test(Authority.ROLE_PLAYER);
-         }
+    @Nested
+    public class GetGame {
 
-         private void test(final Authority authority)
-                  throws Exception {
+        @Test
+        public void absent() throws Exception {
+            final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
+            /* Tough test: user is authorised. */
+            final var response = perform(id, USER_WITH_ALL_AUTHORITIES);
+
+            response.andExpect(status().isNotFound());
+        }
+
+        @Test
+        public void noAuthentication() throws Exception {
+            /* Tough test: game exists. */
             final var id = createGame();
-            final var user = createUser(EnumSet.of(authority));
+
+            final var response = perform(id, null);
+
+            response.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        public void notAuthorised() throws Exception {
+            /* Tough test: game exists and user has all the other authorities */
+            final Set<Authority> authorities = EnumSet.complementOf(EnumSet
+                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+            final var user = createUser(authorities);
+            final var id = createGame();
 
             final var response = perform(id, user);
 
+            response.andExpect(status().isForbidden());
+        }
+
+        private ResultActions perform(final Game.Identifier id, final User user)
+                throws Exception {
+            final var request = get(GameController.createPathFor(id))
+                    .accept(MediaType.APPLICATION_JSON);
+            if (user != null) {
+                request.with(user(user));
+            }
+
+            return mockMvc.perform(request);
+        }
+
+        @Nested
+        public class Valid {
+
+            @Test
+            public void asGamesManager() throws Exception {
+                test(Authority.ROLE_MANAGE_GAMES);
+            }
+
+            @Test
+            public void asPlayer() throws Exception {
+                test(Authority.ROLE_PLAYER);
+            }
+
+            private void test(final Authority authority)
+                    throws Exception {
+                final var id = createGame();
+                final var user = createUser(EnumSet.of(authority));
+
+                final var response = perform(id, user);
+
+                response.andExpect(status().isOk());
+                final var jsonResponse = response.andReturn().getResponse()
+                        .getContentAsString();
+                final var game = objectMapper.readValue(jsonResponse, Game.class);
+                assertEquals(id, game.getIdentifier(), "game has the requested ID");
+            }
+
+        }
+
+    }
+
+    @Nested
+    public class GetGames {
+
+        @Test
+        public void absent() throws Exception {
+            final var scenario = UUID.randomUUID();
+
+            final var response = perform(scenario);
+
+            response.andExpect(status().isNotFound());
+        }
+
+        @Test
+        public void one() throws Exception {
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+            final var created = gameService.create(scenario).getIdentifier()
+                    .getCreated();
+
+            final var response = perform(scenario);
+
             response.andExpect(status().isOk());
             final var jsonResponse = response.andReturn().getResponse()
-                     .getContentAsString();
-            final var game = objectMapper.readValue(jsonResponse, Game.class);
-            assertEquals(id, game.getIdentifier(), "game has the requested ID");
-         }
+                    .getContentAsString();
+            assertThat("Creation time is in ISO format", jsonResponse,
+                    containsString(created.toString()));
+            final var creationTimes = objectMapper.readValue(jsonResponse,
+                    INSTANT_LIST);
+            assertThat("creation times", creationTimes, hasItem(created));
+        }
 
-      }
+        private ResultActions perform(final UUID scenario) throws Exception {
+            final var path = GameController.createPathForGames(scenario);
+            final var request = get(path).accept(MediaType.APPLICATION_JSON);
 
-      @Test
-      public void absent() throws Exception {
-         final var id = new Game.Identifier(UUID.randomUUID(), Instant.now());
-         /* Tough test: user is authorised. */
-         final var response = perform(id, USER_WITH_ALL_AUTHORITIES);
+            return mockMvc.perform(request);
+        }
 
-         response.andExpect(status().isNotFound());
-      }
-
-      @Test
-      public void noAuthentication() throws Exception {
-         /* Tough test: game exists. */
-         final var id = createGame();
-
-         final var response = perform(id, null);
-
-         response.andExpect(status().isUnauthorized());
-      }
-
-      @Test
-      public void notAuthorised() throws Exception {
-         /* Tough test: game exists and user has all other authorities */
-         final Set<Authority> authorities = EnumSet.complementOf(EnumSet
-                  .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
-         final var user = createUser(authorities);
-         final var id = createGame();
-
-         final var response = perform(id, user);
-
-         response.andExpect(status().isForbidden());
-      }
-
-      private ResultActions perform(final Game.Identifier id, final User user)
-               throws Exception {
-         final var request = get(GameController.createPathFor(id))
-                  .accept(MediaType.APPLICATION_JSON);
-         if (user != null) {
-            request.with(user(user));
-         }
-
-         return mockMvc.perform(request);
-      }
-
-   }
-
-   @Nested
-   public class GetGames {
-
-      @Test
-      public void absent() throws Exception {
-         final var scenario = UUID.randomUUID();
-
-         final var response = perform(scenario);
-
-         response.andExpect(status().isNotFound());
-      }
-
-      @Test
-      public void one() throws Exception {
-         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-         assertThat("scenario", scenarioOptional.isPresent());
-         final var scenario = scenarioOptional.get();
-         final var created = gameService.create(scenario).getIdentifier()
-                  .getCreated();
-
-         final var response = perform(scenario);
-
-         response.andExpect(status().isOk());
-         final var jsonResponse = response.andReturn().getResponse()
-                  .getContentAsString();
-         assertThat("Creation time is in ISO format", jsonResponse,
-                  containsString(created.toString()));
-         final var creationTimes = objectMapper.readValue(jsonResponse,
-                  INSTANT_LIST);
-         assertThat("creation times", creationTimes, hasItem(created));
-      }
-
-      private ResultActions perform(final UUID scenario) throws Exception {
-         final var path = GameController.createPathForGames(scenario);
-         final var request = get(path).accept(MediaType.APPLICATION_JSON);
-
-         return mockMvc.perform(request);
-      }
-
-   }
-
-   private static final UUID ID_A = UUID.randomUUID();
-
-   private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
-   };
-
-   private static final User USER_WITH_ALL_AUTHORITIES = new User(
-            UUID.randomUUID(), "jeff", "letmein", Authority.ALL, true, true,
-            true, true);
-
-   @Autowired
-   GameSpringRepository gameRepository;
-
-   @Autowired
-   ScenarioSpringService scenarioService;
-
-   @Autowired
-   GameSpringService gameService;
-
-   @Autowired
-   private ObjectMapper objectMapper;
-
-   @Autowired
-   private MockMvc mockMvc;
-
-   private Game.Identifier createGame() {
-      final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-      assertThat("scenario", scenarioOptional.isPresent());
-      final var scenario = scenarioOptional.get();
-      return gameService.create(scenario).getIdentifier();
-   }
-
-   private User createUser(final Set<Authority> authorities) {
-      return new User(ID_A, "Allan", "secret", authorities, true, true, true,
-               true);
-   }
+    }
 }

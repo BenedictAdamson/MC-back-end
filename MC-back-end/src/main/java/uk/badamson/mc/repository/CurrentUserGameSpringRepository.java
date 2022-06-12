@@ -18,12 +18,11 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.UUID;
-
 import org.springframework.data.repository.CrudRepository;
-
 import uk.badamson.mc.Game;
 import uk.badamson.mc.UserGameAssociation;
+
+import java.util.UUID;
 
 /**
  * <p>
@@ -32,6 +31,6 @@ import uk.badamson.mc.UserGameAssociation;
  * </p>
  */
 public interface CurrentUserGameSpringRepository
-         extends CrudRepository<UserGameAssociation, UUID> {
+        extends CrudRepository<UserGameAssociation, UUID> {
 
 }

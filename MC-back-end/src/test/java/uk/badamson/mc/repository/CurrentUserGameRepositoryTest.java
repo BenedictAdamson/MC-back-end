@@ -18,10 +18,10 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.UUID;
-
 import uk.badamson.dbc.assertions.ObjectVerifier;
 import uk.badamson.mc.UserGameAssociation;
+
+import java.util.UUID;
 
 /**
  * <p>
@@ -30,27 +30,27 @@ import uk.badamson.mc.UserGameAssociation;
  */
 public class CurrentUserGameRepositoryTest {
 
-   public static final class Fake
+    public static void assertInvariants(
+            final CurrentUserGameSpringRepository repository) {
+        ObjectVerifier.assertInvariants(repository);// inherited
+        CrudRepositoryTest.assertInvariants(repository);// inherited
+    }
+
+    public static final class Fake
             extends CrudRepositoryTest.AbstractFake<UserGameAssociation, UUID>
             implements CurrentUserGameSpringRepository {
 
-      @Override
-      protected UserGameAssociation copy(
-               final UserGameAssociation association) {
-         return association;// no need to copy, as is immutable
-      }
+        @Override
+        protected UserGameAssociation copy(
+                final UserGameAssociation association) {
+            return association;// no need to copy, as is immutable
+        }
 
-      @Override
-      protected UUID getId(final UserGameAssociation game) {
-         return game.getUser();
-      }
+        @Override
+        protected UUID getId(final UserGameAssociation game) {
+            return game.getUser();
+        }
 
-   }
-
-   public static void assertInvariants(
-            final CurrentUserGameSpringRepository repository) {
-      ObjectVerifier.assertInvariants(repository);// inherited
-      CrudRepositoryTest.assertInvariants(repository);// inherited
-   }
+    }
 
 }

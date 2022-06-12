@@ -10,6 +10,9 @@ import java.util.UUID;
 final class Fixtures {
 
 
+    static final User ADMINISTRATOR = User
+            .createAdministrator("password");
+
     private static String createUserName(@Nonnull final UUID id) {
         return "jeff-" + id;
     }
@@ -17,9 +20,6 @@ final class Fixtures {
     static String createUserName() {
         return createUserName(UUID.randomUUID());
     }
-
-    static final User ADMINISTRATOR = User
-            .createAdministrator("password");
 
     static User createUserWithAllRoles() {
         final var id = UUID.randomUUID();

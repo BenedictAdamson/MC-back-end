@@ -19,11 +19,10 @@ package uk.badamson.mc.repository;
  */
 
 import org.springframework.data.repository.CrudRepository;
-
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
 
 public interface GamePlayersSpringRepository
-         extends CrudRepository<GamePlayers, Game.Identifier> {
+        extends CrudRepository<GamePlayers, Game.Identifier> {
 
 }
