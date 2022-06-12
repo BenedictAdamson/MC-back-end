@@ -47,7 +47,9 @@ import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.presentation.GamePlayersController;
 import uk.badamson.mc.service.GameService;
+import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.ScenarioSpringService;
 
 /**
  * <p>
@@ -62,10 +64,10 @@ public class ScenarioSteps {
    private BackEndWorld world;
 
    @Autowired
-   private GameService gameService;
+   private GameSpringService gameService;
 
    @Autowired
-   private ScenarioService scenarioService;
+   private ScenarioSpringService scenarioService;
 
    @Autowired
    private ObjectMapper objectMapper;

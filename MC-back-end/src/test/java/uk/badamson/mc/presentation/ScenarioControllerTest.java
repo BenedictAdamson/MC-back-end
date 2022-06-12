@@ -46,6 +46,7 @@ import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.ScenarioSpringService;
 
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -100,7 +101,7 @@ public class ScenarioControllerTest {
    private MockMvc mockMvc;
 
    @Autowired
-   private ScenarioService service;
+   private ScenarioSpringService service;
 
    @Autowired
    private ObjectMapper objectMapper;

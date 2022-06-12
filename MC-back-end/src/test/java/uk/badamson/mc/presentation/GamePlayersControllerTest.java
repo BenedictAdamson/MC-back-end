@@ -56,10 +56,7 @@ import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameSpringRepository;
-import uk.badamson.mc.service.GamePlayersService;
-import uk.badamson.mc.service.GameService;
-import uk.badamson.mc.service.ScenarioService;
-import uk.badamson.mc.service.UserService;
+import uk.badamson.mc.service.*;
 
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -533,16 +530,16 @@ public class GamePlayersControllerTest {
    GameSpringRepository gameRepository;
 
    @Autowired
-   ScenarioService scenarioService;
+   ScenarioSpringService scenarioService;
 
    @Autowired
-   GameService gameService;
+   GameSpringService gameService;
 
    @Autowired
-   UserService userService;
+   UserSpringService userService;
 
    @Autowired
-   GamePlayersService gamePlayersService;
+   GamePlayersSpringService gamePlayersService;
 
    @Autowired
    private ObjectMapper objectMapper;

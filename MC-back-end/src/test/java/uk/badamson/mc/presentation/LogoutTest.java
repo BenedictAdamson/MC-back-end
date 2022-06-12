@@ -28,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.UserService;
+import uk.badamson.mc.service.UserSpringService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -45,7 +46,7 @@ public class LogoutTest {
    private static final String PATH = "/logout";
 
    @Autowired
-   private UserService service;
+   private UserSpringService service;
 
    @Autowired
    private MockMvc mockMvc;

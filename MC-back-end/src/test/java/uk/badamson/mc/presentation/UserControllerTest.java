@@ -54,6 +54,7 @@ import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserService;
+import uk.badamson.mc.service.UserSpringService;
 
 @SpringBootTest(classes = TestConfiguration.class,
          webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -377,7 +378,7 @@ public class UserControllerTest {
    }
 
    @Autowired
-   private UserService service;
+   private UserSpringService service;
 
    @Autowired
    private MockMvc mockMvc;

@@ -58,9 +58,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.presentation.GamePlayersController;
-import uk.badamson.mc.service.GamePlayersService;
-import uk.badamson.mc.service.GameService;
-import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.*;
 
 import javax.annotation.Nonnull;
 
@@ -105,13 +103,13 @@ public class GameSteps {
    private BackEndWorld world;
 
    @Autowired
-   private ScenarioService scenarioService;
+   private ScenarioSpringService scenarioService;
 
    @Autowired
-   private GameService gameService;
+   private GameSpringService gameService;
 
    @Autowired
-   private GamePlayersService gamePlayersService;
+   private GamePlayersSpringService gamePlayersService;
 
    @Autowired
    private ObjectMapper objectMapper;
@@ -751,7 +749,7 @@ public class GameSteps {
       game = null;// local copy is out of date
    }
 
-   private static UUID getAScenarioId(@Nonnull ScenarioService scenarioService) {
+   private static UUID getAScenarioId(@Nonnull ScenarioSpringService scenarioService) {
       final Optional<UUID> scenarioIdOptional = scenarioService.getScenarioIdentifiers().findAny();
       assertThat("scenarioId", scenarioIdOptional.isPresent());
       return scenarioIdOptional.get();

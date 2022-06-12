@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.service.UserService;
+import uk.badamson.mc.service.UserSpringService;
 
 import java.io.IOException;
 import java.util.*;
@@ -68,7 +69,7 @@ public class UserSteps {
    private BackEndWorld world;
 
    @Autowired
-   private UserService service;
+   private UserSpringService service;
 
    @Autowired
    private ObjectMapper objectMapper;

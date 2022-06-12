@@ -36,7 +36,9 @@ import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.service.GameService;
+import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioService;
+import uk.badamson.mc.service.ScenarioSpringService;
 
 import java.time.Instant;
 import java.util.*;
@@ -289,10 +291,10 @@ public class GameControllerTest {
    GameSpringRepository gameRepository;
 
    @Autowired
-   ScenarioService scenarioService;
+   ScenarioSpringService scenarioService;
 
    @Autowired
-   GameService gameService;
+   GameSpringService gameService;
 
    @Autowired
    private ObjectMapper objectMapper;
