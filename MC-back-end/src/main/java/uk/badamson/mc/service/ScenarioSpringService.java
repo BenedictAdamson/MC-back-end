@@ -18,55 +18,38 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import org.springframework.stereotype.Service;
+import uk.badamson.mc.NamedUUID;
+import uk.badamson.mc.Scenario;
+
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
-import org.springframework.stereotype.Service;
-
-import uk.badamson.mc.NamedUUID;
-import uk.badamson.mc.Scenario;
-
-/**
- * <p>
- * Implementation of the part of the service layer pertaining to scenarios of
- * the Mission Command game.
- * </p>
- */
 @Service
-public class ScenarioSpringService implements ScenarioService {
+public class ScenarioSpringService {
 
-   // TODO have useful scenarios.
-   private static final Scenario SCENARIO = new Scenario(UUID.randomUUID(),
-            "Section assault", "Basic fire and movement tactics.",
-            List.of(new NamedUUID(UUID.randomUUID(), "Lt. Winters"),
-                     new NamedUUID(UUID.randomUUID(), "Sgt. Summer"))) {
-   };
-   private static final Map<UUID, Scenario> SCENARIOS = Map
-            .of(SCENARIO.getIdentifier(), SCENARIO);
+   private final ScenarioService delegate = new ScenarioService();
 
-   @Override
+   @Nonnull
+   final ScenarioService getDelegate() {
+      return delegate;
+   }
+
    @Nonnull
    public Stream<NamedUUID> getNamedScenarioIdentifiers() {
-      return SCENARIOS.values().stream().map(Scenario::getNamedUUID);
+      return delegate.getNamedScenarioIdentifiers().stream();
    }
 
-   @Override
    @Nonnull
    public Optional<Scenario> getScenario(@Nonnull final UUID id) {
-      Objects.requireNonNull(id, "id");
-      return Optional.ofNullable(SCENARIOS.get(id));
+      return delegate.getScenario(id);
    }
 
-   @Override
    @Nonnull
    public Stream<UUID> getScenarioIdentifiers() {
-      return SCENARIOS.keySet().stream();
+      return delegate.getScenarioIdentifiers();
    }
 
 }

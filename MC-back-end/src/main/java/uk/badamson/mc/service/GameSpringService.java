@@ -18,189 +18,74 @@ package uk.badamson.mc.service;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.annotation.Nonnull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.repository.GameRepositoryAdapter;
 import uk.badamson.mc.repository.GameSpringRepository;
 
-/**
- * <p>
- * Implementation of the part of the service layer pertaining to games of
- * Mission Command.
- * </p>
- */
+import javax.annotation.Nonnull;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 @Service
-public class GameSpringService implements GameService {
+public class GameSpringService {
 
-   private final GameSpringRepository repository;
+   private final GameService delegate;
 
-   private final Clock clock;
-
-   private final ScenarioService scenarioService;
-
-   /**
-    * <p>
-    * Construct a service with given associations.
-    * </p>
-    *
-    * @param repository
-    *           The repository that this service uses for persistent storage.
-    * @param clock
-    *           The clock that this service uses to access to the current
-    *           {@linkplain Instant instant} (point in time).
-    * @param scenarioService
-    *           The part of the service layer that this service uses for
-    *           information about scenarios.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code repository} is null.</li>
-    *            <li>If {@code clock} is null.</li>
-    *            <li>If {@code scenarioService} is null.</li>
-    *            </ul>
-    */
    @Autowired
    public GameSpringService(@Nonnull final GameSpringRepository repository,
                             @Nonnull final Clock clock,
-                            @Nonnull final ScenarioService scenarioService) {
-      this.repository = Objects.requireNonNull(repository, "repository");
-      this.clock = Objects.requireNonNull(clock, "clock");
-      this.scenarioService = Objects.requireNonNull(scenarioService,
-               "scenarioService");
+                            @Nonnull final ScenarioSpringService scenarioService) {
+      this.delegate = new GameService(
+              new GameRepositoryAdapter(repository),
+              clock,
+              scenarioService.getDelegate()
+      );
    }
 
-   @Override
+   final GameService getDelegate() {
+      return delegate;
+   }
+
    @Nonnull
    @Transactional
    public Game create(@Nonnull final UUID scenario) {
-      requireKnownScenario(scenario);// read-and-check
-      final var identifier = new Identifier(scenario, getNow());
-      final var game = new Game(identifier, Game.RunState.WAITING_TO_START);
-      return repository.save(game);// write
-   }
-
-   private Optional<Game> get(final Identifier id) {
-      Objects.requireNonNull(id, "id");
-      return repository.findById(id);
+      return delegate.create(scenario);
    }
 
    @Nonnull
-   @Override
-   public final Clock getClock() {
-      return clock;
-   }
-
-   @Nonnull
-   @Override
    @Transactional
    public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
-      requireKnownScenario(scenario);// read-and-check
-      return getGameIdentifiers()// read
-               .filter(id -> scenario.equals(id.getScenario()))
-               .map(Identifier::getCreated);
+      return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
    }
 
-   @Override
    @Nonnull
    public Optional<Game> getGame(@Nonnull final Identifier id) {
-      return get(id);
+      return delegate.getGame(id);
    }
 
-   @Override
    @Nonnull
    public Stream<Identifier> getGameIdentifiers() {
-      return getGames().map(Game::getIdentifier);
+      return delegate.getGameIdentifiers();
    }
 
-   private Stream<Game> getGames() {
-      return StreamSupport.stream(repository.findAll().spliterator(), false);
-   }
-
-   @Override
-   @Nonnull
-   public Instant getNow() {
-      return clock.instant().truncatedTo(ChronoUnit.MILLIS);
-   }
-
-   @Nonnull
-   public final GameSpringRepository getRepository() {
-      return repository;
-   }
-
-   @Override
-   @Nonnull
-   public final ScenarioService getScenarioService() {
-      return scenarioService;
-   }
-
-   private void requireKnownScenario(final UUID scenario)
-            throws NoSuchElementException {
-      Objects.requireNonNull(scenario, "scenario");
-      if (scenarioService.getScenarioIdentifiers()
-               .noneMatch(scenario::equals)) {
-         throw new NoSuchElementException("unknown scenario");
-      }
-   }
-
-   @Override
    @Nonnull
    public Game startGame(@Nonnull final Identifier id)
             throws NoSuchElementException, IllegalGameStateException {
-      Optional<Game> gameOptional = get(id);
-      if (gameOptional.isEmpty()) {
-         throw new NoSuchElementException("game");
-      }
-      var game = gameOptional.get();// read
-      switch (game.getRunState()) {
-      case WAITING_TO_START:
-         game = new Game(game);
-         game.setRunState(Game.RunState.RUNNING);
-         return repository.save(game);// write
-      case RUNNING:
-         // do nothing
-         return new Game(game);
-      case STOPPED:
-         throw new IllegalGameStateException("Game stopped");
-      default:// never happens
-         throw new AssertionError("Valid game state");
-      }
+      return delegate.startGame(id);
    }
 
-   @Override
    public void stopGame(@Nonnull final Identifier id)
             throws NoSuchElementException {
-      Optional<Game> gameOptional = get(id);
-      if (gameOptional.isEmpty()) {
-         throw new NoSuchElementException("game");
-      }
-      var game = gameOptional.get();// read
-      switch (game.getRunState()) {
-         case WAITING_TO_START, RUNNING -> {
-            game = new Game(game);
-            game.setRunState(Game.RunState.STOPPED);
-            repository.save(game);
-            // write
-         }
-         case STOPPED -> // do nothing
-                 new Game(game);
-         default ->// never happens
-                 throw new AssertionError("Valid game state");
-      }
+      delegate.stopGame(id);
    }
 
 }
