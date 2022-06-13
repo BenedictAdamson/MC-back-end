@@ -215,14 +215,29 @@
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+               <includes>
+                  <include>**/*Spec.class</include>
+               </includes>
                <excludes>
                   <!--Work around Failsafe/Surefire not yet using Test Engine 
                      discovery functionality of JUnit 5 -->
                   <exclude>**/*Cucumber*.java</exclude>
                </excludes>
             </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>compile</goal>
+                     <goal>compileTests</goal>
+                  </goals>
+               </execution>
+            </executions>
          </plugin>
       </plugins>
    </build>
@@ -276,6 +291,11 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>org.codehaus.groovy</groupId>
+         <artifactId>groovy</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>org.hamcrest</groupId>
          <artifactId>hamcrest</artifactId>
          <scope>test</scope>
@@ -302,6 +322,11 @@
       <dependency>
          <groupId>org.opentest4j</groupId>
          <artifactId>opentest4j</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.spockframework</groupId>
+         <artifactId>spock-core</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>
