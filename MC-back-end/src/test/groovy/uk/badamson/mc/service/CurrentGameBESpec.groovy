@@ -1,10 +1,14 @@
 package uk.badamson.mc.service
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.*
 
-import java.time.Instant
+import org.hamcrest.Matchers
+import org.springframework.boot.test.context.SpringBootTest
+import uk.badamson.mc.Authority
+import uk.badamson.mc.GamePlayers
+import uk.badamson.mc.TestConfiguration
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static spock.util.matcher.HamcrestSupport.expect
 
 /**
  * © Copyright Benedict Adamson 2021-22.
@@ -30,54 +34,48 @@ import java.time.Instant
  */
 @SpringBootTest(classes = TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class CurrentGameBESpec {
+class CurrentGameBESpec extends BESpecification {
 
-  @Autowired
-  private BackEndWorld world;
+    def "May examine current-game only if playing"() {
+        given: "has a game"
+        def scenario = chooseScenario()
+        gameService.create(scenario.identifier).identifier
 
-  def "May examine current-game only if playing"() {
-    given: "has a game"
-    hasAGame()
+        and: "user has the player role but is not playing"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-    and: "user is not playing any games"
-    world.backEnd.mockNoCurrentGame()
+        when: "examine the current game of the user while logged in"
+        final def response = requestGetCurrentGame(user)
 
-    when: "logged in as a user with the player role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
+        then: "it does not indicate that the user has a current game"
+        response.andExpect(status().isNotFound())
+    }
 
-    then: "does not indicate that the user has a current game"
-    !homePage.doesIndicateUserHasCurrentGame()
-  }
+    def "Examine current game"() {
+        given: "has a game"
+        def scenario = chooseScenario()
+        def gameId = gameService.create(scenario.identifier).identifier
 
-  def "Examine current game"() {
-    given: "has a game"
-    hasAGame()
+        and: "user has the player role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-    and: "user is playing the game"
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-    world.backEnd.mockCurrentGame(GAME_ID)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, Map.of(CHARACTER_ID, user.id)))
+        and: "user is playing the game"
+        gamePlayersService.userJoinsGame(user.id, gameId)
 
-    when: "logged in as a user with the player role"
-    def homePage = world.logInAsUser(user)
+        when: "examine whether have a current game while logged in"
+        def response = requestGetCurrentGame(user)
 
-    then: "indicates that the user has a current game"
-    homePage.doesIndicateUserHasCurrentGame()
+        then: "indicates that the user has a current game"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
 
-    when: "examine the current game"
-    def gamePage = homePage.navigateToCurrentGamePage()
+        when: "examine the current game"
+        def currentGameId = parseGamePath(location)
+        response = requestGetGamePlayers(currentGameId, user)
 
-    then: "the game indicates which character the user is playing"
-    gamePage.assertInvariants()
-    gamePage.assertIndicatesWhichCharacterUserIsPlaying()
-  }
-
-  private void hasAGame() {
-    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-    world.backEnd.mockGetScenario(SCENARIO)
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(GAME_WAITING_TO_START)
-  }
-
-
+        then: "the game indicates which character the user is playing"
+        def gamePlayers = expectEncodedResponse(response, GamePlayers.class)
+        expect(gamePlayers.users.values(), Matchers.hasItem(user.id))
+    }
 }

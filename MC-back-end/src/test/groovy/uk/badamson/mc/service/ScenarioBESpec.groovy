@@ -1,19 +1,13 @@
 package uk.badamson.mc.service
 
-import org.springframework.beans.factory.annotation.Autowired
+import com.fasterxml.jackson.core.type.TypeReference
+import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import org.testcontainers.spock.Testcontainers
 import spock.lang.Unroll
-import uk.badamson.mc.Authority
-import uk.badamson.mc.BackEndWorld
-import uk.badamson.mc.Game
-import uk.badamson.mc.NamedUUID
-import uk.badamson.mc.Scenario
-import uk.badamson.mc.TestConfiguration
+import uk.badamson.mc.*
 
 import java.time.Instant
 
-import static org.hamcrest.Matchers.contains
 import static spock.util.matcher.HamcrestSupport.expect
 
 /** © Copyright Benedict Adamson 2019,20,22.
@@ -39,87 +33,73 @@ import static spock.util.matcher.HamcrestSupport.expect
  */
 @SpringBootTest(classes = TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class ScenarioBESpec {
-
-    @Autowired
-    private BackEndWorld world;
+class ScenarioBESpec extends BESpecification {
 
     def "List scenarios"() {
-        given: "back-end can provide a list of scenarios"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
-
-        and: "not logged in"
-        world.notLoggedIn()
+        given: "not logged in"
+        final User user = null
 
         when: "examine scenarios"
-        def scenariosPage = world.getHomePage().navigateToScenariosPage()
+        def response = requestGetScenarios(user)
 
         then: "the response is the list of scenarios"
-        scenariosPage.assertInvariants()
-        scenariosPage.assertHasListOfScenarios()
-        expect(scenariosPage.getScenarioTitles(), contains(SCENARIO_TITLE))
+        def scenarios = expectEncodedResponse(response, new TypeReference<List<NamedUUID>>() {})
+        expect(scenarios, Matchers.not(Matchers.empty()))
     }
 
     def "Examine scenario anonymously"() {
         given: "a scenario that has a game"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
-        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-        world.backEnd.mockGetGame(GAME)
-        world.backEnd.mockMayJoinGame(GAME_ID, false)
+        def scenarioId = chooseScenario().identifier
+        gameService.create(scenarioId).identifier
 
         and: "not logged in"
-        world.notLoggedIn()
+        final User user = null
 
-        when: "examine the scenario"
-        final def scenarioPage = world.getHomePage()
-                .navigateToScenariosPage()
-                .navigateToScenario(0)
+        when: "try to examine the scenario"
+        final def scenarioResponse = requestGetScenario(scenarioId, user)
+        final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
 
-        then: "the scenario includes the scenario description"
-        scenarioPage.assertInvariants()
-        //TODO test presence of description
+        then: "provides the scenario"
+        def scenario = expectEncodedResponse(scenarioResponse, Scenario.class)
+        def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
+
+        and: "the scenario includes the scenario description"
+        expect(scenario.description, Matchers.not(Matchers.emptyOrNullString()))
 
         and: "the scenario includes the list of playable characters of that scenario"
-        scenarioPage.assertHasListOfCharacters()
+        expect(scenario.characters, Matchers.not(Matchers.empty()))
 
-        and: "the scenario includes the list of games of that scenario"
-        scenarioPage.assertHasListOfGames()
-
-        and: "it does not allow examination of games of the scenario"
-        !scenarioPage.hasLinksToGames()
+        and: "the scenario has a list of games of that scenario"
+        expect(gameCreationTimes, Matchers.hasSize(1))
     }
 
     @Unroll
     def "Examine scenario with authorization"() {
         given: "a scenario that has a game"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
-        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-        world.backEnd.mockGetGame(GAME)
-        world.backEnd.mockMayJoinGame(GAME_ID, false)
+        def scenarioId = chooseScenario().identifier
+        gameService.create(scenarioId).identifier
 
-        and: "logged in as a user with the $role role"
-        def homePage = world.logInAsUserWithTheRole(role)
+        and: "logged in as a user with the #role"
+        def user = addUserWithAuthorities(EnumSet.of(role))
 
-        when: "examine the scenario"
-        final def scenarioPage = homePage
-                .navigateToScenariosPage()
-                .navigateToScenario(0)
+        when: "try to examine the scenario"
+        final def scenarioResponse = requestGetScenario(scenarioId, user)
+        final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
+
+        then: "provides the scenario"
+        def scenario = expectEncodedResponse(scenarioResponse, Scenario.class)
+        def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
 
         then: "the scenario includes the scenario description"
-        scenarioPage.assertInvariants()
-        //TODO test presence of description
+        expect(scenario.description, Matchers.not(Matchers.emptyOrNullString()))
 
         and: "the scenario includes the list of playable characters of that scenario"
-        scenarioPage.assertHasListOfCharacters()
+        expect(scenario.characters, Matchers.not(Matchers.empty()))
 
         and: "the scenario includes the list of games of that scenario"
-        scenarioPage.assertHasListOfGames()
 
-        and: "it allows examination of games of the scenario"
-        scenarioPage.hasLinksToGames()
+        and: "the scenario has a list of games of that scenario"
+        expect(gameCreationTimes, Matchers.hasSize(1))
 
         where:
         role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]

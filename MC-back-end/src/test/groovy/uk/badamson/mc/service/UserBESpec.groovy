@@ -1,13 +1,15 @@
 package uk.badamson.mc.service
 
-import org.mockserver.matchers.Times
-import org.springframework.beans.factory.annotation.Autowired
+import com.fasterxml.jackson.core.type.TypeReference
+import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
-import uk.badamson.mc.BackEndWorld
 import uk.badamson.mc.BasicUserDetails
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.User
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static spock.util.matcher.HamcrestSupport.expect
 
 /**
  * © Copyright Benedict Adamson 2019-20,22.
@@ -33,174 +35,120 @@ import uk.badamson.mc.User
  */
 @SpringBootTest(classes = TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class UserBESpec {
+class UserBESpec extends BESpecification {
 
-  @Autowired
-  private BackEndWorld world;
+    def "List users"() {
+        given: "user has the #role"
+        def user = addUserWithAuthorities(EnumSet.of(role))
 
-  def "List users"() {
-    given: "logged in as a user with the ${role} role"
-    def user = world.createUserWithRole(role)
-    def homePage = world.logInAsUser(user)
+        when: "try to get the list of users"
+        def response = requestGetUsers(user)
 
-    when: "getting the users"
-    world.backEnd.mockGetAllUsers(Set.of(user))
-    def usersPage = homePage.navigateToUsersPage()
+        then: "it provides the list of users"
+        def users = expectEncodedResponse(response, new TypeReference<List<User>>() {})
 
-    then: "it serves the list of users"
-    usersPage.assertInvariants()
-    usersPage.assertHasListOfUsers()
+        and: "the list of users has at least one user"
+        expect(users, Matchers.not(Matchers.empty()))
 
-    and: "the list of users has at least one user"
-    usersPage.assertListOfUsersNotEmpty()
+        where:
+        role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_USERS]
+    }
 
-    where:
-    role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_USERS]
-  }
+    def "Examine user"() {
+        given: "there is a user to examine"
+        def userToExamine = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
-  def "Examine user"() {
-    given: "logged in as a user with the manage users role"
-    def currentUser = world.createUserWithRole(Authority.ROLE_MANAGE_USERS)
-    def otherUser = world.createUserWithRole(Authority.ROLE_PLAYER)
-    def homePage = world.logInAsUser(currentUser)
+        and: "current user has the manage users role"
+        def currentUser = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
-    and: "viewing the list of users"
-    world.backEnd.mockGetAllUsers(Set.of(currentUser, otherUser))
-    def usersPage = homePage.navigateToUsersPage()
+        when: "try to examine the user"
+        def response = requestGetUser(userToExamine.id, currentUser)
 
-    when: "navigate to one user"
-    def userPage = usersPage.navigateToUserPage(0)
+        then: "it provides the user"
+        def fetchedUser = expectEncodedResponse(response, User.class)
 
-    then: "MC serves the user"
-    userPage.assertInvariants()
+        and: "the user includes the user name"
+        fetchedUser.username == userToExamine.username
 
-    and: "the user includes the user name"
-    userPage.assertIncludesUserName()
+        and: "the user lists the roles of the user"
+        fetchedUser.authorities == userToExamine.authorities
+    }
 
-    and: "the user lists the roles of the user"
-    userPage.assertListsRolesOfUser()
-  }
+    def "Login"() {
+        given: "user with any role"
+        def username = 'Zoe'
+        def password = 'password1'
+        userService.add(new BasicUserDetails(username, password, EnumSet.of(Authority.ROLE_PLAYER),
+                true, true, true, true))
 
-  def "Login"() {
-    given: "user with any role"
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
+        when: "try to log in using correct password"
+        def response = requestLogin(username, password)
 
-    and: "not logged in"
-    world.backEnd.mockGetSelfUnauthenticated(Times.once())
-    world.backEnd.mockNoCurrentGame()
-    def homePage = world.getHomePage()
+        then: "accepts the login and redirected to home-page"
+        def location = expectRedirection(response)
+        location == '/'
+    }
 
-    when: "log in using correct password"
-    final var loginPage = homePage.navigateToLoginPage()
-    world.backEnd.mockLogin(user, UUID.randomUUID().toString(), UUID.randomUUID().toString())
-    world.backEnd.mockGetSelf(user)
-    loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    homePage.awaitIsReadyOrErrorMessage()
+    def "Login denied"() {
+        given: "unknown user"
+        def username = 'Zoe'
+        def password = 'password1'
 
-    then: "redirected to home-page"
-    homePage.requireIsReady()
-    homePage.assertInvariants()
+        when: "try to login"
+        def response = requestLogin(username, password)
 
-    then: "accepts the login"
-    homePage.assertNoErrorMessages()
-    homePage.assertReportsThatLoggedIn()
+        then: "rejects the login"
+        def location = expectRedirection(response)
+        location == '/login'
+    }
 
-    and: "allows logout"
-    homePage.isLogoutEnabled()
+    def "Add user"() {
+        given: "current user has the manage users role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
-    and: "allows examining the current user"
-    homePage.hasExamineCurrentUserLink()
-  }
+        when: "try to add a user named #userName with password #password"
+        def newBasicUserDetails = new BasicUserDetails(userName, password, Set.of(Authority.ROLE_PLAYER),
+                false, false, false, true)
+        def response = requestAddUser(newBasicUserDetails, user)
 
-  def "Logout"() {
-    given: "logged in as user with any role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
+        then: "accepts the addition"
+        def location = expectRedirection(response)
+        parseUserPath(location) != null
 
-    when: "request logout"
-    homePage.logout()
+        and:
+        "the list of users includes a user named ${userName}"
+        userService.getUsers().anyMatch(u -> u.username == userName)
 
-    then: "accepts the logout"
-    homePage.assertInvariants()
-    homePage.assertNoErrorMessages()
-    homePage.assertReportsThatNotLoggedIn()
-  }
+        where:
+        userName | password
+        'John'   | 'secret'
+        'Jeff'   | 'password123'
+    }
 
-  def "Login denied"() {
-    given: "not logged in"
-    world.backEnd.mockGetSelfUnauthenticated()
+    def "Only administrator may add user"() {
+        given: "current user has the player role but not the manage users role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-    and: "unknown user"
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
+        when: "try to add a user"
+        def newBasicUserDetails = new BasicUserDetails('Zoe', 'password', Set.of(Authority.ROLE_PLAYER),
+                false, false, false, true)
+        def response = requestAddUser(newBasicUserDetails, user)
 
-    when: "try to login"
-    final var loginPage = world.getHomePage().navigateToLoginPage()
-    loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    loginPage.awaitIsReadyAndErrorMessage()
+        then: "does not allow adding a user"
+        response.andExpect(status().isForbidden())
+    }
 
-    then: "rejects the login"
-    loginPage.assertRejectedLogin()
-  }
+    def "Only administrator my examine user"() {
+        given: "current user has the player role but not the manage users role"
+        def currentUser = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-  def "Add user"() {
-    given: "logged in as a user with the manage users role"
-    world.backEnd.mockNoCurrentGame()
-    def user = world.createUserWithRole(Authority.ROLE_MANAGE_USERS)
-    def homePage = world.logInAsUser(user)
+        and: "there is a user to examine"
+        def userToExamine = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-    and: 'on the users page'
-    world.backEnd.mockGetAllUsers(Set.of(user), Times.once())
-    def usersPage = homePage.navigateToUsersPage()
+        when: "try to examine the user"
+        final def response = requestGetUser(userToExamine.id, currentUser)
 
-    when: "adding a user named ${userName} with password ${password}"
-    def newBasicUserDetails = new BasicUserDetails(userName, password, Set.of(Authority.ROLE_PLAYER),
-            false, false, false, true)
-    def newUserId = UUID.randomUUID()
-    def newUser = new User(newUserId, newBasicUserDetails)
-    world.backEnd.mockAddUser(newBasicUserDetails, newUserId)
-    world.backEnd.mockGetAllUsers(Set.of(user, newUser))
-    world.backEnd.mockGetUser(newUser)
-    usersPage.navigateToAddUserPage().submitForm(userName, password)
-
-    then: "accepts the addition"
-    usersPage.awaitIsReady()
-
-    and: "can get the list of users"
-    usersPage.assertInvariants()
-
-    and: "the list of users includes a user named ${userName}"
-    usersPage.assertListOfUsersIncludes(userName)
-
-    where:
-    userName | password
-    'John' | 'secret'
-    'Jeff' | 'password123'
-  }
-
-  def "Only administrator may add user"() {
-    given: "logged in as a user with the player role but not the manage users role"
-    world.backEnd.mockNoCurrentGame()
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-    world.backEnd.mockGetAllUsers(Set.of(user))
-    def homePage = world.logInAsUser(user)
-
-    when: "examining the users page"
-    final var usersPage = homePage.navigateToUsersPage()
-
-    then: "does not allow adding a user"
-    !usersPage.hasAddUserLink()
-  }
-
-  def "Only administrator my examine user"() {
-    given: "logged in as user with the player role but not the manage users role"
-    world.backEnd.mockNoCurrentGame()
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-    world.backEnd.mockGetAllUsers(Set.of(user))
-    def homePage = world.logInAsUser(user)
-
-    when: "viewing the list of users"
-    final var usersPage = homePage.navigateToUsersPage()
-
-    then: "does not allow examining any users"
-    usersPage.getNumberOfUserLinks() == 0
-  }
+        then: "does not allow examining any users"
+        response.andExpect(status().isForbidden())
+    }
 }

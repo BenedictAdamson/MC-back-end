@@ -63,7 +63,7 @@ public class ScenarioController {
      * @return The path.
      * @throws NullPointerException If {@code id} is null.
      */
-    static String createPathFor(final UUID id) {
+    public static String createPathFor(final UUID id) {
         Objects.requireNonNull(id, "id");
         return "/api/scenario/" + id;
     }

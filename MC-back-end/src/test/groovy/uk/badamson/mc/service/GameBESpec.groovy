@@ -1,11 +1,14 @@
 package uk.badamson.mc.service
 
-import org.mockserver.matchers.Times
-import org.springframework.beans.factory.annotation.Autowired
+import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.*
+import uk.badamson.mc.Authority
+import uk.badamson.mc.Game
+import uk.badamson.mc.GamePlayers
+import uk.badamson.mc.TestConfiguration
 
-import java.time.Instant
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static spock.util.matcher.HamcrestSupport.expect
 
 /**
  * © Copyright Benedict Adamson 2020-22.
@@ -31,372 +34,331 @@ import java.time.Instant
  */
 @SpringBootTest(classes = TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class GameBESpec {
+class GameBESpec extends BESpecification {
 
-  @Autowired
-  private BackEndWorld world;
+    def "Examine game as player"() {
+        given: "has a game"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
 
-  def "Examine game as player"() {
-    given: "has a game"
-    hasAGameWaitingToStart()
-    world.backEnd.mockMayJoinGame(GAME_ID, false)
+        and: "user has the player role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
-    and: "logged in as a user with the player role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
+        when: "try to examine the game"
+        def gameResponse = requestGetGame(gameId, user)
+        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
+        def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
+
+        then: "provides the game"
+        gameResponse.andExpect(status().isOk())
+        gamePlayersResponse.andExpect(status().isOk())
+        mayJoinResponse.andExpect(status().isOk())
+        def game = expectEncodedResponse(gameResponse, Game.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
+        and: "the game indicates its scenario"
+        game.identifier.scenario == scenarioId
 
-    then: "the game includes the scenario title"
-    gamePage.assertInvariants()
-    gamePage.assertIncludesScenarioTitle()
+        and: "the game indicates the date and time that the game was set up"
+        game.identifier.created != null
 
-    and: "the game includes the scenario description"
-    // TODO
+        and: "the game indicates whether it is recruiting players"
+        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
 
-    and: "the game includes the date and time that the game was set up"
-    gamePage.assertIncludesCreationTime()
+        and: "the game indicates whether the user may join the game"
+        mayJoin != null
 
-    and: "the game indicates whether it has players"
-    gamePage.assertIndicatesWhetherGameHasPlayers()
+        and: "the game indicates whether it has players"
+        gamePlayers.users != null
 
-    and: "the game indicates whether it is recruiting players"
-    gamePage.assertIndicatesWhetherRecruitingPlayers()
+        and: "the game indicates whether it is running"
+        game.runState != null
 
-    and: "the game indicates whether the user may join the game"
-    gamePage.assertIndicatesWhetherUserMayJoinGame()
+        and: "the game indicates which character (if any) the user is playing"
+        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
 
-    and: "the game indicates whether the user is playing the game"
-    gamePage.assertIndicatesWhetherUserIsPlayingGame()
+        and: "the game does not indicate which characters are played by which (other) users"
+        gamePlayers.users.values().stream().map(userId -> !(userId == user.id)).count() == 0
+    }
 
-    and: "the game indicates whether it is running"
-    gamePage.assertIndicatesWhetherRunning()
+    def "Examine game as game manager"() {
+        given: "has a game"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
 
-    and: "the game indicates which character (if any) the user is playing"
-    gamePage.assertIndicatesWhichCharacterIfAnyUserIsPlaying()
+        and: "user has the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
 
-    and: "the game does not indicate which characters are played by which (other) users"
-    gamePage.assertDoesNotIndicateWhichCharactersPlayedByOtherUsers()
-  }
+        when: "try to examine the game"
+        def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
+        def gameResponse = requestGetGame(gameId, user)
+        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
 
-  def "Examine game as game manager"() {
-    given: "has a game"
-    hasAGameWaitingToStart()
-    world.backEnd.mockMayJoinGame(GAME_ID, false)
+        then: "provides the game"
+        gameResponse.andExpect(status().isOk())
+        gamePlayersResponse.andExpect(status().isOk())
+        def game = expectEncodedResponse(gameResponse, Game.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
-    and: "logged in as a user with the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
+        and: "the game indicates its scenario"
+        game.identifier.scenario == scenarioId
+
+        and: "the game indicates the date and time that the game was set up"
+        game.identifier.created != null
+
+        and: "the game indicates whether it is recruiting players"
+        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
 
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
+        and: "the game indicates whether the user may join the game"
+        mayJoin != null
 
-    then: "the game includes the scenario title"
-    gamePage.assertInvariants()
-    gamePage.assertIncludesScenarioTitle()
+        and: "the game indicates whether it has players"
+        gamePlayers.users != null
 
-    and: "the game includes the scenario description"
-    // TODO
+        and: "the game indicates whether it is running"
+        game.runState != null
+
+        and: "the game indicates which character (if any) the user is playing"
+        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
 
-    and: "the game includes the date and time that the game was set up"
-    gamePage.assertIncludesCreationTime()
+        and: "the game indicates which characters are played by which users"
+        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
+    }
 
-    and: "the game indicates whether it has players"
-    gamePage.assertIndicatesWhetherGameHasPlayers()
+    def "Add game"() {
+        given: "has a scenario without any games"
+        def scenarioId = chooseScenario().identifier
 
-    and: "the game indicates whether it is recruiting players"
-    gamePage.assertIndicatesWhetherRecruitingPlayers()
-
-    and: "the game indicates whether the user may join the game"
-    gamePage.assertIndicatesWhetherUserMayJoinGame()
-
-    and: "the game indicates whether the user is playing the game"
-    gamePage.assertIndicatesWhetherUserIsPlayingGame()
-
-    and: "the game indicates whether it is running"
-    gamePage.assertIndicatesWhetherRunning()
-
-    and: "the game indicates which character (if any) the user is playing"
-    gamePage.assertIndicatesWhichCharacterIfAnyUserIsPlaying()
-
-    and: "the game indicates which characters are played by which users"
-    gamePage.assertIndicatesWhichCharactersPlayedByWhichUsers()
-  }
-
-  def "Add game"() {
-    given: "has a scenario without any games"
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(), Times.once())
-
-    and: "logged in as a user with the manage games role"
-    def user = world.createUserWithRole(Authority.ROLE_MANAGE_GAMES)
-    def homePage = world.logInAsUser(user)
-
-    and: "selected the scenario"
-    def scenarioPage0 = homePage.navigateToScenariosPage()
-            .navigateToScenario(0)
-
-    when: "creating a game for the scenario"
-    world.backEnd.mockCreateGameForScenario(GAME_ID)
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME), Times.unlimited())
-    world.backEnd.mockGetGame(GAME_WAITING_TO_START)
-    world.backEnd.mockMayJoinGame(GAME_ID, true)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS))
-    def gamePage = scenarioPage0.createGame()
-
-    then: "accepts the creation of the game"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
-
-    and: "the game indicates that it is recruiting players"
-    gamePage.assertIndicatesIsRecruitingPlayers()
-
-    and: "the game indicates that it has no players"
-    gamePage.assertIndicatesGameHasNoPlayedCharacters()
-
-    and: "the game indicates that it is not running"
-    gamePage.assertIndicatesNotRunning()
-
-    and: "can get the list of games"
-    def scenarioPage1 = gamePage.navigateToScenarioPage()
-    scenarioPage1.assertHasListOfGames()
-
-    and: "the list of games includes the new game"
-    scenarioPage1.getNumberOfGamesListed() == 1
-  }
-
-  def "Only a game manager may add a game"() {
-    given: "has a scenario without any games"
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(), Times.once())
-
-    and: "logged in as a user without the manage games role"
-    def homePage = world.logInAsUserWithoutTheRole(Authority.ROLE_MANAGE_GAMES)
-
-    when: "examine scenario"
-    def scenarioPage = homePage.navigateToScenariosPage()
-            .navigateToScenario(0)
-
-    then: "the scenario does not allow creating a game"
-    !scenarioPage.isCreateGameButtonEnabled()
-  }
-
-  def "End game recruitment"() {
-    given: "a game is initially recruiting players"
-    hasAGameWaitingToStart()
-    world.backEnd.mockMayJoinGame(GAME_ID, false)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS), Times.once())
-
-    and: "logged in as a user with the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
-
-    when: "user ends recruitment for the game"
-    def gamePage = examineGame(homePage)
-    world.backEnd.mockEndRecruitment(GAME_ID)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, false, NO_USERS), Times.unlimited())
-    gamePage.endRecruitement()
-
-    then: "the game accepts ending recruitment"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
-
-    and: "the game indicates that it is not recruiting players"
-    gamePage.assertIndicatesIsNotRecruitingPlayers()
-  }
-
-  def "Only a game manager may end recruitment for a game"() {
-    given: "a game is recruiting players"
-    hasAGameRecruitingPlayers()
-    world.backEnd.mockMayJoinGame(GAME_ID, false)
-
-    and: "logged in as a user has the player role but not the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
-
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    then: "the game does not allow ending recruitment"
-    !gamePage.isEndRecruitmentEnabled()
-  }
-
-  def "Players may join a game"() {
-    given: "a game is recruiting players"
-    hasAGameRecruitingPlayers()
-
-    and: "user is not playing any games"
-    world.backEnd.mockNoCurrentGame()
-    world.backEnd.mockMayJoinGame(GAME_ID, true)
-
-    and: "logged in as a user with the player role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
-
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    then: "the game indicates that the user may join the game"
-    gamePage.assertIndicatesUserMayJoinGame()
-
-    and: "the game indicates that the user is not playing the game"
-    gamePage.assertIndicatesUserIsNotPlayingGame()
-  }
-
-  def "Join a game"() {
-    given: "a game is recruiting players"
-    hasAGameWaitingToStart()
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS), Times.once())
-    world.backEnd.mockMayJoinGame(GAME_ID, true)
-
-    and: "logged in as a user with the player role"
-    def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-    def homePage = world.logInAsUser(user)
-
-    and: "user is not playing any games"
-    world.backEnd.mockNoCurrentGame()
-    world.backEnd.mockMayJoinGame(GAME_ID, true)
-
-    and: "examining the game"
-    def gamePage = examineGame(homePage)
-
-    when: "the user joins the game"
-    world.backEnd.mockJoinGame(GAME_ID)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, Map.of(CHARACTER_ID, user.id)), Times.unlimited())
-    gamePage.joinGame()
-
-    then: "the game accepts joining"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
-
-    and: "the game indicates that the user is playing the game"
-    gamePage.assertIndicatesUserIsPlayingGame()
-
-    and: "the game indicates which character the user is playing"
-    gamePage.assertIndicatesWhichCharacterUserIsPlaying()
-  }
-
-  def "Only a player may join a game"() {
-    given: "a game is recruiting players"
-    hasAGameRecruitingPlayers()
-    world.backEnd.mockMayJoinGame(GAME_ID, false)
-
-    and: "user is not playing any games"
-    world.backEnd.mockNoCurrentGame()
-
-    and: "logged in as a user with the manage games role but not the player role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
-
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    then: "the game indicates that the user may not join the game"
-    gamePage.assertIndicatesUserMayNotJoinGame()
-  }
-
-  def "Start game"() {
-    given: "a game is waiting to start"
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(new Game(GAME_ID, Game.RunState.WAITING_TO_START), Times.once())
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS))
-
-    and: "logged in as a user with the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
-
-    and: "examining the game"
-    def gamePage = examineGame(homePage)
-
-    when: "user starts the game"
-    world.backEnd.mockStartGame(GAME_ID)
-    world.backEnd.mockGetGame(new Game(GAME_ID, Game.RunState.RUNNING))
-    gamePage.startGame()
-
-    then: "the game accepts starting"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
-
-    and: "the game indicates that it is running"
-    gamePage.assertIndicatesRunning()
-  }
-
-  def "Only a game manager may start a game"() {
-    given: "a game is waiting to start"
-    hasAGameWaitingToStart()
-
-    and: "logged in as a user has the player role but not the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
-
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    then: "the game does not allow starting"
-    !gamePage.isStartingEnabled()
-  }
-
-  def "Stop game"() {
-    given: "a game is running"
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(new Game(GAME_ID, Game.RunState.RUNNING), Times.once())
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS))
-
-    and: "logged in as a user with the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
-
-    and: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    when: "user stops the game"
-    world.backEnd.mockStopGame(GAME_ID)
-    world.backEnd.mockGetGame(new Game(GAME_ID, Game.RunState.STOPPED))
-    gamePage.stopGame()
-
-    then: "the game accepts stopping"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
-
-    and: "the game indicates that it is not running"
-    gamePage.assertIndicatesNotRunning()
-  }
-
-  def "Only a game manager may stop a game"() {
-    given: "a game is running"
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(new Game(GAME_ID, Game.RunState.RUNNING))
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS))
-
-    and: "user has the player role but not the manage games role"
-    def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
-
-    when: "examine the game"
-    def gamePage = examineGame(homePage)
-
-    then: "the game does not allow stopping"
-    !gamePage.isStoppingEnabled()
-  }
-
-  private void hasAGameRecruitingPlayers() {
-    hasAGameWaitingToStart()
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, NO_USERS))
-  }
-
-  private void hasAGameWaitingToStart() {
-    hasAScenario()
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(GAME_WAITING_TO_START)
-  }
-
-
-  private void hasAScenario() {
-    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-    world.backEnd.mockGetScenario(SCENARIO)
-  }
-
-  private GamePage examineGame(final HomePage homePage) {
-    def scenarioPage = homePage.navigateToScenariosPage()
-            .navigateToScenario(0)
-    scenarioPage.awaitIsReadyOrErrorMessage()
-    scenarioPage.requireIsReady()
-    def gamePage = scenarioPage.navigateToGamePage(0)
-    gamePage.awaitIsReadyOrErrorMessage()
-    gamePage
-  }
+        and: "user has the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+
+        when: "try to create a game for the scenario"
+        def response = requestAddGame(scenarioId, user)
+
+        then: "accepts the creation of the game"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
+        final def gameId = parseGamePath(location)
+        final def gameOptional = gameService.getGame(gameId)
+        final def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        gameOptional.isPresent()
+        gamePlayersOptional.isPresent()
+        final def game = gameOptional.get()
+        final def gamePlayers = gamePlayersOptional.get()
+
+        and: "the game indicates that it is recruiting players"
+        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
+
+        and: "the game indicates that it has no players"
+        expect(gamePlayers.users, Matchers.anEmptyMap())
+
+        and: "the game indicates that it is not running"
+        game.runState == Game.RunState.WAITING_TO_START
+
+        and: "the list of games includes the new game"
+        def creationTimes = gameService.getCreationTimesOfGamesOfScenario(scenarioId).toList()
+        expect(creationTimes, Matchers.hasItem(gameId.created))
+    }
+
+    def "Only a game manager may add a game"() {
+        given: "has a scenario without any games"
+        def scenarioId = chooseScenario().identifier
+
+        and: "user without the manage games role"
+        def user = addUserWithAuthorities(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)))
+
+        when: "try to create a game for the scenario"
+        def response = requestAddGame(scenarioId, user)
+
+        then: "does not allow creating th game"
+        response.andExpect(status().isForbidden())
+    }
+
+    def "End game recruitment"() {
+        given: "a game is initially recruiting players"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+
+        when: "try to end recruitment for the game"
+        def response = requestEndRecruitment(gameId, user)
+
+        then: "the game accepts ending recruitment"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
+        parseGamePlayersPath(location) == gameId
+
+        and: "the game indicates that it is not recruiting players"
+        final def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        gamePlayersOptional.isPresent()
+        final def gamePlayers = gamePlayersOptional.get()
+        !gamePlayers.recruiting
+    }
+
+    def "Only a game manager may end recruitment for a game"() {
+        given: "a game is recruiting players"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the player role but not the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+
+        when: "try to end recruitment of the game"
+        def response = requestEndRecruitment(gameId, user)
+
+        then: "the game does not allow ending recruitment"
+        response.andExpect(status().isForbidden())
+    }
+
+    def "Players may join a game"() {
+        given: "a game is recruiting players"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the player role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+
+        when: "try to examine the game"
+        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
+        def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
+
+        then: "provides the game"
+        gamePlayersResponse.andExpect(status().isOk())
+        mayJoinResponse.andExpect(status().isOk())
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
+
+        then: "the game indicates that the user may join the game"
+        mayJoin
+
+        and: "the game indicates that the user is not playing the game"
+        expect(gamePlayers.users.values(), Matchers.not(Matchers.hasItem(user.id)))
+    }
+
+    def "Join a game"() {
+        given: "a game is recruiting players"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the player role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+
+        when: "the user trys to join the game"
+        def response = requestJoinGame(gameId, user)
+
+        then: "the game accepts joining"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
+        parseGamePlayersPath(location) == gameId
+        def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        gamePlayersOptional.isPresent()
+        def gamePlayers = gamePlayersOptional.get()
+
+        and: "the game indicates which character the user is playing"
+        expect(gamePlayers.users.values(), Matchers.hasItem(user.id))
+    }
+
+    def "Only a player may join a game"() {
+        given: "a game is recruiting players"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the manage games role but not the player role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+
+        when: "examine the game"
+        def response = requestJoinGame(gameId, user)
+
+        then: "the game indicates that the user may not join the game"
+        response.andExpect(status().isOk())
+        def mayJoin = expectEncodedResponse(response, Boolean.class)
+        !mayJoin
+    }
+
+    def "Start game"() {
+        given: "a game is waiting to start"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "user has the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+
+        when: "user tries to start the game"
+        def response = requestStartGame(gameId, user)
+
+        then: "the game accepts starting"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
+        parseGamePath(location) == gameId
+
+        and: "the game indicates that it is running"
+        def gameOptional = gameService.getGame(gameId)
+        gameOptional.isPresent()
+        def game = gameOptional.get()
+        game.runState == Game.RunState.RUNNING
+    }
+
+    def "Only a game manager may start a game"() {
+        given: "a game is waiting to start"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+
+        and: "logged in as a user has the player role but not the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+
+        when: "user tries to start the game"
+        def response = requestStartGame(gameId, user)
+
+        then: "the game does not allow starting"
+        response.andExpect(status().isForbidden())
+    }
+
+    def "Stop game"() {
+        given: "a game is running"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+        gameService.startGame(gameId)
+
+        and: "user has the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+
+        when: "user tries to stop the game"
+        def response = requestStopGame(gameId, user)
+
+        then: "the game accepts stopping"
+        response.andExpect(status().isTemporaryRedirect())
+        final def location = expectRedirection(response)
+        location != null
+        parseGamePath(location) == gameId
+
+        and: "the game indicates that it is not running"
+        def gameOptional = gameService.getGame(gameId)
+        gameOptional.isPresent()
+        def game = gameOptional.get()
+        game.runState == Game.RunState.STOPPED
+    }
+
+    def "Only a game manager may stop a game"() {
+        given: "a game is running"
+        def scenarioId = chooseScenario().identifier
+        def gameId = gameService.create(scenarioId).identifier
+        gameService.startGame(gameId)
+
+        and: "user has the player role but not the manage games role"
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+
+        when: "user tries to stop the game"
+        def response = requestStopGame(gameId, user)
+
+        then: "the game does not allow stopping"
+        response.andExpect(status().isForbidden())
+    }
 }
