@@ -67,7 +67,7 @@ class CurrentGameBESpec extends BESpecification {
 
         then: "indicates that the user has a current game"
         response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectTemporaryRedirect(response)
         location != null
 
         when: "examine the current game"

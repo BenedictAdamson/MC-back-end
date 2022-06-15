@@ -23,6 +23,7 @@ import javax.annotation.Nullable
 import java.time.Instant
 
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -58,7 +59,9 @@ abstract class BESpecification extends Specification {
     private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
             GamePlayersController.GAME_PLAYERS_PATH_PATTERN)
 
-    private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/usr/{id}')
+    private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
+
+    private static int nUsers
 
     @Autowired
     protected ScenarioSpringService scenarioService
@@ -103,7 +106,8 @@ abstract class BESpecification extends Specification {
     }
 
     protected final User addUserWithAuthorities(final Set<Authority> authorities) {
-        userService.add(new BasicUserDetails("Zoe", "password1", authorities,
+        ++nUsers
+        userService.add(new BasicUserDetails("Zoe-${nUsers}", 'password1', authorities,
                 true, true, true, true))
     }
 
@@ -173,7 +177,7 @@ abstract class BESpecification extends Specification {
     private ResultActions requestGetJson(@Nonnull String path, @Nullable User loggedInUser) {
         var request = get(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -182,7 +186,7 @@ abstract class BESpecification extends Specification {
         final def path = GamePlayersController.createPathForJoining(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -191,7 +195,7 @@ abstract class BESpecification extends Specification {
         final def path = GameController.createPathForStarting(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -200,7 +204,7 @@ abstract class BESpecification extends Specification {
         final def path = GameController.createPathForStopping(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -209,7 +213,7 @@ abstract class BESpecification extends Specification {
         final def path = GameController.createPathForGames(scenarioId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -218,7 +222,7 @@ abstract class BESpecification extends Specification {
         final def path = GamePlayersController.createPathForEndRecruitmentOf(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -226,17 +230,18 @@ abstract class BESpecification extends Specification {
     protected final ResultActions requestLogin(@Nonnull String username, @Nonnull String password) {
         def request = post('/login')
                 .param('username', username).param('password', password)
+                .with(csrf())
         mockMvc.perform(request)
     }
 
     protected final ResultActions requestAddUser(@Nonnull BasicUserDetails userDetails, @Nullable User loggedInUser) {
         final var encoded = objectMapper.writeValueAsString(userDetails)
-        def request = post('/users')
+        def request = post('/api/user')
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(encoded)
         if (loggedInUser != null) {
-            request = request.with(user(loggedInUser))
+            request = request.with(user(loggedInUser)).with(csrf())
         }
         mockMvc.perform(request)
     }
@@ -255,7 +260,12 @@ abstract class BESpecification extends Specification {
         objectMapper.readValue(responseText, type)
     }
 
-    protected final String expectRedirection(ResultActions response) {
+    protected final String expectFound(ResultActions response) {
+        response.andExpect(status().isFound())
+        response.andReturn().getResponse().getHeader("Location")
+    }
+
+    protected final String expectTemporaryRedirect(ResultActions response) {
         response.andExpect(status().isTemporaryRedirect())
         response.andReturn().getResponse().getHeader("Location")
     }

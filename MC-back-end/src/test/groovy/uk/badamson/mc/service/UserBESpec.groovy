@@ -74,34 +74,6 @@ class UserBESpec extends BESpecification {
         fetchedUser.authorities == userToExamine.authorities
     }
 
-    def "Login"() {
-        given: "user with any role"
-        def username = 'Zoe'
-        def password = 'password1'
-        userService.add(new BasicUserDetails(username, password, EnumSet.of(Authority.ROLE_PLAYER),
-                true, true, true, true))
-
-        when: "try to log in using correct password"
-        def response = requestLogin(username, password)
-
-        then: "accepts the login and redirected to home-page"
-        def location = expectRedirection(response)
-        location == '/'
-    }
-
-    def "Login denied"() {
-        given: "unknown user"
-        def username = 'Zoe'
-        def password = 'password1'
-
-        when: "try to login"
-        def response = requestLogin(username, password)
-
-        then: "rejects the login"
-        def location = expectRedirection(response)
-        location == '/login'
-    }
-
     def "Add user"() {
         given: "current user has the manage users role"
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
@@ -112,7 +84,7 @@ class UserBESpec extends BESpecification {
         def response = requestAddUser(newBasicUserDetails, user)
 
         then: "accepts the addition"
-        def location = expectRedirection(response)
+        def location = expectFound(response)
         parseUserPath(location) != null
 
         and:

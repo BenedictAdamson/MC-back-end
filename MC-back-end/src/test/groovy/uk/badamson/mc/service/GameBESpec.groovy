@@ -87,7 +87,7 @@ class GameBESpec extends BESpecification {
         def scenarioId = chooseScenario().identifier
         def gameId = gameService.create(scenarioId).identifier
 
-        and: "user has the manage games role"
+        and: "user has the manage games role but not the player role"
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
 
         when: "try to examine the game"
@@ -100,7 +100,6 @@ class GameBESpec extends BESpecification {
         gamePlayersResponse.andExpect(status().isOk())
         def game = expectEncodedResponse(gameResponse, Game.class)
         def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
-        def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         and: "the game indicates its scenario"
         game.identifier.scenario == scenarioId
@@ -111,8 +110,8 @@ class GameBESpec extends BESpecification {
         and: "the game indicates whether it is recruiting players"
         expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
 
-        and: "the game indicates whether the user may join the game"
-        mayJoin != null
+        and: "the game indicates that the user may not join the game"
+        mayJoinResponse.andExpect(status().isForbidden())
 
         and: "the game indicates whether it has players"
         gamePlayers.users != null
@@ -138,8 +137,7 @@ class GameBESpec extends BESpecification {
         def response = requestAddGame(scenarioId, user)
 
         then: "accepts the creation of the game"
-        response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectFound(response)
         location != null
         final def gameId = parseGamePath(location)
         final def gameOptional = gameService.getGame(gameId)
@@ -189,8 +187,7 @@ class GameBESpec extends BESpecification {
         def response = requestEndRecruitment(gameId, user)
 
         then: "the game accepts ending recruitment"
-        response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectFound(response)
         location != null
         parseGamePlayersPath(location) == gameId
 
@@ -253,8 +250,7 @@ class GameBESpec extends BESpecification {
         def response = requestJoinGame(gameId, user)
 
         then: "the game accepts joining"
-        response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectFound(response)
         location != null
         parseGamePlayersPath(location) == gameId
         def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
@@ -277,9 +273,7 @@ class GameBESpec extends BESpecification {
         def response = requestJoinGame(gameId, user)
 
         then: "the game indicates that the user may not join the game"
-        response.andExpect(status().isOk())
-        def mayJoin = expectEncodedResponse(response, Boolean.class)
-        !mayJoin
+        response.andExpect(status().isForbidden())
     }
 
     def "Start game"() {
@@ -294,8 +288,7 @@ class GameBESpec extends BESpecification {
         def response = requestStartGame(gameId, user)
 
         then: "the game accepts starting"
-        response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectFound(response)
         location != null
         parseGamePath(location) == gameId
 
@@ -334,8 +327,7 @@ class GameBESpec extends BESpecification {
         def response = requestStopGame(gameId, user)
 
         then: "the game accepts stopping"
-        response.andExpect(status().isTemporaryRedirect())
-        final def location = expectRedirection(response)
+        final def location = expectFound(response)
         location != null
         parseGamePath(location) == gameId
 

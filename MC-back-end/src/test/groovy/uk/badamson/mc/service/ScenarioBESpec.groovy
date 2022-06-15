@@ -70,7 +70,7 @@ class ScenarioBESpec extends BESpecification {
         expect(scenario.characters, Matchers.not(Matchers.empty()))
 
         and: "the scenario has a list of games of that scenario"
-        expect(gameCreationTimes, Matchers.hasSize(1))
+        expect(gameCreationTimes, Matchers.not(Matchers.empty()))
     }
 
     @Unroll
@@ -99,7 +99,7 @@ class ScenarioBESpec extends BESpecification {
         and: "the scenario includes the list of games of that scenario"
 
         and: "the scenario has a list of games of that scenario"
-        expect(gameCreationTimes, Matchers.hasSize(1))
+        expect(gameCreationTimes, Matchers.not(Matchers.empty()))
 
         where:
         role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]
