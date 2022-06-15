@@ -59,7 +59,8 @@ MC is available from these public repositories:
 ## Technologies Used
 
 * Languages:
-    * [Java 11](https://docs.oracle.com/javase/11/)
+    * [Groovy](https://groovy-lang.org/)
+    * [Java 17](https://docs.oracle.com/javase/17/)
     * [Typescript](https://www.typescriptlang.org/)
 * Servers:
     * [mongoDB](https://www.mongodb.com/)
@@ -88,30 +89,32 @@ MC is available from these public repositories:
     * [Ubuntu](https://ubuntu.com)
     * [Debian](https://debian.org)
 * Static analysis and testing:
-    * [Cucumber](https://docs.cucumber.io/cucumber/):
-        * [Cucumber JVM](https://docs.cucumber.io/installation/java/)
-        * [Cucumber-Spring](https://docs.cucumber.io/cucumber/state/#spring)
     * [Jasmine](https://jasmine.github.io/index.html)
     * [JUnit 5](https://junit.org/junit5/)
     * [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)
+    * [MockServer](https://mock-server.com/)
     * [Open Test Alliance for the JVM](https://github.com/ota4j-team/opentest4j)
     * [PMD](https://pmd.github.io/)
+    * [Spock](https://spockframework.org/)
     * [SpotBugs](https://spotbugs.github.io/)
 * Frameworks:
     * [Angular](https://angular.io/)
     * [Spring Boot](http://spring.io/projects/spring-boot)
     * [Spring Framework](https://spring.io/projects/spring-framework)
-        * [Spring Security](https://spring.io/projects/spring-security)
-        * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
+    * [Spring Security](https://spring.io/projects/spring-security)
 * Deployment:
     * [Docker Hub](https://hub.docker.com/)
     * [Helm](https://helm.sh/)
     * [Kubernetes](https://kubernetes.io/)
 * Previously used:
     * [Eclipse IDE](https://www.eclipse.org/ide/)
+    * [Cucumber](https://docs.cucumber.io/cucumber/):
+    * [Cucumber JVM](https://docs.cucumber.io/installation/java/)
+    * [Cucumber-Spring](https://docs.cucumber.io/cucumber/state/#spring)
     * [Cucumber Eclipse Plugin](https://marketplace.eclipse.org/content/cucumber-eclipse-plugin)
     * [Eclipse Docker Tooling](https://marketplace.eclipse.org/content/eclipse-docker-tooling)
     * [Eclipse Jenkins Editor](https://github.com/de-jcup/eclipse-jenkins-editor)
     * [Eclipse SpotBugs Plugin](https://marketplace.eclipse.org/content/spotbugs-eclipse-plugin)
     * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
- 
+    * [Java 11](https://docs.oracle.com/javase/11/)
+    * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
