@@ -34,7 +34,6 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
       <debian-package.version>2.22.5</debian-package.version>
-      <MC.cucumber.version>6.11.0</MC.cucumber.version>
       <MC.node.version>v16.15.0</MC.node.version>
       <MC.npm.version>8.5.5</MC.npm.version>
       <MC.spring-boot.version>2.7.0</MC.spring-boot.version>
@@ -194,30 +193,6 @@
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo.spring</artifactId>
             <version>1.1.0-spring27</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-java</artifactId>
-            <version>${MC.cucumber.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-java8</artifactId>
-            <version>${MC.cucumber.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-junit-platform-engine</artifactId>
-            <version>${MC.cucumber.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-spring</artifactId>
-            <version>${MC.cucumber.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
