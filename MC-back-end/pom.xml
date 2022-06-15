@@ -215,15 +215,13 @@
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
+            <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
                <includes>
                   <include>**/*Spec.class</include>
                </includes>
                <excludes>
-                  <!--Work around Failsafe/Surefire not yet using Test Engine 
-                     discovery functionality of JUnit 5 -->
-                  <exclude>**/*Cucumber*.java</exclude>
+                  <exclude>**/*Cucumber*</exclude>
                </excludes>
             </configuration>
          </plugin>
@@ -327,6 +325,11 @@
       <dependency>
          <groupId>org.spockframework</groupId>
          <artifactId>spock-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.spockframework</groupId>
+         <artifactId>spock-spring</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>
