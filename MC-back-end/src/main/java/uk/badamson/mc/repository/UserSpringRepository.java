@@ -25,7 +25,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserSpringRepository extends CrudRepository<User, UUID> {
+public interface UserSpringRepository extends CrudRepository<UserDTO, UUID> {
 
     /**
      * <p>

@@ -20,7 +20,6 @@ package uk.badamson.mc.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.UserGameAssociation;
 
 import java.util.UUID;
 
@@ -31,6 +30,6 @@ import java.util.UUID;
  * </p>
  */
 public interface CurrentUserGameSpringRepository
-        extends CrudRepository<UserGameAssociation, UUID> {
+        extends CrudRepository<UserGameAssociationDTO, UUID> {
 
 }

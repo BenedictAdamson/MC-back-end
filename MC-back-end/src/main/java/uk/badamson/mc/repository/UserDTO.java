@@ -21,105 +21,27 @@ package uk.badamson.mc.repository;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.PersistenceCreator;
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.BasicUserDetails;
+import uk.badamson.mc.spring.BasicUserDetails;
+import uk.badamson.mc.spring.GrantedMCAuthority;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Serial;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.data.annotation.Id;
 
-/**
- * <p>
- * A user of the Mission Command game.
- * </p>
- */
 public final class UserDTO extends BasicUserDetails {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * <p>
-     * The {@linkplain #getId() ID} of an administrator user.
-     * </p>
-     */
-    public static final UUID ADMINISTRATOR_ID = new UUID(0L, 0L);
-
-    /**
-     * <p>
-     * Create a {@link UserDTO} that is a valid administrator user.
-     * </p>
-     *
-     * @param password the password used to authenticate the user, or null if the
-     *                 password is being hidden or is unknown. This might be the
-     *                 password in an encrypted form.
-     */
-    @Nonnull
-    public static UserDTO createAdministrator(@Nullable final String password) {
-        return new UserDTO(password);
-    }
-
-    @org.springframework.data.annotation.Id
+    @Id
     private final UUID id;
 
-    private UserDTO(final String password) {
-        super(password);
-        this.id = ADMINISTRATOR_ID;
-    }
-
-    /**
-     * <p>
-     * Construct a user of the Mission Command game, with given user details.
-     * </p>
-     *
-     * @param id          The unique ID of this user.
-     * @param userDetails the specification for this user.
-     * @throws NullPointerException <ul>
-     *                                         <li>If {@code id} is null</li>
-     *                                         <li>If {@code userDetails} is null</li>
-     *                                         </ul>
-     */
-    public UserDTO(@Nonnull final UUID id,
-                   @Nonnull final BasicUserDetails userDetails) {
-        super(userDetails);
-        this.id = Objects.requireNonNull(id, "id");
-    }
-
-    /**
-     * <p>
-     * Construct a user of the Mission Command game, with given attribute values.
-     * </p>
-     *
-     * @param id                    The unique ID of this user.
-     * @param username              the username used to authenticate the user
-     * @param password              the password used to authenticate the user, or null if the
-     *                              password is being hidden or is unknown. This might be the
-     *                              password in an encrypted form.
-     * @param authorities           The authorities granted to the user.
-     * @param accountNonExpired     whether the user's account has expired, and so cannot be
-     *                              authenticated.
-     * @param accountNonLocked      whether the user's account is locked, and so cannot be
-     *                              authenticated.
-     * @param credentialsNonExpired whether the user's credentials (password) has expired, and so
-     *                              can not be authenticated.
-     * @param enabled               whether the user is enabled; a disabled user cannot be
-     *                              authenticated.
-     * @throws NullPointerException <ul>
-     *                                         <li>If {@code id} is null</li>
-     *                                         <li>If {@code username} is null</li>
-     *                                         <li>If {@code authorities} is null</li>
-     *                                         <li>If {@code authorities} contains null</li>
-     *                                         </ul>
-     */
     @JsonCreator
     @PersistenceCreator
     public UserDTO(@Nonnull @JsonProperty("id") final UUID id,
                    @Nonnull @JsonProperty("username") final String username,
                    @Nullable @JsonProperty("password") final String password,
-                   @Nonnull @JsonProperty("authorities") final Set<Authority> authorities,
+                   @Nonnull @JsonProperty("authorities") final Set<GrantedMCAuthority> authorities,
                    @JsonProperty("accountNonExpired") final boolean accountNonExpired,
                    @JsonProperty("accountNonLocked") final boolean accountNonLocked,
                    @JsonProperty("credentialsNonExpired") final boolean credentialsNonExpired,

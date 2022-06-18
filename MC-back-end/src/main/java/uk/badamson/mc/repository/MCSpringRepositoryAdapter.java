@@ -18,15 +18,12 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
-import uk.badamson.mc.User;
-import uk.badamson.mc.UserGameAssociation;
+import uk.badamson.mc.*;
+import uk.badamson.mc.spring.GrantedMCAuthority;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -53,6 +50,45 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     }
 
     @Nonnull
+    private static GamePlayersDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
+        return new GamePlayersDTO(
+                convertToDTO(id),
+                gamePlayers.isRecruiting(),
+                Map.copyOf(gamePlayers.getUsers())
+        );
+    }
+
+    @Nonnull
+    private static GrantedMCAuthority convertToDTO(@Nonnull Authority authority) {
+        return GrantedMCAuthority.valueOf(authority.toString());
+    }
+
+    @Nonnull
+    private static Set<GrantedMCAuthority> convertToDTO(@Nonnull Set<Authority> authorities) {
+        return authorities.stream()
+                .map(MCSpringRepositoryAdapter::convertToDTO)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Nonnull
+    private static UserDTO convertToDTO(@Nonnull UUID userId, @Nonnull User user) {
+        return new UserDTO(
+                userId,
+                user.getUsername(), user.getPassword(),
+                convertToDTO(user.getAuthorities()),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+                );
+    }
+
+    @Nonnull
+    private static UserGameAssociationDTO convertToDTO(@Nonnull UUID userId,@Nonnull UserGameAssociation association) {
+        return new UserGameAssociationDTO(userId, convertToDTO(association.getGame()));
+    }
+
+    @Nonnull
     private static Game.Identifier convertFromDTO(@Nonnull GameIdentifierDTO dto) {
         return new Game.Identifier(dto.scenario(), dto.created());
     }
@@ -65,6 +101,38 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     @Nonnull
     private static Game convertFromDTO(@Nonnull GameDTO dto) {
         return new Game(convertFromDTO(dto.identifier()), convertFromDTO(dto.runState()));
+    }
+
+    @Nonnull
+    private static GamePlayers convertFromDTO(@Nonnull GamePlayersDTO dto) {
+        return new GamePlayers(convertFromDTO(dto.game()), dto.recruiting(), Map.copyOf(dto.users()));
+    }
+
+    @Nonnull
+    private static Authority convertFromDTO(@Nonnull GrantedMCAuthority dto) {
+        return Authority.valueOf(dto.toString());
+    }
+
+    @Nonnull
+    private static Set<Authority> convertFromDTO(@Nonnull Set<GrantedMCAuthority> dto) {
+        return dto.stream().map(MCSpringRepositoryAdapter::convertFromDTO).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Nonnull
+    private static User convertFromDTO(@Nonnull UserDTO dto) {
+        return new User(dto.getId(),
+        dto.getUsername(),
+        dto.getPassword(),
+        convertFromDTO(dto.getAuthorities()),
+        dto.isAccountNonExpired(),
+        dto.isAccountNonLocked(),
+        dto.isCredentialsNonExpired(),
+        dto.isEnabled());
+    }
+
+    @Nonnull
+    private static UserGameAssociation convertFromDTO(@Nonnull UserGameAssociationDTO dto) {
+        return new UserGameAssociation(dto.user(), convertFromDTO(dto.game()));
     }
 
     public MCSpringRepositoryAdapter(
@@ -101,24 +169,24 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Override
         public void saveGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-            gamePlayersRepository.save(gamePlayers);
+            gamePlayersRepository.save(convertToDTO(id, gamePlayers));
         }
 
         @Nonnull
         @Override
         public Optional<GamePlayers> findGamePlayers(@Nonnull Game.Identifier id) {
-            return gamePlayersRepository.findById(id);
+            return gamePlayersRepository.findById(convertToDTO(id)).map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Nonnull
         @Override
         public Optional<UserGameAssociation> findCurrentUserGame(@Nonnull UUID userId) {
-            return currentUserGameRepository.findById(userId);
+            return currentUserGameRepository.findById(userId).map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Override
         public void saveCurrentUserGame(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
-            currentUserGameRepository.save(association);
+            currentUserGameRepository.save(convertToDTO(userId, association));
         }
 
         @Nonnull
@@ -130,18 +198,19 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         @Nonnull
         @Override
         public Optional<User> findUser(@Nonnull UUID id) {
-            return userRepository.findById(id);
+            return userRepository.findById(id).map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Nonnull
         @Override
         public Stream<User> findAllUsers() {
-            return StreamSupport.stream(userRepository.findAll().spliterator(), false);
+            return StreamSupport.stream(userRepository.findAll().spliterator(), false)
+                    .map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Override
         public void saveUser(@Nonnull UUID id, @Nonnull User user) {
-            userRepository.save(user);
+            userRepository.save(convertToDTO(id, user));
         }
 
         @Override
