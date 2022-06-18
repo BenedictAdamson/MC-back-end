@@ -26,8 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
-import uk.badamson.mc.repository.UserRepositoryAdapter;
-import uk.badamson.mc.repository.UserSpringRepository;
+import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -42,12 +41,10 @@ public class UserSpringService implements UserDetailsService {
 
     @Autowired
     public UserSpringService(@Nonnull final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
-                             @Nonnull final UserSpringRepository userRepository,
-                             @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword) {
+                             @Nonnull @Value("${administrator.password:${random.uuid}}") final String administratorPassword,
+                             @Nonnull MCSpringRepositoryAdapter repository) {
         this.delegate = new UserService(
-                new PasswordEncoderAdapter(passwordEncoder),
-                new UserRepositoryAdapter(userRepository),
-                administratorPassword
+                new PasswordEncoderAdapter(passwordEncoder), administratorPassword, repository
         );
     }
 

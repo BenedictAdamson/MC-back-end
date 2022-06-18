@@ -18,9 +18,25 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+
+import javax.annotation.Nonnull;
 
 @ComponentScan("uk.badamson.mc.repository")
 public class RepositoryLayerSpringConfiguration {
+
+    @Bean
+    public MCSpringRepositoryAdapter provideMCSpringRepositoryAdapter(
+            @Nonnull CurrentUserGameSpringRepository currentUserGameRepository,
+            @Nonnull GamePlayersSpringRepository gamePlayersRepository,
+            @Nonnull GameSpringRepository gameRepository,
+            @Nonnull UserSpringRepository userRepository) {
+        return new MCSpringRepositoryAdapter(
+                currentUserGameRepository,
+                gamePlayersRepository,
+                gameRepository,
+                userRepository);
+    }
 
 }

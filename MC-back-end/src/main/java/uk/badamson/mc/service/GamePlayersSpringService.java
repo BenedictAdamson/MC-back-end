@@ -24,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
-import uk.badamson.mc.repository.CurrentUserGameRepositoryAdapter;
-import uk.badamson.mc.repository.CurrentUserGameSpringRepository;
-import uk.badamson.mc.repository.GamePlayersRepositoryAdapter;
-import uk.badamson.mc.repository.GamePlayersSpringRepository;
+import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
 import java.util.NoSuchElementException;
@@ -42,19 +39,16 @@ public class GamePlayersSpringService {
 
     @Autowired
     public GamePlayersSpringService(
-            @Nonnull final GamePlayersSpringRepository gamePlayersRepository,
-            @Nonnull final CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull final GameSpringService gameService,
-            @Nonnull final UserSpringService userService) {
+            @Nonnull final UserSpringService userService,
+            @Nonnull final MCSpringRepositoryAdapter repository) {
         this.delegate = new GamePlayersService(
-                new GamePlayersRepositoryAdapter(gamePlayersRepository),
-                new CurrentUserGameRepositoryAdapter(currentUserGameRepository),
                 gameService.getDelegate(),
-                userService.getDelegate()
+                userService.getDelegate(),
+                repository
         );
     }
 
-    @Nonnull
     public void endRecruitment(@Nonnull final Identifier id)
             throws NoSuchElementException {
         delegate.endRecruitment(id);

@@ -23,8 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.repository.GameRepositoryAdapter;
-import uk.badamson.mc.repository.GameSpringRepository;
+import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
 import java.time.Clock;
@@ -40,14 +39,10 @@ public class GameSpringService {
     private final GameService delegate;
 
     @Autowired
-    public GameSpringService(@Nonnull final GameSpringRepository repository,
-                             @Nonnull final Clock clock,
-                             @Nonnull final ScenarioSpringService scenarioService) {
-        this.delegate = new GameService(
-                new GameRepositoryAdapter(repository),
-                clock,
-                scenarioService.getDelegate()
-        );
+    public GameSpringService(@Nonnull final Clock clock,
+                             @Nonnull final ScenarioSpringService scenarioService,
+                             @Nonnull MCSpringRepositoryAdapter repository) {
+        this.delegate = new GameService(clock, scenarioService.getDelegate(), repository);
     }
 
     final GameService getDelegate() {
