@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class MCSpringRepositoryAdapter implements MCRepository {
+public class MCSpringRepositoryAdapter extends MCRepository {
 
     private final CurrentUserGameSpringRepository currentUserGameRepository;
     private final GamePlayersSpringRepository gamePlayersRepository;
