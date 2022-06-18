@@ -21,6 +21,8 @@ package uk.badamson.mc.service;
 import org.springframework.stereotype.Service;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.repository.MCRepository;
+import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -30,7 +32,11 @@ import java.util.stream.Stream;
 @Service
 public class ScenarioSpringService {
 
-    private final ScenarioService delegate = new ScenarioService();
+    private final ScenarioService delegate;
+
+    public ScenarioSpringService(@Nonnull MCSpringRepositoryAdapter repository) {
+        delegate = new ScenarioService(repository);
+    }
 
     @Nonnull
     final ScenarioService getDelegate() {

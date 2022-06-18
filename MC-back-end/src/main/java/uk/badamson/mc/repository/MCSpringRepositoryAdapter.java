@@ -48,65 +48,79 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         this.userRepository = Objects.requireNonNull(userRepository);
     }
 
-    @Override
-    public void saveGame(@Nonnull Game.Identifier id, @Nonnull Game game) {
-        gameRepository.save(game);
+    public final class AdapterContext extends Context {
+
+        @Override
+        public void saveGame(@Nonnull Game.Identifier id, @Nonnull Game game) {
+            gameRepository.save(game);
+        }
+
+        @Nonnull
+        @Override
+        public Optional<Game> findGame(@Nonnull Game.Identifier id) {
+            return gameRepository.findById(id);
+        }
+
+        @Nonnull
+        @Override
+        public Stream<Game> findAllGames() {
+            return StreamSupport.stream(gameRepository.findAll().spliterator(), false);
+        }
+
+        @Override
+        public void saveGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
+            gamePlayersRepository.save(gamePlayers);
+        }
+
+        @Nonnull
+        @Override
+        public Optional<GamePlayers> findGamePlayers(@Nonnull Game.Identifier id) {
+            return gamePlayersRepository.findById(id);
+        }
+
+        @Nonnull
+        @Override
+        public Optional<UserGameAssociation> findCurrentUserGame(@Nonnull UUID userId) {
+            return currentUserGameRepository.findById(userId);
+        }
+
+        @Override
+        public void saveCurrentUserGame(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
+            currentUserGameRepository.save(association);
+        }
+
+        @Nonnull
+        @Override
+        public Optional<User> findUserByUsername(@Nonnull String username) {
+            return userRepository.findByUsername(username);
+        }
+
+        @Nonnull
+        @Override
+        public Optional<User> findUser(@Nonnull UUID id) {
+            return userRepository.findById(id);
+        }
+
+        @Nonnull
+        @Override
+        public Stream<User> findAllUsers() {
+            return StreamSupport.stream(userRepository.findAll().spliterator(), false);
+        }
+
+        @Override
+        public void saveUser(@Nonnull UUID id, @Nonnull User user) {
+            userRepository.save(user);
+        }
+
+        @Override
+        public void close() {
+            // Do nothing
+        }
     }
 
     @Nonnull
     @Override
-    public Optional<Game> findGame(@Nonnull Game.Identifier id) {
-        return gameRepository.findById(id);
-    }
-
-    @Nonnull
-    @Override
-    public Stream<Game> findAllGames() {
-        return StreamSupport.stream(gameRepository.findAll().spliterator(), false);
-    }
-
-    @Override
-    public void saveGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-        gamePlayersRepository.save(gamePlayers);
-    }
-
-    @Nonnull
-    @Override
-    public Optional<GamePlayers> findGamePlayers(@Nonnull Game.Identifier id) {
-        return gamePlayersRepository.findById(id);
-    }
-
-    @Nonnull
-    @Override
-    public Optional<UserGameAssociation> findCurrentUserGame(@Nonnull UUID userId) {
-        return currentUserGameRepository.findById(userId);
-    }
-
-    @Override
-    public void saveCurrentUserGame(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
-        currentUserGameRepository.save(association);
-    }
-
-    @Nonnull
-    @Override
-    public Optional<User> findUserByUsername(@Nonnull String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Nonnull
-    @Override
-    public Optional<User> findUser(@Nonnull UUID id) {
-        return userRepository.findById(id);
-    }
-
-    @Nonnull
-    @Override
-    public Stream<User> findAllUsers() {
-        return StreamSupport.stream(userRepository.findAll().spliterator(), false);
-    }
-
-    @Override
-    public void saveUser(@Nonnull UUID id, @Nonnull User user) {
-        userRepository.save(user);
+    public Context openContext() {
+        return new AdapterContext();
     }
 }
