@@ -37,6 +37,36 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     private final GameSpringRepository gameRepository;
     private final UserSpringRepository userRepository;
 
+    @Nonnull
+    private static GameIdentifierDTO convertToDTO(@Nonnull Game.Identifier id) {
+        return new GameIdentifierDTO(id.getScenario(), id.getCreated());
+    }
+
+    @Nonnull
+    private static RunStateDTO convertToDTO(@Nonnull Game.RunState runState) {
+        return RunStateDTO.valueOf(runState.toString());
+    }
+
+    @Nonnull
+    private static GameDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        return new GameDTO(convertToDTO(id), convertToDTO(game.getRunState()));
+    }
+
+    @Nonnull
+    private static Game.Identifier convertFromDTO(@Nonnull GameIdentifierDTO dto) {
+        return new Game.Identifier(dto.scenario(), dto.created());
+    }
+
+    @Nonnull
+    private static Game.RunState convertFromDTO(@Nonnull RunStateDTO dto) {
+        return Game.RunState.valueOf(dto.toString());
+    }
+
+    @Nonnull
+    private static Game convertFromDTO(@Nonnull GameDTO dto) {
+        return new Game(convertFromDTO(dto.identifier()), convertFromDTO(dto.runState()));
+    }
+
     public MCSpringRepositoryAdapter(
             @Nonnull CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull GamePlayersSpringRepository gamePlayersRepository,
@@ -52,19 +82,21 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Override
         public void saveGame(@Nonnull Game.Identifier id, @Nonnull Game game) {
-            gameRepository.save(game);
+            gameRepository.save(convertToDTO(id, game));
         }
 
         @Nonnull
         @Override
         public Optional<Game> findGame(@Nonnull Game.Identifier id) {
-            return gameRepository.findById(id);
+            return gameRepository.findById(convertToDTO(id))
+                    .map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Nonnull
         @Override
         public Stream<Game> findAllGames() {
-            return StreamSupport.stream(gameRepository.findAll().spliterator(), false);
+            return StreamSupport.stream(gameRepository.findAll().spliterator(), false)
+                    .map(MCSpringRepositoryAdapter::convertFromDTO);
         }
 
         @Override

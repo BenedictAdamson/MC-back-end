@@ -18,8 +18,11 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.data.repository.CrudRepository;
+import java.time.Instant;
+import java.util.UUID;
 
-public interface GameSpringRepository extends CrudRepository<GameDTO, GameIdentifierDTO> {
-
+public record GameIdentifierDTO(
+        UUID scenario,
+        Instant created
+) {
 }

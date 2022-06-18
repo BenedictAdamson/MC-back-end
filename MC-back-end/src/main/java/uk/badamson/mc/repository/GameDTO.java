@@ -17,9 +17,14 @@ package uk.badamson.mc.repository;
  * You should have received a copy of the GNU Affero General Public License
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
+import org.springframework.data.annotation.Id;
 
-import org.springframework.data.repository.CrudRepository;
+import javax.persistence.Table;
 
-public interface GameSpringRepository extends CrudRepository<GameDTO, GameIdentifierDTO> {
-
+@Table(name="game")
+public record GameDTO(
+        @Id
+        GameIdentifierDTO identifier,
+        RunStateDTO runState
+) {
 }

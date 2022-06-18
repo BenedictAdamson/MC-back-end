@@ -214,6 +214,11 @@
    </reporting>
    <dependencies>
       <dependency>
+         <groupId>javax.persistence</groupId>
+         <artifactId>javax.persistence-api</artifactId>
+         <scope>provided</scope>
+      </dependency>
+      <dependency>
          <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-core</artifactId>
          <version>${project.parent.version}</version>
