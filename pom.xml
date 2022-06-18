@@ -13,7 +13,7 @@
       credentials for the server index.docker.io. -->
    <groupId>uk.badamson.mc</groupId>
    <artifactId>MC</artifactId>
-   <version>2.22.11</version>
+   <version>2.23.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <organization>
       <name>Benedict Adamson</name>
@@ -33,7 +33,7 @@
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
-      <debian-package.version>2.22.11</debian-package.version>
+      <debian-package.version>2.23.0</debian-package.version>
       <MC.node.version>v16.15.0</MC.node.version>
       <MC.npm.version>8.5.5</MC.npm.version>
       <MC.spring-boot.version>2.7.0</MC.spring-boot.version>
