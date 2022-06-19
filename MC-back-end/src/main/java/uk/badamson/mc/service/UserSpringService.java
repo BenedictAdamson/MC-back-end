@@ -20,14 +20,13 @@ package uk.badamson.mc.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
-import uk.badamson.mc.spring.SpringUserDetails;
 import uk.badamson.mc.spring.SpringUser;
+import uk.badamson.mc.spring.SpringUserDetails;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -73,11 +72,11 @@ public class UserSpringService implements UserDetailsService {
 
     @Override
     @Nonnull
-    public UserDetails loadUserByUsername(@Nonnull final String username)
+    public SpringUser loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {
         final var userOptional = delegate.getUserByUsername(username);
         if (userOptional.isPresent()) {
-            return userOptional.map(SpringUserDetails::convertToSpring).get();
+            return userOptional.map(SpringUser::convertToSpring).get();
         } else {
             throw new UsernameNotFoundException(username);
         }
