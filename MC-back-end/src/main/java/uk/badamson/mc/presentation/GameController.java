@@ -31,9 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.User;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -247,7 +247,7 @@ public class GameController {
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> startGame(
-            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
@@ -271,7 +271,7 @@ public class GameController {
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> stopGame(
-            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");

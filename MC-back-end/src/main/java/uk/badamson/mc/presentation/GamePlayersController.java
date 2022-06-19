@@ -32,11 +32,12 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
-import uk.badamson.mc.User;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GamePlayersSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
 import uk.badamson.mc.service.UserAlreadyPlayingException;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -105,7 +106,7 @@ public class GamePlayersController {
      * </p>
      * <p>
      * The created value is consistent with the path used for
-     * {@link #getGamePlayers(User, UUID, Instant)}.
+     * {@link #getGamePlayers(SpringUser, UUID, Instant)}.
      * </p>
      *
      * @param id The identifier of the game
@@ -123,7 +124,7 @@ public class GamePlayersController {
      * </p>
      * <p>
      * The created value is consistent with the path used for
-     * {@link #joinGame(User, UUID, Instant)}.
+     * {@link #joinGame(SpringUser, UUID, Instant)}.
      * </p>
      *
      * @param id The identifier of the game
@@ -141,7 +142,7 @@ public class GamePlayersController {
      * </p>
      * <p>
      * The created value is consistent with the path used for
-     * {@link #mayJoinGame(User, UUID, Instant)}.
+     * {@link #mayJoinGame(SpringUser, UUID, Instant)}.
      * </p>
      *
      * @param id The identifier of the game
@@ -219,7 +220,7 @@ public class GamePlayersController {
     @GetMapping(CURRENT_GAME_PATH)
     @Nonnull
     public ResponseEntity<Void> getCurrentGame(
-            @AuthenticationPrincipal final User user) {
+            @AuthenticationPrincipal final SpringUser user) {
         if (user == null) {
             /*
              * Must return Not Found rather than Unauthorized, because otherwise
@@ -278,16 +279,16 @@ public class GamePlayersController {
     @RolesAllowed({"PLAYER", "MANAGE_GAMES"})
     @Nonnull
     public GamePlayers getGamePlayers(
-            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
         final var id = new Game.Identifier(scenario, created);
 
         final Optional<GamePlayers> gamePlayers;
-        if (user.getAuthorities().contains(Authority.ROLE_MANAGE_GAMES)) {
+        if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
             gamePlayers = gamePlayersService.getGamePlayersAsGameManager(id);
-        } else if (user.getAuthorities().contains(Authority.ROLE_PLAYER)) {
+        } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
             gamePlayers = gamePlayersService.getGamePlayersAsNonGameManager(id,
                     user.getId());
         } else {
@@ -347,8 +348,7 @@ public class GamePlayersController {
      *                                                                            </li>
      *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
-     *                                                                            the {@code user} does not {@linkplain User#getAuthorities()
-     *                                                                            have} {@linkplain Authority#ROLE_PLAYER permission} to play
+     *                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
      *                                                                            games.</li>
      *                                                                            </ul>
      */
@@ -356,7 +356,7 @@ public class GamePlayersController {
     @RolesAllowed("PLAYER")
     @Nonnull
     public ResponseEntity<Void> joinGame(
-            @Nonnull @AuthenticationPrincipal final User user,
+            @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
@@ -389,7 +389,7 @@ public class GamePlayersController {
      * <li>The{@code user} is the ID of a known user.</li>
      * <li>The {@code game} is the ID of a known game.</li>
      * <li>The {@code user} is not already playing a different game.</li>
-     * <li>The {@code user} {@linkplain User#getAuthorities() has}
+     * <li>The {@code user} has
      * {@linkplain Authority#ROLE_PLAYER permission} to play games. Note that the
      * given user need not be the current user.</li>
      * <li>The game is {@linkplain GamePlayers#isRecruiting() recruiting}
@@ -412,7 +412,7 @@ public class GamePlayersController {
      */
     @GetMapping(path = GAME_PLAYERS_PATH_PATTERN, params = {MAY_JOIN_PARAM})
     @RolesAllowed("PLAYER")
-    public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final User user,
+    public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
                                @Nonnull @PathVariable("scenario") final UUID scenario,
                                @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
