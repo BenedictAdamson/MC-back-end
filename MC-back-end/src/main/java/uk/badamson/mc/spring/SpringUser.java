@@ -26,6 +26,7 @@ import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.Table;
 import java.io.Serial;
 import java.util.Objects;
 import java.util.Set;
@@ -36,6 +37,7 @@ import java.util.UUID;
  * A user of the Mission Command game.
  * </p>
  */
+@Table(name="user")
 public final class SpringUser extends SpringUserDetails {
 
     @Serial

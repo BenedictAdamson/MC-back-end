@@ -18,13 +18,17 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import uk.badamson.mc.*;
-import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.Game;
+import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.User;
+import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -60,31 +64,6 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     }
 
     @Nonnull
-    private static SpringAuthority convertToDTO(@Nonnull Authority authority) {
-        return SpringAuthority.valueOf(authority.toString());
-    }
-
-    @Nonnull
-    private static Set<SpringAuthority> convertToDTO(@Nonnull Set<Authority> authorities) {
-        return authorities.stream()
-                .map(MCSpringRepositoryAdapter::convertToDTO)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    @Nonnull
-    private static SpringUser convertToDTO(@Nonnull UUID userId, @Nonnull User user) {
-        return new SpringUser(
-                userId,
-                user.getUsername(), user.getPassword(),
-                convertToDTO(user.getAuthorities()),
-                user.isAccountNonExpired(),
-                user.isAccountNonLocked(),
-                user.isCredentialsNonExpired(),
-                user.isEnabled()
-                );
-    }
-
-    @Nonnull
     private static UserGameAssociationDTO convertToDTO(@Nonnull UUID userId,@Nonnull UserGameAssociation association) {
         return new UserGameAssociationDTO(userId, convertToDTO(association.getGame()));
     }
@@ -107,28 +86,6 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     @Nonnull
     private static GamePlayers convertFromDTO(@Nonnull GamePlayersDTO dto) {
         return new GamePlayers(convertFromDTO(dto.game()), dto.recruiting(), Map.copyOf(dto.users()));
-    }
-
-    @Nonnull
-    private static Authority convertFromDTO(@Nonnull SpringAuthority dto) {
-        return Authority.valueOf(dto.toString());
-    }
-
-    @Nonnull
-    private static Set<Authority> convertFromDTO(@Nonnull Set<SpringAuthority> dto) {
-        return dto.stream().map(MCSpringRepositoryAdapter::convertFromDTO).collect(Collectors.toUnmodifiableSet());
-    }
-
-    @Nonnull
-    private static User convertFromDTO(@Nonnull SpringUser dto) {
-        return new User(dto.getId(),
-        dto.getUsername(),
-        dto.getPassword(),
-        convertFromDTO(dto.getAuthorities()),
-        dto.isAccountNonExpired(),
-        dto.isAccountNonLocked(),
-        dto.isCredentialsNonExpired(),
-        dto.isEnabled());
     }
 
     @Nonnull
@@ -199,19 +156,19 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         @Nonnull
         @Override
         public Optional<User> findUser(@Nonnull UUID id) {
-            return userRepository.findById(id).map(MCSpringRepositoryAdapter::convertFromDTO);
+            return userRepository.findById(id).map(SpringUser::convertFromSpring);
         }
 
         @Nonnull
         @Override
         public Stream<User> findAllUsers() {
             return StreamSupport.stream(userRepository.findAll().spliterator(), false)
-                    .map(MCSpringRepositoryAdapter::convertFromDTO);
+                    .map(SpringUser::convertFromSpring);
         }
 
         @Override
         public void saveUser(@Nonnull UUID id, @Nonnull User user) {
-            userRepository.save(convertToDTO(id, user));
+            userRepository.save(SpringUser.convertToSpring(user));
         }
 
         @Override
