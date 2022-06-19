@@ -1,4 +1,4 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc.spring;
 /*
  * © Copyright Benedict Adamson 2019-22.
  *
@@ -21,8 +21,8 @@ package uk.badamson.mc.presentation;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.PersistenceCreator;
-import uk.badamson.mc.spring.BasicUserDetails;
-import uk.badamson.mc.spring.GrantedMCAuthority;
+import uk.badamson.mc.BasicUserDetails;
+import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +36,7 @@ import java.util.UUID;
  * A user of the Mission Command game.
  * </p>
  */
-public final class UserResponse extends BasicUserDetails {
+public final class SpringUser extends SpringUserDetails {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -48,9 +48,20 @@ public final class UserResponse extends BasicUserDetails {
      */
     public static final UUID ADMINISTRATOR_ID = new UUID(0L, 0L);
 
+    @Nonnull
+    public static SpringUser convertToSpring(@Nonnull User user) {
+        return new SpringUser(user.getId(), SpringUserDetails.convertToSpring(user));
+    }
+
+    @Nonnull
+    public static User convertFromSpring(@Nonnull SpringUser user) {
+        final BasicUserDetails userDetails = SpringUserDetails.convertFromSpring(user);
+        return new User(user.getId(), userDetails);
+    }
+
     /**
      * <p>
-     * Create a {@link UserResponse} that is a valid administrator user.
+     * Create a {@link SpringUser} that is a valid administrator user.
      * </p>
      *
      * @param password the password used to authenticate the user, or null if the
@@ -58,14 +69,14 @@ public final class UserResponse extends BasicUserDetails {
      *                 password in an encrypted form.
      */
     @Nonnull
-    public static UserResponse createAdministrator(@Nullable final String password) {
-        return new UserResponse(password);
+    public static SpringUser createAdministrator(@Nullable final String password) {
+        return new SpringUser(password);
     }
 
     @org.springframework.data.annotation.Id
     private final UUID id;
 
-    private UserResponse(final String password) {
+    private SpringUser(final String password) {
         super(password);
         this.id = ADMINISTRATOR_ID;
     }
@@ -82,8 +93,8 @@ public final class UserResponse extends BasicUserDetails {
      *                                         <li>If {@code userDetails} is null</li>
      *                                         </ul>
      */
-    public UserResponse(@Nonnull final UUID id,
-                        @Nonnull final BasicUserDetails userDetails) {
+    public SpringUser(@Nonnull final UUID id,
+                      @Nonnull final SpringUserDetails userDetails) {
         super(userDetails);
         this.id = Objects.requireNonNull(id, "id");
     }
@@ -116,14 +127,14 @@ public final class UserResponse extends BasicUserDetails {
      */
     @JsonCreator
     @PersistenceCreator
-    public UserResponse(@Nonnull @JsonProperty("id") final UUID id,
-                        @Nonnull @JsonProperty("username") final String username,
-                        @Nullable @JsonProperty("password") final String password,
-                        @Nonnull @JsonProperty("authorities") final Set<GrantedMCAuthority> authorities,
-                        @JsonProperty("accountNonExpired") final boolean accountNonExpired,
-                        @JsonProperty("accountNonLocked") final boolean accountNonLocked,
-                        @JsonProperty("credentialsNonExpired") final boolean credentialsNonExpired,
-                        @JsonProperty("enabled") final boolean enabled) {
+    public SpringUser(@Nonnull @JsonProperty("id") final UUID id,
+                      @Nonnull @JsonProperty("username") final String username,
+                      @Nullable @JsonProperty("password") final String password,
+                      @Nonnull @JsonProperty("authorities") final Set<SpringAuthority> authorities,
+                      @JsonProperty("accountNonExpired") final boolean accountNonExpired,
+                      @JsonProperty("accountNonLocked") final boolean accountNonLocked,
+                      @JsonProperty("credentialsNonExpired") final boolean credentialsNonExpired,
+                      @JsonProperty("enabled") final boolean enabled) {
         super(username, password, authorities, accountNonExpired,
                 accountNonLocked, credentialsNonExpired, enabled);
         this.id = Objects.requireNonNull(id, "id");
@@ -134,10 +145,10 @@ public final class UserResponse extends BasicUserDetails {
      * Whether this object is <dfn>equivalent</dfn> to another object.
      * </p>
      * <ul>
-     * <li>The {@link UserResponse} class has <i>entity semantics</i>, with the
+     * <li>The {@link SpringUser} class has <i>entity semantics</i>, with the
      * {@linkplain #getId() ID} attribute serving as a unique ID: this object is
      * equivalent to another object if, and only of, the other object is also a
-     * {@link UserResponse} and the two have {@linkplain String#equals(Object)
+     * {@link SpringUser} and the two have {@linkplain String#equals(Object)
      * equivalent} {@linkplain #getId() IDs}.</li>
      * </ul>
      *
@@ -152,7 +163,7 @@ public final class UserResponse extends BasicUserDetails {
         if (that == null) {
             return false;
         }
-        if (!(that instanceof final UserResponse other)) {
+        if (!(that instanceof final SpringUser other)) {
             return false;
         }
         return id.equals(other.id);

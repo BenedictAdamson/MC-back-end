@@ -2,14 +2,13 @@ package uk.badamson.mc.service
 
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
 import uk.badamson.mc.GamePlayers
 import uk.badamson.mc.TestConfiguration
+import uk.badamson.mc.spring.SpringAuthority
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
-
 /**
  * © Copyright Benedict Adamson 2020-22.
  *
@@ -42,7 +41,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "try to examine the game"
         def gameResponse = requestGetGame(gameId, user)
@@ -88,7 +87,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role but not the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "try to examine the game"
         def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
@@ -131,7 +130,7 @@ class GameBESpec extends BESpecification {
         def scenarioId = chooseScenario().identifier
 
         and: "user has the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "try to create a game for the scenario"
         def response = requestAddGame(scenarioId, user)
@@ -166,7 +165,9 @@ class GameBESpec extends BESpecification {
         def scenarioId = chooseScenario().identifier
 
         and: "user without the manage games role"
-        def user = addUserWithAuthorities(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)))
+        def user = addUserWithAuthorities(
+                EnumSet.complementOf(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
+        )
 
         when: "try to create a game for the scenario"
         def response = requestAddGame(scenarioId, user)
@@ -181,7 +182,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "try to end recruitment for the game"
         def response = requestEndRecruitment(gameId, user)
@@ -204,7 +205,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role but not the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "try to end recruitment of the game"
         def response = requestEndRecruitment(gameId, user)
@@ -219,7 +220,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "try to examine the game"
         def gamePlayersResponse = requestGetGamePlayers(gameId, user)
@@ -244,7 +245,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "the user trys to join the game"
         def response = requestJoinGame(gameId, user)
@@ -267,7 +268,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role but not the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "examine the game"
         def response = requestJoinGame(gameId, user)
@@ -282,7 +283,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "user tries to start the game"
         def response = requestStartGame(gameId, user)
@@ -305,7 +306,7 @@ class GameBESpec extends BESpecification {
         def gameId = gameService.create(scenarioId).identifier
 
         and: "logged in as a user has the player role but not the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "user tries to start the game"
         def response = requestStartGame(gameId, user)
@@ -321,7 +322,7 @@ class GameBESpec extends BESpecification {
         gameService.startGame(gameId)
 
         and: "user has the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES))
 
         when: "user tries to stop the game"
         def response = requestStopGame(gameId, user)
@@ -345,7 +346,7 @@ class GameBESpec extends BESpecification {
         gameService.startGame(gameId)
 
         and: "user has the player role but not the manage games role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "user tries to stop the game"
         def response = requestStopGame(gameId, user)

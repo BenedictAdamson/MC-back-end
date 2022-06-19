@@ -19,7 +19,6 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.dbc.assertions.ObjectVerifier;
-import uk.badamson.mc.UserGameAssociation;
 
 import java.util.UUID;
 
@@ -37,18 +36,18 @@ public class CurrentUserGameRepositoryTest {
     }
 
     public static final class Fake
-            extends CrudRepositoryTest.AbstractFake<UserGameAssociation, UUID>
+            extends CrudRepositoryTest.AbstractFake<UserGameAssociationDTO, UUID>
             implements CurrentUserGameSpringRepository {
 
         @Override
-        protected UserGameAssociation copy(
-                final UserGameAssociation association) {
+        protected UserGameAssociationDTO copy(
+                final UserGameAssociationDTO association) {
             return association;// no need to copy, as is immutable
         }
 
         @Override
-        protected UUID getId(final UserGameAssociation game) {
-            return game.getUser();
+        protected UUID getId(final UserGameAssociationDTO game) {
+            return game.user();
         }
 
     }

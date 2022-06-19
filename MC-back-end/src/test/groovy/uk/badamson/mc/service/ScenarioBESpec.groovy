@@ -5,6 +5,8 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Unroll
 import uk.badamson.mc.*
+import uk.badamson.mc.spring.SpringAuthority
+import uk.badamson.mc.spring.SpringUser
 
 import java.time.Instant
 
@@ -37,7 +39,7 @@ class ScenarioBESpec extends BESpecification {
 
     def "List scenarios"() {
         given: "not logged in"
-        final User user = null
+        final SpringUser user = null
 
         when: "examine scenarios"
         def response = requestGetScenarios(user)
@@ -53,7 +55,7 @@ class ScenarioBESpec extends BESpecification {
         gameService.create(scenarioId).identifier
 
         and: "not logged in"
-        final User user = null
+        final SpringUser user = null
 
         when: "try to examine the scenario"
         final def scenarioResponse = requestGetScenario(scenarioId, user)
@@ -102,6 +104,6 @@ class ScenarioBESpec extends BESpecification {
         expect(gameCreationTimes, Matchers.not(Matchers.empty()))
 
         where:
-        role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]
+        role << [SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_GAMES]
     }
 }

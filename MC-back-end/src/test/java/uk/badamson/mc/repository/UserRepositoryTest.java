@@ -19,7 +19,7 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.dbc.assertions.ObjectVerifier;
-import uk.badamson.mc.User;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -39,25 +39,25 @@ public class UserRepositoryTest {
     }
 
     public static final class Fake
-            extends CrudRepositoryTest.AbstractFake<User, UUID>
+            extends CrudRepositoryTest.AbstractFake<SpringUser, UUID>
             implements UserSpringRepository {
 
         @Override
-        protected User copy(final User user) {
+        protected SpringUser copy(final SpringUser user) {
             Objects.requireNonNull(user, "user");
-            return new User(user.getId(), user);
+            return new SpringUser(user.getId(), user);
         }
 
         @Nonnull
         @Override
-        public Optional<User> findByUsername(@Nonnull final String username) {
+        public Optional<SpringUser> findByUsername(@Nonnull final String username) {
             requireNonNull(username, "username");
             return entities.values().stream()
                     .filter(u -> username.equals(u.getUsername())).findAny();
         }
 
         @Override
-        protected UUID getId(final User user) {
+        protected UUID getId(final SpringUser user) {
             Objects.requireNonNull(user, "user");
             return user.getId();
         }

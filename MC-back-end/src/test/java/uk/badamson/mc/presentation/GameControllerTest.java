@@ -30,13 +30,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
-import uk.badamson.mc.User;
 import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
 import java.time.Instant;
 import java.util.*;
@@ -60,9 +60,9 @@ public class GameControllerTest {
     private static final UUID ID_A = UUID.randomUUID();
     private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
     };
-    private static final User USER_WITH_ALL_AUTHORITIES = new User(
-            UUID.randomUUID(), "jeff", "password", Authority.ALL, true, true,
-            true, true);
+    private static final SpringUser USER_WITH_ALL_AUTHORITIES = new SpringUser(
+            UUID.randomUUID(), "jeff", "password", SpringAuthority.ALL,
+            true, true, true, true);
     @Autowired
     GameSpringRepository gameRepository;
     @Autowired
@@ -81,8 +81,8 @@ public class GameControllerTest {
         return gameService.create(scenario).getIdentifier();
     }
 
-    private User createUser(final Set<Authority> authorities) {
-        return new User(ID_A, "Allan", "secret", authorities, true, true, true,
+    private SpringUser createUser(final Set<SpringAuthority> authorities) {
+        return new SpringUser(ID_A, "Allan", "secret", authorities, true, true, true,
                 true);
     }
 
@@ -154,8 +154,8 @@ public class GameControllerTest {
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
             final var authorities = EnumSet
-                    .complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-            final var user = new User(ID_A, "allan", "password", authorities, true,
+                    .complementOf(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES));
+            final var user = new SpringUser(ID_A, "allan", "password", authorities, true,
                     true, true, true);
             final var nGames0 = gameService.getGameIdentifiers().count();
 
@@ -168,7 +168,7 @@ public class GameControllerTest {
         }
 
         private ResultActions testAuthenticated(final UUID scenario,
-                                                final User user) throws Exception {
+                                                final SpringUser user) throws Exception {
             final var request = post(GameController.createPathForGames(scenario))
                     .with(user(user)).with(csrf());
 
@@ -212,8 +212,8 @@ public class GameControllerTest {
         @Test
         public void notAuthorised() throws Exception {
             /* Tough test: game exists and user has all the other authorities */
-            final Set<Authority> authorities = EnumSet.complementOf(EnumSet
-                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+            final Set<SpringAuthority> authorities = EnumSet.complementOf(EnumSet
+                    .of(SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_GAMES));
             final var user = createUser(authorities);
             final var id = createGame();
 
@@ -222,7 +222,7 @@ public class GameControllerTest {
             response.andExpect(status().isForbidden());
         }
 
-        private ResultActions perform(final Game.Identifier id, final User user)
+        private ResultActions perform(final Game.Identifier id, final SpringUser user)
                 throws Exception {
             final var request = get(GameController.createPathFor(id))
                     .accept(MediaType.APPLICATION_JSON);
@@ -238,15 +238,15 @@ public class GameControllerTest {
 
             @Test
             public void asGamesManager() throws Exception {
-                test(Authority.ROLE_MANAGE_GAMES);
+                test(SpringAuthority.ROLE_MANAGE_GAMES);
             }
 
             @Test
             public void asPlayer() throws Exception {
-                test(Authority.ROLE_PLAYER);
+                test(SpringAuthority.ROLE_PLAYER);
             }
 
-            private void test(final Authority authority)
+            private void test(final SpringAuthority authority)
                     throws Exception {
                 final var id = createGame();
                 final var user = createUser(EnumSet.of(authority));

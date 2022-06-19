@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.security.core.userdetails.UserDetails;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
@@ -37,10 +38,22 @@ import java.util.Set;
  * A specification for a new {@linkplain User user}.
  * </p>
  */
-public class BasicUserDetails implements UserDetails {
+public class SpringUserDetails implements UserDetails {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    public static BasicUserDetails convertFromSpring(@Nonnull SpringUserDetails userDetails) {
+        return new BasicUserDetails(
+                userDetails.getUsername(),
+                userDetails.getPassword(),
+                SpringAuthority.convertFromSpring(userDetails.getAuthorities()),
+                userDetails.isAccountNonExpired(),
+                userDetails.isAccountNonLocked(),
+                userDetails.isCredentialsNonExpired(),
+                userDetails.isEnabled()
+        );
+    }
 
     /**
      * <p>
@@ -53,7 +66,7 @@ public class BasicUserDetails implements UserDetails {
 
     /**
      * <p>
-     * Create {@link BasicUserDetails} for a a valid administrator user.
+     * Create {@link SpringUserDetails} for a a valid administrator user.
      * </p>
      *
      * @param password the password used to authenticate the user, or null if the
@@ -62,14 +75,28 @@ public class BasicUserDetails implements UserDetails {
      * @see #ADMINISTRATOR_USERNAME
      */
     @Nonnull
-    public static BasicUserDetails createAdministrator(
+    public static SpringUserDetails createAdministrator(
             @Nullable final String password) {
-        return new BasicUserDetails(password);
+        return new SpringUserDetails(password);
+    }
+
+
+    @Nonnull
+    public static SpringUserDetails convertToSpring(@Nonnull User user) {
+        return new SpringUserDetails(
+                user.getUsername(),
+                user.getPassword(),
+                SpringAuthority.convertToSpring(user.getAuthorities()),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+        );
     }
 
     private final String username;
     private String password;
-    private final Set<GrantedMCAuthority> authorities;
+    private final Set<SpringAuthority> authorities;
     private final boolean accountNonExpired;
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
@@ -83,7 +110,7 @@ public class BasicUserDetails implements UserDetails {
      * @param that the specification to copy
      * @throws NullPointerException If {@code that} is null
      */
-    public BasicUserDetails(@Nonnull final BasicUserDetails that) {
+    public SpringUserDetails(@Nonnull final SpringUserDetails that) {
         Objects.requireNonNull(that, "that");
         this.username = that.username;
         this.password = that.password;
@@ -94,10 +121,10 @@ public class BasicUserDetails implements UserDetails {
         this.enabled = that.enabled;
     }
 
-    protected BasicUserDetails(final String password) {
+    protected SpringUserDetails(final String password) {
         this.username = ADMINISTRATOR_USERNAME;
         this.password = password;
-        this.authorities = GrantedMCAuthority.ALL;
+        this.authorities = SpringAuthority.ALL;
         this.accountNonExpired = true;
         this.accountNonLocked = true;
         this.credentialsNonExpired = true;
@@ -130,10 +157,10 @@ public class BasicUserDetails implements UserDetails {
      *                                         </ul>
      */
     @JsonCreator
-    public BasicUserDetails(
+    public SpringUserDetails(
             @Nonnull @JsonProperty("username") final String username,
             @Nullable @JsonProperty("password") final String password,
-            @Nonnull @JsonProperty("authorities") final Set<GrantedMCAuthority> authorities,
+            @Nonnull @JsonProperty("authorities") final Set<SpringAuthority> authorities,
             @JsonProperty("accountNonExpired") final boolean accountNonExpired,
             @JsonProperty("accountNonLocked") final boolean accountNonLocked,
             @JsonProperty("credentialsNonExpired") final boolean credentialsNonExpired,
@@ -150,7 +177,7 @@ public class BasicUserDetails implements UserDetails {
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "authorities is unmodifiable")
     @Override
-    public final Set<GrantedMCAuthority> getAuthorities() {
+    public final Set<SpringAuthority> getAuthorities() {
         return authorities;
     }
 

@@ -1,7 +1,7 @@
 package uk.badamson.mc.presentation;
 
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.User;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.UUID;
 final class Fixtures {
 
 
-    static final User ADMINISTRATOR = User
+    static final SpringUser ADMINISTRATOR = SpringUser
             .createAdministrator("password");
 
     private static String createUserName(@Nonnull final UUID id) {
@@ -21,24 +21,25 @@ final class Fixtures {
         return createUserName(UUID.randomUUID());
     }
 
-    static User createUserWithAllRoles() {
+    static SpringUser createUserWithAllRoles() {
         final var id = UUID.randomUUID();
-        return new User(id, createUserName(id),
-                "secret", Authority.ALL, true, true, true, true);
+        return new SpringUser(id, createUserName(id),"secret",
+                SpringAuthority.ALL,
+                true, true, true, true);
     }
 
-    static User createUserWithPlayerRole() {
+    static SpringUser createUserWithPlayerRole() {
         final var id = UUID.randomUUID();
-        return new User(id, createUserName(id),
-                "password1", Set.of(Authority.ROLE_PLAYER), false, false, false,
-                false);
+        return new SpringUser(id, createUserName(UUID.randomUUID()),"secret",
+                Set.of(SpringAuthority.ROLE_PLAYER),
+                true, true, true, true);
     }
 
-    static User createUserWithManageGamesRole() {
+    static SpringUser createUserWithManageGamesRole() {
         final var id = UUID.randomUUID();
-        return new User(id, createUserName(id),
-                "password2", Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true,
-                true);
+        return new SpringUser(id, createUserName(UUID.randomUUID()),"secret",
+                Set.of(SpringAuthority.ROLE_MANAGE_GAMES),
+                true, true, true, true);
     }
 
 }

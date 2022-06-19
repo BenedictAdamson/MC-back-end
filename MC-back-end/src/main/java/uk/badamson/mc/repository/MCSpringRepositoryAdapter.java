@@ -19,7 +19,8 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.mc.*;
-import uk.badamson.mc.spring.GrantedMCAuthority;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -59,20 +60,20 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     }
 
     @Nonnull
-    private static GrantedMCAuthority convertToDTO(@Nonnull Authority authority) {
-        return GrantedMCAuthority.valueOf(authority.toString());
+    private static SpringAuthority convertToDTO(@Nonnull Authority authority) {
+        return SpringAuthority.valueOf(authority.toString());
     }
 
     @Nonnull
-    private static Set<GrantedMCAuthority> convertToDTO(@Nonnull Set<Authority> authorities) {
+    private static Set<SpringAuthority> convertToDTO(@Nonnull Set<Authority> authorities) {
         return authorities.stream()
                 .map(MCSpringRepositoryAdapter::convertToDTO)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
     @Nonnull
-    private static UserDTO convertToDTO(@Nonnull UUID userId, @Nonnull User user) {
-        return new UserDTO(
+    private static SpringUser convertToDTO(@Nonnull UUID userId, @Nonnull User user) {
+        return new SpringUser(
                 userId,
                 user.getUsername(), user.getPassword(),
                 convertToDTO(user.getAuthorities()),
@@ -109,17 +110,17 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     }
 
     @Nonnull
-    private static Authority convertFromDTO(@Nonnull GrantedMCAuthority dto) {
+    private static Authority convertFromDTO(@Nonnull SpringAuthority dto) {
         return Authority.valueOf(dto.toString());
     }
 
     @Nonnull
-    private static Set<Authority> convertFromDTO(@Nonnull Set<GrantedMCAuthority> dto) {
+    private static Set<Authority> convertFromDTO(@Nonnull Set<SpringAuthority> dto) {
         return dto.stream().map(MCSpringRepositoryAdapter::convertFromDTO).collect(Collectors.toUnmodifiableSet());
     }
 
     @Nonnull
-    private static User convertFromDTO(@Nonnull UserDTO dto) {
+    private static User convertFromDTO(@Nonnull SpringUser dto) {
         return new User(dto.getId(),
         dto.getUsername(),
         dto.getPassword(),
@@ -192,7 +193,7 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         @Nonnull
         @Override
         public Optional<User> findUserByUsername(@Nonnull String username) {
-            return userRepository.findByUsername(username);
+            return userRepository.findByUsername(username).map(SpringUser::convertFromSpring);
         }
 
         @Nonnull

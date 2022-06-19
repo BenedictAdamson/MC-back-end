@@ -20,13 +20,14 @@ package uk.badamson.mc.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.badamson.mc.BasicUserDetails;
-import uk.badamson.mc.User;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
+import uk.badamson.mc.spring.SpringUserDetails;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -54,27 +55,29 @@ public class UserSpringService implements UserDetailsService {
 
     @Transactional
     @Nonnull
-    public User add(@Nonnull final BasicUserDetails userDetails) {
-        return delegate.add(userDetails);
+    public SpringUser add(@Nonnull final SpringUserDetails userDetails) {
+        return SpringUser.convertToSpring(
+                delegate.add(SpringUserDetails.convertFromSpring(userDetails))
+        );
     }
 
     @Nonnull
-    public Optional<User> getUser(@Nonnull final UUID id) {
-        return delegate.getUser(id);
+    public Optional<SpringUser> getUser(@Nonnull final UUID id) {
+        return delegate.getUser(id).map(SpringUser::convertToSpring);
     }
 
     @Nonnull
-    public Stream<User> getUsers() {
-        return delegate.getUsers();
+    public Stream<SpringUser> getUsers() {
+        return delegate.getUsers().map(SpringUser::convertToSpring);
     }
 
     @Override
     @Nonnull
-    public User loadUserByUsername(@Nonnull final String username)
+    public UserDetails loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {
         final var userOptional = delegate.getUserByUsername(username);
         if (userOptional.isPresent()) {
-            return userOptional.get();
+            return userOptional.map(SpringUserDetails::convertToSpring).get();
         } else {
             throw new UsernameNotFoundException(username);
         }

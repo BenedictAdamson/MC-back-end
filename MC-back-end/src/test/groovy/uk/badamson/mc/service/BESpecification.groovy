@@ -17,6 +17,9 @@ import uk.badamson.mc.presentation.GamePlayersController
 import uk.badamson.mc.presentation.ScenarioController
 import uk.badamson.mc.presentation.UserController
 import uk.badamson.mc.repository.UserSpringRepository
+import uk.badamson.mc.spring.SpringAuthority
+import uk.badamson.mc.spring.SpringUser
+import uk.badamson.mc.spring.SpringUserDetails
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -105,9 +108,9 @@ abstract class BESpecification extends Specification {
         scenarioIdOptional.get()
     }
 
-    protected final User addUserWithAuthorities(final Set<Authority> authorities) {
+    protected final SpringUser addUserWithAuthorities(final Set<SpringAuthority> authorities) {
         ++nUsers
-        userService.add(new BasicUserDetails("Zoe-${nUsers}", 'password1', authorities,
+        userService.add(new SpringUserDetails("Zoe-${nUsers}", 'password1', authorities,
                 true, true, true, true))
     }
 
@@ -138,43 +141,43 @@ abstract class BESpecification extends Specification {
         UUID.fromString(pathVariable.get('id'))
     }
 
-    protected final ResultActions requestGetCurrentGame(@Nullable User loggedInUser) {
+    protected final ResultActions requestGetCurrentGame(@Nullable SpringUser loggedInUser) {
         requestGetJson(GamePlayersController.CURRENT_GAME_PATH, loggedInUser)
     }
 
-    protected final ResultActions requestGetGamePlayers(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGamePlayers(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         requestGetJson(GamePlayersController.createPathForGamePlayersOf(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGame(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         requestGetJson(GameController.createPathFor(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetMayJoinQuery(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetMayJoinQuery(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         requestGetJson(GamePlayersController.createPathForMayJoinQueryOf(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetScenarios(@Nullable User loggedInUser) {
+    protected final ResultActions requestGetScenarios(@Nullable SpringUser loggedInUser) {
         requestGetJson('/api/scenario', loggedInUser)
     }
 
-    protected final ResultActions requestGetScenario(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetScenario(@Nonnull UUID scenarioId, @Nullable SpringUser loggedInUser) {
         requestGetJson(ScenarioController.createPathFor(scenarioId), loggedInUser)
     }
 
-    protected final ResultActions requestGetGameCreationTimes(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGameCreationTimes(@Nonnull UUID scenarioId, @Nullable SpringUser loggedInUser) {
         requestGetJson(GameController.createPathForGames(scenarioId), loggedInUser)
     }
 
-    protected final ResultActions requestGetUsers(@Nullable User loggedInUser) {
+    protected final ResultActions requestGetUsers(@Nullable SpringUser loggedInUser) {
         requestGetJson('/api/user', loggedInUser)
     }
 
-    protected final ResultActions requestGetUser(@Nonnull UUID userId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetUser(@Nonnull UUID userId, @Nullable SpringUser loggedInUser) {
         requestGetJson(UserController.createPathForUser(userId), loggedInUser)
     }
 
-    private ResultActions requestGetJson(@Nonnull String path, @Nullable User loggedInUser) {
+    private ResultActions requestGetJson(@Nonnull String path, @Nullable SpringUser loggedInUser) {
         var request = get(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(loggedInUser)).with(csrf())
@@ -182,7 +185,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestJoinGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestJoinGame(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         final def path = GamePlayersController.createPathForJoining(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -191,7 +194,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStartGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStartGame(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         final def path = GameController.createPathForStarting(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -200,7 +203,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStopGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStopGame(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         final def path = GameController.createPathForStopping(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -209,7 +212,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestAddGame(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
+    protected final ResultActions requestAddGame(@Nonnull UUID scenarioId, @Nullable SpringUser loggedInUser) {
         final def path = GameController.createPathForGames(scenarioId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -218,7 +221,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestEndRecruitment(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestEndRecruitment(@Nonnull Game.Identifier gameId, @Nullable SpringUser loggedInUser) {
         final def path = GamePlayersController.createPathForEndRecruitmentOf(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -234,7 +237,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestAddUser(@Nonnull BasicUserDetails userDetails, @Nullable User loggedInUser) {
+    protected final ResultActions requestAddUser(@Nonnull SpringUserDetails userDetails, @Nullable SpringUser loggedInUser) {
         final var encoded = objectMapper.writeValueAsString(userDetails)
         def request = post('/api/user')
                 .contentType(MediaType.APPLICATION_JSON)

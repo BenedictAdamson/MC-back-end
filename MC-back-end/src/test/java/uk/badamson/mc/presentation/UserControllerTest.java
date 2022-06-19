@@ -31,11 +31,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
-import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserSpringService;
+import uk.badamson.mc.spring.SpringUserDetails;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -65,7 +65,7 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
 
     private void assertEquivalentUserAttributes(final String message,
-                                                final BasicUserDetails expected, final BasicUserDetails actual)
+                                                final SpringUserDetails expected, final SpringUserDetails actual)
             throws MultipleFailuresError {
         assertAll(message,
                 () -> assertThat("username", actual.getUsername(),
@@ -144,8 +144,8 @@ public class UserControllerTest {
                                     .equals(addedUser.getUsername()))));
         }
 
-        private ResultActions test(final User performingUser,
-                                   final BasicUserDetails addedUser) throws Exception {
+        private ResultActions test(final SpringUser performingUser,
+                                   final SpringUser addedUser) throws Exception {
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
@@ -169,10 +169,10 @@ public class UserControllerTest {
                 test(Fixtures.createUserWithManageGamesRole());
             }
 
-            private void test(final BasicUserDetails addedUser) throws Exception {
+            private void test(final SpringUser addedUser) throws Exception {
                 final var performingUser = Fixtures.createUserWithAllRoles();
                 assert performingUser.getAuthorities()
-                        .contains(Authority.ROLE_MANAGE_USERS);
+                        .contains(SpringAuthority.ROLE_MANAGE_USERS);
                 final var response = Add.this.test(performingUser, addedUser);
 
                 final var location = response.andReturn().getResponse()
@@ -209,7 +209,7 @@ public class UserControllerTest {
             test(Fixtures.createUserWithPlayerRole());
         }
 
-        private void test(final User user) throws Exception {
+        private void test(final SpringUser user) throws Exception {
             service.add(user);
             final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
                     .with(user(user)).with(csrf());
@@ -231,7 +231,7 @@ public class UserControllerTest {
             final var jsonResponse = response.andReturn().getResponse()
                     .getContentAsString();
             final var decodedResponse = objectMapper.readValue(jsonResponse,
-                    User.class);
+                    SpringUser.class);
             assertEquivalentUserAttributes("Response is the authenticated user",
                     user, decodedResponse);
         }
@@ -263,7 +263,7 @@ public class UserControllerTest {
             final var jsonResponse = response2.andReturn().getResponse()
                     .getContentAsString();
             final var decodedResponse = objectMapper.readValue(jsonResponse,
-                    User.class);
+                    SpringUser.class);
             assertEquivalentUserAttributes("Response is the authenticated user",
                     user, decodedResponse);
         }
@@ -306,10 +306,10 @@ public class UserControllerTest {
             // request hasCSRF token
             // Tough test: requesting user has minimum authority
             final var requestingUserName = Fixtures.createUserName();
-            final var authorities = EnumSet.allOf(Authority.class);
-            authorities.remove(Authority.ROLE_MANAGE_USERS);
+            final var authorities = EnumSet.allOf(SpringAuthority.class);
+            authorities.remove(SpringAuthority.ROLE_MANAGE_USERS);
             final var requestingUser = service
-                    .add(new BasicUserDetails(requestingUserName, "password1",
+                    .add(new SpringUserDetails(requestingUserName, "password1",
                             authorities, true, true, true, true));
             final var user = service.add(Fixtures.createUserWithAllRoles());
             final var response = perform(user.getId(), requestingUser);
@@ -327,7 +327,7 @@ public class UserControllerTest {
             response.andExpect(status().isUnauthorized());
         }
 
-        private ResultActions perform(final UUID id, final User requestingUser)
+        private ResultActions perform(final UUID id, final SpringUser requestingUser)
                 throws Exception {
             final var path = UserController.createPathForUser(id);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
@@ -356,7 +356,7 @@ public class UserControllerTest {
 
             @Test
             public void administrator() throws Exception {
-                final Optional<User> userOptional = service.getUser(User.ADMINISTRATOR_ID);
+                final Optional<SpringUser> userOptional = service.getUser(SpringUser.ADMINISTRATOR_ID);
                 assertThat("user", userOptional.isPresent());
                 test(Fixtures.createUserName(), userOptional.get());
             }
@@ -366,12 +366,12 @@ public class UserControllerTest {
                 testNonAdministrator(Fixtures.createUserName(), Fixtures.createUserWithAllRoles());
             }
 
-            private void test(final String requestingUserName, final User user)
+            private void test(final String requestingUserName, final SpringUser user)
                     throws Exception {
                 // Tough test: requesting user has minimum authority
-                final var requestingUserDetails = new BasicUserDetails(
+                final var requestingUserDetails = new SpringUserDetails(
                         requestingUserName, "password1",
-                        Set.of(Authority.ROLE_MANAGE_USERS), true, true, true,
+                        Set.of(SpringAuthority.ROLE_MANAGE_USERS), true, true, true,
                         true);
                 final var requestingUser = service.add(requestingUserDetails);
 
@@ -382,7 +382,7 @@ public class UserControllerTest {
                 final var jsonResponse = response.andReturn().getResponse()
                         .getContentAsString();
                 final var decodedResponse = objectMapper.readValue(jsonResponse,
-                        User.class);
+                        SpringUser.class);
                 assertAll("Response is the identified user",
                         () -> assertEquivalentUserAttributes("user details", user,
                                 decodedResponse),
@@ -391,7 +391,7 @@ public class UserControllerTest {
             }
 
             private void testNonAdministrator(final String requestingUserName,
-                                              final BasicUserDetails userDetails) throws Exception {
+                                              final SpringUserDetails userDetails) throws Exception {
                 assert !requestingUserName.equals(userDetails.getUsername());
                 final var user = service.add(userDetails);
                 test(requestingUserName, user);

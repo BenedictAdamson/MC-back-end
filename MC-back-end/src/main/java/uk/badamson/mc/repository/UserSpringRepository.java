@@ -20,12 +20,13 @@ package uk.badamson.mc.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import uk.badamson.mc.User;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserSpringRepository extends CrudRepository<UserDTO, UUID> {
+public interface UserSpringRepository extends CrudRepository<SpringUser, UUID> {
 
     /**
      * <p>
@@ -36,6 +37,6 @@ public interface UserSpringRepository extends CrudRepository<UserDTO, UUID> {
      * @throws NullPointerException If {@code username} is null
      */
     @Nonnull
-    Optional<User> findByUsername(@Nonnull String username);
+    Optional<SpringUser> findByUsername(@Nonnull String username);
 
 }

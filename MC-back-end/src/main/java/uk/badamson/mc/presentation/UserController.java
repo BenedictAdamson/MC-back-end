@@ -27,10 +27,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserSpringService;
+import uk.badamson.mc.spring.SpringUserDetails;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -99,12 +100,11 @@ public class UserController {
      * @throws ResponseStatusException <ul>
      *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
-     *                                                                            Request)} If the {@linkplain BasicUserDetails#getUsername()
-     *                                                                            username} of {@code user} indicates it is the
-     *                                                                            {@linkplain User#ADMINISTRATOR_USERNAME administrator}.</li>
+     *                                                                            Request)} If the {@linkplain SpringUserDetails#getUsername()
+     *                                                                            username} of {@code user} indicates it is the administrator.</li>
      *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
-     *                                                                            the {@linkplain BasicUserDetails#getUsername() username} of
+     *                                                                            the {@linkplain SpringUserDetails#getUsername() username} of
      *                                                                            {@code userDetails} is already the username of a user.</li>
      *                                                                            </ul>
      */
@@ -112,7 +112,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @RolesAllowed("MANAGE_USERS")
     public ResponseEntity<Void> add(
-            @RequestBody final BasicUserDetails userDetails) {
+            @RequestBody final SpringUserDetails userDetails) {
         try {
             final var user = service.add(userDetails);
 
@@ -140,7 +140,7 @@ public class UserController {
      * @return The response.
      */
     @GetMapping("/api/user")
-    public Stream<User> getAll() {
+    public Stream<SpringUser> getAll() {
         return service.getUsers();
     }
 
@@ -156,7 +156,7 @@ public class UserController {
     @GetMapping("/api/self")
     @PreAuthorize("isAuthenticated()")
     @Nonnull
-    public User getSelf(@Nonnull @AuthenticationPrincipal final User user) {
+    public SpringUser getSelf(@Nonnull @AuthenticationPrincipal final SpringUser user) {
         Objects.requireNonNull(user, "user");
         return user;
     }
@@ -183,8 +183,8 @@ public class UserController {
     @GetMapping("/api/user/{id}")
     @RolesAllowed("MANAGE_USERS")
     @Nonnull
-    public User getUser(@Nonnull @PathVariable final UUID id) {
-        final Optional<User> user = service.getUser(id);
+    public SpringUser getUser(@Nonnull @PathVariable final UUID id) {
+        final Optional<SpringUser> user = service.getUser(id);
         if (user.isPresent()) {
             return user.get();
         } else {

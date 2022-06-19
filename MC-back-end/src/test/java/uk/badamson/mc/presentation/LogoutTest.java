@@ -62,10 +62,10 @@ public class LogoutTest {
 
     @Test
     public void logout_noCsrfToken() throws Exception {
-        final var user = Fixtures.createUserWithAllRoles();
-        service.add(user);
+        final var userDetails = Fixtures.createUserWithAllRoles();
+        service.add(userDetails);
         final var session = new MockHttpSession();
-        final var request = post(PATH).with(user(user)).session(session);
+        final var request = post(PATH).with(user(userDetails)).session(session);
 
         final var response = mockMvc.perform(request);
 

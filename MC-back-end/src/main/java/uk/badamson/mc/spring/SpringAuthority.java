@@ -19,13 +19,15 @@ package uk.badamson.mc.spring;
  */
 
 import org.springframework.security.core.GrantedAuthority;
-import uk.badamson.mc.User;
+import uk.badamson.mc.Authority;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public enum GrantedMCAuthority implements GrantedAuthority {
+public enum SpringAuthority implements GrantedAuthority {
     /**
      * <p>
      * May play games.
@@ -50,8 +52,26 @@ public enum GrantedMCAuthority implements GrantedAuthority {
      * The complete set of authorities.
      * </p>
      */
-    public static final Set<GrantedMCAuthority> ALL = Collections
-            .unmodifiableSet(EnumSet.allOf(GrantedMCAuthority.class));
+    public static final Set<SpringAuthority> ALL = Collections
+            .unmodifiableSet(EnumSet.allOf(SpringAuthority.class));
+
+    public static Set<SpringAuthority> convertToSpring(@Nonnull Set<Authority> authorities) {
+        return authorities.stream().map(SpringAuthority::convertToSpring).collect(Collectors.toUnmodifiableSet());
+    }
+
+    public  static SpringAuthority convertToSpring(@Nonnull Authority authority) {
+        return valueOf(authority.toString());
+    }
+
+    @Nonnull
+    public static Set<Authority> convertFromSpring(@Nonnull Set<SpringAuthority> authorities) {
+        return authorities.stream().map(SpringAuthority::convertFromSpring).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Nonnull
+    public static Authority convertFromSpring(@Nonnull SpringAuthority authority) {
+        return Authority.valueOf(authority.toString());
+    }
 
     @Override
     public String getAuthority() {

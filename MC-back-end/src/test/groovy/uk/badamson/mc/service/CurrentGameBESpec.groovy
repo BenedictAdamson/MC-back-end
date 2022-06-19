@@ -3,9 +3,9 @@ package uk.badamson.mc.service
 
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.Authority
 import uk.badamson.mc.GamePlayers
 import uk.badamson.mc.TestConfiguration
+import uk.badamson.mc.spring.SpringAuthority
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
@@ -42,7 +42,7 @@ class CurrentGameBESpec extends BESpecification {
         gameService.create(scenario.identifier).identifier
 
         and: "user has the player role but is not playing"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         when: "examine the current game of the user while logged in"
         final def response = requestGetCurrentGame(user)
@@ -57,7 +57,7 @@ class CurrentGameBESpec extends BESpecification {
         def gameId = gameService.create(scenario.identifier).identifier
 
         and: "user has the player role"
-        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
 
         and: "user is playing the game"
         gamePlayersService.userJoinsGame(user.id, gameId)

@@ -214,11 +214,6 @@
    </reporting>
    <dependencies>
       <dependency>
-         <groupId>javax.persistence</groupId>
-         <artifactId>javax.persistence-api</artifactId>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
          <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-core</artifactId>
          <version>${project.parent.version}</version>
@@ -236,6 +231,11 @@
          <groupId>de.flapdoodle.embed</groupId>
          <artifactId>de.flapdoodle.embed.mongo</artifactId>
          <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>javax.persistence</groupId>
+         <artifactId>javax.persistence-api</artifactId>
+         <scope>provided</scope>
       </dependency>
       <dependency>
          <groupId>org.codehaus.groovy</groupId>

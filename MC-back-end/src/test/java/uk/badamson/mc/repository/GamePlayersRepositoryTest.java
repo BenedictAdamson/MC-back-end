@@ -19,10 +19,6 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.dbc.assertions.ObjectVerifier;
-import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
-
-import java.util.Objects;
 
 /**
  * <p>
@@ -38,18 +34,18 @@ public class GamePlayersRepositoryTest {
     }
 
     public static final class Fake extends
-            CrudRepositoryTest.AbstractFake<GamePlayers, Game.Identifier>
+            CrudRepositoryTest.AbstractFake<GamePlayersDTO, GameIdentifierDTO>
             implements GamePlayersSpringRepository {
 
         @Override
-        protected GamePlayers copy(final GamePlayers players) {
-            return new GamePlayers(players);
+        protected GamePlayersDTO copy(final GamePlayersDTO players) {
+            // copying unnecessary because immutable
+            return players;
         }
 
         @Override
-        protected Game.Identifier getId(final GamePlayers players) {
-            Objects.requireNonNull(players, "players");
-            return players.getGame();
+        protected GameIdentifierDTO getId(final GamePlayersDTO players) {
+            return players.game();
         }
 
     }
