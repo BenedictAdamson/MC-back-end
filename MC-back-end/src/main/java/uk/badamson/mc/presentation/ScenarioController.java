@@ -106,10 +106,10 @@ public class ScenarioController {
      */
     @GetMapping("/api/scenario/{id}")
     @Nonnull
-    public Scenario getScenario(@Nonnull @PathVariable final UUID id) {
+    public ScenarioResponse getScenario(@Nonnull @PathVariable final UUID id) {
         final Optional<Scenario> scenario = service.getScenario(id);
         if (scenario.isPresent()) {
-            return scenario.get();
+            return scenario.map(ScenarioResponse::convertToResponse).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
         }
