@@ -19,12 +19,23 @@ package uk.badamson.mc.repository;
  */
 
 import org.springframework.data.annotation.Id;
+import uk.badamson.mc.UserGameAssociation;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public record UserGameAssociationDTO(
-    @Id
-    UUID user,
-    GameIdentifierDTO game
-){
+        @Id
+        UUID user,
+        GameIdentifierDTO game
+) {
+    @Nonnull
+    static UserGameAssociationDTO convertToDTO(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
+        return new UserGameAssociationDTO(userId, GameIdentifierDTO.convertToDTO(association.getGame()));
+    }
+
+    @Nonnull
+    static UserGameAssociation convertFromDTO(@Nonnull UserGameAssociationDTO dto) {
+        return new UserGameAssociation(dto.user(), GameIdentifierDTO.convertFromDTO(dto.game()));
+    }
 }

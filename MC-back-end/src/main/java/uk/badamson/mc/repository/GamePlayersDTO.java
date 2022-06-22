@@ -20,18 +20,34 @@ package uk.badamson.mc.repository;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.data.annotation.Id;
+import uk.badamson.mc.Game;
+import uk.badamson.mc.GamePlayers;
 
+import javax.annotation.Nonnull;
 import javax.persistence.Table;
 import java.util.Map;
 import java.util.UUID;
 
 
-@Table(name="game_players")
-@SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "DTO")
+@Table(name = "game_players")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersDTO(
         @Id
         GameIdentifierDTO game,
         boolean recruiting,
         Map<UUID, UUID> users
 ) {
+    @Nonnull
+    static GamePlayersDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
+        return new GamePlayersDTO(
+                GameIdentifierDTO.convertToDTO(id),
+                gamePlayers.isRecruiting(),
+                Map.copyOf(gamePlayers.getUsers())
+        );
+    }
+
+    @Nonnull
+    static GamePlayers convertFromDTO(@Nonnull GamePlayersDTO dto) {
+        return new GamePlayers(GameIdentifierDTO.convertFromDTO(dto.game()), dto.recruiting(), Map.copyOf(dto.users()));
+    }
 }

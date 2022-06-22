@@ -25,7 +25,6 @@ import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,50 +38,6 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     private final GameSpringRepository gameRepository;
     private final UserSpringRepository userRepository;
 
-    @Nonnull
-    private static RunStateDTO convertToDTO(@Nonnull Game.RunState runState) {
-        return RunStateDTO.valueOf(runState.toString());
-    }
-
-    @Nonnull
-    private static GameDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull Game game) {
-        return new GameDTO(GameIdentifierDTO.convertToDTO(id), convertToDTO(game.getRunState()));
-    }
-
-    @Nonnull
-    private static GamePlayersDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-        return new GamePlayersDTO(
-                GameIdentifierDTO.convertToDTO(id),
-                gamePlayers.isRecruiting(),
-                Map.copyOf(gamePlayers.getUsers())
-        );
-    }
-
-    @Nonnull
-    private static UserGameAssociationDTO convertToDTO(@Nonnull UUID userId,@Nonnull UserGameAssociation association) {
-        return new UserGameAssociationDTO(userId, GameIdentifierDTO.convertToDTO(association.getGame()));
-    }
-
-    @Nonnull
-    private static Game.RunState convertFromDTO(@Nonnull RunStateDTO dto) {
-        return Game.RunState.valueOf(dto.toString());
-    }
-
-    @Nonnull
-    private static Game convertFromDTO(@Nonnull GameDTO dto) {
-        return new Game(GameIdentifierDTO.convertFromDTO(dto.identifier()), convertFromDTO(dto.runState()));
-    }
-
-    @Nonnull
-    private static GamePlayers convertFromDTO(@Nonnull GamePlayersDTO dto) {
-        return new GamePlayers(GameIdentifierDTO.convertFromDTO(dto.game()), dto.recruiting(), Map.copyOf(dto.users()));
-    }
-
-    @Nonnull
-    private static UserGameAssociation convertFromDTO(@Nonnull UserGameAssociationDTO dto) {
-        return new UserGameAssociation(dto.user(), GameIdentifierDTO.convertFromDTO(dto.game()));
-    }
-
     public MCSpringRepositoryAdapter(
             @Nonnull CurrentUserGameSpringRepository currentUserGameRepository,
             @Nonnull GamePlayersSpringRepository gamePlayersRepository,
@@ -94,47 +49,53 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         this.userRepository = Objects.requireNonNull(userRepository);
     }
 
+    @Nonnull
+    @Override
+    public Context openContext() {
+        return new AdapterContext();
+    }
+
     public final class AdapterContext extends Context {
 
         @Override
         public void saveGame(@Nonnull Game.Identifier id, @Nonnull Game game) {
-            gameRepository.save(convertToDTO(id, game));
+            gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
         @Nonnull
         @Override
         public Optional<Game> findGame(@Nonnull Game.Identifier id) {
             return gameRepository.findById(GameIdentifierDTO.convertToDTO(id))
-                    .map(MCSpringRepositoryAdapter::convertFromDTO);
+                    .map(GameDTO::convertFromDTO);
         }
 
         @Nonnull
         @Override
         public Stream<Game> findAllGames() {
             return StreamSupport.stream(gameRepository.findAll().spliterator(), false)
-                    .map(MCSpringRepositoryAdapter::convertFromDTO);
+                    .map(GameDTO::convertFromDTO);
         }
 
         @Override
         public void saveGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-            gamePlayersRepository.save(convertToDTO(id, gamePlayers));
+            gamePlayersRepository.save(GamePlayersDTO.convertToDTO(id, gamePlayers));
         }
 
         @Nonnull
         @Override
         public Optional<GamePlayers> findGamePlayers(@Nonnull Game.Identifier id) {
-            return gamePlayersRepository.findById(GameIdentifierDTO.convertToDTO(id)).map(MCSpringRepositoryAdapter::convertFromDTO);
+            return gamePlayersRepository.findById(GameIdentifierDTO.convertToDTO(id)).map(GamePlayersDTO::convertFromDTO);
         }
 
         @Nonnull
         @Override
         public Optional<UserGameAssociation> findCurrentUserGame(@Nonnull UUID userId) {
-            return currentUserGameRepository.findById(userId).map(MCSpringRepositoryAdapter::convertFromDTO);
+            return currentUserGameRepository.findById(userId).map(UserGameAssociationDTO::convertFromDTO);
         }
 
         @Override
         public void saveCurrentUserGame(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
-            currentUserGameRepository.save(convertToDTO(userId, association));
+            currentUserGameRepository.save(UserGameAssociationDTO.convertToDTO(userId, association));
         }
 
         @Nonnull
@@ -165,11 +126,5 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         public void close() {
             // Do nothing
         }
-    }
-
-    @Nonnull
-    @Override
-    public Context openContext() {
-        return new AdapterContext();
     }
 }
