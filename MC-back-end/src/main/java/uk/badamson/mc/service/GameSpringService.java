@@ -62,22 +62,26 @@ public class GameSpringService {
         return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
     }
 
+    @Transactional
     @Nonnull
     public Optional<Game> getGame(@Nonnull final Identifier id) {
         return delegate.getGame(id);
     }
 
+    @Transactional
     @Nonnull
     public Stream<Identifier> getGameIdentifiers() {
         return delegate.getGameIdentifiers();
     }
 
+    @Transactional
     @Nonnull
     public Game startGame(@Nonnull final Identifier id)
             throws NoSuchElementException, IllegalGameStateException {
         return delegate.startGame(id);
     }
 
+    @Transactional
     public void stopGame(@Nonnull final Identifier id)
             throws NoSuchElementException {
         delegate.stopGame(id);

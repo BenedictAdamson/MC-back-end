@@ -60,17 +60,20 @@ public class UserSpringService implements UserDetailsService {
         );
     }
 
+    @Transactional
     @Nonnull
     public Optional<SpringUser> getUser(@Nonnull final UUID id) {
         return delegate.getUser(id).map(SpringUser::convertToSpring);
     }
 
+    @Transactional
     @Nonnull
     public Stream<SpringUser> getUsers() {
         return delegate.getUsers().map(SpringUser::convertToSpring);
     }
 
-    @Override
+
+    @Transactional    @Override
     @Nonnull
     public SpringUser loadUserByUsername(@Nonnull final String username)
             throws UsernameNotFoundException {

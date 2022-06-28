@@ -51,23 +51,27 @@ public class GamePlayersSpringService {
         );
     }
 
+    @Transactional
     public void endRecruitment(@Nonnull final Identifier id)
             throws NoSuchElementException {
         delegate.endRecruitment(id);
     }
 
+    @Transactional
     @Nonnull
     public Optional<Game.Identifier> getCurrentGameOfUser(
             @Nonnull final UUID userId) {
         return delegate.getCurrentGameOfUser(userId);
     }
 
+    @Transactional
     @Nonnull
     public Optional<GamePlayers> getGamePlayersAsGameManager(
             @Nonnull final Game.Identifier id) {
         return delegate.getGamePlayersAsGameManager(id);
     }
 
+    @Transactional
     @Nonnull
     public Optional<GamePlayers> getGamePlayersAsNonGameManager(
             @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
