@@ -39,12 +39,10 @@ public class GamePlayersSpringService {
 
     @Autowired
     public GamePlayersSpringService(
-            @Nonnull final GameSpringService gameService,
             @Nonnull final UserSpringService userService,
             @Nonnull final ScenarioSpringService scenarioService,
             @Nonnull final MCSpringRepositoryAdapter repository) {
         this.delegate = new GamePlayersService(
-                gameService.getDelegate(),
                 userService.getDelegate(),
                 scenarioService.getDelegate(),
                 repository
