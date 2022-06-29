@@ -42,20 +42,4 @@ public record GamePlayersResponse(
         );
     }
 
-    @Override
-    public boolean equals(final Object that) {
-        if (this == that) {
-            return true;
-        }
-        if (!(that instanceof final GamePlayersResponse other)) {
-            return false;
-        }
-        return game.equals(other.game);
-    }
-
-    @Override
-    public int hashCode() {
-        return game.hashCode();
-    }
-
 }
