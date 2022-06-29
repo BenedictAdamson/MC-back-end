@@ -28,7 +28,7 @@ import java.util.UUID;
 
 @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersResponse(
-        Game.Identifier game,
+        GameIdentifierResponse game,
         boolean recruiting,
         Map<UUID, UUID> users
 ) {
@@ -36,7 +36,7 @@ public record GamePlayersResponse(
     @Nonnull
     public static GamePlayersResponse convertToResponse(@Nonnull Game.Identifier identifier, @Nonnull GamePlayers gamePlayers) {
         return new GamePlayersResponse(
-                gamePlayers.getGame(),
+                GameIdentifierResponse.convertToResponse(gamePlayers.getGame()),
                 gamePlayers.isRecruiting(),
                 gamePlayers.getUsers()
         );
