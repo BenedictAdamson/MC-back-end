@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import uk.badamson.mc.Game;
 
 import javax.annotation.Nonnull;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 public record GameIdentifierResponse(
         UUID scenario,
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
         Instant created
 ) {
     @Nonnull
