@@ -278,7 +278,7 @@ public class GamePlayersController {
     @GetMapping(GAME_PLAYERS_PATH_PATTERN)
     @RolesAllowed({"PLAYER", "MANAGE_GAMES"})
     @Nonnull
-    public GamePlayers getGamePlayers(
+    public GamePlayersResponse getGamePlayers(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
@@ -296,7 +296,7 @@ public class GamePlayersController {
         }
 
         if (gamePlayers.isPresent()) {
-            return gamePlayers.get();
+            return gamePlayers.map(gps -> GamePlayersResponse.convertToResponse(id, gps)).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
         }
