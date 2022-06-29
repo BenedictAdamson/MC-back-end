@@ -232,12 +232,12 @@ public class GameController {
     @GetMapping(GAME_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
-    public Game getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
+    public GameResponse getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
                         @Nonnull @PathVariable("created") final Instant created) {
         final var id = new Game.Identifier(scenario, created);
         final Optional<Game> game = gameService.getGame(id);
         if (game.isPresent()) {
-            return game.get();
+            return game.map(g -> GameResponse.convertToResponse(id, g)).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
         }

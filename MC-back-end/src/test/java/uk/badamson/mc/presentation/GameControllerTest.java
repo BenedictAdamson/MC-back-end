@@ -254,10 +254,10 @@ public class GameControllerTest {
                 final var response = perform(id, user);
 
                 response.andExpect(status().isOk());
-                final var jsonResponse = response.andReturn().getResponse()
-                        .getContentAsString();
-                final var game = objectMapper.readValue(jsonResponse, Game.class);
-                assertEquals(id, game.getIdentifier(), "game has the requested ID");
+                final var jsonResponse = response.andReturn().getResponse().getContentAsString();
+                final var gameResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
+                assertThat("scenario", gameResponse.identifier().scenario(), is(id.getScenario()));
+                assertThat("created", gameResponse.identifier().created(), is(id.getCreated()));
             }
 
         }
