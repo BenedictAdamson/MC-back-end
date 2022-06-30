@@ -1,4 +1,4 @@
-package uk.badamson.mc.spring;
+package uk.badamson.mc.rest;
 /*
  * © Copyright Benedict Adamson 2020-22.
  *
@@ -64,7 +64,6 @@ public final class NamedUUID {
         }
     }
 
-    @org.springframework.data.annotation.Id
     private final UUID id;
     private final String title;
 
