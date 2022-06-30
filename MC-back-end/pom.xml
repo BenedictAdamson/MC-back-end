@@ -219,6 +219,11 @@
          <artifactId>MC-core</artifactId>
          <version>${project.parent.version}</version>
       </dependency>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-REST</artifactId>
+         <version>${project.parent.version}</version>
+      </dependency>
       <!-- Third-party dependencies: -->
       <dependency>
          <groupId>com.fasterxml.jackson.datatype</groupId>
