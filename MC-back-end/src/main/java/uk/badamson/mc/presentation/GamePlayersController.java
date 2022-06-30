@@ -32,6 +32,7 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
+import uk.badamson.mc.rest.GamePlayersResponse;
 import uk.badamson.mc.service.GamePlayersService;
 import uk.badamson.mc.service.GamePlayersSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;

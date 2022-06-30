@@ -31,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
 import uk.badamson.mc.spring.SpringUser;
@@ -233,7 +234,7 @@ public class GameController {
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
     public GameResponse getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
-                        @Nonnull @PathVariable("created") final Instant created) {
+                                @Nonnull @PathVariable("created") final Instant created) {
         final var id = new Game.Identifier(scenario, created);
         final Optional<Game> game = gameService.getGame(id);
         if (game.isPresent()) {

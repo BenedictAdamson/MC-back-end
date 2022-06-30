@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.rest.ScenarioResponse;
 import uk.badamson.mc.service.ScenarioSpringService;
 
 import javax.annotation.Nonnull;
