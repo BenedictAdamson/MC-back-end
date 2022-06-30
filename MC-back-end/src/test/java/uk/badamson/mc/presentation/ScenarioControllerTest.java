@@ -31,7 +31,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.NamedUUID;
-import uk.badamson.mc.Scenario;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.ScenarioSpringService;
 
@@ -41,7 +40,7 @@ import java.util.UUID;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,10 +107,8 @@ public class ScenarioControllerTest {
             response.andExpect(status().isOk());
             final var jsonResponse = response.andReturn().getResponse()
                     .getContentAsString();
-            final var scenario = objectMapper.readValue(jsonResponse,
-                    Scenario.class);
-            assertEquals(id, scenario.getIdentifier(),
-                    "scenario has the requested ID");
+            final var scenarioResponse = objectMapper.readValue(jsonResponse, ScenarioResponse.class);
+            assertThat(scenarioResponse.identifier(), is(id));
         }
 
     }
