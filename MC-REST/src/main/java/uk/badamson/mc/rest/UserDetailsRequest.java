@@ -18,11 +18,13 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uk.badamson.mc.BasicUserDetails;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
 
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record UserDetailsRequest(
         String username,
         String password,

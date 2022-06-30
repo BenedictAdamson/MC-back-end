@@ -19,6 +19,7 @@ package uk.badamson.mc.rest;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record UserResponse(
         @Nonnull @JsonProperty("id") UUID id,
         @Nonnull @JsonProperty("username") String username,

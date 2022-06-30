@@ -34,7 +34,10 @@ public record GamePlayersResponse(
 ) {
 
     @Nonnull
-    public static GamePlayersResponse convertToResponse(@Nonnull Game.Identifier identifier, @Nonnull GamePlayers gamePlayers) {
+    public static GamePlayersResponse convertToResponse(
+            @Nonnull Game.Identifier identifier,
+            @Nonnull GamePlayers gamePlayers
+    ) {
         return new GamePlayersResponse(
                 GameIdentifierResponse.convertToResponse(identifier),
                 gamePlayers.isRecruiting(),

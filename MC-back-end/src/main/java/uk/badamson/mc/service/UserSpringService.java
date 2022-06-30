@@ -24,9 +24,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.badamson.mc.BasicUserDetails;
+import uk.badamson.mc.User;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
+import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.spring.SpringUser;
-import uk.badamson.mc.spring.SpringUserDetails;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -54,22 +56,20 @@ public class UserSpringService implements UserDetailsService {
 
     @Transactional
     @Nonnull
-    public SpringUser add(@Nonnull final SpringUserDetails userDetails) {
-        return SpringUser.convertToSpring(
-                delegate.add(SpringUserDetails.convertFromSpring(userDetails))
-        );
+    public User add(@Nonnull final BasicUserDetails userDetails) {
+        return delegate.add(userDetails);
     }
 
     @Transactional
     @Nonnull
-    public Optional<SpringUser> getUser(@Nonnull final UUID id) {
-        return delegate.getUser(id).map(SpringUser::convertToSpring);
+    public Optional<User> getUser(@Nonnull final UUID id) {
+        return delegate.getUser(id);
     }
 
     @Transactional
     @Nonnull
-    public Stream<SpringUser> getUsers() {
-        return delegate.getUsers().map(SpringUser::convertToSpring);
+    public Stream<UserResponse> getUsers() {
+        return delegate.getUsers().map(UserResponse::convertToResponse);
     }
 
 
