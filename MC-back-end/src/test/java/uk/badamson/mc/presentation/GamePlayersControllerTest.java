@@ -301,12 +301,13 @@ public class GamePlayersControllerTest {
                 response.andExpect(status().isOk());
                 final var jsonResponse = response.andReturn().getResponse()
                         .getContentAsString();
-                final var gamePlayers = objectMapper.readValue(jsonResponse,
-                        GamePlayers.class);
-                assertAll("game-players",
-                        () -> assertThat("gameID", gamePlayers.getGame(), is(id)),
+                final var gamePlayersResponse = objectMapper.readValue(jsonResponse,
+                        GamePlayersResponse.class);
+                assertAll(
+                        () -> assertThat("scenario", gamePlayersResponse.game().scenario(), is(id.getScenario())),
+                        () -> assertThat("created", gamePlayersResponse.game().created(), is(id.getCreated())),
                         () -> assertThat("players",
-                                Set.copyOf(gamePlayers.getUsers().values()),
+                                Set.copyOf(gamePlayersResponse.users().values()),
                                 is(expectedPlayers)));
             }
 
