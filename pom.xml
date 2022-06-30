@@ -275,5 +275,6 @@
       <module>MC-front-end</module>
       <module>MC-integration</module>
       <module>MC-model</module>
+      <module>MC-REST</module>
    </modules>
 </project>
