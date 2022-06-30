@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.UUID;
 
-@SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "DTO")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersResponse(
         GameIdentifierResponse game,
         boolean recruiting,

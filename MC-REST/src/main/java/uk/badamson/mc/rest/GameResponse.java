@@ -43,6 +43,7 @@ public record GameResponse(
         WAITING_TO_START, RUNNING, STOPPED;
 
         private static final Map<Game.RunState, RunStateResponse> CONVERT_TO_RESPONSE_MAP;
+
         static {
             CONVERT_TO_RESPONSE_MAP = new EnumMap<>(Game.RunState.class);
             CONVERT_TO_RESPONSE_MAP.put(Game.RunState.WAITING_TO_START, RunStateResponse.WAITING_TO_START);

@@ -14,6 +14,8 @@ public enum AuthorityValue {
     ROLE_MANAGE_GAMES;
 
     private static final Map<Authority, AuthorityValue> CONVERT_TO_VALUE_MAP;
+    private static final Map<AuthorityValue, Authority> CONVERT_FROM_VALUE_MAP;
+
     static {
         CONVERT_TO_VALUE_MAP = new EnumMap<>(Authority.class);
         CONVERT_TO_VALUE_MAP.put(Authority.ROLE_PLAYER, AuthorityValue.ROLE_PLAYER);
@@ -21,7 +23,6 @@ public enum AuthorityValue {
         CONVERT_TO_VALUE_MAP.put(Authority.ROLE_MANAGE_GAMES, AuthorityValue.ROLE_MANAGE_GAMES);
     }
 
-    private static final Map<AuthorityValue, Authority> CONVERT_FROM_VALUE_MAP;
     static {
         CONVERT_FROM_VALUE_MAP = new EnumMap<>(AuthorityValue.class);
         CONVERT_FROM_VALUE_MAP.put(AuthorityValue.ROLE_PLAYER, Authority.ROLE_PLAYER);
@@ -35,7 +36,7 @@ public enum AuthorityValue {
     }
 
     @Nonnull
-    public static  Authority convertFromValue(@Nonnull AuthorityValue authority) {
+    public static Authority convertFromValue(@Nonnull AuthorityValue authority) {
         return CONVERT_FROM_VALUE_MAP.get(authority);
     }
 

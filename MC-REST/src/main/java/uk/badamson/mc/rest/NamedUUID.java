@@ -38,6 +38,32 @@ import java.util.UUID;
 @Immutable
 public final class NamedUUID {
 
+    private final UUID id;
+    private final String title;
+    /**
+     * <p>
+     * Construct an identifier with given attribute values.
+     * </p>
+     *
+     * @param id    The unique identifier.
+     * @param title A short human-readable identifier.
+     * @throws NullPointerException     <ul>
+     *                                  <li>If {@code id} is null</li>
+     *                                  <li>If {@code title} is null</li>
+     *                                  </ul>
+     * @throws IllegalArgumentException If the {@code title} is not {@linkplain #isValidTitle(String)
+     *                                  valid}.
+     */
+    @JsonCreator
+    public NamedUUID(@Nonnull @JsonProperty("id") final UUID id,
+                     @Nonnull @JsonProperty("title") final String title) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.title = Objects.requireNonNull(title, "title");
+        if (!isValidTitle(title)) {
+            throw new IllegalArgumentException("invalid title");
+        }
+    }
+
     /**
      * <p>
      * Whether a given text is valid as a {@linkplain #getTitle() title}
@@ -61,33 +87,6 @@ public final class NamedUUID {
         } else {
             final var length = text.length();
             return 0 < length && length <= 64;
-        }
-    }
-
-    private final UUID id;
-    private final String title;
-
-    /**
-     * <p>
-     * Construct an identifier with given attribute values.
-     * </p>
-     *
-     * @param id    The unique identifier.
-     * @param title A short human-readable identifier.
-     * @throws NullPointerException     <ul>
-     *                                             <li>If {@code id} is null</li>
-     *                                             <li>If {@code title} is null</li>
-     *                                             </ul>
-     * @throws IllegalArgumentException If the {@code title} is not {@linkplain #isValidTitle(String)
-     *                                  valid}.
-     */
-    @JsonCreator
-    public NamedUUID(@Nonnull @JsonProperty("id") final UUID id,
-                     @Nonnull @JsonProperty("title") final String title) {
-        this.id = Objects.requireNonNull(id, "id");
-        this.title = Objects.requireNonNull(title, "title");
-        if (!isValidTitle(title)) {
-            throw new IllegalArgumentException("invalid title");
         }
     }
 

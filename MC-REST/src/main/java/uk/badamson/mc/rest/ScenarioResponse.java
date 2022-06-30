@@ -26,12 +26,12 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "DTO")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record ScenarioResponse(
-    UUID identifier,
-    String title,
-    String description,
-    List<NamedUUID> characters
+        UUID identifier,
+        String title,
+        String description,
+        List<NamedUUID> characters
 ) {
 
     public static ScenarioResponse convertToResponse(@Nonnull Scenario scenario) {
