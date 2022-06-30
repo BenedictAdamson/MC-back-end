@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.repository.GameSpringRepository;
+import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
 import uk.badamson.mc.spring.SpringAuthority;

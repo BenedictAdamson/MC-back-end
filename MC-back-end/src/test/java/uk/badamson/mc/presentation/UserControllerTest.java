@@ -31,15 +31,18 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import uk.badamson.mc.Authority;
+import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
+import uk.badamson.mc.User;
+import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserSpringService;
-import uk.badamson.mc.spring.SpringUserDetails;
-import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
+import uk.badamson.mc.spring.SpringUserDetails;
 
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,23 +68,23 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
 
     private void assertEquivalentUserAttributes(final String message,
-                                                final SpringUserDetails expected, final SpringUserDetails actual)
+                                                final BasicUserDetails details, final UserResponse response)
             throws MultipleFailuresError {
         assertAll(message,
-                () -> assertThat("username", actual.getUsername(),
-                        is(expected.getUsername())),
-                () -> assertThat("authorities", actual.getAuthorities(),
-                        is(expected.getAuthorities())),
+                () -> assertThat("username", response.username(),
+                        is(details.getUsername())),
+                () -> assertThat("authorities", response.authorities(),
+                        is(AuthorityValue.convertToValue(details.getAuthorities()))),
                 () -> assertThat("accountNonExpired",
-                        actual.isAccountNonExpired(),
-                        is(expected.isAccountNonExpired())),
-                () -> assertThat("accountNonLocked", actual.isAccountNonLocked(),
-                        is(expected.isAccountNonLocked())),
+                        response.accountNonExpired(),
+                        is(details.isAccountNonExpired())),
+                () -> assertThat("accountNonLocked", response.accountNonLocked(),
+                        is(details.isAccountNonLocked())),
                 () -> assertThat("credentialsNonExpired",
-                        actual.isCredentialsNonExpired(),
-                        is(expected.isCredentialsNonExpired())),
-                () -> assertThat("enabled", actual.isEnabled(),
-                        is(expected.isEnabled())));
+                        response.credentialsNonExpired(),
+                        is(details.isCredentialsNonExpired())),
+                () -> assertThat("enabled", response.enabled(),
+                        is(details.isEnabled())));
     }
 
     @Nested
@@ -89,7 +92,7 @@ public class UserControllerTest {
 
         @Test
         public void administrator() throws Exception {
-            final var performingUser = Fixtures.createUserWithAllRoles();
+            final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
 
             final var response = test(performingUser, Fixtures.ADMINISTRATOR);
 
@@ -98,8 +101,8 @@ public class UserControllerTest {
 
         @Test
         public void duplicate() throws Exception {
-            final var performingUser = Fixtures.createUserWithAllRoles();
-            final var addedUser = Fixtures.createUserWithPlayerRole();
+            final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var addedUser = Fixtures.createBasicUserDetailsWithAllRoles();
 
             service.add(addedUser);
             final var response = test(performingUser, addedUser);
@@ -109,8 +112,8 @@ public class UserControllerTest {
 
         @Test
         public void noAuthentication() throws Exception {
-            final var performingUser = Fixtures.createUserWithAllRoles();
-            final var addedUser = Fixtures.createUserWithPlayerRole();
+            final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var addedUser = Fixtures.createBasicUserDetailsWithAllRoles();
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
@@ -122,35 +125,35 @@ public class UserControllerTest {
 
             response.andExpect(status().is4xxClientError());
             assertThat("User not added", service.getUsers().noneMatch(
-                    u -> u.getUsername().equals(addedUser.getUsername())));
+                    u -> u.username().equals(addedUser.getUsername())));
         }
 
         @Test
         public void noCsrfToken() throws Exception {
-            final var performingUser = Fixtures.createUserWithAllRoles();
-            final var addedUser = Fixtures.createUserWithPlayerRole();
+            final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var addedUser = Fixtures.createBasicUserDetailsWithAllRoles();
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUserDetails.convertToSpring(performingUser)))
                     .content(encoded);
 
             final var response = mockMvc.perform(request);
 
             assertAll(() -> response.andExpect(status().isForbidden()),
                     () -> assertThat("User not added",
-                            service.getUsers().noneMatch(u -> u.getUsername()
+                            service.getUsers().noneMatch(u -> u.username()
                                     .equals(addedUser.getUsername()))));
         }
 
-        private ResultActions test(final SpringUser performingUser,
-                                   final SpringUser addedUser) throws Exception {
+        private ResultActions test(final BasicUserDetails performingUser,
+                                   final BasicUserDetails addedUser) throws Exception {
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON).with(user(performingUser))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUserDetails.convertToSpring(performingUser)))
                     .with(csrf()).content(encoded);
 
             return mockMvc.perform(request);
@@ -161,35 +164,35 @@ public class UserControllerTest {
 
             @Test
             public void a() throws Exception {
-                test(Fixtures.createUserWithPlayerRole());
+                test(Fixtures.createBasicUserDetailsWithPlayerRole());
             }
 
             @Test
             public void b() throws Exception {
-                test(Fixtures.createUserWithManageGamesRole());
+                test(Fixtures.createBasicUserDetailsWithManageGamesRole());
             }
 
-            private void test(final SpringUser addedUser) throws Exception {
-                final var performingUser = Fixtures.createUserWithAllRoles();
+            private void test(final BasicUserDetails userDetails) throws Exception {
+                final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
                 assert performingUser.getAuthorities()
-                        .contains(SpringAuthority.ROLE_MANAGE_USERS);
-                final var response = Add.this.test(performingUser, addedUser);
+                        .contains(Authority.ROLE_MANAGE_USERS);
+                final var response = Add.this.test(performingUser, userDetails);
 
                 final var location = response.andReturn().getResponse()
                         .getHeaderValue("Location");
                 final var newUserOptional = service.getUsers().filter(
-                                u -> u.getUsername().equals(addedUser.getUsername()))
+                                u -> u.username().equals(userDetails.getUsername()))
                         .findAny();
                 assertTrue(newUserOptional.isPresent(),
                         "List of users includes the added user");// guard
                 final var newUser = newUserOptional.get();
                 assertAll(() -> response.andExpect(status().isFound()),
                         () -> assertEquals(
-                                UserController.createPathForUser(newUser.getId()),
+                                UserController.createPathForUser(newUser.id()),
                                 location,
                                 "redirection location is the resource for the added user"),
                         () -> assertEquivalentUserAttributes(
-                                "Added user has the given attributes", addedUser,
+                                "Added user has the given attributes", userDetails,
                                 newUser));
             }
         }
@@ -201,18 +204,18 @@ public class UserControllerTest {
 
         @Test
         public void a() throws Exception {
-            test(Fixtures.createUserWithAllRoles());
+            test(Fixtures.createBasicUserDetailsWithAllRoles());
         }
 
         @Test
         public void b() throws Exception {
-            test(Fixtures.createUserWithPlayerRole());
+            test(Fixtures.createBasicUserDetailsWithPlayerRole());
         }
 
-        private void test(final SpringUser user) throws Exception {
-            service.add(user);
+        private void test(final BasicUserDetails details) throws Exception {
+            final var user = service.add(details);
             final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
-                    .with(user(user)).with(csrf());
+                    .with(user(SpringUser.convertToSpring(user))).with(csrf());
 
             final var response = mockMvc.perform(request);
 
@@ -231,22 +234,22 @@ public class UserControllerTest {
             final var jsonResponse = response.andReturn().getResponse()
                     .getContentAsString();
             final var decodedResponse = objectMapper.readValue(jsonResponse,
-                    SpringUser.class);
+                    UserResponse.class);
             assertEquivalentUserAttributes("Response is the authenticated user",
-                    user, decodedResponse);
+                    details, decodedResponse);
         }
 
         @Test
         public void twice() throws Exception {
-            final var user = Fixtures.createUserWithAllRoles();
-            service.add(user);
+            final var basicUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var user = service.add(basicUserDetails);
             final var request1 = get("/api/self")
-                    .accept(MediaType.APPLICATION_JSON).with(user(user))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUser.convertToSpring(user)))
                     .with(csrf());
             mockMvc.perform(request1);
 
             final var request2 = get("/api/self")
-                    .accept(MediaType.APPLICATION_JSON).with(user(user))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUser.convertToSpring(user)))
                     .with(csrf());
             final var response2 = mockMvc.perform(request2);
             /*
@@ -262,10 +265,9 @@ public class UserControllerTest {
              */
             final var jsonResponse = response2.andReturn().getResponse()
                     .getContentAsString();
-            final var decodedResponse = objectMapper.readValue(jsonResponse,
-                    SpringUser.class);
+            final var decodedResponse = objectMapper.readValue(jsonResponse, UserResponse.class);
             assertEquivalentUserAttributes("Response is the authenticated user",
-                    user, decodedResponse);
+                    basicUserDetails, decodedResponse);
         }
 
         @Test
@@ -283,11 +285,11 @@ public class UserControllerTest {
 
         @Test
         public void wrongPassword() throws Exception {
-            final var user = Fixtures.createUserWithAllRoles();
+            final var basicUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
             final var wrongPassword = "****";
             final var headers = new HttpHeaders();
-            headers.setBasicAuth(user.getUsername(), wrongPassword);
-            service.add(user);
+            headers.setBasicAuth(basicUserDetails.getUsername(), wrongPassword);
+            service.add(basicUserDetails);
             final var request = get("/api/self").accept(MediaType.APPLICATION_JSON)
                     .headers(headers).with(csrf());
 
@@ -306,12 +308,12 @@ public class UserControllerTest {
             // request hasCSRF token
             // Tough test: requesting user has minimum authority
             final var requestingUserName = Fixtures.createUserName();
-            final var authorities = EnumSet.allOf(SpringAuthority.class);
-            authorities.remove(SpringAuthority.ROLE_MANAGE_USERS);
+            final var authorities = EnumSet.allOf(Authority.class);
+            authorities.remove(Authority.ROLE_MANAGE_USERS);
             final var requestingUser = service
-                    .add(new SpringUserDetails(requestingUserName, "password1",
+                    .add(new BasicUserDetails(requestingUserName, "password1",
                             authorities, true, true, true, true));
-            final var user = service.add(Fixtures.createUserWithAllRoles());
+            final var user = service.add(Fixtures.createBasicUserDetailsWithAllRoles());
             final var response = perform(user.getId(), requestingUser);
 
             response.andExpect(status().isForbidden());
@@ -320,19 +322,19 @@ public class UserControllerTest {
         @Test
         public void notLoggedIn() throws Exception {
             // Tough test: exists and has CSRF token
-            final var user = Fixtures.createUserWithAllRoles();
-            service.add(user);
+            final var basicUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var user = service.add(basicUserDetails);
             final var response = perform(user.getId(), null);
 
             response.andExpect(status().isUnauthorized());
         }
 
-        private ResultActions perform(final UUID id, final SpringUser requestingUser)
+        private ResultActions perform(final UUID id, final BasicUserDetails requestingUser)
                 throws Exception {
             final var path = UserController.createPathForUser(id);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
             if (requestingUser != null) {
-                request = request.with(user(requestingUser));
+                request = request.with(user(SpringUserDetails.convertToSpring(requestingUser)));
             }
 
             return mockMvc.perform(request);
@@ -351,27 +353,28 @@ public class UserControllerTest {
 
             @Test
             public void a() throws Exception {
-                testNonAdministrator(Fixtures.createUserName(), Fixtures.createUserWithPlayerRole());
+                testNonAdministrator(Fixtures.createUserName(), Fixtures.createBasicUserDetailsWithPlayerRole());
             }
 
             @Test
             public void administrator() throws Exception {
-                final Optional<SpringUser> userOptional = service.getUser(SpringUser.ADMINISTRATOR_ID);
+                final Optional<User> userOptional = service.getUser(SpringUser.ADMINISTRATOR_ID);
                 assertThat("user", userOptional.isPresent());
                 test(Fixtures.createUserName(), userOptional.get());
             }
 
             @Test
             public void b() throws Exception {
-                testNonAdministrator(Fixtures.createUserName(), Fixtures.createUserWithAllRoles());
+                testNonAdministrator(Fixtures.createUserName(), Fixtures.createBasicUserDetailsWithAllRoles());
             }
 
-            private void test(final String requestingUserName, final SpringUser user)
+            private void test(final String requestingUserName, final User user)
                     throws Exception {
                 // Tough test: requesting user has minimum authority
-                final var requestingUserDetails = new SpringUserDetails(
+                final var requestingUserDetails = new BasicUserDetails(
                         requestingUserName, "password1",
-                        Set.of(SpringAuthority.ROLE_MANAGE_USERS), true, true, true,
+                        EnumSet.of(Authority.ROLE_MANAGE_USERS),
+                        true, true, true,
                         true);
                 final var requestingUser = service.add(requestingUserDetails);
 
@@ -382,16 +385,16 @@ public class UserControllerTest {
                 final var jsonResponse = response.andReturn().getResponse()
                         .getContentAsString();
                 final var decodedResponse = objectMapper.readValue(jsonResponse,
-                        SpringUser.class);
+                        UserResponse.class);
                 assertAll("Response is the identified user",
                         () -> assertEquivalentUserAttributes("user details", user,
                                 decodedResponse),
-                        () -> assertEquals(user.getId(), decodedResponse.getId(),
+                        () -> assertEquals(user.getId(), decodedResponse.id(),
                                 "id"));
             }
 
             private void testNonAdministrator(final String requestingUserName,
-                                              final SpringUserDetails userDetails) throws Exception {
+                                              final BasicUserDetails userDetails) throws Exception {
                 assert !requestingUserName.equals(userDetails.getUsername());
                 final var user = service.add(userDetails);
                 test(requestingUserName, user);

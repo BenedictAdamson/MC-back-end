@@ -82,15 +82,15 @@ public class SpringUserDetails implements UserDetails {
 
 
     @Nonnull
-    public static SpringUserDetails convertToSpring(@Nonnull User user) {
+    public static SpringUserDetails convertToSpring(@Nonnull BasicUserDetails userDetails) {
         return new SpringUserDetails(
-                user.getUsername(),
-                user.getPassword(),
-                SpringAuthority.convertToSpring(user.getAuthorities()),
-                user.isAccountNonExpired(),
-                user.isAccountNonLocked(),
-                user.isCredentialsNonExpired(),
-                user.isEnabled()
+                userDetails.getUsername(),
+                userDetails.getPassword(),
+                SpringAuthority.convertToSpring(userDetails.getAuthorities()),
+                userDetails.isAccountNonExpired(),
+                userDetails.isAccountNonLocked(),
+                userDetails.isCredentialsNonExpired(),
+                userDetails.isEnabled()
         );
     }
 

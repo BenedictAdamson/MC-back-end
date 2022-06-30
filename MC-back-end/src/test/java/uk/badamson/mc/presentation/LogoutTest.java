@@ -28,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.service.UserSpringService;
+import uk.badamson.mc.spring.SpringUserDetails;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -52,7 +53,7 @@ public class LogoutTest {
 
     @Test
     public void logout_noAuthentication() throws Exception {
-        service.add(Fixtures.createUserWithAllRoles());
+        service.add(Fixtures.createBasicUserDetailsWithAllRoles());
         final var request = post(PATH).with(csrf());
 
         final var response = mockMvc.perform(request);
@@ -62,10 +63,12 @@ public class LogoutTest {
 
     @Test
     public void logout_noCsrfToken() throws Exception {
-        final var userDetails = Fixtures.createUserWithAllRoles();
+        final var userDetails = Fixtures.createBasicUserDetailsWithAllRoles();
         service.add(userDetails);
         final var session = new MockHttpSession();
-        final var request = post(PATH).with(user(userDetails)).session(session);
+        final var request = post(PATH)
+                .with(user(SpringUserDetails.convertToSpring(userDetails)))
+                .session(session);
 
         final var response = mockMvc.perform(request);
 
@@ -76,7 +79,7 @@ public class LogoutTest {
 
     @Test
     public void logout_noSession() throws Exception {
-        service.add(Fixtures.createUserWithAllRoles());
+        service.add(Fixtures.createBasicUserDetailsWithAllRoles());
         final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf());
 
         final var response = mockMvc.perform(request);
@@ -86,7 +89,7 @@ public class LogoutTest {
 
     @Test
     public void logout_withSession() throws Exception {
-        service.add(Fixtures.createUserWithAllRoles());
+        service.add(Fixtures.createBasicUserDetailsWithAllRoles());
         final var session = new MockHttpSession();
         final var request = post(PATH).with(user(Fixtures.createUserWithAllRoles())).with(csrf())
                 .session(session);

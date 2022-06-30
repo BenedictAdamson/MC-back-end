@@ -4,14 +4,15 @@ import com.fasterxml.jackson.core.type.TypeReference
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Unroll
-import uk.badamson.mc.*
-import uk.badamson.mc.spring.SpringAuthority
+import uk.badamson.mc.Authority
+import uk.badamson.mc.NamedUUID
+import uk.badamson.mc.Scenario
+import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.spring.SpringUser
 
 import java.time.Instant
 
 import static spock.util.matcher.HamcrestSupport.expect
-
 /** © Copyright Benedict Adamson 2019,20,22.
  *
  * This file is part of MC.
@@ -104,6 +105,6 @@ class ScenarioBESpec extends BESpecification {
         expect(gameCreationTimes, Matchers.not(Matchers.empty()))
 
         where:
-        role << [SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_GAMES]
+        role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]
     }
 }

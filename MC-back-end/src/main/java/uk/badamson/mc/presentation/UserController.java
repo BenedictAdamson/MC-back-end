@@ -28,8 +28,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.User;
+import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.UserDetailsRequest;
+import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserSpringService;
+import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUserDetails;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -112,9 +116,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @RolesAllowed("MANAGE_USERS")
     public ResponseEntity<Void> add(
-            @RequestBody final SpringUserDetails userDetails) {
+            @RequestBody final UserDetailsRequest userDetails) {
         try {
-            final var user = service.add(userDetails);
+            final var user = service.add(UserDetailsRequest.convertFromRequest(userDetails));
 
             final var location = URI.create(createPathForUser(user.getId()));
             final var headers = new HttpHeaders();
@@ -140,7 +144,7 @@ public class UserController {
      * @return The response.
      */
     @GetMapping("/api/user")
-    public Stream<SpringUser> getAll() {
+    public Stream<UserResponse> getAll() {
         return service.getUsers();
     }
 
@@ -156,9 +160,18 @@ public class UserController {
     @GetMapping("/api/self")
     @PreAuthorize("isAuthenticated()")
     @Nonnull
-    public SpringUser getSelf(@Nonnull @AuthenticationPrincipal final SpringUser user) {
+    public UserResponse getSelf(@Nonnull @AuthenticationPrincipal final SpringUser user) {
         Objects.requireNonNull(user, "user");
-        return user;
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                AuthorityValue.convertToValue(SpringAuthority.convertFromSpring(user.getAuthorities())),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+        );
     }
 
     /**
@@ -183,10 +196,10 @@ public class UserController {
     @GetMapping("/api/user/{id}")
     @RolesAllowed("MANAGE_USERS")
     @Nonnull
-    public SpringUser getUser(@Nonnull @PathVariable final UUID id) {
-        final Optional<SpringUser> user = service.getUser(id);
+    public UserResponse getUser(@Nonnull @PathVariable final UUID id) {
+        final Optional<User> user = service.getUser(id);
         if (user.isPresent()) {
-            return user.get();
+            return user.map(UserResponse::convertToResponse).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
         }

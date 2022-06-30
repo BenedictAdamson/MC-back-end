@@ -5,7 +5,10 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.User
-import uk.badamson.mc.spring.SpringAuthority
+import uk.badamson.mc.Authority
+import uk.badamson.mc.rest.AuthorityValue
+import uk.badamson.mc.rest.UserDetailsRequest
+import uk.badamson.mc.rest.UserResponse
 import uk.badamson.mc.spring.SpringUser
 import uk.badamson.mc.spring.SpringUserDetails
 
@@ -51,37 +54,37 @@ class UserBESpec extends BESpecification {
         expect(users, Matchers.not(Matchers.empty()))
 
         where:
-        role << [SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_USERS]
+        role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_USERS]
     }
 
     def "Examine user"() {
         given: "there is a user to examine"
-        def userToExamine = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_USERS))
+        def userToExamine = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
         and: "current user has the manage users role"
-        def currentUser = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_USERS))
+        def currentUser = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
         when: "try to examine the user"
         def response = requestGetUser(userToExamine.id, currentUser)
 
         then: "it provides the user"
-        def fetchedUser = expectEncodedResponse(response, SpringUser.class)
+        def fetchedUser = expectEncodedResponse(response, UserResponse.class)
 
         and: "the user includes the user name"
-        fetchedUser.username == userToExamine.username
+        fetchedUser.username() == userToExamine.username
 
         and: "the user lists the roles of the user"
-        fetchedUser.authorities == userToExamine.authorities
+        fetchedUser.authorities() == AuthorityValue.convertToValue(userToExamine.authorities)
     }
 
     def "Add user"() {
         given: "current user has the manage users role"
-        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_MANAGE_USERS))
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_USERS))
 
         when: "try to add a user named #userName with password #password"
-        def newBasicUserDetails = new SpringUserDetails(userName, password, Set.of(SpringAuthority.ROLE_PLAYER),
+        def requestBody = new UserDetailsRequest(userName, password, Set.of(AuthorityValue.ROLE_PLAYER),
                 false, false, false, true)
-        def response = requestAddUser(newBasicUserDetails, user)
+        def response = requestAddUser(requestBody, user)
 
         then: "accepts the addition"
         def location = expectFound(response)
@@ -99,13 +102,13 @@ class UserBESpec extends BESpecification {
 
     def "Only administrator may add user"() {
         given: "current user has the player role but not the manage users role"
-        def user = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
+        def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
         when: "try to add a user"
-        def newBasicUserDetails = new SpringUserDetails('Zoe', 'password',
-                Set.of(SpringAuthority.ROLE_PLAYER),
+        def requestBody = new UserDetailsRequest('Zoe', 'password',
+                Set.of(AuthorityValue.ROLE_PLAYER),
                 false, false, false, true)
-        def response = requestAddUser(newBasicUserDetails, user)
+        def response = requestAddUser(requestBody, user)
 
         then: "does not allow adding a user"
         response.andExpect(status().isForbidden())
@@ -113,10 +116,10 @@ class UserBESpec extends BESpecification {
 
     def "Only administrator my examine user"() {
         given: "current user has the player role but not the manage users role"
-        def currentUser = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
+        def currentUser = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
         and: "there is a user to examine"
-        def userToExamine = addUserWithAuthorities(EnumSet.of(SpringAuthority.ROLE_PLAYER))
+        def userToExamine = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
         when: "try to examine the user"
         final def response = requestGetUser(userToExamine.id, currentUser)

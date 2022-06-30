@@ -25,19 +25,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
+import uk.badamson.mc.rest.GamePlayersResponse;
 import uk.badamson.mc.service.GamePlayersSpringService;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
 import uk.badamson.mc.service.UserSpringService;
-import uk.badamson.mc.spring.SpringUserDetails;
-import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
 import java.time.Instant;
@@ -84,8 +82,8 @@ public class GamePlayersControllerTest {
         return game.getIdentifier();
     }
 
-    private SpringUser createUser(final Set<SpringAuthority> authorities) {
-        return userService.add(new SpringUserDetails(Fixtures.createUserName(), "password",
+    private User createUser(final Set<Authority> authorities) {
+        return userService.add(new BasicUserDetails(Fixtures.createUserName(), "password",
                 authorities, true, true, true, true));
     }
 
@@ -96,7 +94,7 @@ public class GamePlayersControllerTest {
         public void absent() throws Exception {
             final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
             // Tough test: user has authority
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             final var response = test(game, user, true);
 
             response.andExpect(status().isNotFound());
@@ -116,7 +114,7 @@ public class GamePlayersControllerTest {
         public void noCsrfToken() throws Exception {
             // Tough test: game exists and user has all authorities
             final var game = createGame();
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
 
             final var response = test(game, user, false);
 
@@ -129,7 +127,7 @@ public class GamePlayersControllerTest {
             // token provided
             final var game = createGame();
             final var authorities = EnumSet.complementOf(EnumSet
-                    .of(SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_GAMES));
+                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
             final var user = createUser(authorities);
 
             final var response = test(game, user, true);
@@ -143,7 +141,7 @@ public class GamePlayersControllerTest {
             final var expectedRedirectionLocation = GamePlayersController
                     .createPathForGamePlayersOf(game);
             // Tough test: user has a minimum set of authorities
-            final var authorities = EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES);
+            final var authorities = EnumSet.of(Authority.ROLE_MANAGE_GAMES);
             final var user = createUser(authorities);
 
             final var response = test(game, user, true);
@@ -155,13 +153,13 @@ public class GamePlayersControllerTest {
                             "redirection location"));
         }
 
-        private ResultActions test(final Game.Identifier id, final UserDetails user,
+        private ResultActions test(final Game.Identifier id, final User user,
                                    final boolean hasCsrfToken) throws Exception {
             final var path = GamePlayersController
                     .createPathForEndRecruitmentOf(id);
             var request = post(path);
             if (user != null) {
-                request = request.with(user(user));
+                request = request.with(user(SpringUser.convertToSpring(user)));
             }
             if (hasCsrfToken) {
                 request = request.with(csrf());
@@ -179,7 +177,7 @@ public class GamePlayersControllerTest {
         public void hasCurrentGame() throws Exception {
             final var game = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = createUser(EnumSet.of(SpringAuthority.ROLE_PLAYER));
+            final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
             gamePlayersService.userJoinsGame(user.getId(), game);
 
             final var response = test(user);
@@ -205,17 +203,17 @@ public class GamePlayersControllerTest {
         @Test
         public void noGames() throws Exception {
             // Tough test: user has all authorities
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             final var response = test(user);
 
             response.andExpect(status().isNotFound());
         }
 
-        private ResultActions test(final UserDetails user) throws Exception {
+        private ResultActions test(final User user) throws Exception {
             var request = get(GamePlayersController.CURRENT_GAME_PATH)
                     .with(csrf());
             if (user != null) {
-                request = request.with(user(user));
+                request = request.with(user(SpringUser.convertToSpring(user)));
             }
 
             return mockMvc.perform(request);
@@ -230,7 +228,7 @@ public class GamePlayersControllerTest {
         public void absent() throws Exception {
             final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
             // Tough test: user has authority
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             final var response = test(game, user);
 
             response.andExpect(status().isNotFound());
@@ -250,7 +248,7 @@ public class GamePlayersControllerTest {
         public void notPermitted() throws Exception {
             // Tough test: game exists and user has all the other authorities
             final var authorities = EnumSet.complementOf(EnumSet
-                    .of(SpringAuthority.ROLE_PLAYER, SpringAuthority.ROLE_MANAGE_GAMES));
+                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
             final var user = createUser(authorities);
             final var game = createGame();
 
@@ -259,12 +257,12 @@ public class GamePlayersControllerTest {
             response.andExpect(status().isForbidden());
         }
 
-        private ResultActions test(final Game.Identifier id, final UserDetails user)
+        private ResultActions test(final Game.Identifier id, final User user)
                 throws Exception {
             final var path = GamePlayersController.createPathForGamePlayersOf(id);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
             if (user != null) {
-                request = request.with(user(user));
+                request = request.with(user(SpringUser.convertToSpring(user)));
             }
 
             return mockMvc.perform(request);
@@ -275,20 +273,21 @@ public class GamePlayersControllerTest {
 
             @Test
             public void asGamesManager() throws Exception {
-                test(SpringAuthority.ROLE_MANAGE_GAMES, true);
+                test(Authority.ROLE_MANAGE_GAMES, true);
             }
 
             @Test
             public void asPlayer() throws Exception {
-                test(SpringAuthority.ROLE_PLAYER, false);
+                test(Authority.ROLE_PLAYER, false);
             }
 
-            private void test(final SpringAuthority authority,
+            private void test(final Authority authority,
                               final boolean expectListsOtherPlayer) throws Exception {
                 // Tough test: user has a minimum set of authorities
                 final var user = createUser(EnumSet.of(authority));
-                final var player = userService.add(new SpringUserDetails(Fixtures.createUserName(),
-                        "password", EnumSet.of(SpringAuthority.ROLE_PLAYER), true, true,
+                final var player = userService.add(new BasicUserDetails(Fixtures.createUserName(),
+                        "password", EnumSet.of(Authority.ROLE_PLAYER),
+                        true, true,
                         true, true));
                 final var id = createGame();
                 gamePlayersService.userJoinsGame(player.getId(), id);
@@ -322,7 +321,7 @@ public class GamePlayersControllerTest {
         public void absent() throws Exception {
             final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
             // Tough test: user has authority
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             final var response = performRequest(game, user, true);
 
             response.andExpect(status().isNotFound());
@@ -342,7 +341,7 @@ public class GamePlayersControllerTest {
         public void noCsrfToken() throws Exception {
             // Tough test: game exists and user has all authorities
             final var game = createGame();
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
 
             final var response = performRequest(game, user, false);
 
@@ -363,7 +362,7 @@ public class GamePlayersControllerTest {
              */
             final var game = createGame();
             final var authorities = EnumSet
-                    .complementOf(EnumSet.of(SpringAuthority.ROLE_PLAYER));
+                    .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = createUser(authorities);
 
             final var response = performRequest(game, user, true);
@@ -384,7 +383,7 @@ public class GamePlayersControllerTest {
              * provided
              */
             final var game = createGame();
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             gamePlayersService.endRecruitment(game);
 
             final var response = performRequest(game, user, true);
@@ -399,11 +398,11 @@ public class GamePlayersControllerTest {
         }
 
         private ResultActions performRequest(final Game.Identifier game,
-                                             final SpringUser user, final boolean hasCsrfToken) throws Exception {
+                                             final User user, final boolean hasCsrfToken) throws Exception {
             final var path = GamePlayersController.createPathForJoining(game);
             var request = post(path);
             if (user != null) {
-                request = request.with(user(user));
+                request = request.with(user(SpringUser.convertToSpring(user)));
             }
             if (hasCsrfToken) {
                 request = request.with(csrf());
@@ -422,7 +421,7 @@ public class GamePlayersControllerTest {
             Thread.sleep(10);// ensure can create a game with a new unique ID
             final var gameB = createGame();
             assert !gameA.equals(gameB);
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             gamePlayersService.userJoinsGame(user.getId(), gameA);
 
             final var response = performRequest(gameB, user, true);
@@ -443,7 +442,7 @@ public class GamePlayersControllerTest {
             final var expectedRedirectionLocation = GamePlayersController
                     .createPathForGamePlayersOf(game);
             // Tough test: user has a minimum set of authorities
-            final var authorities = EnumSet.of(SpringAuthority.ROLE_PLAYER);
+            final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
             final var user = createUser(authorities);
 
             final var response = performRequest(game, user, true);
@@ -483,7 +482,7 @@ public class GamePlayersControllerTest {
         public void may() throws Exception {
             final var game = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = createUser(EnumSet.of(SpringAuthority.ROLE_PLAYER));
+            final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
 
             final var response = test(game, user);
 
@@ -506,7 +505,7 @@ public class GamePlayersControllerTest {
             final var game = createGame();
             gamePlayersService.endRecruitment(game);
             // Tough test: user has full authority
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
 
             final var response = test(game, user);
 
@@ -514,14 +513,14 @@ public class GamePlayersControllerTest {
             assertFalse(may);
         }
 
-        private ResultActions test(final Game.Identifier game, final SpringUser user)
+        private ResultActions test(final Game.Identifier game, final User user)
                 throws Exception {
             final var path = GamePlayersController
                     .createPathForMayJoinQueryOf(game);
             var request = get(path).accept(MediaType.APPLICATION_JSON)
                     .with(csrf());
             if (user != null) {
-                request = request.with(user(user));
+                request = request.with(user(SpringUser.convertToSpring(user)));
             }
 
             return mockMvc.perform(request);
@@ -531,7 +530,7 @@ public class GamePlayersControllerTest {
         public void unknownGame() throws Exception {
             final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
             // Tough test: user has all authorities
-            final var user = createUser(SpringAuthority.ALL);
+            final var user = createUser(Authority.ALL);
             final var response = test(game, user);
 
             response.andExpect(status().isNotFound());
@@ -541,7 +540,7 @@ public class GamePlayersControllerTest {
         public void userNotPermitted() throws Exception {
             // Tough test: game exists and user has all the other authorities
             final var authorities = EnumSet
-                    .complementOf(EnumSet.of(SpringAuthority.ROLE_PLAYER));
+                    .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = createUser(authorities);
             final var id = createGame();
 
