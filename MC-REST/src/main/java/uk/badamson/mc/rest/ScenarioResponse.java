@@ -19,12 +19,12 @@ package uk.badamson.mc.rest;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record ScenarioResponse(
@@ -36,7 +36,8 @@ public record ScenarioResponse(
 
     public static ScenarioResponse convertToResponse(@Nonnull Scenario scenario) {
         return new ScenarioResponse(
-                scenario.getIdentifier(), scenario.getTitle(), scenario.getDescription(), scenario.getCharacters()
+                scenario.getIdentifier(), scenario.getTitle(), scenario.getDescription(),
+                scenario.getCharacters().stream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle())).collect(Collectors.toUnmodifiableList())
         );
     }
 }
