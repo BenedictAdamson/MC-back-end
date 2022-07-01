@@ -5,10 +5,10 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Unroll
 import uk.badamson.mc.Authority
-import uk.badamson.mc.NamedUUID
-import uk.badamson.mc.Scenario
 import uk.badamson.mc.TestConfiguration
-import uk.badamson.mc.spring.SpringUser
+import uk.badamson.mc.User
+import uk.badamson.mc.rest.NamedUUID
+import uk.badamson.mc.rest.ScenarioResponse
 
 import java.time.Instant
 
@@ -40,7 +40,7 @@ class ScenarioBESpec extends BESpecification {
 
     def "List scenarios"() {
         given: "not logged in"
-        final SpringUser user = null
+        final User user = null
 
         when: "examine scenarios"
         def response = requestGetScenarios(user)
@@ -56,21 +56,21 @@ class ScenarioBESpec extends BESpecification {
         gameService.create(scenarioId).identifier
 
         and: "not logged in"
-        final SpringUser user = null
+        final User user = null
 
         when: "try to examine the scenario"
         final def scenarioResponse = requestGetScenario(scenarioId, user)
         final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
 
         then: "provides the scenario"
-        def scenario = expectEncodedResponse(scenarioResponse, Scenario.class)
+        def scenario = expectEncodedResponse(scenarioResponse, ScenarioResponse.class)
         def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
 
         and: "the scenario includes the scenario description"
-        expect(scenario.description, Matchers.not(Matchers.emptyOrNullString()))
+        expect(scenario.description(), Matchers.not(Matchers.emptyOrNullString()))
 
         and: "the scenario includes the list of playable characters of that scenario"
-        expect(scenario.characters, Matchers.not(Matchers.empty()))
+        expect(scenario.characters(), Matchers.not(Matchers.empty()))
 
         and: "the scenario has a list of games of that scenario"
         expect(gameCreationTimes, Matchers.not(Matchers.empty()))
@@ -90,14 +90,14 @@ class ScenarioBESpec extends BESpecification {
         final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
 
         then: "provides the scenario"
-        def scenario = expectEncodedResponse(scenarioResponse, Scenario.class)
+        def scenario = expectEncodedResponse(scenarioResponse, ScenarioResponse.class)
         def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
 
         then: "the scenario includes the scenario description"
-        expect(scenario.description, Matchers.not(Matchers.emptyOrNullString()))
+        expect(scenario.description(), Matchers.not(Matchers.emptyOrNullString()))
 
         and: "the scenario includes the list of playable characters of that scenario"
-        expect(scenario.characters, Matchers.not(Matchers.empty()))
+        expect(scenario.characters(), Matchers.not(Matchers.empty()))
 
         and: "the scenario includes the list of games of that scenario"
 

@@ -2,10 +2,11 @@ package uk.badamson.mc.service
 
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.Game
-import uk.badamson.mc.GamePlayers
-import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.Authority
+import uk.badamson.mc.Game
+import uk.badamson.mc.TestConfiguration
+import uk.badamson.mc.rest.GamePlayersResponse
+import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
@@ -52,33 +53,33 @@ class GameBESpec extends BESpecification {
         gameResponse.andExpect(status().isOk())
         gamePlayersResponse.andExpect(status().isOk())
         mayJoinResponse.andExpect(status().isOk())
-        def game = expectEncodedResponse(gameResponse, Game.class)
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def game = expectEncodedResponse(gameResponse, GameResponse.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
         def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         and: "the game indicates its scenario"
-        game.identifier.scenario == scenarioId
+        game.identifier().scenario() == scenarioId
 
         and: "the game indicates the date and time that the game was set up"
-        game.identifier.created != null
+        game.identifier().created() != null
 
         and: "the game indicates whether it is recruiting players"
-        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
+        expect(gamePlayers.recruiting(), Matchers.instanceOf(Boolean.class))
 
         and: "the game indicates whether the user may join the game"
         mayJoin != null
 
         and: "the game indicates whether it has players"
-        gamePlayers.users != null
+        gamePlayers.users() != null
 
         and: "the game indicates whether it is running"
-        game.runState != null
+        game.runState() != null
 
         and: "the game indicates which character (if any) the user is playing"
-        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
+        expect(gamePlayers.users(), Matchers.instanceOf(Map.class))
 
         and: "the game does not indicate which characters are played by which (other) users"
-        gamePlayers.users.values().stream().map(userId -> !(userId == user.id)).count() == 0
+        gamePlayers.users().values().stream().map(userId -> !(userId == user.id)).count() == 0
     }
 
     def "Examine game as game manager"() {
@@ -97,32 +98,32 @@ class GameBESpec extends BESpecification {
         then: "provides the game"
         gameResponse.andExpect(status().isOk())
         gamePlayersResponse.andExpect(status().isOk())
-        def game = expectEncodedResponse(gameResponse, Game.class)
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def game = expectEncodedResponse(gameResponse, GameResponse.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
 
         and: "the game indicates its scenario"
-        game.identifier.scenario == scenarioId
+        game.identifier().scenario() == scenarioId
 
         and: "the game indicates the date and time that the game was set up"
-        game.identifier.created != null
+        game.identifier().created() != null
 
         and: "the game indicates whether it is recruiting players"
-        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
+        expect(gamePlayers.recruiting(), Matchers.instanceOf(Boolean.class))
 
         and: "the game indicates that the user may not join the game"
         mayJoinResponse.andExpect(status().isForbidden())
 
         and: "the game indicates whether it has players"
-        gamePlayers.users != null
+        gamePlayers.users() != null
 
         and: "the game indicates whether it is running"
-        game.runState != null
+        game.runState() != null
 
         and: "the game indicates which character (if any) the user is playing"
-        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
+        expect(gamePlayers.users(), Matchers.instanceOf(Map.class))
 
         and: "the game indicates which characters are played by which users"
-        expect(gamePlayers.users, Matchers.instanceOf(Map.class))
+        expect(gamePlayers.users(), Matchers.instanceOf(Map.class))
     }
 
     def "Add game"() {
@@ -229,14 +230,14 @@ class GameBESpec extends BESpecification {
         then: "provides the game"
         gamePlayersResponse.andExpect(status().isOk())
         mayJoinResponse.andExpect(status().isOk())
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayers.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
         def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         then: "the game indicates that the user may join the game"
         mayJoin
 
         and: "the game indicates that the user is not playing the game"
-        expect(gamePlayers.users.values(), Matchers.not(Matchers.hasItem(user.id)))
+        expect(gamePlayers.users().values(), Matchers.not(Matchers.hasItem(user.id)))
     }
 
     def "Join a game"() {

@@ -48,7 +48,7 @@ class UserBESpec extends BESpecification {
         def response = requestGetUsers(user)
 
         then: "it provides the list of users"
-        def users = expectEncodedResponse(response, new TypeReference<List<User>>() {})
+        def users = expectEncodedResponse(response, new TypeReference<List<UserResponse>>() {})
 
         and: "the list of users has at least one user"
         expect(users, Matchers.not(Matchers.empty()))
