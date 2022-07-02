@@ -47,4 +47,17 @@ public record UserDetailsRequest(
                 request.enabled()
         );
     }
+
+    @Nonnull
+    public static UserDetailsRequest convertToRequest(@Nonnull BasicUserDetails details) {
+        return new UserDetailsRequest(
+                details.getUsername(),
+                details.getPassword(),
+                AuthorityValue.convertToValue(details.getAuthorities()),
+                details.isAccountNonExpired(),
+                details.isAccountNonLocked(),
+                details.isCredentialsNonExpired(),
+                details.isEnabled()
+        );
+    }
 }
