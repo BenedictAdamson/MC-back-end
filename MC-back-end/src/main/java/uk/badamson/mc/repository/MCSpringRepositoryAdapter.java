@@ -58,22 +58,27 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     public final class AdapterContext extends Context {
 
         @Override
-        public void saveGame(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        protected void addGameUncached(@Nonnull Game.Identifier id, @Nonnull Game game) {
+            gameRepository.save(GameDTO.convertToDTO(id, game));
+        }
+
+        @Override
+        protected void updateGameUncached(@Nonnull Game.Identifier id, @Nonnull Game game) {
             gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
         @Nonnull
         @Override
-        public Optional<Game> findGame(@Nonnull Game.Identifier id) {
+        protected Optional<Game> findGameUncached(@Nonnull Game.Identifier id) {
             return gameRepository.findById(GameIdentifierDTO.convertToDTO(id))
                     .map(GameDTO::convertFromDTO);
         }
 
         @Nonnull
         @Override
-        public Stream<Game> findAllGames() {
+        protected Stream<Game.Identifier> findAllGameIdentifiersUncached() {
             return StreamSupport.stream(gameRepository.findAll().spliterator(), false)
-                    .map(GameDTO::convertFromDTO);
+                    .map(game -> GameIdentifierDTO.convertFromDTO(game.identifier()));
         }
 
         @Override
@@ -120,11 +125,6 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         @Override
         public void saveUser(@Nonnull UUID id, @Nonnull User user) {
             userRepository.save(SpringUser.convertToSpring(user));
-        }
-
-        @Override
-        public void close() {
-            // Do nothing
         }
     }
 }
