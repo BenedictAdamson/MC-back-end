@@ -99,12 +99,17 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        public Optional<UserGameAssociation> findCurrentUserGame(@Nonnull UUID userId) {
+        protected Optional<UserGameAssociation> findCurrentUserGameUncached(@Nonnull UUID userId) {
             return currentUserGameRepository.findById(userId).map(UserGameAssociationDTO::convertFromDTO);
         }
 
         @Override
-        public void saveCurrentUserGame(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
+        protected void addCurrentUserGameUncached(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
+            currentUserGameRepository.save(UserGameAssociationDTO.convertToDTO(userId, association));
+        }
+
+        @Override
+        protected void updateCurrentUserGameUncached(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
             currentUserGameRepository.save(UserGameAssociationDTO.convertToDTO(userId, association));
         }
 
