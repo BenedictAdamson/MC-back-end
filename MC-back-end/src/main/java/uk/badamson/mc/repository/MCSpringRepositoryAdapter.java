@@ -82,13 +82,18 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         }
 
         @Override
-        public void saveGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
+        protected void addGamePlayersUncached(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
+            gamePlayersRepository.save(GamePlayersDTO.convertToDTO(id, gamePlayers));
+        }
+
+        @Override
+        protected void updateGamePlayersUncached(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
             gamePlayersRepository.save(GamePlayersDTO.convertToDTO(id, gamePlayers));
         }
 
         @Nonnull
         @Override
-        public Optional<GamePlayers> findGamePlayers(@Nonnull Game.Identifier id) {
+        protected Optional<GamePlayers> findGamePlayersUncached(@Nonnull Game.Identifier id) {
             return gamePlayersRepository.findById(GameIdentifierDTO.convertToDTO(id)).map(GamePlayersDTO::convertFromDTO);
         }
 
