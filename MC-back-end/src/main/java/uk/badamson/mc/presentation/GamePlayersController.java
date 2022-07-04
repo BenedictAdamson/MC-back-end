@@ -33,10 +33,7 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.rest.GamePlayersResponse;
-import uk.badamson.mc.service.GamePlayersService;
-import uk.badamson.mc.service.GamePlayersSpringService;
-import uk.badamson.mc.service.IllegalGameStateException;
-import uk.badamson.mc.service.UserAlreadyPlayingException;
+import uk.badamson.mc.service.*;
 import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -73,12 +70,12 @@ public class GamePlayersController {
     public static final String MAY_JOIN_PARAM = "mayJoin";
 
     public static final String JOIN_PARAM = "join";
-    private final GamePlayersSpringService gamePlayersService;
+    private final GameSpringService gameSpringService;
 
     @Autowired
     public GamePlayersController(
-            @Nonnull final GamePlayersSpringService gamePlayersService) {
-        this.gamePlayersService = Objects.requireNonNull(gamePlayersService);
+            @Nonnull final GameSpringService gameSpringService) {
+        this.gameSpringService = Objects.requireNonNull(gameSpringService);
     }
 
     /**
@@ -170,7 +167,7 @@ public class GamePlayersController {
      * creation time</li>
      * </ul>
      * <ul>
-     * <li>{@linkplain GamePlayersService#endRecruitment(Identifier) ends
+     * <li>{@linkplain GameSpringService#endRecruitment(Identifier) ends
      * recruitment} for the game with the given ID.</li>
      * <li>Returns a redirect to the modified game players resource. That is, a
      * response with
@@ -207,7 +204,7 @@ public class GamePlayersController {
             @Nonnull @PathVariable("created") final Instant created) {
         final var id = new Game.Identifier(scenario, created);
         try {
-            gamePlayersService.endRecruitment(id);
+            gameSpringService.endRecruitment(id);
             final var location = URI.create(createPathForGamePlayersOf(id));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
@@ -231,7 +228,7 @@ public class GamePlayersController {
                     "Not Found Because Unauthorized");
 
         }
-        final Optional<Identifier> gameId = gamePlayersService.getCurrentGameOfUser(user.getId());
+        final Optional<Identifier> gameId = gameSpringService.getCurrentGameOfUser(user.getId());
         if (gameId.isPresent()) {
             final var headers = new HttpHeaders();
             headers.setLocation(URI.create(GameController.createPathFor(gameId.get())));
@@ -288,9 +285,9 @@ public class GamePlayersController {
 
         final Optional<GamePlayers> gamePlayers;
         if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
-            gamePlayers = gamePlayersService.getGamePlayersAsGameManager(id);
+            gamePlayers = gameSpringService.getGamePlayersAsGameManager(id);
         } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
-            gamePlayers = gamePlayersService.getGamePlayersAsNonGameManager(id,
+            gamePlayers = gameSpringService.getGamePlayersAsNonGameManager(id,
                     user.getId());
         } else {
             throw new IllegalArgumentException("Request not permitted for role");
@@ -363,7 +360,7 @@ public class GamePlayersController {
         Objects.requireNonNull(user, "user");
         final var game = new Game.Identifier(scenario, created);
         try {
-            gamePlayersService.userJoinsGame(user.getId(), game);
+            gameSpringService.userJoinsGame(user.getId(), game);
             final var location = URI.create(createPathForGamePlayersOf(game));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
@@ -418,8 +415,8 @@ public class GamePlayersController {
                                @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
         final var game = new Game.Identifier(scenario, created);
-        if (gamePlayersService.getGamePlayersAsGameManager(game).isPresent()) {
-            return gamePlayersService.mayUserJoinGame(user.getId(), game);
+        if (gameSpringService.getGamePlayersAsGameManager(game).isPresent()) {
+            return gameSpringService.mayUserJoinGame(user.getId(), game);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
         }

@@ -141,7 +141,7 @@ class GameBESpec extends BESpecification {
         location != null
         final def gameId = parseGamePath(location)
         final def gameOptional = gameService.getGame(gameId)
-        final def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        final def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
         gameOptional.isPresent()
         gamePlayersOptional.isPresent()
         final def game = gameOptional.get()
@@ -194,7 +194,7 @@ class GameBESpec extends BESpecification {
         parseGamePlayersPath(location) == gameId
 
         and: "the game indicates that it is not recruiting players"
-        final def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        final def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
         gamePlayersOptional.isPresent()
         final def gamePlayers = gamePlayersOptional.get()
         !gamePlayers.recruiting
@@ -255,7 +255,7 @@ class GameBESpec extends BESpecification {
         final def location = expectFound(response)
         location != null
         parseGamePlayersPath(location) == gameId
-        def gamePlayersOptional = gamePlayersService.getGamePlayersAsGameManager(gameId)
+        def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
         gamePlayersOptional.isPresent()
         def gamePlayers = gamePlayersOptional.get()
 

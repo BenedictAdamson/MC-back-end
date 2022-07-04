@@ -59,7 +59,7 @@ class CurrentGameBESpec extends BESpecification {
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
         and: "user is playing the game"
-        gamePlayersService.userJoinsGame(user.id, gameId)
+        gameService.userJoinsGame(user.id, gameId)
 
         when: "examine whether have a current game while logged in"
         def response = requestGetCurrentGame(user)

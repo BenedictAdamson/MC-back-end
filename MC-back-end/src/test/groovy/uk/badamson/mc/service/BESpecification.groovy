@@ -71,9 +71,6 @@ abstract class BESpecification extends Specification {
     protected GameSpringService gameService
 
     @Autowired
-    protected GamePlayersSpringService gamePlayersService
-
-    @Autowired
     protected UserSpringService userService
 
     @Autowired

@@ -66,8 +66,6 @@ public class GamePlayersControllerTest {
     @Autowired
     UserSpringService userService;
     @Autowired
-    GamePlayersSpringService gamePlayersService;
-    @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
@@ -178,7 +176,7 @@ public class GamePlayersControllerTest {
             final var game = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
-            gamePlayersService.userJoinsGame(user.getId(), game);
+            gameService.userJoinsGame(user.getId(), game);
 
             final var response = test(user);
 
@@ -290,7 +288,7 @@ public class GamePlayersControllerTest {
                         true, true,
                         true, true));
                 final var id = createGame();
-                gamePlayersService.userJoinsGame(player.getId(), id);
+                gameService.userJoinsGame(player.getId(), id);
                 final var expectedPlayers = expectListsOtherPlayer
                         ? Set.of(player.getId())
                         : Set.of();
@@ -346,7 +344,7 @@ public class GamePlayersControllerTest {
             final var response = performRequest(game, user, false);
 
             response.andExpect(status().isForbidden());
-            final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+            final Optional<GamePlayers> gamePlayersOptional = gameService
                     .getGamePlayersAsGameManager(game);
             assertThat("gamePlayers", gamePlayersOptional.isPresent());
             final var gamePlayers = gamePlayersOptional.get();
@@ -368,7 +366,7 @@ public class GamePlayersControllerTest {
             final var response = performRequest(game, user, true);
 
             response.andExpect(status().isForbidden());
-            final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+            final Optional<GamePlayers> gamePlayersOptional = gameService
                     .getGamePlayersAsGameManager(game);
             assertThat("gamePlayers", gamePlayersOptional.isPresent());
             final var gamePlayers = gamePlayersOptional.get();
@@ -384,12 +382,12 @@ public class GamePlayersControllerTest {
              */
             final var game = createGame();
             final var user = createUser(Authority.ALL);
-            gamePlayersService.endRecruitment(game);
+            gameService.endRecruitment(game);
 
             final var response = performRequest(game, user, true);
 
             response.andExpect(status().isConflict());
-            Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+            Optional<GamePlayers> gamePlayersOptional = gameService
                     .getGamePlayersAsGameManager(game);
             assertThat("gamePlayers", gamePlayersOptional.isPresent());
             final var gamePlayers = gamePlayersOptional.get();
@@ -422,11 +420,11 @@ public class GamePlayersControllerTest {
             final var gameB = createGame();
             assert !gameA.equals(gameB);
             final var user = createUser(Authority.ALL);
-            gamePlayersService.userJoinsGame(user.getId(), gameA);
+            gameService.userJoinsGame(user.getId(), gameA);
 
             final var response = performRequest(gameB, user, true);
 
-            final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+            final Optional<GamePlayers> gamePlayersOptional = gameService
                     .getGamePlayersAsGameManager(gameB);
             assertThat("gamePlayers", gamePlayersOptional.isPresent());
             final var gamePlayers = gamePlayersOptional.get();
@@ -449,11 +447,11 @@ public class GamePlayersControllerTest {
 
             final var location = response.andReturn().getResponse()
                     .getHeaderValue("Location");
-            final Optional<GamePlayers> gamePlayersOptional = gamePlayersService
+            final Optional<GamePlayers> gamePlayersOptional = gameService
                     .getGamePlayersAsGameManager(game);
             assertThat("gamePlayers", gamePlayersOptional.isPresent());
             final var gamePlayers = gamePlayersOptional.get();
-            final var currentGame = gamePlayersService
+            final var currentGame = gameService
                     .getCurrentGameOfUser(user.getId());
             assertAll(() -> response.andExpect(status().isFound()),
                     () -> assertEquals(expectedRedirectionLocation, location,
@@ -503,7 +501,7 @@ public class GamePlayersControllerTest {
         @Test
         public void recruitmentEnded() throws Exception {
             final var game = createGame();
-            gamePlayersService.endRecruitment(game);
+            gameService.endRecruitment(game);
             // Tough test: user has full authority
             final var user = createUser(Authority.ALL);
 
