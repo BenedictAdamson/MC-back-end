@@ -25,9 +25,7 @@ import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -115,25 +113,30 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        public Optional<User> findUserByUsername(@Nonnull String username) {
-            return userRepository.findByUsername(username).map(SpringUser::convertFromSpring);
+        protected Optional<UUID> findUserIdForUsernameUncached(@Nonnull String username) {
+            return userRepository.findByUsername(username).map(SpringUser::getId);
         }
 
         @Nonnull
         @Override
-        public Optional<User> findUser(@Nonnull UUID id) {
+        protected Optional<User> findUserUncached(@Nonnull UUID id) {
             return userRepository.findById(id).map(SpringUser::convertFromSpring);
         }
 
         @Nonnull
         @Override
-        public Stream<User> findAllUsers() {
+        protected Stream<Map.Entry<UUID,User>> findAllUsersUncached() {
             return StreamSupport.stream(userRepository.findAll().spliterator(), false)
-                    .map(SpringUser::convertFromSpring);
+                    .map(u -> new AbstractMap.SimpleImmutableEntry<>(u.getId(), SpringUser.convertFromSpring(u)));
         }
 
         @Override
-        public void saveUser(@Nonnull UUID id, @Nonnull User user) {
+        protected void addUserUncached(@Nonnull UUID id, @Nonnull User user) {
+            userRepository.save(SpringUser.convertToSpring(user));
+        }
+
+        @Override
+        protected void updateUserUncached(@Nonnull UUID id, @Nonnull User user) {
             userRepository.save(SpringUser.convertToSpring(user));
         }
     }
