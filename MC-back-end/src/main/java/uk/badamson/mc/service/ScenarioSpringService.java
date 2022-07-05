@@ -21,7 +21,6 @@ package uk.badamson.mc.service;
 import org.springframework.stereotype.Service;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.repository.MCRepository;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
