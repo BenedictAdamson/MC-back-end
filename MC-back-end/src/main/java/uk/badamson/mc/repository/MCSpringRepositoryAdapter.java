@@ -26,8 +26,6 @@ import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class MCSpringRepositoryAdapter extends MCRepository {
 
@@ -74,12 +72,15 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        protected Stream<Map.Entry<Game.Identifier, Game>> findAllGamesUncached() {
-            return StreamSupport.stream(gameRepository.findAll().spliterator(), false)
-                    .map(gameDTO -> new AbstractMap.SimpleImmutableEntry<>(
-                            GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),
-                            GameDTO.convertFromDTO(gameDTO)
-                    ));
+        protected Iterable<Map.Entry<Game.Identifier, Game>> findAllGamesUncached() {
+            List<Map.Entry<Game.Identifier, Game>> result = new ArrayList<>();
+            for (var gameDTO: gameRepository.findAll()) {
+                result.add(new AbstractMap.SimpleImmutableEntry<>(
+                        GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),
+                        GameDTO.convertFromDTO(gameDTO)
+                ));
+            }
+            return result;
         }
 
         @Override
@@ -128,9 +129,12 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        protected Stream<Map.Entry<UUID,User>> findAllUsersUncached() {
-            return StreamSupport.stream(userRepository.findAll().spliterator(), false)
-                    .map(u -> new AbstractMap.SimpleImmutableEntry<>(u.getId(), SpringUser.convertFromSpring(u)));
+        protected Iterable<Map.Entry<UUID,User>> findAllUsersUncached() {
+            final List<Map.Entry<UUID,User>> result = new ArrayList<>();
+            for (var u: userRepository.findAll()) {
+                result.add(new AbstractMap.SimpleImmutableEntry<>(u.getId(), SpringUser.convertFromSpring(u)));
+            }
+            return result;
         }
 
         @Override

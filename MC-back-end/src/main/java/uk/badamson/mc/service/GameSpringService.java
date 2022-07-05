@@ -72,7 +72,7 @@ public class GameSpringService {
 
     @Transactional
     @Nonnull
-    public Stream<Identifier> getGameIdentifiers() {
+    public Iterable<Identifier> getGameIdentifiers() {
         return delegate.getGameIdentifiers();
     }
 

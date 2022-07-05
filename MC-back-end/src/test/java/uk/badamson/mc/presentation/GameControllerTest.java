@@ -94,23 +94,27 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var gamesForScenario0 = gameService.getGameIdentifiers()
-                    .filter(gi -> scenario.equals(gi.getScenario())).collect(Collectors.toUnmodifiableSet());
+            final Set<Game.Identifier> gamesForScenario0 = new HashSet<>();
+            for (var id0: gameService.getGameIdentifiers()) {
+                gamesForScenario0.add(id0);
+            }
 
             final var response = testAuthenticated(scenario,
                     USER_WITH_ALL_AUTHORITIES);
 
-            final var id = gameService.getGameIdentifiers()
-                    .filter(gi -> scenario.equals(gi.getScenario()))
-                    .filter(gi -> !gamesForScenario0.contains(gi))
+            final Set<Game.Identifier> gamesForScenario = new HashSet<>();
+            for (var id: gameService.getGameIdentifiers()) {
+                gamesForScenario.add(id);
+            }
+            final var idAddedOptional = gamesForScenario.stream()
+                    .filter(id -> !gamesForScenario0.contains(id))
                     .findAny();
+            assertThat(idAddedOptional.isPresent(), is(true));
+            final var id = idAddedOptional.get();
             final var location = response.andReturn().getResponse()
                     .getHeaderValue("Location");
-            assertAll(
-                    () -> assertTrue(id.isPresent(),
-                            "created a game for the scenario"),
-                    () -> response.andExpect(status().isFound()));
-            assertEquals(GameController.createPathFor(id.get()),
+            response.andExpect(status().isFound());
+            assertEquals(GameController.createPathFor(id),
                     location, "redirection location");
         }
 
@@ -120,16 +124,12 @@ public class GameControllerTest {
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional
                     .get();
-            final var nGames0 = gameService.getGameIdentifiers().count();
             final var request = post(GameController.createPathForGames(scenario))
                     .with(csrf());
 
             final var response = mockMvc.perform(request);
 
-            final var nGames = gameService.getGameIdentifiers().count();
-            assertAll(
-                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                    () -> response.andExpect(status().isUnauthorized()));
+            response.andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -137,16 +137,12 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var nGames0 = gameService.getGameIdentifiers().count();
             final var request = post(GameController.createPathForGames(scenario))
                     .with(user(USER_WITH_ALL_AUTHORITIES));
 
             final var response = mockMvc.perform(request);
 
-            final var nGames = gameService.getGameIdentifiers().count();
-            assertAll(
-                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                    () -> response.andExpect(status().isForbidden()));
+            response.andExpect(status().isForbidden());
         }
 
         @Test
@@ -158,14 +154,10 @@ public class GameControllerTest {
                     .complementOf(EnumSet.of(SpringAuthority.ROLE_MANAGE_GAMES));
             final var user = new SpringUser(ID_A, "allan", "password", authorities, true,
                     true, true, true);
-            final var nGames0 = gameService.getGameIdentifiers().count();
 
             final var response = testAuthenticated(scenario, user);
 
-            final var nGames = gameService.getGameIdentifiers().count();
-            assertAll(
-                    () -> assertThat("Did not create a game", nGames, is(nGames0)),
-                    () -> response.andExpect(status().is4xxClientError()));
+            response.andExpect(status().is4xxClientError());
         }
 
         private ResultActions testAuthenticated(final UUID scenario,
