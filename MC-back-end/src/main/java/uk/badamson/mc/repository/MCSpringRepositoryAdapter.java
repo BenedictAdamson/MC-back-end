@@ -74,9 +74,12 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        protected Stream<Game.Identifier> findAllGameIdentifiersUncached() {
+        protected Stream<Map.Entry<Game.Identifier, Game>> findAllGamesUncached() {
             return StreamSupport.stream(gameRepository.findAll().spliterator(), false)
-                    .map(game -> GameIdentifierDTO.convertFromDTO(game.identifier()));
+                    .map(gameDTO -> new AbstractMap.SimpleImmutableEntry<>(
+                            GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),
+                            GameDTO.convertFromDTO(gameDTO)
+                    ));
         }
 
         @Override
