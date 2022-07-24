@@ -36,7 +36,7 @@
       <debian-package.version>2.27.0</debian-package.version>
       <MC.node.version>v16.15.0</MC.node.version>
       <MC.npm.version>8.5.5</MC.npm.version>
-      <MC.spring-boot.version>2.7.0</MC.spring-boot.version>
+      <MC.spring-boot.version>2.7.2</MC.spring-boot.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
    </properties>
    <build>
