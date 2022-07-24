@@ -25,29 +25,62 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
-@Document(collection="game_players")
+@Document(collection = "game_players")
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersDTO(
         @Id
         GameIdentifierDTO game,
         boolean recruiting,
-        Map<UUID, UUID> users
+        List<PlayedCharacterDTO> users
 ) {
     @Nonnull
     static GamePlayersDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
         return new GamePlayersDTO(
                 GameIdentifierDTO.convertToDTO(id),
                 gamePlayers.isRecruiting(),
-                Map.copyOf(gamePlayers.getUsers())
+                convertToUsersDTO(gamePlayers)
         );
+    }
+
+    private static List<PlayedCharacterDTO> convertToUsersDTO(GamePlayers gamePlayers) {
+        return gamePlayers.getUsers().entrySet().stream()
+                .map(PlayedCharacterDTO::convertToDTO)
+                .toList();
     }
 
     @Nonnull
     static GamePlayers convertFromDTO(@Nonnull GamePlayersDTO dto) {
-        return new GamePlayers(GameIdentifierDTO.convertFromDTO(dto.game()), dto.recruiting(), Map.copyOf(dto.users()));
+        return new GamePlayers(
+                GameIdentifierDTO.convertFromDTO(dto.game()),
+                dto.recruiting(),
+                convertFromUsersDTO(dto)
+        );
+    }
+
+    private static Map<UUID, UUID> convertFromUsersDTO(GamePlayersDTO dto) {
+        return dto.users().stream()
+                .map(PlayedCharacterDTO::convertFromDTO)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Document(collection = "played_character")
+    public record PlayedCharacterDTO(
+            UUID characterId,
+            UUID userId
+    ) {
+
+        @Nonnull
+        static PlayedCharacterDTO convertToDTO(@Nonnull Map.Entry<UUID, UUID> entry) {
+            return new PlayedCharacterDTO(entry.getKey(), entry.getValue());
+        }
+
+        @Nonnull
+        static Map.Entry<UUID, UUID> convertFromDTO(@Nonnull PlayedCharacterDTO dto) {
+            return new AbstractMap.SimpleEntry<>(dto.characterId(), dto.userId());
+        }
     }
 }
