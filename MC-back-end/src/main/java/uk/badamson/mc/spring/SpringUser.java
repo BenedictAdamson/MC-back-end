@@ -21,12 +21,12 @@ package uk.badamson.mc.spring;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Table;
 import java.io.Serial;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +37,7 @@ import java.util.UUID;
  * A user of the Mission Command game.
  * </p>
  */
-@Table(name="user")
+@Document(collection="user")
 public final class SpringUser extends SpringUserDetails {
 
     @Serial

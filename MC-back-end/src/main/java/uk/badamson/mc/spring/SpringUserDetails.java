@@ -21,6 +21,7 @@ package uk.badamson.mc.spring;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.security.core.userdetails.UserDetails;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.User;
@@ -94,6 +95,7 @@ public class SpringUserDetails implements UserDetails {
         );
     }
 
+    @Indexed
     private final String username;
     private String password;
     private final Set<SpringAuthority> authorities;

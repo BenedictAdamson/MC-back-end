@@ -20,16 +20,16 @@ package uk.badamson.mc.repository;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GamePlayers;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Table;
 import java.util.Map;
 import java.util.UUID;
 
 
-@Table(name = "game_players")
+@Document(collection="game_players")
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersDTO(
         @Id

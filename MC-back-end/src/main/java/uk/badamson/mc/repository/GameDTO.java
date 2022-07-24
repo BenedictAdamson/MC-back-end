@@ -19,12 +19,12 @@ package uk.badamson.mc.repository;
  */
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.Game;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Table;
 
-@Table(name = "game")
+@Document(collection="game")
 public record GameDTO(
         @Id
         GameIdentifierDTO identifier,

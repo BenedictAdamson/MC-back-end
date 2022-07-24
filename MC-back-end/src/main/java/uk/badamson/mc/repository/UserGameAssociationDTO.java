@@ -19,11 +19,13 @@ package uk.badamson.mc.repository;
  */
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.UserGameAssociation;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
+@Document(collection="user_game_association")
 public record UserGameAssociationDTO(
         @Id
         UUID user,
