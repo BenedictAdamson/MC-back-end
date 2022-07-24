@@ -10,6 +10,7 @@ import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
+
 /**
  * © Copyright Benedict Adamson 2020-22.
  *

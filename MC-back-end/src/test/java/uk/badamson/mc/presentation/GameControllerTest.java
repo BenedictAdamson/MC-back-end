@@ -41,11 +41,10 @@ import uk.badamson.mc.spring.SpringUser;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -95,7 +94,7 @@ public class GameControllerTest {
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
             final Set<Game.Identifier> gamesForScenario0 = new HashSet<>();
-            for (var id0: gameService.getGameIdentifiers()) {
+            for (var id0 : gameService.getGameIdentifiers()) {
                 gamesForScenario0.add(id0);
             }
 
@@ -103,7 +102,7 @@ public class GameControllerTest {
                     USER_WITH_ALL_AUTHORITIES);
 
             final Set<Game.Identifier> gamesForScenario = new HashSet<>();
-            for (var id: gameService.getGameIdentifiers()) {
+            for (var id : gameService.getGameIdentifiers()) {
                 gamesForScenario.add(id);
             }
             final var idAddedOptional = gamesForScenario.stream()

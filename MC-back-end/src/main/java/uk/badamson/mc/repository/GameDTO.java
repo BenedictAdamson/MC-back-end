@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Document(collection="game")
-@SuppressFBWarnings(value="EI_EXPOSE_REP", justification="DTO")
+@Document(collection = "game")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GameDTO(
         @Id
         GameIdentifierDTO identifier,
@@ -49,7 +49,7 @@ public record GameDTO(
         );
     }
 
-    private static List<PlayedCharacterDTO> convertToUsersDTO(Map<UUID,UUID> users) {
+    private static List<PlayedCharacterDTO> convertToUsersDTO(Map<UUID, UUID> users) {
         return users.entrySet().stream()
                 .map(PlayedCharacterDTO::convertToDTO)
                 .toList();

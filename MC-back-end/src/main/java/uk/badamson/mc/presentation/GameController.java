@@ -159,15 +159,15 @@ public class GameController {
      * @return The response.
      * @throws NullPointerException    If {@code scenario} is null.
      * @throws ResponseStatusException <ul>
-     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                            there is no scenario with the given {@code scenario} ID
-     *                                                                            {@linkplain UUID#equals(Object) equivalent to} its
-     *                                                                            {@linkplain Scenario#getIdentifier() identifier}.</li>
-     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
-     *                                                                            (Internal Server Error)} if there is data access error.</li>
-     *                                                                            </ul>
+     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                                                                                            there is no scenario with the given {@code scenario} ID
+     *                                                                                                            {@linkplain UUID#equals(Object) equivalent to} its
+     *                                                                                                            {@linkplain Scenario#getIdentifier() identifier}.</li>
+     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
+     *                                                                                                            (Internal Server Error)} if there is data access error.</li>
+     *                                                                                                            </ul>
      */
     @PostMapping(GAMES_PATH_PATTERN)
     @Nonnull

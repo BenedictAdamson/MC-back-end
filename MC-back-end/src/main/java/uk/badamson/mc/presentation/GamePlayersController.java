@@ -31,9 +31,10 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.rest.GamePlayersResponse;
-import uk.badamson.mc.service.*;
+import uk.badamson.mc.service.GameSpringService;
+import uk.badamson.mc.service.IllegalGameStateException;
+import uk.badamson.mc.service.UserAlreadyPlayingException;
 import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -80,7 +81,7 @@ public class GamePlayersController {
 
     /**
      * <p>
-     * Create a valid path for {@linkplain GamePlayers#endRecruitment() ending
+     * Create a valid path for {@linkplain Game#endRecruitment() ending
      * recruitment} for a game that has a given identifier.
      * </p>
      * <p>
@@ -158,11 +159,11 @@ public class GamePlayersController {
      * <ul>
      * <li>Returns a (non null) game players container.</li>
      * <li>The {@linkplain Identifier#getScenario() scenario identifier} of the
-     * {@linkplain GamePlayers#getGame() game identifier} of the game players
+     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain UUID#equals(Object) is equivalent to} the given
      * scenario ID</li>
      * <li>The {@linkplain Identifier#getCreated() creation time} of the
-     * {@linkplain GamePlayers#getGame() game identifier} of the game players
+     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain Instant#equals(Object) is equivalent to} the given
      * creation time</li>
      * </ul>
@@ -186,9 +187,9 @@ public class GamePlayersController {
      * @param created  The creation time of the game.
      * @return The response.
      * @throws NullPointerException    <ul>
-     *                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                            <li>If {@code created} is null.</li>
-     *                                                                            </ul>
+     *                                                                                                            <li>If {@code scenario} is null.</li>
+     *                                                                                                            <li>If {@code created} is null.</li>
+     *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no game that has {@linkplain Game#getIdentifier()
@@ -246,11 +247,11 @@ public class GamePlayersController {
      * <ul>
      * <li>Returns a (non null) game players container.</li>
      * <li>The {@linkplain Identifier#getScenario() scenario identifier} of the
-     * {@linkplain GamePlayers#getGame() game identifier} of the game players
+     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain UUID#equals(Object) is equivalent to} the given
      * scenario ID</li>
      * <li>The {@linkplain Identifier#getCreated() creation time} of the
-     * {@linkplain GamePlayers#getGame() game identifier} of the game players
+     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain Instant#equals(Object) is equivalent to} the given
      * creation time</li>
      * </ul>
@@ -260,10 +261,10 @@ public class GamePlayersController {
      * @param created  The creation time of the game.
      * @return The response.
      * @throws NullPointerException     <ul>
-     *                                                                              <li>If {@code user} is null.</li>
-     *                                                                              <li>If {@code scenario} is null.</li>
-     *                                                                              <li>If {@code created} is null.</li>
-     *                                                                              </ul>
+     *                                                                                                               <li>If {@code user} is null.</li>
+     *                                                                                                               <li>If {@code scenario} is null.</li>
+     *                                                                                                               <li>If {@code created} is null.</li>
+     *                                                                                                               </ul>
      * @throws IllegalArgumentException If the {@code user} does not have the
      *                                  {@link Authority#ROLE_MANAGE_GAMES} or
      *                                  {@link Authority#ROLE_PLAYER} roles.
@@ -324,31 +325,31 @@ public class GamePlayersController {
      * @param created  The creation time of the game.
      * @return The response.
      * @throws NullPointerException    <ul>
-     *                                                                            <li>If {@code user} is null.</li>
-     *                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                            <li>If {@code created} is null.</li>
-     *                                                                            </ul>
+     *                                                                                                            <li>If {@code user} is null.</li>
+     *                                                                                                            <li>If {@code scenario} is null.</li>
+     *                                                                                                            <li>If {@code created} is null.</li>
+     *                                                                                                            </ul>
      * @throws ResponseStatusException <ul>
-     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                            there is no game that has {@linkplain Game#getIdentifier()
-     *                                                                            identification information} equivalent to the given
-     *                                                                            {@code scenario} and {@code created}.</li>
-     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
-     *                                                                            any of the following are true:
-     *                                                                            <ul>
-     *                                                                            <li>If the {@code user} is already playing a different
-     *                                                                            game.</li>
-     *                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
-     *                                                                            recruiting} players.
-     *                                                                            </ul>
-     *                                                                            </li>
-     *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
-     *                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
-     *                                                                            games.</li>
-     *                                                                            </ul>
+     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                                                                                            there is no game that has {@linkplain Game#getIdentifier()
+     *                                                                                                            identification information} equivalent to the given
+     *                                                                                                            {@code scenario} and {@code created}.</li>
+     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
+     *                                                                                                            any of the following are true:
+     *                                                                                                            <ul>
+     *                                                                                                            <li>If the {@code user} is already playing a different
+     *                                                                                                            game.</li>
+     *                                                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
+     *                                                                                                            recruiting} players.
+     *                                                                                                            </ul>
+     *                                                                                                            </li>
+     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
+     *                                                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
+     *                                                                                                            games.</li>
+     *                                                                                                            </ul>
      */
     @PostMapping(path = GAME_PLAYERS_PATH_PATTERN, params = {JOIN_PARAM})
     @RolesAllowed("PLAYER")
@@ -398,10 +399,10 @@ public class GamePlayersController {
      * @param scenario The unique ID of the scenario of the game.
      * @param created  The creation time of the game.
      * @throws NullPointerException    <ul>
-     *                                                                            <li>If {@code user} is null.</li>
-     *                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                            <li>If {@code created} is null.</li>
-     *                                                                            </ul>
+     *                                                                                                            <li>If {@code user} is null.</li>
+     *                                                                                                            <li>If {@code scenario} is null.</li>
+     *                                                                                                            <li>If {@code created} is null.</li>
+     *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no game that has {@linkplain Game#getIdentifier()
