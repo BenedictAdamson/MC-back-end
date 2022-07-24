@@ -70,13 +70,8 @@
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-antrun-plugin</artifactId>
-               <version>3.1.0</version>
-            </plugin>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-assembly-plugin</artifactId>
-               <version>3.3.0</version>
+               <version>3.4.2</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -92,7 +87,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-failsafe-plugin</artifactId>
-               <version>3.0.0-M6</version>
+               <version>3.0.0-M7</version>
                <!-- For running integration tests. -->
             </plugin>
             <plugin>
@@ -111,7 +106,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-pmd-plugin</artifactId>
-               <version>3.16.0</version>
+               <version>3.17.0</version>
                <configuration>
                   <targetJdk>17</targetJdk>
                   <failurePriority>2</failurePriority>
@@ -136,7 +131,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
-               <version>3.0.0-M6</version>
+               <version>3.0.0-M7</version>
                <configuration>
                   <!-- Ensure uses static inner test classes. -->
                   <excludes>
