@@ -40,7 +40,6 @@ import uk.badamson.mc.rest.UserDetailsRequest;
 import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
-import uk.badamson.mc.spring.SpringUserDetails;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -132,14 +131,13 @@ public class UserControllerTest {
 
         @Test
         public void noCsrfToken() throws Exception {
-            final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
             final var addedUser =
                     UserDetailsRequest.convertToRequest(Fixtures.createBasicUserDetailsWithAllRoles());
-            service.add(performingUser);
+            final var performingUser = service.add(Fixtures.createBasicUserDetailsWithAllRoles());
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUserDetails.convertToSpring(performingUser)))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUser.convertToSpring(performingUser)))
                     .content(encoded);
 
             final var response = mockMvc.perform(request);
@@ -150,13 +148,15 @@ public class UserControllerTest {
                                     .equals(addedUser.username()))));
         }
 
-        private ResultActions test(final BasicUserDetails performingUser,
-                                   final BasicUserDetails addedUser) throws Exception {
-            service.add(performingUser);
-            final var encoded = objectMapper.writeValueAsString(UserDetailsRequest.convertToRequest(addedUser));
+        private ResultActions test(final BasicUserDetails performingUserDetails,
+                                   final BasicUserDetails addedUserDetails) throws Exception {
+            final var performingUser = service.add(performingUserDetails);
+            final var encoded = objectMapper.writeValueAsString(
+                    UserDetailsRequest.convertToRequest(addedUserDetails)
+            );
             final var request = post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUserDetails.convertToSpring(performingUser)))
+                    .accept(MediaType.APPLICATION_JSON).with(user(SpringUser.convertToSpring(performingUser)))
                     .with(csrf()).content(encoded);
 
             return mockMvc.perform(request);
@@ -332,12 +332,12 @@ public class UserControllerTest {
             response.andExpect(status().isUnauthorized());
         }
 
-        private ResultActions perform(final UUID id, final BasicUserDetails requestingUser)
+        private ResultActions perform(final UUID id, final User requestingUser)
                 throws Exception {
             final var path = UserController.createPathForUser(id);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
             if (requestingUser != null) {
-                request = request.with(user(SpringUserDetails.convertToSpring(requestingUser)));
+                request = request.with(user(SpringUser.convertToSpring(requestingUser)));
             }
 
             return mockMvc.perform(request);
@@ -346,7 +346,10 @@ public class UserControllerTest {
         @Test
         public void unknownUser() throws Exception {
             // Tough test: has permission and CSRF token
-            final var response = perform(Fixtures.createUserWithAllRoles().getId(), Fixtures.ADMINISTRATOR);
+            final var requestingUserOptional = service.getUser(User.ADMINISTRATOR_ID);
+            assert requestingUserOptional.isPresent();
+            final var requestingUser = requestingUserOptional.get();
+            final var response = perform(Fixtures.createUserWithAllRoles().getId(), requestingUser);
 
             response.andExpect(status().isNotFound());
         }
@@ -381,8 +384,7 @@ public class UserControllerTest {
                         true);
                 final var requestingUser = service.add(requestingUserDetails);
 
-                final var response = GetUser.this.perform(user.getId(),
-                        requestingUser);
+                final var response = GetUser.this.perform(user.getId(), requestingUser);
 
                 response.andExpect(status().isOk());
                 final var jsonResponse = response.andReturn().getResponse()

@@ -34,7 +34,6 @@ import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserExistsException;
 import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringAuthority;
-import uk.badamson.mc.spring.SpringUserDetails;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
@@ -104,11 +103,11 @@ public class UserController {
      * @throws ResponseStatusException <ul>
      *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                            status} of {@linkplain HttpStatus#BAD_REQUEST 400 (Bad
-     *                                                                            Request)} If the {@linkplain SpringUserDetails#getUsername()
+     *                                                                            Request)} If the {@linkplain UserDetailsRequest#username()
      *                                                                            username} of {@code user} indicates it is the administrator.</li>
      *                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} If
-     *                                                                            the {@linkplain SpringUserDetails#getUsername() username} of
+     *                                                                            the {@linkplain UserDetailsRequest#username() username} of
      *                                                                            {@code userDetails} is already the username of a user.</li>
      *                                                                            </ul>
      */

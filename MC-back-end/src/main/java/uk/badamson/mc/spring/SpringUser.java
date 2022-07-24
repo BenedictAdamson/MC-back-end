@@ -20,17 +20,17 @@ package uk.badamson.mc.spring;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import uk.badamson.mc.BasicUserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
 import uk.badamson.mc.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serial;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>
@@ -38,68 +38,52 @@ import java.util.UUID;
  * </p>
  */
 @Document(collection="user")
-public final class SpringUser extends SpringUserDetails {
+public final class SpringUser implements UserDetails  {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * <p>
-     * The {@linkplain #getId() ID} of an administrator user.
-     * </p>
-     */
-    public static final UUID ADMINISTRATOR_ID = new UUID(0L, 0L);
-
     @Nonnull
     public static SpringUser convertToSpring(@Nonnull User user) {
-        return new SpringUser(user.getId(), SpringUserDetails.convertToSpring(user));
+        return new SpringUser(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                SpringAuthority.convertToSpring(user.getAuthorities()),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+        );
     }
 
     @Nonnull
     public static User convertFromSpring(@Nonnull SpringUser user) {
-        final BasicUserDetails userDetails = SpringUserDetails.convertFromSpring(user);
-        return new User(user.getId(), userDetails);
-    }
-
-    /**
-     * <p>
-     * Create a {@link SpringUser} that is a valid administrator user.
-     * </p>
-     *
-     * @param password the password used to authenticate the user, or null if the
-     *                 password is being hidden or is unknown. This might be the
-     *                 password in an encrypted form.
-     */
-    @Nonnull
-    public static SpringUser createAdministrator(@Nullable final String password) {
-        return new SpringUser(password);
+        return new User(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                SpringAuthority.convertFromSpring(user.getAuthorities()),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+        );
     }
 
     @org.springframework.data.annotation.Id
     private final UUID id;
 
-    private SpringUser(final String password) {
-        super(password);
-        this.id = ADMINISTRATOR_ID;
-    }
 
-    /**
-     * <p>
-     * Construct a user of the Mission Command game, with given user details.
-     * </p>
-     *
-     * @param id          The unique ID of this user.
-     * @param userDetails the specification for this user.
-     * @throws NullPointerException <ul>
-     *                                         <li>If {@code id} is null</li>
-     *                                         <li>If {@code userDetails} is null</li>
-     *                                         </ul>
-     */
-    public SpringUser(@Nonnull final UUID id,
-                      @Nonnull final SpringUserDetails userDetails) {
-        super(userDetails);
-        this.id = Objects.requireNonNull(id, "id");
-    }
+
+    @Indexed
+    private final String username;
+    private String password;
+    private final Set<SpringAuthority> authorities;
+    private final boolean accountNonExpired;
+    private final boolean accountNonLocked;
+    private final boolean credentialsNonExpired;
+    private final boolean enabled;
 
     /**
      * <p>
@@ -137,9 +121,15 @@ public final class SpringUser extends SpringUserDetails {
                       @JsonProperty("accountNonLocked") final boolean accountNonLocked,
                       @JsonProperty("credentialsNonExpired") final boolean credentialsNonExpired,
                       @JsonProperty("enabled") final boolean enabled) {
-        super(username, password, authorities, accountNonExpired,
-                accountNonLocked, credentialsNonExpired, enabled);
         this.id = Objects.requireNonNull(id, "id");
+        this.username = Objects.requireNonNull(username, "username");
+        this.password = password;
+        this.authorities = authorities.isEmpty() ? Collections.emptySet()
+                : Collections.unmodifiableSet(EnumSet.copyOf(authorities));
+        this.accountNonExpired = accountNonExpired;
+        this.accountNonLocked = accountNonLocked;
+        this.credentialsNonExpired = credentialsNonExpired;
+        this.enabled = enabled;
     }
 
     /**
@@ -184,6 +174,48 @@ public final class SpringUser extends SpringUserDetails {
     @Nonnull
     public UUID getId() {
         return id;
+    }
+
+
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "authorities is unmodifiable")
+    @Override
+    public Set<SpringAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    @Nonnull
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public  boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setPassword(@Nullable final String password) {
+        this.password = password;
     }
 
     @Override

@@ -45,7 +45,16 @@ public class UserRepositoryTest {
         @Override
         protected SpringUser copy(final SpringUser user) {
             Objects.requireNonNull(user, "user");
-            return new SpringUser(user.getId(), user);
+            return new SpringUser(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.getAuthorities(),
+                    user.isAccountNonExpired(),
+                    user.isAccountNonLocked(),
+                    user.isCredentialsNonExpired(),
+                    user.isEnabled()
+            );
         }
 
         @Nonnull

@@ -4,13 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.TestConfiguration
-import uk.badamson.mc.User
 import uk.badamson.mc.Authority
 import uk.badamson.mc.rest.AuthorityValue
 import uk.badamson.mc.rest.UserDetailsRequest
 import uk.badamson.mc.rest.UserResponse
-import uk.badamson.mc.spring.SpringUser
-import uk.badamson.mc.spring.SpringUserDetails
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
