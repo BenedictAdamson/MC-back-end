@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.rest.GamePlayersResponse;
-import uk.badamson.mc.service.GamePlayersSpringService;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
 import uk.badamson.mc.service.UserSpringService;
@@ -344,10 +343,9 @@ public class GamePlayersControllerTest {
             final var response = performRequest(game, user, false);
 
             response.andExpect(status().isForbidden());
-            final Optional<GamePlayers> gamePlayersOptional = gameService
-                    .getGamePlayersAsGameManager(game);
-            assertThat("gamePlayers", gamePlayersOptional.isPresent());
-            final var gamePlayers = gamePlayersOptional.get();
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(game);
+            assertThat("present", gameOptional.isPresent());
+            final var gamePlayers = gameOptional.get();
             assertThat("User not added to players of game",
                     gamePlayers.getUsers().values(), not(hasItem(user.getId())));
         }
@@ -358,20 +356,19 @@ public class GamePlayersControllerTest {
              * Tough test: game exists, user has all other authorities, and CSRF
              * token provided
              */
-            final var game = createGame();
+            final var gameId = createGame();
             final var authorities = EnumSet
                     .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = createUser(authorities);
 
-            final var response = performRequest(game, user, true);
+            final var response = performRequest(gameId, user, true);
 
             response.andExpect(status().isForbidden());
-            final Optional<GamePlayers> gamePlayersOptional = gameService
-                    .getGamePlayersAsGameManager(game);
-            assertThat("gamePlayers", gamePlayersOptional.isPresent());
-            final var gamePlayers = gamePlayersOptional.get();
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            assertThat("present", gameOptional.isPresent());
+            final var game = gameOptional.get();
             assertThat("User not added to players of game",
-                    gamePlayers.getUsers().values(), not(hasItem(user.getId())));
+                    game.getUsers().values(), not(hasItem(user.getId())));
         }
 
         @Test
@@ -380,19 +377,18 @@ public class GamePlayersControllerTest {
              * Tough test: game exists, user has all authorities, and CSRF token
              * provided
              */
-            final var game = createGame();
+            final var gameId = createGame();
             final var user = createUser(Authority.ALL);
-            gameService.endRecruitment(game);
+            gameService.endRecruitment(gameId);
 
-            final var response = performRequest(game, user, true);
+            final var response = performRequest(gameId, user, true);
 
             response.andExpect(status().isConflict());
-            Optional<GamePlayers> gamePlayersOptional = gameService
-                    .getGamePlayersAsGameManager(game);
-            assertThat("gamePlayers", gamePlayersOptional.isPresent());
-            final var gamePlayers = gamePlayersOptional.get();
+            Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            assertThat("present", gameOptional.isPresent());
+            final var game = gameOptional.get();
             assertThat("User not added to players of game",
-                    gamePlayers.getUsers().values(), not(hasItem(user.getId())));
+                    game.getUsers().values(), not(hasItem(user.getId())));
         }
 
         private ResultActions performRequest(final Game.Identifier game,
@@ -415,49 +411,46 @@ public class GamePlayersControllerTest {
              * Tough test: game exists, user has all authorities, and CSRF token
              * provided
              */
-            final var gameA = createGame();
+            final var gameIdA = createGame();
             Thread.sleep(10);// ensure can create a game with a new unique ID
-            final var gameB = createGame();
-            assert !gameA.equals(gameB);
+            final var gameIdB = createGame();
+            assert !gameIdA.equals(gameIdB);
             final var user = createUser(Authority.ALL);
-            gameService.userJoinsGame(user.getId(), gameA);
+            gameService.userJoinsGame(user.getId(), gameIdA);
 
-            final var response = performRequest(gameB, user, true);
+            final var response = performRequest(gameIdB, user, true);
 
-            final Optional<GamePlayers> gamePlayersOptional = gameService
-                    .getGamePlayersAsGameManager(gameB);
-            assertThat("gamePlayers", gamePlayersOptional.isPresent());
-            final var gamePlayers = gamePlayersOptional.get();
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameIdB);
+            assertThat("present", gameOptional.isPresent());
+            final var game = gameOptional.get();
             assertAll(() -> response.andExpect(status().isConflict()),
                     () -> assertThat("User not added to players of game",
-                            gamePlayers.getUsers().values(),
+                            game.getUsers().values(),
                             not(hasItem(user.getId()))));
         }
 
         @Test
         public void valid() throws Exception {
-            final var game = createGame();
+            final var gameId = createGame();
             final var expectedRedirectionLocation = GamePlayersController
-                    .createPathForGamePlayersOf(game);
+                    .createPathForGamePlayersOf(gameId);
             // Tough test: user has a minimum set of authorities
             final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
             final var user = createUser(authorities);
 
-            final var response = performRequest(game, user, true);
+            final var response = performRequest(gameId, user, true);
 
             final var location = response.andReturn().getResponse()
                     .getHeaderValue("Location");
-            final Optional<GamePlayers> gamePlayersOptional = gameService
-                    .getGamePlayersAsGameManager(game);
-            assertThat("gamePlayers", gamePlayersOptional.isPresent());
-            final var gamePlayers = gamePlayersOptional.get();
-            final var currentGame = gameService
-                    .getCurrentGameOfUser(user.getId());
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            assertThat("present", gameOptional.isPresent());
+            final var game = gameOptional.get();
+            final var currentGame = gameService.getCurrentGameOfUser(user.getId());
             assertAll(() -> response.andExpect(status().isFound()),
                     () -> assertEquals(expectedRedirectionLocation, location,
                             "redirection location"),
                     () -> assertThat("User added to players of game",
-                            gamePlayers.getUsers().values(),
+                            game.getUsers().values(),
                             hasItem(user.getId())),
                     () -> assertThat("User has a current game",
                             currentGame.isPresent(), is(true)));

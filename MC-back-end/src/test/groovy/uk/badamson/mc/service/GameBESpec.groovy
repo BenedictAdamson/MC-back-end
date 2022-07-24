@@ -140,18 +140,15 @@ class GameBESpec extends BESpecification {
         final def location = expectFound(response)
         location != null
         final def gameId = parseGamePath(location)
-        final def gameOptional = gameService.getGame(gameId)
-        final def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
+        final def gameOptional = gameService.getGameAsGameManager(gameId)
         gameOptional.isPresent()
-        gamePlayersOptional.isPresent()
         final def game = gameOptional.get()
-        final def gamePlayers = gamePlayersOptional.get()
 
         and: "the game indicates that it is recruiting players"
-        expect(gamePlayers.recruiting, Matchers.instanceOf(Boolean.class))
+        expect(game.recruiting, Matchers.instanceOf(Boolean.class))
 
         and: "the game indicates that it has no players"
-        expect(gamePlayers.users, Matchers.anEmptyMap())
+        expect(game.users, Matchers.anEmptyMap())
 
         and: "the game indicates that it is not running"
         game.runState == Game.RunState.WAITING_TO_START
@@ -194,7 +191,7 @@ class GameBESpec extends BESpecification {
         parseGamePlayersPath(location) == gameId
 
         and: "the game indicates that it is not recruiting players"
-        final def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
+        final def gamePlayersOptional = gameService.getGameAsGameManager(gameId)
         gamePlayersOptional.isPresent()
         final def gamePlayers = gamePlayersOptional.get()
         !gamePlayers.recruiting
@@ -255,7 +252,7 @@ class GameBESpec extends BESpecification {
         final def location = expectFound(response)
         location != null
         parseGamePlayersPath(location) == gameId
-        def gamePlayersOptional = gameService.getGamePlayersAsGameManager(gameId)
+        def gamePlayersOptional = gameService.getGameAsGameManager(gameId)
         gamePlayersOptional.isPresent()
         def gamePlayers = gamePlayersOptional.get()
 
@@ -295,7 +292,7 @@ class GameBESpec extends BESpecification {
         parseGamePath(location) == gameId
 
         and: "the game indicates that it is running"
-        def gameOptional = gameService.getGame(gameId)
+        def gameOptional = gameService.getGameAsGameManager(gameId)
         gameOptional.isPresent()
         def game = gameOptional.get()
         game.runState == Game.RunState.RUNNING
@@ -334,7 +331,7 @@ class GameBESpec extends BESpecification {
         parseGamePath(location) == gameId
 
         and: "the game indicates that it is not running"
-        def gameOptional = gameService.getGame(gameId)
+        def gameOptional = gameService.getGameAsGameManager(gameId)
         gameOptional.isPresent()
         def game = gameOptional.get()
         game.runState == Game.RunState.STOPPED

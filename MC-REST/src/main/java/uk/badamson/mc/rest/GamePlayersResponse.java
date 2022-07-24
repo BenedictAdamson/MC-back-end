@@ -20,7 +20,6 @@ package uk.badamson.mc.rest;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -36,12 +35,12 @@ public record GamePlayersResponse(
     @Nonnull
     public static GamePlayersResponse convertToResponse(
             @Nonnull Game.Identifier identifier,
-            @Nonnull GamePlayers gamePlayers
+            @Nonnull Game game
     ) {
         return new GamePlayersResponse(
                 GameIdentifierResponse.convertToResponse(identifier),
-                gamePlayers.isRecruiting(),
-                gamePlayers.getUsers()
+                game.isRecruiting(),
+                game.getUsers()
         );
     }
 

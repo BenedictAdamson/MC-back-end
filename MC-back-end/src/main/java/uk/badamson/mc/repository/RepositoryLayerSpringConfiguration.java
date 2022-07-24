@@ -29,12 +29,10 @@ public class RepositoryLayerSpringConfiguration {
     @Bean
     public MCSpringRepositoryAdapter provideMCSpringRepositoryAdapter(
             @Nonnull CurrentUserGameSpringRepository currentUserGameRepository,
-            @Nonnull GamePlayersSpringRepository gamePlayersRepository,
             @Nonnull GameSpringRepository gameRepository,
             @Nonnull UserSpringRepository userRepository) {
         return new MCSpringRepositoryAdapter(
                 currentUserGameRepository,
-                gamePlayersRepository,
                 gameRepository,
                 userRepository);
     }

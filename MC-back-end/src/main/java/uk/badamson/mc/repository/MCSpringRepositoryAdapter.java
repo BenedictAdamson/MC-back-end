@@ -19,7 +19,6 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.User;
 import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.spring.SpringUser;
@@ -30,17 +29,14 @@ import java.util.*;
 public class MCSpringRepositoryAdapter extends MCRepository {
 
     private final CurrentUserGameSpringRepository currentUserGameRepository;
-    private final GamePlayersSpringRepository gamePlayersRepository;
     private final GameSpringRepository gameRepository;
     private final UserSpringRepository userRepository;
 
     public MCSpringRepositoryAdapter(
             @Nonnull CurrentUserGameSpringRepository currentUserGameRepository,
-            @Nonnull GamePlayersSpringRepository gamePlayersRepository,
             @Nonnull GameSpringRepository gameRepository,
             @Nonnull UserSpringRepository userRepository) {
         this.currentUserGameRepository = Objects.requireNonNull(currentUserGameRepository);
-        this.gamePlayersRepository = Objects.requireNonNull(gamePlayersRepository);
         this.gameRepository = Objects.requireNonNull(gameRepository);
         this.userRepository = Objects.requireNonNull(userRepository);
     }
@@ -81,22 +77,6 @@ public class MCSpringRepositoryAdapter extends MCRepository {
                 ));
             }
             return result;
-        }
-
-        @Override
-        protected void addGamePlayersUncached(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-            gamePlayersRepository.save(GamePlayersDTO.convertToDTO(id, gamePlayers));
-        }
-
-        @Override
-        protected void updateGamePlayersUncached(@Nonnull Game.Identifier id, @Nonnull GamePlayers gamePlayers) {
-            gamePlayersRepository.save(GamePlayersDTO.convertToDTO(id, gamePlayers));
-        }
-
-        @Nonnull
-        @Override
-        protected Optional<GamePlayers> findGamePlayersUncached(@Nonnull Game.Identifier id) {
-            return gamePlayersRepository.findById(GameIdentifierDTO.convertToDTO(id)).map(GamePlayersDTO::convertFromDTO);
         }
 
         @Nonnull

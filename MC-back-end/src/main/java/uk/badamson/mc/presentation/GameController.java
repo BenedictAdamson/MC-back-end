@@ -34,6 +34,7 @@ import uk.badamson.mc.Scenario;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
+import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
@@ -97,7 +98,7 @@ public class GameController {
      *
      * @param id The identifier of the game
      * @throws NullPointerException If {@code id} is null.
-     * @see #getGame(UUID, Instant)
+     * @see #getGame(SpringUser, UUID, Instant)
      */
     @Nonnull
     public static String createPathFor(@Nonnull final Game.Identifier id) {
@@ -233,10 +234,22 @@ public class GameController {
     @GetMapping(GAME_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
-    public GameResponse getGame(@Nonnull @PathVariable("scenario") final UUID scenario,
-                                @Nonnull @PathVariable("created") final Instant created) {
+    public GameResponse getGame(
+            @Nonnull @AuthenticationPrincipal final SpringUser user,
+            @Nonnull @PathVariable("scenario") final UUID scenario,
+            @Nonnull @PathVariable("created") final Instant created) {
         final var id = new Game.Identifier(scenario, created);
-        final Optional<Game> game = gameService.getGame(id);
+
+        final Optional<Game> game;
+        if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
+            game = gameService.getGameAsGameManager(id);
+        } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
+            game = gameService.getGameAsNonGameManager(id,
+                    user.getId());
+        } else {
+            throw new IllegalArgumentException("Request not permitted for role");
+        }
+
         if (game.isPresent()) {
             return game.map(g -> GameResponse.convertToResponse(id, g)).get();
         } else {

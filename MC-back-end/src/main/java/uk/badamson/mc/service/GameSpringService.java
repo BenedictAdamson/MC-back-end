@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.GamePlayers;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
@@ -47,10 +46,6 @@ public class GameSpringService {
         this.delegate = new GameService(clock, scenarioService.getDelegate(), userService.getDelegate(), repository);
     }
 
-    final GameService getDelegate() {
-        return delegate;
-    }
-
     @Nonnull
     @Transactional
     public Game create(@Nonnull final UUID scenario) {
@@ -62,12 +57,6 @@ public class GameSpringService {
     public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
         return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
-    }
-
-    @Transactional
-    @Nonnull
-    public Optional<Game> getGame(@Nonnull final Identifier id) {
-        return delegate.getGame(id);
     }
 
     @Transactional
@@ -104,16 +93,16 @@ public class GameSpringService {
 
     @Transactional
     @Nonnull
-    public Optional<GamePlayers> getGamePlayersAsGameManager(
+    public Optional<Game> getGameAsGameManager(
             @Nonnull final Game.Identifier id) {
-        return delegate.getGamePlayersAsGameManager(id);
+        return delegate.getGameAsGameManager(id);
     }
 
     @Transactional
     @Nonnull
-    public Optional<GamePlayers> getGamePlayersAsNonGameManager(
+    public Optional<Game> getGameAsNonGameManager(
             @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
-        return delegate.getGamePlayersAsNonGameManager(id, user);
+        return delegate.getGameAsNonGameManager(id, user);
     }
 
     @Transactional

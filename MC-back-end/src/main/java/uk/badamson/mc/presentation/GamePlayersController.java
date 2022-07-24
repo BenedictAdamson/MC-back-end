@@ -283,18 +283,18 @@ public class GamePlayersController {
         Objects.requireNonNull(user, "user");
         final var id = new Game.Identifier(scenario, created);
 
-        final Optional<GamePlayers> gamePlayers;
+        final Optional<Game> gameOptional;
         if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
-            gamePlayers = gameSpringService.getGamePlayersAsGameManager(id);
+            gameOptional = gameSpringService.getGameAsGameManager(id);
         } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
-            gamePlayers = gameSpringService.getGamePlayersAsNonGameManager(id,
+            gameOptional = gameSpringService.getGameAsNonGameManager(id,
                     user.getId());
         } else {
             throw new IllegalArgumentException("Request not permitted for role");
         }
 
-        if (gamePlayers.isPresent()) {
-            return gamePlayers.map(gps -> GamePlayersResponse.convertToResponse(id, gps)).get();
+        if (gameOptional.isPresent()) {
+            return gameOptional.map(g -> GamePlayersResponse.convertToResponse(id, g)).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
         }
@@ -302,11 +302,11 @@ public class GamePlayersController {
 
     /**
      * <p>
-     * Add the requesting user as a {@linkplain GamePlayers#getUsers() player} of
+     * Add the requesting user as a {@linkplain Game#getUsers() player} of
      * a given game.
      * </p>
      * <ul>
-     * <li>Returns a redirect to the {@linkplain GamePlayers game players}
+     * <li>Returns a redirect to the game players
      * resource of the game. That is, a response with
      * <ul>
      * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
@@ -340,7 +340,7 @@ public class GamePlayersController {
      *                                                                            <ul>
      *                                                                            <li>If the {@code user} is already playing a different
      *                                                                            game.</li>
-     *                                                                            <li>If the game is not {@linkplain GamePlayers#isRecruiting()
+     *                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
      *                                                                            recruiting} players.
      *                                                                            </ul>
      *                                                                            </li>
@@ -378,7 +378,7 @@ public class GamePlayersController {
     /**
      * <p>
      * Whether the requesting user can become one of the
-     * {@linkplain GamePlayers#getUsers() players} of a given game.
+     * {@linkplain Game#getUsers() players} of a given game.
      * </p>
      * <p>
      * That is, whether all the following are true.
@@ -390,7 +390,7 @@ public class GamePlayersController {
      * <li>The {@code user} has
      * {@linkplain Authority#ROLE_PLAYER permission} to play games. Note that the
      * given user need not be the current user.</li>
-     * <li>The game is {@linkplain GamePlayers#isRecruiting() recruiting}
+     * <li>The game is {@linkplain Game#isRecruiting() recruiting}
      * players.</li>
      * </ul>
      *
@@ -415,7 +415,7 @@ public class GamePlayersController {
                                @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
         final var game = new Game.Identifier(scenario, created);
-        if (gameSpringService.getGamePlayersAsGameManager(game).isPresent()) {
+        if (gameSpringService.getGameAsGameManager(game).isPresent()) {
             return gameSpringService.mayUserJoinGame(user.getId(), game);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
