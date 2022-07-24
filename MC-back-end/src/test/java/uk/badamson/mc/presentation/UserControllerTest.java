@@ -36,6 +36,7 @@ import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.UserDetailsRequest;
 import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
@@ -113,7 +114,8 @@ public class UserControllerTest {
         @Test
         public void noAuthentication() throws Exception {
             final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
-            final var addedUser = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var addedUser =
+                    UserDetailsRequest.convertToRequest(Fixtures.createBasicUserDetailsWithAllRoles());
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
@@ -125,13 +127,14 @@ public class UserControllerTest {
 
             response.andExpect(status().is4xxClientError());
             assertThat("User not added", service.getUsers().noneMatch(
-                    u -> u.username().equals(addedUser.getUsername())));
+                    u -> u.username().equals(addedUser.username())));
         }
 
         @Test
         public void noCsrfToken() throws Exception {
             final var performingUser = Fixtures.createBasicUserDetailsWithAllRoles();
-            final var addedUser = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var addedUser =
+                    UserDetailsRequest.convertToRequest(Fixtures.createBasicUserDetailsWithAllRoles());
             service.add(performingUser);
             final var encoded = objectMapper.writeValueAsString(addedUser);
             final var request = post("/api/user")
@@ -144,13 +147,13 @@ public class UserControllerTest {
             assertAll(() -> response.andExpect(status().isForbidden()),
                     () -> assertThat("User not added",
                             service.getUsers().noneMatch(u -> u.username()
-                                    .equals(addedUser.getUsername()))));
+                                    .equals(addedUser.username()))));
         }
 
         private ResultActions test(final BasicUserDetails performingUser,
                                    final BasicUserDetails addedUser) throws Exception {
             service.add(performingUser);
-            final var encoded = objectMapper.writeValueAsString(addedUser);
+            final var encoded = objectMapper.writeValueAsString(UserDetailsRequest.convertToRequest(addedUser));
             final var request = post("/api/user")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON).with(user(SpringUserDetails.convertToSpring(performingUser)))
@@ -358,7 +361,7 @@ public class UserControllerTest {
 
             @Test
             public void administrator() throws Exception {
-                final Optional<User> userOptional = service.getUser(SpringUser.ADMINISTRATOR_ID);
+                final Optional<User> userOptional = service.getUser(User.ADMINISTRATOR_ID);
                 assertThat("user", userOptional.isPresent());
                 test(Fixtures.createUserName(), userOptional.get());
             }
