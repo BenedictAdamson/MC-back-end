@@ -13,7 +13,7 @@ import org.springframework.web.util.UriTemplate
 import spock.lang.Specification
 import uk.badamson.mc.*
 import uk.badamson.mc.presentation.GameController
-import uk.badamson.mc.presentation.GamePlayersController
+
 import uk.badamson.mc.presentation.ScenarioController
 import uk.badamson.mc.presentation.UserController
 import uk.badamson.mc.repository.UserSpringRepository
@@ -58,7 +58,7 @@ abstract class BESpecification extends Specification {
             GameController.GAME_PATH_PATTERN)
 
     private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
-            GamePlayersController.GAME_PLAYERS_PATH_PATTERN)
+            GameController.GAME_PLAYERS_PATH_PATTERN)
 
     private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
 
@@ -137,11 +137,11 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetCurrentGame(@Nullable User loggedInUser) {
-        requestGetJson(GamePlayersController.CURRENT_GAME_PATH, loggedInUser)
+        requestGetJson(GameController.CURRENT_GAME_PATH, loggedInUser)
     }
 
     protected final ResultActions requestGetGamePlayers(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(GamePlayersController.createPathForGamePlayersOf(gameId), loggedInUser)
+        requestGetJson(GameController.createPathForGamePlayersOf(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
@@ -149,7 +149,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetMayJoinQuery(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(GamePlayersController.createPathForMayJoinQueryOf(gameId), loggedInUser)
+        requestGetJson(GameController.createPathForMayJoinQueryOf(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetScenarios(@Nullable User loggedInUser) {
@@ -181,7 +181,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestJoinGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
-        final def path = GamePlayersController.createPathForJoining(gameId)
+        final def path = GameController.createPathForJoining(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())
@@ -217,7 +217,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestEndRecruitment(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
-        final def path = GamePlayersController.createPathForEndRecruitmentOf(gameId)
+        final def path = GameController.createPathForEndRecruitmentOf(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())
