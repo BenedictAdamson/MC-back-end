@@ -18,15 +18,20 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uk.badamson.mc.Game;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.UUID;
 
+@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GameResponse(
         GameIdentifierResponse identifier,
-        RunStateResponse runState
+        RunStateResponse runState,
+        boolean recruiting,
+        Map<UUID, UUID> users
 ) {
 
     @Nonnull
@@ -35,7 +40,9 @@ public record GameResponse(
             @Nonnull Game game) {
         return new GameResponse(
                 GameIdentifierResponse.convertToResponse(identifier),
-                RunStateResponse.convertToResponse(game.getRunState())
+                RunStateResponse.convertToResponse(game.getRunState()),
+                game.isRecruiting(),
+                game.getUsers()
         );
     }
 
