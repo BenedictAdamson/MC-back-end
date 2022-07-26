@@ -300,8 +300,8 @@ public class GamePlayersControllerTest {
                 final var gamePlayersResponse = objectMapper.readValue(jsonResponse,
                         GamePlayersResponse.class);
                 assertAll(
-                        () -> assertThat("scenario", gamePlayersResponse.game().scenario(), is(id.getScenario())),
-                        () -> assertThat("created", gamePlayersResponse.game().created(), is(id.getCreated())),
+                        () -> assertThat("scenario", gamePlayersResponse.identifier().scenario(), is(id.getScenario())),
+                        () -> assertThat("created", gamePlayersResponse.identifier().created(), is(id.getCreated())),
                         () -> assertThat("players",
                                 Set.copyOf(gamePlayersResponse.users().values()),
                                 is(expectedPlayers)));

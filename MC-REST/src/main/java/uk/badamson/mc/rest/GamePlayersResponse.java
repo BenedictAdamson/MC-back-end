@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GamePlayersResponse(
-        GameIdentifierResponse game,
+        GameIdentifierResponse identifier,
         boolean recruiting,
         Map<UUID, UUID> users
 ) {
