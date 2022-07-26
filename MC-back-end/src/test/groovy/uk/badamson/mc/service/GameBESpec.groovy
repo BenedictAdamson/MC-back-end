@@ -5,7 +5,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
 import uk.badamson.mc.TestConfiguration
-import uk.badamson.mc.rest.GamePlayersResponse
 import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -55,7 +54,7 @@ class GameBESpec extends BESpecification {
         gamePlayersResponse.andExpect(status().isOk())
         mayJoinResponse.andExpect(status().isOk())
         def game = expectEncodedResponse(gameResponse, GameResponse.class)
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GameResponse.class)
         def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         and: "the game indicates its scenario"
@@ -100,7 +99,7 @@ class GameBESpec extends BESpecification {
         gameResponse.andExpect(status().isOk())
         gamePlayersResponse.andExpect(status().isOk())
         def game = expectEncodedResponse(gameResponse, GameResponse.class)
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GameResponse.class)
 
         and: "the game indicates its scenario"
         game.identifier().scenario() == scenarioId
@@ -228,7 +227,7 @@ class GameBESpec extends BESpecification {
         then: "provides the game"
         gamePlayersResponse.andExpect(status().isOk())
         mayJoinResponse.andExpect(status().isOk())
-        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GamePlayersResponse.class)
+        def gamePlayers = expectEncodedResponse(gamePlayersResponse, GameResponse.class)
         def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         then: "the game indicates that the user may join the game"

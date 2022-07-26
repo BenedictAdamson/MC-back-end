@@ -32,7 +32,6 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.Game.Identifier;
 import uk.badamson.mc.Scenario;
-import uk.badamson.mc.rest.GamePlayersResponse;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
@@ -468,7 +467,7 @@ public class GameController {
     @GetMapping(GAME_PLAYERS_PATH_PATTERN)
     @RolesAllowed({"PLAYER", "MANAGE_GAMES"})
     @Nonnull
-    public GamePlayersResponse getGamePlayers(
+    public GameResponse getGamePlayers(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
@@ -486,7 +485,7 @@ public class GameController {
         }
 
         if (gameOptional.isPresent()) {
-            return gameOptional.map(g -> GamePlayersResponse.convertToResponse(id, g)).get();
+            return gameOptional.map(g -> GameResponse.convertToResponse(id, g)).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
         }

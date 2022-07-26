@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
-import uk.badamson.mc.rest.GamePlayersResponse;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
@@ -514,8 +513,7 @@ public class GameControllerTest {
                 response.andExpect(status().isOk());
                 final var jsonResponse = response.andReturn().getResponse()
                         .getContentAsString();
-                final var gamePlayersResponse = objectMapper.readValue(jsonResponse,
-                        GamePlayersResponse.class);
+                final var gamePlayersResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
                 assertAll(
                         () -> assertThat("scenario",
                                 gamePlayersResponse.identifier().scenario(), is(id.getScenario())),

@@ -4,7 +4,7 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.Authority
-import uk.badamson.mc.rest.GamePlayersResponse
+import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
@@ -74,7 +74,7 @@ class CurrentGameBESpec extends BESpecification {
         response = requestGetGamePlayers(currentGameId, user)
 
         then: "the game indicates which character the user is playing"
-        def gamePlayers = expectEncodedResponse(response, GamePlayersResponse.class)
+        def gamePlayers = expectEncodedResponse(response, GameResponse.class)
         expect(gamePlayers.users().values(), Matchers.hasItem(user.id))
     }
 }
