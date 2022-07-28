@@ -30,8 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.Game.Identifier;
-import uk.badamson.mc.Scenario;
+import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
@@ -63,7 +62,7 @@ public class GameController {
 
     /**
      * <p>
-     * The format of URI paths for {@linkplain #createPathFor(Identifier) game
+     * The format of URI paths for {@linkplain #createPathFor(GameIdentifier) game
      * resources}.
      * </p>
      */
@@ -113,7 +112,7 @@ public class GameController {
      * @see #getGame(SpringUser, UUID, Instant)
      */
     @Nonnull
-    public static String createPathFor(@Nonnull final Game.Identifier id) {
+    public static String createPathFor(@Nonnull final GameIdentifier id) {
         Objects.requireNonNull(id, "id");
         return createPathForGames(id.getScenario())
                 + URI_DATETIME_FORMATTER.format(id.getCreated());
@@ -139,25 +138,25 @@ public class GameController {
     }
 
     @Nonnull
-    public static String createPathForStarting(@Nonnull final Game.Identifier id) {
+    public static String createPathForStarting(@Nonnull final GameIdentifier id) {
         return createPathFor(id) + "?" + START_PARAM;
     }
 
     @Nonnull
-    public static String createPathForStopping(@Nonnull final Game.Identifier id) {
+    public static String createPathForStopping(@Nonnull final GameIdentifier id) {
         return createPathFor(id) + "?" + STOP_PARAM;
     }
 
     public static String createPathForEndRecruitmentOf(
-            final Game.Identifier id) {
+            final GameIdentifier id) {
         return createPathFor(id) + "?" + END_RECRUITMENT_PARAM;
     }
 
-    public static String createPathForJoining(final Game.Identifier id) {
+    public static String createPathForJoining(final GameIdentifier id) {
         return createPathFor(id) + "?" + JOIN_PARAM;
     }
 
-    public static String createPathForMayJoinQueryOf(final Game.Identifier id) {
+    public static String createPathForMayJoinQueryOf(final GameIdentifier id) {
         return createPathFor(id) + "?" + MAY_JOIN_PARAM;
     }
 
@@ -173,7 +172,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(Identifier) path} of the new game.</li>
+     * {@linkplain #createPathFor(GameIdentifier) path} of the new game.</li>
      * </ul>
      * </li>
      * <li>The scenario ID part of the identifier of the newly created game is
@@ -260,7 +259,7 @@ public class GameController {
             @Nonnull @AuthenticationPrincipal final SpringUser user,
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
-        final var id = new Game.Identifier(scenario, created);
+        final var id = new GameIdentifier(scenario, created);
 
         final Optional<Game> game;
         if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
@@ -287,7 +286,7 @@ public class GameController {
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
-        final var gameId = new Game.Identifier(scenario, created);
+        final var gameId = new GameIdentifier(scenario, created);
         try {
             gameService.startGame(gameId);
             final var location = URI.create(createPathFor(gameId));
@@ -311,7 +310,7 @@ public class GameController {
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
-        final var gameId = new Game.Identifier(scenario, created);
+        final var gameId = new GameIdentifier(scenario, created);
         try {
             gameService.stopGame(gameId);
             final var location = URI.create(createPathFor(gameId));
@@ -332,17 +331,17 @@ public class GameController {
      * </p>
      * <ul>
      * <li>Returns a (non null) game players container.</li>
-     * <li>The {@linkplain Identifier#getScenario() scenario identifier} of the
+     * <li>The {@linkplain GameIdentifier#getScenario() scenario identifier} of the
      * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain UUID#equals(Object) is equivalent to} the given
      * scenario ID</li>
-     * <li>The {@linkplain Identifier#getCreated() creation time} of the
+     * <li>The {@linkplain GameIdentifier#getCreated() creation time} of the
      * {@linkplain Game#getIdentifier()}  game identifier} of the game players
      * container {@linkplain Instant#equals(Object) is equivalent to} the given
      * creation time</li>
      * </ul>
      * <ul>
-     * <li>{@linkplain GameSpringService#endRecruitment(Identifier) ends
+     * <li>{@linkplain GameSpringService#endRecruitment(GameIdentifier) ends
      * recruitment} for the game with the given ID.</li>
      * <li>Returns a redirect to the modified game players resource. That is, a
      * response with
@@ -351,7 +350,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(Identifier) path} of the
+     * {@linkplain #createPathFor(GameIdentifier) path} of the
      * resource.</li>
      * </ul>
      * </li>
@@ -376,7 +375,7 @@ public class GameController {
     public ResponseEntity<Void> endRecruitment(
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
-        final var id = new Game.Identifier(scenario, created);
+        final var id = new GameIdentifier(scenario, created);
         try {
             gameService.endRecruitment(id);
             final var location = URI.create(createPathFor(id));
@@ -402,7 +401,7 @@ public class GameController {
                     "Not Found Because Unauthorized");
 
         }
-        final Optional<Identifier> gameId = gameService.getCurrentGameOfUser(user.getId());
+        final Optional<GameIdentifier> gameId = gameService.getCurrentGameOfUser(user.getId());
         if (gameId.isPresent()) {
             final var headers = new HttpHeaders();
             headers.setLocation(URI.create(GameController.createPathFor(gameId.get())));
@@ -426,7 +425,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(Identifier) path} of the game
+     * {@linkplain #createPathFor(GameIdentifier) path} of the game
      * players resource.</li>
      * </ul>
      * </li>
@@ -471,7 +470,7 @@ public class GameController {
             @Nonnull @PathVariable("scenario") final UUID scenario,
             @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
-        final var game = new Game.Identifier(scenario, created);
+        final var game = new GameIdentifier(scenario, created);
         try {
             gameService.userJoinsGame(user.getId(), game);
             final var location = URI.create(createPathFor(game));
@@ -527,7 +526,7 @@ public class GameController {
                                @Nonnull @PathVariable("scenario") final UUID scenario,
                                @Nonnull @PathVariable("created") final Instant created) {
         Objects.requireNonNull(user, "user");
-        final var game = new Game.Identifier(scenario, created);
+        final var game = new GameIdentifier(scenario, created);
         if (gameService.getGameAsGameManager(game).isPresent()) {
             return gameService.mayUserJoinGame(user.getId(), game);
         } else {

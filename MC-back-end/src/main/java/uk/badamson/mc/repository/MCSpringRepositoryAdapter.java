@@ -19,6 +19,7 @@ package uk.badamson.mc.repository;
  */
 
 import uk.badamson.mc.Game;
+import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.User;
 import uk.badamson.mc.UserGameAssociation;
 import uk.badamson.mc.spring.SpringUser;
@@ -50,26 +51,26 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     public final class AdapterContext extends Context {
 
         @Override
-        protected void addGameUncached(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        protected void addGameUncached(@Nonnull GameIdentifier id, @Nonnull Game game) {
             gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
         @Override
-        protected void updateGameUncached(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        protected void updateGameUncached(@Nonnull GameIdentifier id, @Nonnull Game game) {
             gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
         @Nonnull
         @Override
-        protected Optional<Game> findGameUncached(@Nonnull Game.Identifier id) {
+        protected Optional<Game> findGameUncached(@Nonnull GameIdentifier id) {
             return gameRepository.findById(GameIdentifierDTO.convertToDTO(id))
                     .map(GameDTO::convertFromDTO);
         }
 
         @Nonnull
         @Override
-        protected Iterable<Map.Entry<Game.Identifier, Game>> findAllGamesUncached() {
-            List<Map.Entry<Game.Identifier, Game>> result = new ArrayList<>();
+        protected Iterable<Map.Entry<GameIdentifier, Game>> findAllGamesUncached() {
+            List<Map.Entry<GameIdentifier, Game>> result = new ArrayList<>();
             for (var gameDTO: gameRepository.findAll()) {
                 result.add(new AbstractMap.SimpleImmutableEntry<>(
                         GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),

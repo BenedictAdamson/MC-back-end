@@ -109,23 +109,23 @@ abstract class BESpecification extends Specification {
                 true, true, true, true))
     }
 
-    protected static Game.Identifier parseGamePath(final String path) {
+    protected static GameIdentifier parseGamePath(final String path) {
         return parseGamePathUsingTemplate(path, GAME_PATH_URI_TEMPLATE)
     }
 
-    protected static Game.Identifier parseGamePlayersPath(final String path) {
+    protected static GameIdentifier parseGamePlayersPath(final String path) {
         return parseGamePathUsingTemplate(path, GAME_PLAYERS_PATH_URI_TEMPLATE)
     }
 
-    private static Game.Identifier parseGamePathUsingTemplate(final String path,
-                                                              final UriTemplate template) {
+    private static GameIdentifier parseGamePathUsingTemplate(final String path,
+                                                             final UriTemplate template) {
         Objects.requireNonNull(path, "path")
         Objects.requireNonNull(template, "template")
         final var pathVariable = template.match(path)
         try {
             final var scenarioId = UUID.fromString(pathVariable.get("scenario"))
             final var created = Instant.parse(pathVariable.get("created"))
-            return new Game.Identifier(scenarioId, created)
+            return new GameIdentifier(scenarioId, created)
         } catch (final RuntimeException e) {
             throw new IllegalArgumentException("Path " + path, e)
         }
@@ -140,15 +140,15 @@ abstract class BESpecification extends Specification {
         requestGetJson(GameController.CURRENT_GAME_PATH, loggedInUser)
     }
 
-    protected final ResultActions requestGetGamePlayers(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGamePlayers(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         requestGetJson(GameController.createPathFor(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         requestGetJson(GameController.createPathFor(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetMayJoinQuery(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetMayJoinQuery(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         requestGetJson(GameController.createPathForMayJoinQueryOf(gameId), loggedInUser)
     }
 
@@ -180,7 +180,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestJoinGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestJoinGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForJoining(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -189,7 +189,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStartGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStartGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForStarting(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -198,7 +198,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStopGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStopGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForStopping(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -216,7 +216,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestEndRecruitment(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestEndRecruitment(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForEndRecruitmentOf(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {

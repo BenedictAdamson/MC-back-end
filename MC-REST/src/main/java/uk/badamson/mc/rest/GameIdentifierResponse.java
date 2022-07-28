@@ -19,7 +19,7 @@ package uk.badamson.mc.rest;
  */
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import uk.badamson.mc.Game;
+import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
@@ -31,12 +31,12 @@ public record GameIdentifierResponse(
         Instant created
 ) {
     @Nonnull
-    public static Game.Identifier convertFromResponse(@Nonnull GameIdentifierResponse dto) {
-        return new Game.Identifier(dto.scenario(), dto.created());
+    public static GameIdentifier convertFromResponse(@Nonnull GameIdentifierResponse dto) {
+        return new GameIdentifier(dto.scenario(), dto.created());
     }
 
     @Nonnull
-    public static GameIdentifierResponse convertToResponse(@Nonnull Game.Identifier id) {
+    public static GameIdentifierResponse convertToResponse(@Nonnull GameIdentifier id) {
         return new GameIdentifierResponse(id.getScenario(), id.getCreated());
     }
 }

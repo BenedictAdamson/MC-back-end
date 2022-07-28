@@ -18,7 +18,7 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import uk.badamson.mc.Game;
+import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
@@ -29,12 +29,12 @@ public record GameIdentifierDTO(
         Instant created
 ) {
     @Nonnull
-    public static Game.Identifier convertFromDTO(@Nonnull GameIdentifierDTO dto) {
-        return new Game.Identifier(dto.scenario(), dto.created());
+    public static GameIdentifier convertFromDTO(@Nonnull GameIdentifierDTO dto) {
+        return new GameIdentifier(dto.scenario(), dto.created());
     }
 
     @Nonnull
-    public static GameIdentifierDTO convertToDTO(@Nonnull Game.Identifier id) {
+    public static GameIdentifierDTO convertToDTO(@Nonnull GameIdentifier id) {
         return new GameIdentifierDTO(id.getScenario(), id.getCreated());
     }
 }

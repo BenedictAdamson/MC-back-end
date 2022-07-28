@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.Game.Identifier;
+import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
@@ -61,32 +61,32 @@ public class GameSpringService {
 
     @Transactional
     @Nonnull
-    public Iterable<Identifier> getGameIdentifiers() {
+    public Iterable<GameIdentifier> getGameIdentifiers() {
         return delegate.getGameIdentifiers();
     }
 
     @Transactional
     @Nonnull
-    public Game startGame(@Nonnull final Identifier id)
+    public Game startGame(@Nonnull final GameIdentifier id)
             throws NoSuchElementException, IllegalGameStateException {
         return delegate.startGame(id);
     }
 
     @Transactional
-    public void stopGame(@Nonnull final Identifier id)
+    public void stopGame(@Nonnull final GameIdentifier id)
             throws NoSuchElementException {
         delegate.stopGame(id);
     }
 
     @Transactional
-    public void endRecruitment(@Nonnull final Identifier id)
+    public void endRecruitment(@Nonnull final GameIdentifier id)
             throws NoSuchElementException {
         delegate.endRecruitment(id);
     }
 
     @Transactional
     @Nonnull
-    public Optional<Game.Identifier> getCurrentGameOfUser(
+    public Optional<GameIdentifier> getCurrentGameOfUser(
             @Nonnull final UUID userId) {
         return delegate.getCurrentGameOfUser(userId);
     }
@@ -94,25 +94,25 @@ public class GameSpringService {
     @Transactional
     @Nonnull
     public Optional<Game> getGameAsGameManager(
-            @Nonnull final Game.Identifier id) {
+            @Nonnull final GameIdentifier id) {
         return delegate.getGameAsGameManager(id);
     }
 
     @Transactional
     @Nonnull
     public Optional<Game> getGameAsNonGameManager(
-            @Nonnull final Game.Identifier id, @Nonnull final UUID user) {
+            @Nonnull final GameIdentifier id, @Nonnull final UUID user) {
         return delegate.getGameAsNonGameManager(id, user);
     }
 
     @Transactional
-    public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final Identifier game) {
+    public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final GameIdentifier game) {
         return delegate.mayUserJoinGame(user, game);
     }
 
     @Transactional
     public void userJoinsGame(@Nonnull final UUID userId,
-                              @Nonnull final Game.Identifier gameId)
+                              @Nonnull final GameIdentifier gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, SecurityException {
         delegate.userJoinsGame(userId, gameId);

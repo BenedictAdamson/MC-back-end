@@ -22,6 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.Game;
+import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
 import java.util.AbstractMap;
@@ -40,7 +41,7 @@ public record GameDTO(
         List<PlayedCharacterDTO> users
 ) {
     @Nonnull
-    static GameDTO convertToDTO(@Nonnull Game.Identifier id, @Nonnull Game game) {
+    static GameDTO convertToDTO(@Nonnull GameIdentifier id, @Nonnull Game game) {
         return new GameDTO(
                 GameIdentifierDTO.convertToDTO(id),
                 RunStateDTO.convertToDTO(game.getRunState()),
