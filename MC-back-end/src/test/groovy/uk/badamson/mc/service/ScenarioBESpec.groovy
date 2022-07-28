@@ -60,20 +60,15 @@ class ScenarioBESpec extends BESpecification {
 
         when: "try to examine the scenario"
         final def scenarioResponse = requestGetScenario(scenarioId, user)
-        final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
 
         then: "provides the scenario"
         def scenario = expectEncodedResponse(scenarioResponse, ScenarioResponse.class)
-        def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
 
         and: "the scenario includes the scenario description"
         expect(scenario.description(), Matchers.not(Matchers.emptyOrNullString()))
 
         and: "the scenario includes the list of playable characters of that scenario"
         expect(scenario.characters(), Matchers.not(Matchers.empty()))
-
-        and: "the scenario has a list of games of that scenario"
-        expect(gameCreationTimes, Matchers.not(Matchers.empty()))
     }
 
     @Unroll

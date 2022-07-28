@@ -58,7 +58,7 @@ abstract class BESpecification extends Specification {
             GameController.GAME_PATH_PATTERN)
 
     private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
-            GameController.GAME_PLAYERS_PATH_PATTERN)
+            GameController.GAME_PATH_PATTERN)
 
     private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
 
@@ -141,7 +141,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetGamePlayers(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(GameController.createPathForGamePlayersOf(gameId), loggedInUser)
+        requestGetJson(GameController.createPathFor(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetGame(@Nonnull Game.Identifier gameId, @Nullable User loggedInUser) {

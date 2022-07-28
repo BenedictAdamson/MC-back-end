@@ -79,15 +79,6 @@ public class GameController {
 
     /**
      * <p>
-     * The format of URI paths for
-     * {@linkplain #createPathForGamePlayersOf(Identifier) game player
-     * resources}.
-     * </p>
-     */
-    public static final String GAME_PLAYERS_PATH_PATTERN = "/api/scenario/{scenario}/game/{created}/players";
-
-    /**
-     * <p>
      * The format of time-stamps when used as parts of paths of URIs used by this
      * controller.
      * </p>
@@ -159,19 +150,15 @@ public class GameController {
 
     public static String createPathForEndRecruitmentOf(
             final Game.Identifier id) {
-        return createPathForGamePlayersOf(id) + "?" + END_RECRUITMENT_PARAM;
-    }
-
-    public static String createPathForGamePlayersOf(final Game.Identifier id) {
-        return createPathFor(id) + "/players";
+        return createPathFor(id) + "?" + END_RECRUITMENT_PARAM;
     }
 
     public static String createPathForJoining(final Game.Identifier id) {
-        return createPathForGamePlayersOf(id) + "?" + JOIN_PARAM;
+        return createPathFor(id) + "?" + JOIN_PARAM;
     }
 
     public static String createPathForMayJoinQueryOf(final Game.Identifier id) {
-        return createPathForGamePlayersOf(id) + "?" + MAY_JOIN_PARAM;
+        return createPathFor(id) + "?" + MAY_JOIN_PARAM;
     }
 
     /**
@@ -244,6 +231,7 @@ public class GameController {
      *                                 {@linkplain Scenario#getIdentifier() identifier}.
      */
     @GetMapping(GAMES_PATH_PATTERN)
+    @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
     public Stream<String> getCreationTimes(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
@@ -367,7 +355,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathForGamePlayersOf(Identifier) path} of the
+     * {@linkplain #createPathFor(Identifier) path} of the
      * resource.</li>
      * </ul>
      * </li>
@@ -386,8 +374,7 @@ public class GameController {
      *                                 identification information} equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @PostMapping(path = GAME_PLAYERS_PATH_PATTERN,
-            params = {END_RECRUITMENT_PARAM})
+    @PostMapping(path = GAME_PATH_PATTERN, params = {END_RECRUITMENT_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
@@ -396,7 +383,7 @@ public class GameController {
         final var id = new Game.Identifier(scenario, created);
         try {
             gameService.endRecruitment(id);
-            final var location = URI.create(createPathForGamePlayersOf(id));
+            final var location = URI.create(createPathFor(id));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -432,67 +419,6 @@ public class GameController {
 
     /**
      * <p>
-     * Behaviour of the GET verb for a game players resource.
-     * </p>
-     * <ul>
-     * <li>Returns a (non null) game players container.</li>
-     * <li>The {@linkplain Identifier#getScenario() scenario identifier} of the
-     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
-     * container {@linkplain UUID#equals(Object) is equivalent to} the given
-     * scenario ID</li>
-     * <li>The {@linkplain Identifier#getCreated() creation time} of the
-     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
-     * container {@linkplain Instant#equals(Object) is equivalent to} the given
-     * creation time</li>
-     * </ul>
-     *
-     * @param user     The authenticated identity of the current user
-     * @param scenario The unique ID of the scenario of the game.
-     * @param created  The creation time of the game.
-     * @return The response.
-     * @throws NullPointerException     <ul>
-     *                                                                                                               <li>If {@code user} is null.</li>
-     *                                                                                                               <li>If {@code scenario} is null.</li>
-     *                                                                                                               <li>If {@code created} is null.</li>
-     *                                                                                                               </ul>
-     * @throws IllegalArgumentException If the {@code user} does not have the
-     *                                  {@link Authority#ROLE_MANAGE_GAMES} or
-     *                                  {@link Authority#ROLE_PLAYER} roles.
-     * @throws ResponseStatusException  With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                  of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                  is no game that has {@linkplain Game#getIdentifier()
-     *                                  identification information} equivalent to the given
-     *                                  {@code scenario} and {@code created}.
-     */
-    @GetMapping(GAME_PLAYERS_PATH_PATTERN)
-    @RolesAllowed({"PLAYER", "MANAGE_GAMES"})
-    @Nonnull
-    public GameResponse getGamePlayers(
-            @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
-        Objects.requireNonNull(user, "user");
-        final var id = new Game.Identifier(scenario, created);
-
-        final Optional<Game> gameOptional;
-        if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
-            gameOptional = gameService.getGameAsGameManager(id);
-        } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
-            gameOptional = gameService.getGameAsNonGameManager(id,
-                    user.getId());
-        } else {
-            throw new IllegalArgumentException("Request not permitted for role");
-        }
-
-        if (gameOptional.isPresent()) {
-            return gameOptional.map(g -> GameResponse.convertToResponse(id, g)).get();
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
-        }
-    }
-
-    /**
-     * <p>
      * Add the requesting user as a {@linkplain Game#getUsers() player} of
      * a given game.
      * </p>
@@ -504,7 +430,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathForGamePlayersOf(Identifier) path} of the game
+     * {@linkplain #createPathFor(Identifier) path} of the game
      * players resource.</li>
      * </ul>
      * </li>
@@ -541,7 +467,7 @@ public class GameController {
      *                                                                                                            games.</li>
      *                                                                                                            </ul>
      */
-    @PostMapping(path = GAME_PLAYERS_PATH_PATTERN, params = {JOIN_PARAM})
+    @PostMapping(path = GAME_PATH_PATTERN, params = {JOIN_PARAM})
     @RolesAllowed("PLAYER")
     @Nonnull
     public ResponseEntity<Void> joinGame(
@@ -552,7 +478,7 @@ public class GameController {
         final var game = new Game.Identifier(scenario, created);
         try {
             gameService.userJoinsGame(user.getId(), game);
-            final var location = URI.create(createPathForGamePlayersOf(game));
+            final var location = URI.create(createPathFor(game));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -599,7 +525,7 @@ public class GameController {
      *                                 identification information} equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @GetMapping(path = GAME_PLAYERS_PATH_PATTERN, params = {MAY_JOIN_PARAM})
+    @GetMapping(path = GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})
     @RolesAllowed("PLAYER")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
                                @Nonnull @PathVariable("scenario") final UUID scenario,

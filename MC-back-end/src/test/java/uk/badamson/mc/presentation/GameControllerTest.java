@@ -265,21 +265,51 @@ public class GameControllerTest {
         @Test
         public void absent() throws Exception {
             final var scenario = UUID.randomUUID();
+            // Tough test: user has authority
+            final var user = createUser(Authority.ALL);
 
-            final var response = perform(scenario);
+            final var response = perform(scenario, user);
 
             response.andExpect(status().isNotFound());
         }
+        @Test
+        public void noAuthentication() throws Exception {
+            // Tough test: scenario exists
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+
+            final var response = perform(scenario, null);
+
+            response.andExpect(status().isUnauthorized());
+        }
 
         @Test
-        public void one() throws Exception {
+        public void notPermitted() throws Exception {
+            // Tough test: game exists, user has all other authorities
+            final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+            assertThat("scenario", scenarioOptional.isPresent());
+            final var scenario = scenarioOptional.get();
+            final var authorities = EnumSet.complementOf(EnumSet
+                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+            final var user = createUser(authorities);
+
+            final var response = perform(scenario, user);
+
+            response.andExpect(status().isForbidden());
+        }
+
+        @Test
+        public void permitted() throws Exception {
+            // Tough test: user has minimum authority
+            final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
             final var created = gameService.create(scenario).getIdentifier()
                     .getCreated();
 
-            final var response = perform(scenario);
+            final var response = perform(scenario, user);
 
             response.andExpect(status().isOk());
             final var jsonResponse = response.andReturn().getResponse()
@@ -291,9 +321,13 @@ public class GameControllerTest {
             assertThat("creation times", creationTimes, hasItem(created));
         }
 
-        private ResultActions perform(final UUID scenario) throws Exception {
+        private ResultActions perform(final UUID scenario,
+                                      final User user) throws Exception {
             final var path = GameController.createPathForGames(scenario);
-            final var request = get(path).accept(MediaType.APPLICATION_JSON);
+            var request = get(path).accept(MediaType.APPLICATION_JSON);
+            if (user != null) {
+                request = request.with(user(SpringUser.convertToSpring(user)));
+            }
 
             return mockMvc.perform(request);
         }
@@ -351,8 +385,7 @@ public class GameControllerTest {
         @Test
         public void permitted() throws Exception {
             final var game = createGame();
-            final var expectedRedirectionLocation = GameController
-                    .createPathForGamePlayersOf(game);
+            final var expectedRedirectionLocation = GameController.createPathFor(game);
             // Tough test: user has a minimum set of authorities
             final var authorities = EnumSet.of(Authority.ROLE_MANAGE_GAMES);
             final var user = createUser(authorities);
@@ -368,8 +401,7 @@ public class GameControllerTest {
 
         private ResultActions test(final Game.Identifier id, final User user,
                                    final boolean hasCsrfToken) throws Exception {
-            final var path = GameController
-                    .createPathForEndRecruitmentOf(id);
+            final var path = GameController.createPathForEndRecruitmentOf(id);
             var request = post(path);
             if (user != null) {
                 request = request.with(user(SpringUser.convertToSpring(user)));
@@ -430,99 +462,6 @@ public class GameControllerTest {
             }
 
             return mockMvc.perform(request);
-        }
-
-    }
-
-    @Nested
-    public class GetGamePlayers {
-
-        @Test
-        public void absent() throws Exception {
-            final var game = new Game.Identifier(UUID.randomUUID(), Instant.now());
-            // Tough test: user has authority
-            final var user = createUser(Authority.ALL);
-            final var response = test(game, user);
-
-            response.andExpect(status().isNotFound());
-        }
-
-        @Test
-        public void noAuthentication() throws Exception {
-            // Tough test: game exists
-            final var id = createGame();
-
-            final var response = test(id, null);
-
-            response.andExpect(status().isUnauthorized());
-        }
-
-        @Test
-        public void notPermitted() throws Exception {
-            // Tough test: game exists and user has all the other authorities
-            final var authorities = EnumSet.complementOf(EnumSet
-                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
-            final var user = createUser(authorities);
-            final var game = createGame();
-
-            final var response = test(game, user);
-
-            response.andExpect(status().isForbidden());
-        }
-
-        private ResultActions test(final Game.Identifier id, final User user)
-                throws Exception {
-            final var path = GameController.createPathForGamePlayersOf(id);
-            var request = get(path).accept(MediaType.APPLICATION_JSON);
-            if (user != null) {
-                request = request.with(user(SpringUser.convertToSpring(user)));
-            }
-
-            return mockMvc.perform(request);
-        }
-
-        @Nested
-        public class Valid {
-
-            @Test
-            public void asGamesManager() throws Exception {
-                test(Authority.ROLE_MANAGE_GAMES, true);
-            }
-
-            @Test
-            public void asPlayer() throws Exception {
-                test(Authority.ROLE_PLAYER, false);
-            }
-
-            private void test(final Authority authority,
-                              final boolean expectListsOtherPlayer) throws Exception {
-                // Tough test: user has a minimum set of authorities
-                final var user = createUser(EnumSet.of(authority));
-                final var player = userService.add(new BasicUserDetails(Fixtures.createUserName(),
-                        "password", EnumSet.of(Authority.ROLE_PLAYER),
-                        true, true,
-                        true, true));
-                final var id = createGame();
-                gameService.userJoinsGame(player.getId(), id);
-                final var expectedPlayers = expectListsOtherPlayer
-                        ? Set.of(player.getId())
-                        : Set.of();
-
-                final var response = GameControllerTest.GetGamePlayers.this.test(id, user);
-
-                response.andExpect(status().isOk());
-                final var jsonResponse = response.andReturn().getResponse()
-                        .getContentAsString();
-                final var gamePlayersResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
-                assertAll(
-                        () -> assertThat("scenario",
-                                gamePlayersResponse.identifier().scenario(), is(id.getScenario())),
-                        () -> assertThat("created",
-                                gamePlayersResponse.identifier().created(), is(id.getCreated())),
-                        () -> assertThat("players",
-                                Set.copyOf(gamePlayersResponse.users().values()), is(expectedPlayers)));
-            }
-
         }
 
     }
@@ -648,7 +587,7 @@ public class GameControllerTest {
         @Test
         public void valid() throws Exception {
             final var gameId = createGame();
-            final var expectedRedirectionLocation = GameController.createPathForGamePlayersOf(gameId);
+            final var expectedRedirectionLocation = GameController.createPathFor(gameId);
             // Tough test: user has a minimum set of authorities
             final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
             final var user = createUser(authorities);
