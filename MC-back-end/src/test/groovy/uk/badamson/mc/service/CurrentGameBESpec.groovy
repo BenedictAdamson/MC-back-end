@@ -37,8 +37,8 @@ class CurrentGameBESpec extends BESpecification {
 
     def "May examine current-game only if playing"() {
         given: "has a game"
-        def scenario = chooseScenario()
-        gameService.create(scenario.identifier).identifier
+        def scenarioId = chooseScenario()
+        gameService.create(scenarioId).identifier
 
         and: "user has the player role but is not playing"
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
@@ -52,8 +52,8 @@ class CurrentGameBESpec extends BESpecification {
 
     def "Examine current game"() {
         given: "has a game"
-        def scenario = chooseScenario()
-        def gameId = gameService.create(scenario.identifier).identifier
+        def scenarioId = chooseScenario()
+        def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))

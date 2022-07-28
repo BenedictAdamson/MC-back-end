@@ -52,7 +52,7 @@ class ScenarioBESpec extends BESpecification {
 
     def "Examine scenario anonymously"() {
         given: "a scenario that has a game"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         gameService.create(scenarioId).identifier
 
         and: "not logged in"
@@ -74,7 +74,7 @@ class ScenarioBESpec extends BESpecification {
     @Unroll
     def "Examine scenario with authorization"() {
         given: "a scenario that has a game"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         gameService.create(scenarioId).identifier
 
         and: "logged in as a user with the #role"

@@ -90,11 +90,11 @@ abstract class BESpecification extends Specification {
         userRepository.deleteAll()
     }
 
-    protected final Scenario chooseScenario() {
+    protected final UUID chooseScenario() {
         final def scenarioId = getAScenarioId()
         def scenarioOptional = scenarioService.getScenario(scenarioId)
         assertThat("scenario", scenarioOptional.isPresent())
-        scenarioOptional.get()
+        scenarioId
     }
 
     protected final UUID getAScenarioId() {

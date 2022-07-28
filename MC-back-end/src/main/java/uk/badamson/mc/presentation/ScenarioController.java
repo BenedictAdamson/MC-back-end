@@ -89,28 +89,20 @@ public class ScenarioController {
      * <p>
      * Behaviour of the GET verb for a scenario resource.
      * </p>
-     * <ul>
-     * <li>Returns a (non null) scenario.</li>
-     * <li>The {@linkplain Scenario#getIdentifier() identifier} of the returned
-     * scenario {@linkplain UUID#equals(Object) is equivalent to} the given
-     * ID</li>
-     * </ul>
      *
      * @param id The unique ID of the wanted scenario.
      * @return The response.
      * @throws NullPointerException    If {@code id} is null.
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no scenario with the given {@code id}
-     *                                 {@linkplain UUID#equals(Object) equivalent to} its
-     *                                 {@linkplain Scenario#getIdentifier() identifier}.
+     *                                 is no scenario with the given {@code id}.
      */
     @GetMapping("/api/scenario/{id}")
     @Nonnull
     public ScenarioResponse getScenario(@Nonnull @PathVariable final UUID id) {
         final Optional<Scenario> scenario = service.getScenario(id);
         if (scenario.isPresent()) {
-            return scenario.map(ScenarioResponse::convertToResponse).get();
+            return scenario.map(s -> ScenarioResponse.convertToResponse(id, s)).get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
         }

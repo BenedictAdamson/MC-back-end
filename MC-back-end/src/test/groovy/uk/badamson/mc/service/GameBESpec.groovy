@@ -38,7 +38,7 @@ class GameBESpec extends BESpecification {
 
     def "Examine game as player"() {
         given: "has a game"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
@@ -84,7 +84,7 @@ class GameBESpec extends BESpecification {
 
     def "Examine game as game manager"() {
         given: "has a game"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role but not the player role"
@@ -128,7 +128,7 @@ class GameBESpec extends BESpecification {
 
     def "Add game"() {
         given: "has a scenario without any games"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
 
         and: "user has the manage games role"
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
@@ -160,7 +160,7 @@ class GameBESpec extends BESpecification {
 
     def "Only a game manager may add a game"() {
         given: "has a scenario without any games"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
 
         and: "user without the manage games role"
         def user = addUserWithAuthorities(
@@ -176,7 +176,7 @@ class GameBESpec extends BESpecification {
 
     def "End game recruitment"() {
         given: "a game is initially recruiting players"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role"
@@ -199,7 +199,7 @@ class GameBESpec extends BESpecification {
 
     def "Only a game manager may end recruitment for a game"() {
         given: "a game is recruiting players"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role but not the manage games role"
@@ -214,7 +214,7 @@ class GameBESpec extends BESpecification {
 
     def "Players may join a game"() {
         given: "a game is recruiting players"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
@@ -239,7 +239,7 @@ class GameBESpec extends BESpecification {
 
     def "Join a game"() {
         given: "a game is recruiting players"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the player role"
@@ -262,7 +262,7 @@ class GameBESpec extends BESpecification {
 
     def "Only a player may join a game"() {
         given: "a game is recruiting players"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role but not the player role"
@@ -277,7 +277,7 @@ class GameBESpec extends BESpecification {
 
     def "Start game"() {
         given: "a game is waiting to start"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "user has the manage games role"
@@ -300,7 +300,7 @@ class GameBESpec extends BESpecification {
 
     def "Only a game manager may start a game"() {
         given: "a game is waiting to start"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
 
         and: "logged in as a user has the player role but not the manage games role"
@@ -315,7 +315,7 @@ class GameBESpec extends BESpecification {
 
     def "Stop game"() {
         given: "a game is running"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
         gameService.startGame(gameId)
 
@@ -339,7 +339,7 @@ class GameBESpec extends BESpecification {
 
     def "Only a game manager may stop a game"() {
         given: "a game is running"
-        def scenarioId = chooseScenario().identifier
+        def scenarioId = chooseScenario()
         def gameId = gameService.create(scenarioId).identifier
         gameService.startGame(gameId)
 

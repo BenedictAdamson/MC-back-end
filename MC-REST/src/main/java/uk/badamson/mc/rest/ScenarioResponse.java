@@ -34,9 +34,9 @@ public record ScenarioResponse(
         List<NamedUUID> characters
 ) {
 
-    public static ScenarioResponse convertToResponse(@Nonnull Scenario scenario) {
+    public static ScenarioResponse convertToResponse(@Nonnull UUID id, @Nonnull Scenario scenario) {
         return new ScenarioResponse(
-                scenario.getIdentifier(), scenario.getTitle(), scenario.getDescription(),
+                id, scenario.getTitle(), scenario.getDescription(),
                 scenario.getCharacters().stream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle())).collect(Collectors.toUnmodifiableList())
         );
     }
