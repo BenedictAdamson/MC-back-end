@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
+import uk.badamson.mc.IdentifiedValue;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
@@ -48,7 +49,7 @@ public class GameSpringService {
 
     @Nonnull
     @Transactional
-    public Game create(@Nonnull final UUID scenario) {
+    public IdentifiedValue<GameIdentifier, Game> create(@Nonnull final UUID scenario) {
         return delegate.create(scenario);
     }
 

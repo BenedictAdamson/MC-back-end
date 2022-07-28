@@ -306,8 +306,7 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var created = gameService.create(scenario).getIdentifier()
-                    .getCreated();
+            final var created = gameService.create(scenario).getIdentifier().getCreated();
 
             final var response = perform(scenario, user);
 

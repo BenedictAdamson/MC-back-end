@@ -197,9 +197,9 @@ public class GameController {
     public ResponseEntity<Void> createGameForScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
         try {
-            final var game = gameService.create(scenario);
+            final var identifier = gameService.create(scenario).getIdentifier();
 
-            final var location = URI.create(createPathFor(game.getIdentifier()));
+            final var location = URI.create(createPathFor(identifier));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
