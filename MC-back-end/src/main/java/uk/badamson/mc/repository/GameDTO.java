@@ -23,6 +23,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
+import uk.badamson.mc.Scenario;
 
 import javax.annotation.Nonnull;
 import java.util.AbstractMap;
@@ -59,7 +60,6 @@ public record GameDTO(
     @Nonnull
     static Game convertFromDTO(@Nonnull GameDTO dto) {
         return new Game(
-                dto.identifier().scenario(),
                 dto.identifier().created(),
                 RunStateDTO.convertFromDTO(dto.runState()),
                 dto.recruiting() != null && dto.recruiting(),

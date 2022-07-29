@@ -60,18 +60,23 @@ public class MCSpringRepositoryAdapter extends MCRepository {
         @Nonnull
         @Override
         protected Optional<FindGameResult> findGameUncached(@Nonnull GameIdentifier id) {
-            return gameRepository.findById(GameIdentifierDTO.convertToDTO(id))
-                    .map(dto -> new FindGameResult(GameDTO.convertFromDTO(dto), id.getScenario()));
+            final var gameDtoOptional = gameRepository.findById(GameIdentifierDTO.convertToDTO(id));
+            if (gameDtoOptional.isEmpty()) {
+                return Optional.empty();
+            }
+            final var gameDto = gameDtoOptional.get();
+            final var scenarioId = gameDto.identifier().scenario();
+            return gameDtoOptional.map(dto -> new FindGameResult(GameDTO.convertFromDTO(dto), scenarioId));
         }
 
         @Nonnull
         @Override
-        protected Iterable<Map.Entry<GameIdentifier, Game>> findAllGamesUncached() {
-            List<Map.Entry<GameIdentifier, Game>> result = new ArrayList<>();
+        protected Iterable<Map.Entry<GameIdentifier, FindGameResult>> findAllGamesUncached() {
+            List<Map.Entry<GameIdentifier, FindGameResult>> result = new ArrayList<>();
             for (var gameDTO: gameRepository.findAll()) {
                 result.add(new AbstractMap.SimpleImmutableEntry<>(
                         GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),
-                        GameDTO.convertFromDTO(gameDTO)
+                        new FindGameResult(GameDTO.convertFromDTO(gameDTO), gameDTO.identifier().scenario())
                 ));
             }
             return result;
