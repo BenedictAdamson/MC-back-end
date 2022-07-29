@@ -248,8 +248,7 @@ public class GameController {
      *                                 </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has {@linkplain Game#getIdentifier()
-     *                                 identification information} equivalent to the given
+     *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
     @GetMapping(GAME_PATH_PATTERN)
@@ -332,11 +331,11 @@ public class GameController {
      * <ul>
      * <li>Returns a (non null) game players container.</li>
      * <li>The {@linkplain GameIdentifier#getScenario() scenario identifier} of the
-     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
+     * game identifier of the game players
      * container {@linkplain UUID#equals(Object) is equivalent to} the given
      * scenario ID</li>
      * <li>The {@linkplain GameIdentifier#getCreated() creation time} of the
-     * {@linkplain Game#getIdentifier()}  game identifier} of the game players
+     * game identifier of the game players
      * container {@linkplain Instant#equals(Object) is equivalent to} the given
      * creation time</li>
      * </ul>
@@ -365,8 +364,7 @@ public class GameController {
      *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has {@linkplain Game#getIdentifier()
-     *                                 identification information} equivalent to the given
+     *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
     @PostMapping(path = GAME_PATH_PATTERN, params = {END_RECRUITMENT_PARAM})
@@ -443,8 +441,7 @@ public class GameController {
      * @throws ResponseStatusException <ul>
      *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                                                            there is no game that has {@linkplain Game#getIdentifier()
-     *                                                                                                            identification information} equivalent to the given
+     *                                                                                                            there is no game that has identification information equivalent to the given
      *                                                                                                            {@code scenario} and {@code created}.</li>
      *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
@@ -516,8 +513,7 @@ public class GameController {
      *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has {@linkplain Game#getIdentifier()
-     *                                 identification information} equivalent to the given
+     *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
     @GetMapping(path = GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})

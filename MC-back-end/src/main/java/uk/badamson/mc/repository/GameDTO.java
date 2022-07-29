@@ -59,7 +59,8 @@ public record GameDTO(
     @Nonnull
     static Game convertFromDTO(@Nonnull GameDTO dto) {
         return new Game(
-                GameIdentifierDTO.convertFromDTO(dto.identifier()),
+                dto.identifier().scenario(),
+                dto.identifier().created(),
                 RunStateDTO.convertFromDTO(dto.runState()),
                 dto.recruiting() != null && dto.recruiting(),
                 convertFromUsersDTO(dto.users())
