@@ -18,10 +18,7 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import uk.badamson.mc.Game;
-import uk.badamson.mc.GameIdentifier;
-import uk.badamson.mc.User;
-import uk.badamson.mc.UserGameAssociation;
+import uk.badamson.mc.*;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
@@ -62,9 +59,9 @@ public class MCSpringRepositoryAdapter extends MCRepository {
 
         @Nonnull
         @Override
-        protected Optional<Game> findGameUncached(@Nonnull GameIdentifier id) {
+        protected Optional<FindGameResult> findGameUncached(@Nonnull GameIdentifier id) {
             return gameRepository.findById(GameIdentifierDTO.convertToDTO(id))
-                    .map(GameDTO::convertFromDTO);
+                    .map(dto -> new FindGameResult(GameDTO.convertFromDTO(dto), id.getScenario()));
         }
 
         @Nonnull

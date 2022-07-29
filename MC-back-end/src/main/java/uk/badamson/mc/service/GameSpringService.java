@@ -21,6 +21,7 @@ package uk.badamson.mc.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.badamson.mc.FindGameResult;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.IdentifiedValue;
@@ -94,14 +95,14 @@ public class GameSpringService {
 
     @Transactional
     @Nonnull
-    public Optional<Game> getGameAsGameManager(
+    public Optional<FindGameResult> getGameAsGameManager(
             @Nonnull final GameIdentifier id) {
         return delegate.getGameAsGameManager(id);
     }
 
     @Transactional
     @Nonnull
-    public Optional<Game> getGameAsNonGameManager(
+    public Optional<FindGameResult> getGameAsNonGameManager(
             @Nonnull final GameIdentifier id, @Nonnull final UUID user) {
         return delegate.getGameAsNonGameManager(id, user);
     }

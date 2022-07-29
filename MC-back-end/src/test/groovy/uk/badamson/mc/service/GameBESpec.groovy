@@ -3,6 +3,7 @@ package uk.badamson.mc.service
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
+import uk.badamson.mc.FindGameResult
 import uk.badamson.mc.Game
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.rest.GameResponse
@@ -140,9 +141,9 @@ class GameBESpec extends BESpecification {
         final def location = expectFound(response)
         location != null
         final def gameId = parseGamePath(location)
-        final def gameOptional = gameService.getGameAsGameManager(gameId)
-        gameOptional.isPresent()
-        final def game = gameOptional.get()
+        final def findGameResultOptional = gameService.getGameAsGameManager(gameId)
+        findGameResultOptional.isPresent()
+        final def game = findGameResultOptional.map(r -> r.game()).get()
 
         and: "the game indicates that it is recruiting players"
         expect(game.recruiting, Matchers.instanceOf(Boolean.class))
@@ -191,10 +192,10 @@ class GameBESpec extends BESpecification {
         parseGamePlayersPath(location) == gameId
 
         and: "the game indicates that it is not recruiting players"
-        final def gamePlayersOptional = gameService.getGameAsGameManager(gameId)
-        gamePlayersOptional.isPresent()
-        final def gamePlayers = gamePlayersOptional.get()
-        !gamePlayers.recruiting
+        final def findGameResultOptional = gameService.getGameAsGameManager(gameId)
+        findGameResultOptional.isPresent()
+        final def game = findGameResultOptional.map(r -> r.game()).get()
+        !game.recruiting
     }
 
     def "Only a game manager may end recruitment for a game"() {
@@ -252,12 +253,12 @@ class GameBESpec extends BESpecification {
         final def location = expectFound(response)
         location != null
         parseGamePlayersPath(location) == gameId
-        def gamePlayersOptional = gameService.getGameAsGameManager(gameId)
-        gamePlayersOptional.isPresent()
-        def gamePlayers = gamePlayersOptional.get()
+        def findGameResultOptional = gameService.getGameAsGameManager(gameId)
+        findGameResultOptional.isPresent()
+        def game = findGameResultOptional.map(r -> r.game()).get()
 
         and: "the game indicates which character the user is playing"
-        expect(gamePlayers.users.values(), Matchers.hasItem(user.id))
+        expect(game.users.values(), Matchers.hasItem(user.id))
     }
 
     def "Only a player may join a game"() {
@@ -292,9 +293,9 @@ class GameBESpec extends BESpecification {
         parseGamePath(location) == gameId
 
         and: "the game indicates that it is running"
-        def gameOptional = gameService.getGameAsGameManager(gameId)
-        gameOptional.isPresent()
-        def game = gameOptional.get()
+        def findGameResultOptional = gameService.getGameAsGameManager(gameId)
+        findGameResultOptional.isPresent()
+        def game = findGameResultOptional.map(r -> r.game()).get()
         game.runState == Game.RunState.RUNNING
     }
 
@@ -331,9 +332,9 @@ class GameBESpec extends BESpecification {
         parseGamePath(location) == gameId
 
         and: "the game indicates that it is not running"
-        def gameOptional = gameService.getGameAsGameManager(gameId)
-        gameOptional.isPresent()
-        def game = gameOptional.get()
+        def findGameResultOptional = gameService.getGameAsGameManager(gameId)
+        findGameResultOptional.isPresent()
+        def game = findGameResultOptional.map(r -> r.game()).get()
         game.runState == Game.RunState.STOPPED
     }
 

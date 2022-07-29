@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.Authority;
+import uk.badamson.mc.FindGameResult;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.rest.GameResponse;
@@ -262,10 +263,9 @@ public class GameController {
 
         final Optional<Game> game;
         if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
-            game = gameService.getGameAsGameManager(id);
+            game = gameService.getGameAsGameManager(id).map(FindGameResult::game);
         } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
-            game = gameService.getGameAsNonGameManager(id,
-                    user.getId());
+            game = gameService.getGameAsNonGameManager(id, user.getId()).map(FindGameResult::game);
         } else {
             throw new IllegalArgumentException("Request not permitted for role");
         }

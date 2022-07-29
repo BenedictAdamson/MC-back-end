@@ -497,7 +497,7 @@ public class GameControllerTest {
             final var response = performRequest(game, user, false);
 
             response.andExpect(status().isForbidden());
-            final Optional<Game> gameOptional = gameService.getGameAsGameManager(game);
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(game).map(FindGameResult::game);
             assertThat("present", gameOptional.isPresent());
             final var gamePlayers = gameOptional.get();
             assertThat("User not added to players of game",
@@ -518,7 +518,7 @@ public class GameControllerTest {
             final var response = performRequest(gameId, user, true);
 
             response.andExpect(status().isForbidden());
-            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId).map(FindGameResult::game);
             assertThat("present", gameOptional.isPresent());
             final var game = gameOptional.get();
             assertThat("User not added to players of game",
@@ -538,7 +538,7 @@ public class GameControllerTest {
             final var response = performRequest(gameId, user, true);
 
             response.andExpect(status().isConflict());
-            Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId).map(FindGameResult::game);
             assertThat("present", gameOptional.isPresent());
             final var game = gameOptional.get();
             assertThat("User not added to players of game",
@@ -574,7 +574,7 @@ public class GameControllerTest {
 
             final var response = performRequest(gameIdB, user, true);
 
-            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameIdB);
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameIdB).map(FindGameResult::game);
             assertThat("present", gameOptional.isPresent());
             final var game = gameOptional.get();
             assertAll(() -> response.andExpect(status().isConflict()),
@@ -594,7 +594,7 @@ public class GameControllerTest {
             final var response = performRequest(gameId, user, true);
 
             final var location = response.andReturn().getResponse().getHeaderValue("Location");
-            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId);
+            final Optional<Game> gameOptional = gameService.getGameAsGameManager(gameId).map(FindGameResult::game);
             assertThat("present", gameOptional.isPresent());
             final var game = gameOptional.get();
             final var currentGame = gameService.getCurrentGameOfUser(user.getId());
