@@ -243,16 +243,19 @@ public class GameControllerTest {
 
             private void test(final Authority authority)
                     throws Exception {
-                final var id = createGame();
+                final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
+                assertThat("scenario", scenarioOptional.isPresent());
+                final var scenarioId = scenarioOptional.get();
+                final var gameId = gameService.create(scenarioId).getIdentifier();
                 final var user = createUser(EnumSet.of(authority));
 
-                final var response = perform(id, user);
+                final var response = perform(gameId, user);
 
                 response.andExpect(status().isOk());
                 final var jsonResponse = response.andReturn().getResponse().getContentAsString();
                 final var gameResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
-                assertThat("scenario", gameResponse.identifier().scenario(), is(id.getScenario()));
-                assertThat("created", gameResponse.identifier().created(), is(id.getCreated()));
+                assertThat("scenario", gameResponse.identifier().scenario(), is(scenarioId));
+                assertThat("created", gameResponse.identifier().created(), is(gameId.getCreated()));
             }
 
         }

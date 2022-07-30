@@ -48,12 +48,12 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     public final class AdapterContext extends Context {
 
         @Override
-        protected void addGameUncached(@Nonnull GameIdentifier id, @Nonnull Game game) {
+        protected void addGameUncached(@Nonnull GameIdentifier id, @Nonnull UUID scenarioId, @Nonnull Game game) {
             gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
         @Override
-        protected void updateGameUncached(@Nonnull GameIdentifier id, @Nonnull Game game) {
+        protected void updateGameUncached(@Nonnull GameIdentifier id, @Nonnull UUID scenarioId, @Nonnull Game game) {
             gameRepository.save(GameDTO.convertToDTO(id, game));
         }
 
