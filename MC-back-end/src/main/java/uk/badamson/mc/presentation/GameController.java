@@ -232,7 +232,8 @@ public class GameController {
     public Stream<String> getCreationTimes(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
         try {
-            return gameService.getCreationTimesOfGamesOfScenario(scenario)
+            return gameService.getGameIdentifiersOfScenario(scenario)
+                    .map(GameIdentifier::getCreated)
                     .map(URI_DATETIME_FORMATTER::format);
         } catch (final NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,

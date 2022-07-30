@@ -56,9 +56,9 @@ public class GameSpringService {
 
     @Nonnull
     @Transactional
-    public Stream<Instant> getCreationTimesOfGamesOfScenario(@Nonnull final UUID scenario)
+    public Stream<GameIdentifier> getGameIdentifiersOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
-        return delegate.getCreationTimesOfGamesOfScenario(scenario).stream();
+        return delegate.getGameIdentifiersOfScenario(scenario).stream();
     }
 
     @Transactional

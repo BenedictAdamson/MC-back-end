@@ -3,7 +3,6 @@ package uk.badamson.mc.service
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
-import uk.badamson.mc.FindGameResult
 import uk.badamson.mc.Game
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.rest.GameResponse
@@ -155,8 +154,8 @@ class GameBESpec extends BESpecification {
         game.runState == Game.RunState.WAITING_TO_START
 
         and: "the list of games includes the new game"
-        def creationTimes = gameService.getCreationTimesOfGamesOfScenario(scenarioId).toList()
-        expect(creationTimes, Matchers.hasItem(gameId.created))
+        def gameIds = gameService.getGameIdentifiersOfScenario(scenarioId).toList()
+        expect(gameIds, Matchers.hasItem(gameId))
     }
 
     def "Only a game manager may add a game"() {
