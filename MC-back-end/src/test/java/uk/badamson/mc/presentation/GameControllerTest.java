@@ -246,7 +246,9 @@ public class GameControllerTest {
                 final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
                 assertThat("scenario", scenarioOptional.isPresent());
                 final var scenarioId = scenarioOptional.get();
-                final var gameId = gameService.create(scenarioId).getIdentifier();
+                final var identifiedGame = gameService.create(scenarioId);
+                final var gameId = identifiedGame.getIdentifier();
+                final var created = identifiedGame.getValue().getCreated();
                 final var user = createUser(EnumSet.of(authority));
 
                 final var response = perform(gameId, user);
@@ -255,7 +257,7 @@ public class GameControllerTest {
                 final var jsonResponse = response.andReturn().getResponse().getContentAsString();
                 final var gameResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
                 assertThat("scenario", gameResponse.identifier().scenario(), is(scenarioId));
-                assertThat("created", gameResponse.identifier().created(), is(gameId.getCreated()));
+                assertThat("created", gameResponse.identifier().created(), is(created));
             }
 
         }
@@ -309,7 +311,7 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var created = gameService.create(scenario).getIdentifier().getCreated();
+            final var created = gameService.create(scenario).getValue().getCreated();
 
             final var response = perform(scenario, user);
 
