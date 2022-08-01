@@ -41,7 +41,7 @@ public class SecurityConfiguration {
             throws Exception {
         http.authorizeRequests().antMatchers("/api/user/**").authenticated();
         http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
-        http.authorizeRequests().antMatchers("/api/scenario/*/game/").authenticated();
+        http.authorizeRequests().antMatchers("/api/game/**").authenticated();
     }
 
 

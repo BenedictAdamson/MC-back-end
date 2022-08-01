@@ -61,28 +61,10 @@ public class GameController {
 
     public static final String CURRENT_GAME_PATH = "/api/self/current-game";
 
-    /**
-     * <p>
-     * The format of URI paths for {@linkplain #createPathFor(GameIdentifier) game
-     * resources}.
-     * </p>
-     */
-    public static final String GAME_PATH_PATTERN = "/api/scenario/{scenario}/game/{created:.+}";
+    public static final String GAME_PATH_PATTERN = "/api/game/{scenario}/{created:.+}";
 
-    /**
-     * <p>
-     * The format of URI paths for {@linkplain #createPathForGames(UUID) games
-     * collection resources}.
-     * </p>
-     */
-    public static final String GAMES_PATH_PATTERN = "/api/scenario/{scenario}/game";
+    public static final String GAMES_PATH_PATTERN = "/api/game/{scenario}";
 
-    /**
-     * <p>
-     * The format of time-stamps when used as parts of paths of URIs used by this
-     * controller.
-     * </p>
-     */
     public static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     public static final String START_PARAM = "start";
@@ -135,7 +117,7 @@ public class GameController {
      */
     @Nonnull
     public static String createPathForGames(@Nonnull final UUID scenario) {
-        return ScenarioController.createPathFor(scenario) + "/game/";
+        return "/api/game/" + scenario + "/";
     }
 
     @Nonnull
