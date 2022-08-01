@@ -239,6 +239,11 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>de.flapdoodle.embed</groupId>
+         <artifactId>de.flapdoodle.embed.mongo.spring</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>javax.persistence</groupId>
          <artifactId>javax.persistence-api</artifactId>
          <scope>provided</scope>
