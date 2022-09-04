@@ -13,10 +13,8 @@ import org.springframework.web.util.UriTemplate
 import spock.lang.Specification
 import uk.badamson.mc.*
 import uk.badamson.mc.presentation.GameController
-
-import uk.badamson.mc.presentation.ScenarioController
-import uk.badamson.mc.presentation.UserController
 import uk.badamson.mc.repository.UserSpringRepository
+import uk.badamson.mc.rest.Paths
 import uk.badamson.mc.rest.UserDetailsRequest
 import uk.badamson.mc.spring.SpringUser
 
@@ -55,10 +53,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 abstract class BESpecification extends Specification {
 
     private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
-            GameController.GAME_PATH_PATTERN)
+            Paths.GAME_PATH_PATTERN)
 
     private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
-            GameController.GAME_PATH_PATTERN)
+            Paths.GAME_PATH_PATTERN)
 
     private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
 
@@ -137,15 +135,15 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetCurrentGame(@Nullable User loggedInUser) {
-        requestGetJson(GameController.CURRENT_GAME_PATH, loggedInUser)
+        requestGetJson(Paths.CURRENT_GAME_PATH, loggedInUser)
     }
 
     protected final ResultActions requestGetGamePlayers(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(GameController.createPathFor(gameId), loggedInUser)
+        requestGetJson(Paths.createPathForGame(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(GameController.createPathFor(gameId), loggedInUser)
+        requestGetJson(Paths.createPathForGame(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetMayJoinQuery(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
@@ -157,11 +155,11 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetScenario(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
-        requestGetJson(ScenarioController.createPathFor(scenarioId), loggedInUser)
+        requestGetJson(Paths.createPathForScenario(scenarioId), loggedInUser)
     }
 
     protected final ResultActions requestGetGameCreationTimes(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
-        requestGetJson(GameController.createPathForGames(scenarioId), loggedInUser)
+        requestGetJson(Paths.createPathForGamesOfScenario(scenarioId), loggedInUser)
     }
 
     protected final ResultActions requestGetUsers(@Nullable User loggedInUser) {
@@ -169,7 +167,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetUser(@Nonnull UUID userId, @Nullable User loggedInUser) {
-        requestGetJson(UserController.createPathForUser(userId), loggedInUser)
+        requestGetJson(Paths.createPathForUser(userId), loggedInUser)
     }
 
     private ResultActions requestGetJson(@Nonnull String path, @Nullable User loggedInUser) {
@@ -208,7 +206,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestAddGame(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
-        final def path = GameController.createPathForGames(scenarioId)
+        final def path = Paths.createPathForGamesOfScenario(scenarioId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())

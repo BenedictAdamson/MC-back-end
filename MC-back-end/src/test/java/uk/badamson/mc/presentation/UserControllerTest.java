@@ -36,6 +36,7 @@ import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.TestConfiguration;
 import uk.badamson.mc.User;
 import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.rest.UserDetailsRequest;
 import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserSpringService;
@@ -191,7 +192,7 @@ public class UserControllerTest {
                 final var newUser = newUserOptional.get();
                 assertAll(() -> response.andExpect(status().isFound()),
                         () -> assertEquals(
-                                UserController.createPathForUser(newUser.id()),
+                                Paths.createPathForUser(newUser.id()),
                                 location,
                                 "redirection location is the resource for the added user"),
                         () -> assertEquivalentUserAttributes(
@@ -334,7 +335,7 @@ public class UserControllerTest {
 
         private ResultActions perform(final UUID id, final User requestingUser)
                 throws Exception {
-            final var path = UserController.createPathForUser(id);
+            final var path = Paths.createPathForUser(id);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
             if (requestingUser != null) {
                 request = request.with(user(SpringUser.convertToSpring(requestingUser)));

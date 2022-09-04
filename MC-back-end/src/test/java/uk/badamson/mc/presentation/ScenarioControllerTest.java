@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.rest.NamedUUID;
 import uk.badamson.mc.TestConfiguration;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.rest.ScenarioResponse;
 import uk.badamson.mc.service.ScenarioSpringService;
 
@@ -91,7 +92,7 @@ public class ScenarioControllerTest {
         }
 
         private ResultActions perform(final UUID id) throws Exception {
-            final var path = ScenarioController.createPathFor(id);
+            final var path = Paths.createPathForScenario(id);
             final var request = get(path).accept(MediaType.APPLICATION_JSON);
 
             return mockMvc.perform(request);

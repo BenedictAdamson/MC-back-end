@@ -34,6 +34,7 @@ import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.GameResponse;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
 import uk.badamson.mc.service.UserAlreadyPlayingException;
@@ -44,7 +45,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,14 +56,6 @@ import java.util.stream.Collectors;
 @RestController
 public class GameController {
 
-
-    public static final String CURRENT_GAME_PATH = "/api/self/current-game";
-
-    public static final String GAME_PATH_PATTERN = "/api/game/{scenario}/{created:.+}";
-
-    public static final String GAMES_PATH_PATTERN = "/api/game/{scenario}";
-
-    public static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     public static final String START_PARAM = "start";
 
@@ -82,63 +74,27 @@ public class GameController {
         this.gameService = Objects.requireNonNull(gameService, "gameService");
     }
 
-    /**
-     * <p>
-     * Create a valid path for a game resource for a game that has a given
-     * identifier.
-     * </p>
-     *
-     * @param id The identifier of the game
-     * @throws NullPointerException If {@code id} is null.
-     * @see #getGame(SpringUser, UUID, Instant)
-     */
-    @Nonnull
-    public static String createPathFor(@Nonnull final GameIdentifier id) {
-        Objects.requireNonNull(id, "id");
-        return createPathForGames(id.getScenario())
-                + URI_DATETIME_FORMATTER.format(id.getCreated());
-    }
-
-    /**
-     * <p>
-     * Create a valid path for the games collection resource for a scenario with
-     * a given identifier.
-     * </p>
-     * <p>
-     * The created value is consistent with the path used for
-     * {@link #createGameForScenario(UUID)} and {@link #getGameIdentifiersOfScenario(UUID)}.
-     * </p>
-     *
-     * @param scenario The identifier of the scenario
-     * @return The path.
-     * @throws NullPointerException If {@code scenario} is null.
-     */
-    @Nonnull
-    public static String createPathForGames(@Nonnull final UUID scenario) {
-        return "/api/game/" + scenario + "/";
-    }
-
     @Nonnull
     public static String createPathForStarting(@Nonnull final GameIdentifier id) {
-        return createPathFor(id) + "?" + START_PARAM;
+        return Paths.createPathForGame(id) + "?" + START_PARAM;
     }
 
     @Nonnull
     public static String createPathForStopping(@Nonnull final GameIdentifier id) {
-        return createPathFor(id) + "?" + STOP_PARAM;
+        return Paths.createPathForGame(id) + "?" + STOP_PARAM;
     }
 
     public static String createPathForEndRecruitmentOf(
             final GameIdentifier id) {
-        return createPathFor(id) + "?" + END_RECRUITMENT_PARAM;
+        return Paths.createPathForGame(id) + "?" + END_RECRUITMENT_PARAM;
     }
 
     public static String createPathForJoining(final GameIdentifier id) {
-        return createPathFor(id) + "?" + JOIN_PARAM;
+        return Paths.createPathForGame(id) + "?" + JOIN_PARAM;
     }
 
     public static String createPathForMayJoinQueryOf(final GameIdentifier id) {
-        return createPathFor(id) + "?" + MAY_JOIN_PARAM;
+        return Paths.createPathForGame(id) + "?" + MAY_JOIN_PARAM;
     }
 
     /**
@@ -153,7 +109,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(GameIdentifier) path} of the new game.</li>
+     * {@linkplain Paths#createPathForGame(GameIdentifier) path} of the new game.</li>
      * </ul>
      * </li>
      * <li>The scenario ID part of the identifier of the newly created game is
@@ -172,7 +128,7 @@ public class GameController {
      *                                                                                                            (Internal Server Error)} if there is data access error.</li>
      *                                                                                                            </ul>
      */
-    @PostMapping(GAMES_PATH_PATTERN)
+    @PostMapping(Paths.GAMES_PATH_PATTERN)
     @Nonnull
     @RolesAllowed("MANAGE_GAMES")
     public ResponseEntity<Void> createGameForScenario(
@@ -180,7 +136,7 @@ public class GameController {
         try {
             final var identifier = gameService.create(scenario).getIdentifier();
 
-            final var location = URI.create(createPathFor(identifier));
+            final var location = URI.create(Paths.createPathForGame(identifier));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -199,7 +155,7 @@ public class GameController {
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no scenario with the given {@code scenario} ID.
      */
-    @GetMapping(GAMES_PATH_PATTERN)
+    @GetMapping(Paths.GAMES_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
     public Set<GameIdentifierResponse> getGameIdentifiersOfScenario(
@@ -225,7 +181,7 @@ public class GameController {
      *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @GetMapping(GAME_PATH_PATTERN)
+    @GetMapping(Paths.GAME_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
     public GameResponse getGame(
@@ -250,7 +206,7 @@ public class GameController {
         }
     }
 
-    @PostMapping(path = GAME_PATH_PATTERN, params = {START_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {START_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> startGame(
@@ -261,7 +217,7 @@ public class GameController {
         final var gameId = new GameIdentifier(scenario, created);
         try {
             gameService.startGame(gameId);
-            final var location = URI.create(createPathFor(gameId));
+            final var location = URI.create(Paths.createPathForGame(gameId));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -274,7 +230,7 @@ public class GameController {
         }
     }
 
-    @PostMapping(path = GAME_PATH_PATTERN, params = {STOP_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {STOP_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> stopGame(
@@ -285,7 +241,7 @@ public class GameController {
         final var gameId = new GameIdentifier(scenario, created);
         try {
             gameService.stopGame(gameId);
-            final var location = URI.create(createPathFor(gameId));
+            final var location = URI.create(Paths.createPathForGame(gameId));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -322,7 +278,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(GameIdentifier) path} of the
+     * {@linkplain Paths#createPathForGame(GameIdentifier) path} of the
      * resource.</li>
      * </ul>
      * </li>
@@ -340,7 +296,7 @@ public class GameController {
      *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @PostMapping(path = GAME_PATH_PATTERN, params = {END_RECRUITMENT_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {END_RECRUITMENT_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
@@ -349,7 +305,7 @@ public class GameController {
         final var id = new GameIdentifier(scenario, created);
         try {
             gameService.endRecruitment(id);
-            final var location = URI.create(createPathFor(id));
+            final var location = URI.create(Paths.createPathForGame(id));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -359,7 +315,7 @@ public class GameController {
         }
     }
 
-    @GetMapping(CURRENT_GAME_PATH)
+    @GetMapping(Paths.CURRENT_GAME_PATH)
     @Nonnull
     public ResponseEntity<Void> getCurrentGame(
             @AuthenticationPrincipal final SpringUser user) {
@@ -375,7 +331,7 @@ public class GameController {
         final Optional<GameIdentifier> gameId = gameService.getCurrentGameOfUser(user.getId());
         if (gameId.isPresent()) {
             final var headers = new HttpHeaders();
-            headers.setLocation(URI.create(GameController.createPathFor(gameId.get())));
+            headers.setLocation(URI.create(Paths.createPathForGame(gameId.get())));
             return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -396,7 +352,7 @@ public class GameController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathFor(GameIdentifier) path} of the game
+     * {@linkplain Paths#createPathForGame(GameIdentifier) path} of the game
      * players resource.</li>
      * </ul>
      * </li>
@@ -432,7 +388,7 @@ public class GameController {
      *                                                                                                            games.</li>
      *                                                                                                            </ul>
      */
-    @PostMapping(path = GAME_PATH_PATTERN, params = {JOIN_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {JOIN_PARAM})
     @RolesAllowed("PLAYER")
     @Nonnull
     public ResponseEntity<Void> joinGame(
@@ -443,7 +399,7 @@ public class GameController {
         final var game = new GameIdentifier(scenario, created);
         try {
             gameService.userJoinsGame(user.getId(), game);
-            final var location = URI.create(createPathFor(game));
+            final var location = URI.create(Paths.createPathForGame(game));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -489,7 +445,7 @@ public class GameController {
      *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @GetMapping(path = GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})
+    @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})
     @RolesAllowed("PLAYER")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
                                @Nonnull @PathVariable("scenario") final UUID scenario,

@@ -34,6 +34,7 @@ import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.GameResponse;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
 import uk.badamson.mc.service.UserSpringService;
@@ -117,7 +118,7 @@ public class GameControllerTest {
             final var location = response.andReturn().getResponse()
                     .getHeaderValue("Location");
             response.andExpect(status().isFound());
-            assertEquals(GameController.createPathFor(id),
+            assertEquals(Paths.createPathForGame(id),
                     location, "redirection location");
         }
 
@@ -127,7 +128,7 @@ public class GameControllerTest {
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional
                     .get();
-            final var request = post(GameController.createPathForGames(scenario))
+            final var request = post(Paths.createPathForGamesOfScenario(scenario))
                     .with(csrf());
 
             final var response = mockMvc.perform(request);
@@ -140,7 +141,7 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var request = post(GameController.createPathForGames(scenario))
+            final var request = post(Paths.createPathForGamesOfScenario(scenario))
                     .with(user(SpringUser.convertToSpring(USER_WITH_ALL_AUTHORITIES)));
 
             final var response = mockMvc.perform(request);
@@ -165,7 +166,7 @@ public class GameControllerTest {
 
         private ResultActions testAuthenticated(final UUID scenario,
                                                 final User user) throws Exception {
-            final var request = post(GameController.createPathForGames(scenario))
+            final var request = post(Paths.createPathForGamesOfScenario(scenario))
                     .with(user(SpringUser.convertToSpring(user))).with(csrf());
 
             return mockMvc.perform(request);
@@ -220,7 +221,7 @@ public class GameControllerTest {
 
         private ResultActions perform(final GameIdentifier id, final User user)
                 throws Exception {
-            final var request = get(GameController.createPathFor(id))
+            final var request = get(Paths.createPathForGame(id))
                     .accept(MediaType.APPLICATION_JSON);
             if (user != null) {
                 request.with(user(SpringUser.convertToSpring(user)));
@@ -329,7 +330,7 @@ public class GameControllerTest {
 
         private ResultActions perform(final UUID scenario,
                                       final User user) throws Exception {
-            final var path = GameController.createPathForGames(scenario);
+            final var path = Paths.createPathForGamesOfScenario(scenario);
             var request = get(path).accept(MediaType.APPLICATION_JSON);
             if (user != null) {
                 request = request.with(user(SpringUser.convertToSpring(user)));
@@ -391,7 +392,7 @@ public class GameControllerTest {
         @Test
         public void permitted() throws Exception {
             final var game = createGame();
-            final var expectedRedirectionLocation = GameController.createPathFor(game);
+            final var expectedRedirectionLocation = Paths.createPathForGame(game);
             // Tough test: user has a minimum set of authorities
             final var authorities = EnumSet.of(Authority.ROLE_MANAGE_GAMES);
             final var user = createUser(authorities);
@@ -434,7 +435,7 @@ public class GameControllerTest {
             final var response = test(user);
 
             response.andExpect(status().isTemporaryRedirect()).andExpect(header()
-                    .string("Location", GameController.createPathFor(game)));
+                    .string("Location", Paths.createPathForGame(game)));
         }
 
         @Test
@@ -461,7 +462,7 @@ public class GameControllerTest {
         }
 
         private ResultActions test(final User user) throws Exception {
-            var request = get(GameController.CURRENT_GAME_PATH)
+            var request = get(Paths.CURRENT_GAME_PATH)
                     .with(csrf());
             if (user != null) {
                 request = request.with(user(SpringUser.convertToSpring(user)));
@@ -593,7 +594,7 @@ public class GameControllerTest {
         @Test
         public void valid() throws Exception {
             final var gameId = createGame();
-            final var expectedRedirectionLocation = GameController.createPathFor(gameId);
+            final var expectedRedirectionLocation = Paths.createPathForGame(gameId);
             // Tough test: user has a minimum set of authorities
             final var authorities = EnumSet.of(Authority.ROLE_PLAYER);
             final var user = createUser(authorities);

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.rest.ScenarioResponse;
 import uk.badamson.mc.service.ScenarioSpringService;
 
@@ -52,25 +53,6 @@ public class ScenarioController {
 
     /**
      * <p>
-     * Create a valid path for a scenario resource for a scenario that has a given
-     * identifier.
-     * </p>
-     * <p>
-     * The created value is consistent with the path used for
-     * {@link #getScenario(UUID)}.
-     * </p>
-     *
-     * @param id The identifier of the scenario
-     * @return The path.
-     * @throws NullPointerException If {@code id} is null.
-     */
-    public static String createPathFor(final UUID id) {
-        Objects.requireNonNull(id, "id");
-        return "/api/scenario/" + id;
-    }
-
-    /**
-     * <p>
      * Behaviour of the GET verb for the scenarios list.
      * </p>
      * <p>
@@ -79,7 +61,7 @@ public class ScenarioController {
      *
      * @return The response.
      */
-    @GetMapping("/api/scenario")
+    @GetMapping(Paths.SCENARIOS_PATH)
     @Nonnull
     public Stream<NamedUUID> getAll() {
         return service.getNamedScenarioIdentifiers();
@@ -97,7 +79,7 @@ public class ScenarioController {
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no scenario with the given {@code id}.
      */
-    @GetMapping("/api/scenario/{id}")
+    @GetMapping(Paths.SCENARIO_PATH_PATTERN)
     @Nonnull
     public ScenarioResponse getScenario(@Nonnull @PathVariable final UUID id) {
         final Optional<Scenario> scenario = service.getScenario(id);

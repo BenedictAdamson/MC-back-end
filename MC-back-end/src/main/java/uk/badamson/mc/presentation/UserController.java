@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.User;
 import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.rest.UserDetailsRequest;
 import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.service.UserExistsException;
@@ -62,26 +63,6 @@ public class UserController {
 
     /**
      * <p>
-     * Create a valid path for a user resource for a user that has a given unique
-     * ID.
-     * </p>
-     * <p>
-     * The created path is consistent with the path used with
-     * {@link #getUser(UUID)}.
-     * </p>
-     *
-     * @param id The identifier of the user
-     * @return The path.
-     * @throws NullPointerException If {@code id} is null.
-     */
-    @Nonnull
-    public static String createPathForUser(@Nonnull final UUID id) {
-        Objects.requireNonNull(id, "id");
-        return "/api/user/" + id;
-    }
-
-    /**
-     * <p>
      * Behaviour of the POST verb for the user list.
      * </p>
      * <ul>
@@ -92,7 +73,7 @@ public class UserController {
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
      * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain #createPathForUser(UUID) path} of the new user.</li>
+     * {@linkplain Paths#createPathForUser(UUID) path} of the new user.</li>
      * </ul>
      * </li>
      * </ul>
@@ -111,7 +92,7 @@ public class UserController {
      *                                                                            {@code userDetails} is already the username of a user.</li>
      *                                                                            </ul>
      */
-    @PostMapping("/api/user")
+    @PostMapping(Paths.USERS_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     @RolesAllowed("MANAGE_USERS")
     public ResponseEntity<Void> add(
@@ -119,7 +100,7 @@ public class UserController {
         try {
             final var user = service.add(UserDetailsRequest.convertFromRequest(userDetails));
 
-            final var location = URI.create(createPathForUser(user.getId()));
+            final var location = URI.create(Paths.createPathForUser(user.getId()));
             final var headers = new HttpHeaders();
             headers.setLocation(location);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
@@ -142,7 +123,7 @@ public class UserController {
      *
      * @return The response.
      */
-    @GetMapping("/api/user")
+    @GetMapping(Paths.USERS_PATH)
     public Stream<UserResponse> getAll() {
         return service.getUsers();
     }
@@ -156,7 +137,7 @@ public class UserController {
      * @return The user object for the current user.
      * @throws NullPointerException If {@code user} is null
      */
-    @GetMapping("/api/self")
+    @GetMapping(Paths.SELF_PATH)
     @PreAuthorize("isAuthenticated()")
     @Nonnull
     public UserResponse getSelf(@Nonnull @AuthenticationPrincipal final SpringUser user) {
@@ -192,7 +173,7 @@ public class UserController {
      *                                 {@linkplain String#equals(Object) equivalent to} its
      *                                 {@linkplain User#getUsername() username}.
      */
-    @GetMapping("/api/user/{id}")
+    @GetMapping(Paths.USER_PATH_PATTERN)
     @RolesAllowed("MANAGE_USERS")
     @Nonnull
     public UserResponse getUser(@Nonnull @PathVariable final UUID id) {
