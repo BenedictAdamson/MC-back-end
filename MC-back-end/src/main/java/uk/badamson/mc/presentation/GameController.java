@@ -32,6 +32,7 @@ import uk.badamson.mc.Authority;
 import uk.badamson.mc.FindGameResult;
 import uk.badamson.mc.Game;
 import uk.badamson.mc.GameIdentifier;
+import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
@@ -44,11 +45,8 @@ import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -108,7 +106,7 @@ public class GameController {
      * </p>
      * <p>
      * The created value is consistent with the path used for
-     * {@link #createGameForScenario(UUID)} and {@link #getCreationTimes(UUID)}.
+     * {@link #createGameForScenario(UUID)} and {@link #getGameIdentifiersOfScenario(UUID)}.
      * </p>
      *
      * @param scenario The identifier of the scenario
@@ -197,13 +195,6 @@ public class GameController {
     }
 
     /**
-     * <p>
-     * Get the creation times of the games for a given scenario, formatted in a
-     * manner suitable for use in URIs used by this controller.
-     * </p>
-     *
-     * @param scenario The unique ID of the scenario for which to create a game.
-     * @throws NullPointerException    If {@code scenario} is null.
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no scenario with the given {@code scenario} ID.
@@ -211,15 +202,14 @@ public class GameController {
     @GetMapping(GAMES_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
-    public Stream<String> getCreationTimes(
+    public Set<GameIdentifierResponse> getGameIdentifiersOfScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
         try {
-            return gameService.getGameIdentifiersOfScenario(scenario)
-                    .map(GameIdentifier::getCreated)
-                    .map(URI_DATETIME_FORMATTER::format);
+            return gameService.getGameIdentifiersOfScenario(scenario).stream()
+                    .map(GameIdentifierResponse::convertToResponse)
+                    .collect(Collectors.toUnmodifiableSet());
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized ID", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "scenario not found", e);
         }
     }
 

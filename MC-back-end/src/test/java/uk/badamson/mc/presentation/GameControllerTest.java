@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
+import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
@@ -58,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GameControllerTest {
 
     private static final UUID ID_A = UUID.randomUUID();
-    private static final TypeReference<List<Instant>> INSTANT_LIST = new TypeReference<>() {
+    private static final TypeReference<List<GameIdentifierResponse>> GAME_ID_LIST = new TypeReference<>() {
     };
     private static final User USER_WITH_ALL_AUTHORITIES = new User(
             UUID.randomUUID(), "jeff", "password", Authority.ALL,
@@ -311,7 +312,9 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final var created = gameService.create(scenario).getValue().getCreated();
+            final var identifiedGame = gameService.create(scenario);
+            final var gameId = identifiedGame.getIdentifier();
+            final var created = identifiedGame.getValue().getCreated();
 
             final var response = perform(scenario, user);
 
@@ -320,9 +323,8 @@ public class GameControllerTest {
                     .getContentAsString();
             assertThat("Creation time is in ISO format", jsonResponse,
                     containsString(created.toString()));
-            final var creationTimes = objectMapper.readValue(jsonResponse,
-                    INSTANT_LIST);
-            assertThat("creation times", creationTimes, hasItem(created));
+            final var gameIds = objectMapper.readValue(jsonResponse, GAME_ID_LIST);
+            assertThat("IDs", gameIds, hasItem(GameIdentifierResponse.convertToResponse(gameId)));
         }
 
         private ResultActions perform(final UUID scenario,

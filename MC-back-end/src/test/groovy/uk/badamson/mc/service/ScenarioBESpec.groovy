@@ -7,6 +7,7 @@ import spock.lang.Unroll
 import uk.badamson.mc.Authority
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.User
+import uk.badamson.mc.rest.GameIdentifierResponse
 import uk.badamson.mc.rest.NamedUUID
 import uk.badamson.mc.rest.ScenarioResponse
 
@@ -86,7 +87,7 @@ class ScenarioBESpec extends BESpecification {
 
         then: "provides the scenario"
         def scenario = expectEncodedResponse(scenarioResponse, ScenarioResponse.class)
-        def gameCreationTimes = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<Instant>>() {})
+        def gameIds = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<GameIdentifierResponse>>() {})
 
         then: "the scenario includes the scenario description"
         expect(scenario.description(), Matchers.not(Matchers.emptyOrNullString()))
@@ -95,9 +96,10 @@ class ScenarioBESpec extends BESpecification {
         expect(scenario.characters(), Matchers.not(Matchers.empty()))
 
         and: "the scenario includes the list of games of that scenario"
+        gameIds
 
         and: "the scenario has a list of games of that scenario"
-        expect(gameCreationTimes, Matchers.not(Matchers.empty()))
+        expect(gameIds, Matchers.not(Matchers.empty()))
 
         where:
         role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]

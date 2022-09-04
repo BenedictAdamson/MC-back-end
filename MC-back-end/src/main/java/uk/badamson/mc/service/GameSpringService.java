@@ -29,11 +29,10 @@ import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class GameSpringService {
@@ -56,9 +55,9 @@ public class GameSpringService {
 
     @Nonnull
     @Transactional
-    public Stream<GameIdentifier> getGameIdentifiersOfScenario(@Nonnull final UUID scenario)
+    public Set<GameIdentifier> getGameIdentifiersOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
-        return delegate.getGameIdentifiersOfScenario(scenario).stream();
+        return delegate.getGameIdentifiersOfScenario(scenario);
     }
 
     @Transactional

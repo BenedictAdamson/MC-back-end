@@ -30,13 +30,10 @@ public record GameIdentifierResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         Instant created
 ) {
-    @Nonnull
-    public static GameIdentifier convertFromResponse(@Nonnull GameIdentifierResponse dto) {
-        return new GameIdentifier(dto.scenario(), dto.created());
-    }
 
     @Nonnull
     public static GameIdentifierResponse convertToResponse(@Nonnull GameIdentifier id) {
         return new GameIdentifierResponse(id.getScenario(), id.getCreated());
     }
+
 }
