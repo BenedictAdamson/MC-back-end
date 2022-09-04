@@ -20,7 +20,6 @@ import uk.badamson.mc.spring.SpringUser
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
-import java.time.Instant
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -53,9 +52,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 abstract class BESpecification extends Specification {
 
     private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
-            Paths.GAME_PATH_PATTERN)
-
-    private static final UriTemplate GAME_PLAYERS_PATH_URI_TEMPLATE = new UriTemplate(
             Paths.GAME_PATH_PATTERN)
 
     private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
@@ -108,22 +104,10 @@ abstract class BESpecification extends Specification {
     }
 
     protected static GameIdentifier parseGamePath(final String path) {
-        return parseGamePathUsingTemplate(path, GAME_PATH_URI_TEMPLATE)
-    }
-
-    protected static GameIdentifier parseGamePlayersPath(final String path) {
-        return parseGamePathUsingTemplate(path, GAME_PLAYERS_PATH_URI_TEMPLATE)
-    }
-
-    private static GameIdentifier parseGamePathUsingTemplate(final String path,
-                                                             final UriTemplate template) {
         Objects.requireNonNull(path, "path")
-        Objects.requireNonNull(template, "template")
-        final var pathVariable = template.match(path)
+        final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path)
         try {
-            final var scenarioId = UUID.fromString(pathVariable.get("scenario"))
-            final var created = Instant.parse(pathVariable.get("created"))
-            return new GameIdentifier(scenarioId, created)
+            return Paths.parseGameIdentifier(pathVariable.get("game"))
         } catch (final RuntimeException e) {
             throw new IllegalArgumentException("Path " + path, e)
         }

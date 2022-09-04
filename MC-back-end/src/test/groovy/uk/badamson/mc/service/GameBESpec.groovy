@@ -188,7 +188,7 @@ class GameBESpec extends BESpecification {
         then: "the game accepts ending recruitment"
         final def location = expectFound(response)
         location != null
-        parseGamePlayersPath(location) == gameId
+        parseGamePath(location) == gameId
 
         and: "the game indicates that it is not recruiting players"
         final def findGameResultOptional = gameService.getGameAsGameManager(gameId)
@@ -251,7 +251,7 @@ class GameBESpec extends BESpecification {
         then: "the game accepts joining"
         final def location = expectFound(response)
         location != null
-        parseGamePlayersPath(location) == gameId
+        parseGamePath(location) == gameId
         def findGameResultOptional = gameService.getGameAsGameManager(gameId)
         findGameResultOptional.isPresent()
         def game = findGameResultOptional.map(r -> r.game()).get()

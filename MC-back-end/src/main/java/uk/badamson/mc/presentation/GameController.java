@@ -170,12 +170,6 @@ public class GameController {
     }
 
     /**
-     * @param scenario The unique ID of the scenario of the wanted game.
-     * @param created  The creation time of the wanted game.
-     * @throws NullPointerException    <ul>
-     *                                 <li>If {@code scenario} is null.</li>
-     *                                 <li>If {@code created} is null.</li>
-     *                                 </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no game that has identification information equivalent to the given
@@ -186,10 +180,8 @@ public class GameController {
     @Nonnull
     public GameResponse getGame(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
-        final var id = new GameIdentifier(scenario, created);
-
+            @Nonnull @PathVariable("game") final String idComponent) {
+        final GameIdentifier id = parseGameIdentifier(idComponent);
         final Optional<Game> game;
         if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
             game = gameService.getGameAsGameManager(id).map(FindGameResult::game);
@@ -206,15 +198,24 @@ public class GameController {
         }
     }
 
+    private static GameIdentifier parseGameIdentifier(String idComponent) throws ResponseStatusException {
+        final GameIdentifier id;
+        try {
+            id = Paths.parseGameIdentifier(idComponent);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized path format", e);
+        }
+        return id;
+    }
+
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {START_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> startGame(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
+            @Nonnull @PathVariable("game") final String idComponent) {
         Objects.requireNonNull(user, "user");
-        final var gameId = new GameIdentifier(scenario, created);
+        final GameIdentifier gameId = parseGameIdentifier(idComponent);
         try {
             gameService.startGame(gameId);
             final var location = URI.create(Paths.createPathForGame(gameId));
@@ -235,10 +236,9 @@ public class GameController {
     @Nonnull
     public ResponseEntity<Void> stopGame(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
+            @Nonnull @PathVariable("game") final String idComponent) {
         Objects.requireNonNull(user, "user");
-        final var gameId = new GameIdentifier(scenario, created);
+        final GameIdentifier gameId = parseGameIdentifier(idComponent);
         try {
             gameService.stopGame(gameId);
             final var location = URI.create(Paths.createPathForGame(gameId));
@@ -284,13 +284,6 @@ public class GameController {
      * </li>
      * </ul>
      *
-     * @param scenario The unique ID of the scenario of the game.
-     * @param created  The creation time of the game.
-     * @return The response.
-     * @throws NullPointerException    <ul>
-     *                                                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                                                            <li>If {@code created} is null.</li>
-     *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no game that has identification information equivalent to the given
@@ -300,9 +293,8 @@ public class GameController {
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
-        final var id = new GameIdentifier(scenario, created);
+            @Nonnull @PathVariable("game") final String idComponent) {
+        final GameIdentifier id = parseGameIdentifier(idComponent);
         try {
             gameService.endRecruitment(id);
             final var location = URI.create(Paths.createPathForGame(id));
@@ -358,15 +350,7 @@ public class GameController {
      * </li>
      * </ul>
      *
-     * @param user     The authenticated identity of the current user
-     * @param scenario The unique ID of the scenario of the game.
-     * @param created  The creation time of the game.
      * @return The response.
-     * @throws NullPointerException    <ul>
-     *                                                                                                            <li>If {@code user} is null.</li>
-     *                                                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                                                            <li>If {@code created} is null.</li>
-     *                                                                                                            </ul>
      * @throws ResponseStatusException <ul>
      *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
      *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
@@ -393,10 +377,9 @@ public class GameController {
     @Nonnull
     public ResponseEntity<Void> joinGame(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("scenario") final UUID scenario,
-            @Nonnull @PathVariable("created") final Instant created) {
+            @Nonnull @PathVariable("game") final String idComponent) {
         Objects.requireNonNull(user, "user");
-        final var game = new GameIdentifier(scenario, created);
+        final GameIdentifier game = parseGameIdentifier(idComponent);
         try {
             gameService.userJoinsGame(user.getId(), game);
             final var location = URI.create(Paths.createPathForGame(game));
@@ -432,14 +415,6 @@ public class GameController {
      * players.</li>
      * </ul>
      *
-     * @param user     The authenticated identity of the current user
-     * @param scenario The unique ID of the scenario of the game.
-     * @param created  The creation time of the game.
-     * @throws NullPointerException    <ul>
-     *                                                                                                            <li>If {@code user} is null.</li>
-     *                                                                                                            <li>If {@code scenario} is null.</li>
-     *                                                                                                            <li>If {@code created} is null.</li>
-     *                                                                                                            </ul>
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
      *                                 is no game that has identification information equivalent to the given
@@ -448,10 +423,9 @@ public class GameController {
     @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})
     @RolesAllowed("PLAYER")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
-                               @Nonnull @PathVariable("scenario") final UUID scenario,
-                               @Nonnull @PathVariable("created") final Instant created) {
+                               @Nonnull @PathVariable("game") final String idComponent) {
         Objects.requireNonNull(user, "user");
-        final var game = new GameIdentifier(scenario, created);
+        final GameIdentifier game = parseGameIdentifier(idComponent);
         if (gameService.getGameAsGameManager(game).isPresent()) {
             return gameService.mayUserJoinGame(user.getId(), game);
         } else {
