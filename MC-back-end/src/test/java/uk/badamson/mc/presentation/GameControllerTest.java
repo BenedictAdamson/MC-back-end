@@ -32,15 +32,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
 import uk.badamson.mc.repository.GameSpringRepository;
-import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.GameResponse;
+import uk.badamson.mc.rest.NamedUUID;
 import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.ScenarioSpringService;
 import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
 
-import java.time.Instant;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -60,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GameControllerTest {
 
     private static final UUID ID_A = UUID.randomUUID();
-    private static final TypeReference<List<GameIdentifierResponse>> GAME_ID_LIST = new TypeReference<>() {
+    private static final TypeReference<List<NamedUUID>> GAME_ID_LIST = new TypeReference<>() {
     };
     private static final User USER_WITH_ALL_AUTHORITIES = new User(
             UUID.randomUUID(), "jeff", "password", Authority.ALL,
@@ -79,7 +78,7 @@ public class GameControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private GameIdentifier createGame() {
+    private UUID createGame() {
         final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
         assertThat("scenario", scenarioOptional.isPresent());
         final var scenario = scenarioOptional.get();
@@ -98,7 +97,7 @@ public class GameControllerTest {
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
             assertThat("scenario", scenarioOptional.isPresent());
             final var scenario = scenarioOptional.get();
-            final Set<GameIdentifier> gamesForScenario0 = new HashSet<>();
+            final Set<UUID> gamesForScenario0 = new HashSet<>();
             for (var id0 : gameService.getGameIdentifiers()) {
                 gamesForScenario0.add(id0);
             }
@@ -106,7 +105,7 @@ public class GameControllerTest {
             final var response = testAuthenticated(scenario,
                     USER_WITH_ALL_AUTHORITIES);
 
-            final Set<GameIdentifier> gamesForScenario = new HashSet<>();
+            final Set<UUID> gamesForScenario = new HashSet<>();
             for (var id : gameService.getGameIdentifiers()) {
                 gamesForScenario.add(id);
             }
@@ -189,7 +188,7 @@ public class GameControllerTest {
 
         @Test
         public void absent() throws Exception {
-            final var id = new GameIdentifier(UUID.randomUUID(), Instant.now());
+            final var id = UUID.randomUUID();
             /* Tough test: user is authorised. */
             final var response = perform(id, USER_WITH_ALL_AUTHORITIES);
 
@@ -219,7 +218,7 @@ public class GameControllerTest {
             response.andExpect(status().isForbidden());
         }
 
-        private ResultActions perform(final GameIdentifier id, final User user)
+        private ResultActions perform(final UUID id, final User user)
                 throws Exception {
             final var request = get(Paths.createPathForGame(id))
                     .accept(MediaType.APPLICATION_JSON);
@@ -258,8 +257,8 @@ public class GameControllerTest {
                 response.andExpect(status().isOk());
                 final var jsonResponse = response.andReturn().getResponse().getContentAsString();
                 final var gameResponse = objectMapper.readValue(jsonResponse, GameResponse.class);
-                assertThat("scenario", gameResponse.identifier().scenario(), is(scenarioId));
-                assertThat("created", gameResponse.identifier().created(), is(created));
+                assertThat("scenario", gameResponse.scenario(), is(scenarioId));
+                assertThat("created", gameResponse.created(), is(created));
             }
 
         }
@@ -295,7 +294,7 @@ public class GameControllerTest {
         public void notPermitted() throws Exception {
             // Tough test: game exists, user has all other authorities
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-            assertThat("scenario", scenarioOptional.isPresent());
+            assert scenarioOptional.isPresent();
             final var scenario = scenarioOptional.get();
             final var authorities = EnumSet.complementOf(EnumSet
                     .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
@@ -311,21 +310,20 @@ public class GameControllerTest {
             // Tough test: user has minimum authority
             final var user = createUser(EnumSet.of(Authority.ROLE_PLAYER));
             final Optional<UUID> scenarioOptional = scenarioService.getScenarioIdentifiers().findAny();
-            assertThat("scenario", scenarioOptional.isPresent());
+            assert scenarioOptional.isPresent();
             final var scenario = scenarioOptional.get();
             final var identifiedGame = gameService.create(scenario);
             final var gameId = identifiedGame.getIdentifier();
             final var created = identifiedGame.getValue().getCreated();
+            final var expectedNamedId = new NamedUUID(gameId, created.toString());
 
             final var response = perform(scenario, user);
 
             response.andExpect(status().isOk());
             final var jsonResponse = response.andReturn().getResponse()
                     .getContentAsString();
-            assertThat("Creation time is in ISO format", jsonResponse,
-                    containsString(created.toString()));
             final var gameIds = objectMapper.readValue(jsonResponse, GAME_ID_LIST);
-            assertThat("IDs", gameIds, hasItem(GameIdentifierResponse.convertToResponse(gameId)));
+            assertThat(gameIds, hasItem(expectedNamedId));
         }
 
         private ResultActions perform(final UUID scenario,
@@ -346,7 +344,7 @@ public class GameControllerTest {
 
         @Test
         public void absent() throws Exception {
-            final var game = new GameIdentifier(UUID.randomUUID(), Instant.now());
+            final var game = UUID.randomUUID();
             // Tough test: user has authority
             final var user = createUser(Authority.ALL);
             final var response = test(game, user, true);
@@ -406,7 +404,7 @@ public class GameControllerTest {
                             "redirection location"));
         }
 
-        private ResultActions test(final GameIdentifier id, final User user,
+        private ResultActions test(final UUID id, final User user,
                                    final boolean hasCsrfToken) throws Exception {
             final var path = GameController.createPathForEndRecruitmentOf(id);
             var request = post(path);
@@ -478,7 +476,7 @@ public class GameControllerTest {
 
         @Test
         public void absent() throws Exception {
-            final var game = new GameIdentifier(UUID.randomUUID(), Instant.now());
+            final var game = UUID.randomUUID();
             // Tough test: user has authority
             final var user = createUser(Authority.ALL);
             final var response = performRequest(game, user, true);
@@ -553,7 +551,7 @@ public class GameControllerTest {
                     game.getUsers().values(), not(hasItem(user.getId())));
         }
 
-        private ResultActions performRequest(final GameIdentifier game,
+        private ResultActions performRequest(final UUID game,
                                              final User user, final boolean hasCsrfToken) throws Exception {
             final var path = GameController.createPathForJoining(game);
             var request = post(path);
@@ -662,7 +660,7 @@ public class GameControllerTest {
             assertFalse(may);
         }
 
-        private ResultActions test(final GameIdentifier game, final User user)
+        private ResultActions test(final UUID game, final User user)
                 throws Exception {
             final var path = GameController.createPathForMayJoinQueryOf(game);
             var request = get(path).accept(MediaType.APPLICATION_JSON)
@@ -676,7 +674,7 @@ public class GameControllerTest {
 
         @Test
         public void unknownGame() throws Exception {
-            final var game = new GameIdentifier(UUID.randomUUID(), Instant.now());
+            final var game = UUID.randomUUID();
             // Tough test: user has all authorities
             final var user = createUser(Authority.ALL);
             final var response = test(game, user);

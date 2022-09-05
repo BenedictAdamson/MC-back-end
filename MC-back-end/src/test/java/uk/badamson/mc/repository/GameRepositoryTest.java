@@ -20,6 +20,8 @@ package uk.badamson.mc.repository;
 
 import uk.badamson.dbc.assertions.ObjectVerifier;
 
+import java.util.UUID;
+
 /**
  * <p>
  * Auxiliary test code for classes that implement the {@link GameSpringRepository}
@@ -33,7 +35,7 @@ public class GameRepositoryTest {
     }
 
     public static final class Fake
-            extends CrudRepositoryTest.AbstractFake<GameDTO, GameIdentifierDTO>
+            extends CrudRepositoryTest.AbstractFake<GameDTO, UUID>
             implements GameSpringRepository {
 
         @Override
@@ -42,7 +44,7 @@ public class GameRepositoryTest {
         }
 
         @Override
-        protected GameIdentifierDTO getId(final GameDTO game) {
+        protected UUID getId(final GameDTO game) {
             return game.identifier();
         }
 

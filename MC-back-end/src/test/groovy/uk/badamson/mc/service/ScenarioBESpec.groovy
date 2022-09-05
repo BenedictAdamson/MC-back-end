@@ -7,11 +7,8 @@ import spock.lang.Unroll
 import uk.badamson.mc.Authority
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.User
-import uk.badamson.mc.rest.GameIdentifierResponse
 import uk.badamson.mc.rest.NamedUUID
 import uk.badamson.mc.rest.ScenarioResponse
-
-import java.time.Instant
 
 import static spock.util.matcher.HamcrestSupport.expect
 /** © Copyright Benedict Adamson 2019,20,22.
@@ -83,11 +80,11 @@ class ScenarioBESpec extends BESpecification {
 
         when: "try to examine the scenario"
         final def scenarioResponse = requestGetScenario(scenarioId, user)
-        final def gameCreationTimesResponse = requestGetGameCreationTimes(scenarioId, user)
+        final def gamesResponse = requestGetGamesOfScenario(scenarioId, user)
 
         then: "provides the scenario"
         def scenario = expectEncodedResponse(scenarioResponse, ScenarioResponse.class)
-        def gameIds = expectEncodedResponse(gameCreationTimesResponse, new TypeReference<Set<GameIdentifierResponse>>() {})
+        def gameIds = expectEncodedResponse(gamesResponse, new TypeReference<Set<NamedUUID>>() {})
 
         then: "the scenario includes the scenario description"
         expect(scenario.description(), Matchers.not(Matchers.emptyOrNullString()))

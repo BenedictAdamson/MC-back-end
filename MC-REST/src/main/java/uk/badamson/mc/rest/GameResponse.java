@@ -18,18 +18,22 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
+import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GameResponse(
-        GameIdentifierResponse identifier,
+        UUID identifier,
+        UUID scenario,
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        Instant created,
         RunStateResponse runState,
         boolean recruiting,
         Map<UUID, UUID> users
@@ -37,10 +41,13 @@ public record GameResponse(
 
     @Nonnull
     public static GameResponse convertToResponse(
-            @Nonnull GameIdentifier gameIdentifier,
+            @Nonnull UUID gameId,
+            @Nonnull UUID scenarioId,
             @Nonnull Game game) {
         return new GameResponse(
-                GameIdentifierResponse.convertToResponse(gameIdentifier),
+                gameId,
+                scenarioId,
+                game.getCreated(),
                 RunStateResponse.convertToResponse(game.getRunState()),
                 game.isRecruiting(),
                 game.getUsers()

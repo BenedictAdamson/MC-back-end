@@ -20,6 +20,8 @@ package uk.badamson.mc.repository;
 
 import org.springframework.data.repository.CrudRepository;
 
-public interface GameSpringRepository extends CrudRepository<GameDTO, GameIdentifierDTO> {
+import java.util.UUID;
+
+public interface GameSpringRepository extends CrudRepository<GameDTO, UUID> {
 
 }

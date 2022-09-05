@@ -22,10 +22,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GameIdentifier;
-import uk.badamson.mc.Scenario;
 
 import javax.annotation.Nonnull;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +35,19 @@ import java.util.stream.Collectors;
 @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DTO")
 public record GameDTO(
         @Id
-        GameIdentifierDTO identifier,
+        UUID identifier,
+        UUID scenario,
+        Instant created,
         RunStateDTO runState,
         Boolean recruiting,
         List<PlayedCharacterDTO> users
 ) {
     @Nonnull
-    static GameDTO convertToDTO(@Nonnull GameIdentifier id, @Nonnull Game game) {
+    static GameDTO convertToDTO(@Nonnull UUID gameId, @Nonnull UUID scenarioId, @Nonnull Game game) {
         return new GameDTO(
-                GameIdentifierDTO.convertToDTO(id),
+                gameId,
+                scenarioId,
+                game.getCreated(),
                 RunStateDTO.convertToDTO(game.getRunState()),
                 game.isRecruiting(),
                 convertToUsersDTO(game.getUsers())
@@ -60,7 +63,7 @@ public record GameDTO(
     @Nonnull
     static Game convertFromDTO(@Nonnull GameDTO dto) {
         return new Game(
-                dto.identifier().created(),
+                dto.created(),
                 RunStateDTO.convertFromDTO(dto.runState()),
                 dto.recruiting() != null && dto.recruiting(),
                 convertFromUsersDTO(dto.users())

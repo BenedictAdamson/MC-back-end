@@ -1,10 +1,6 @@
 package uk.badamson.mc.rest;
 
-import uk.badamson.mc.GameIdentifier;
-
 import javax.annotation.Nonnull;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -44,37 +40,13 @@ public final class Paths {
 
     @Nonnull
     public static String createPathForGamesOfScenario(@Nonnull final UUID scenario) {
+        Objects.requireNonNull(scenario);
         return "/api/scenario/" + scenario + "/games";
     }
 
-    private static String format(@Nonnull final GameIdentifier id) {
-        return id.getScenario().toString() + '@' + id.getCreated();
-    }
-
-    public static GameIdentifier parseGameIdentifier(@Nonnull String text) throws IllegalArgumentException {
-        final int at = text.indexOf('@');
-        if (at < 0) {
-            throw new IllegalArgumentException("missing separator");
-        } else if (at == text.length() - 1) {
-            throw new IllegalArgumentException("created");
-        }
-        final UUID scenario;
-        try {
-            scenario = UUID.fromString(text.substring(0, at));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("scenario", e);
-        }
-        final Instant created;
-        try {
-            created = Instant.parse(text.substring(at + 1));
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("created", e);
-        }
-        return new GameIdentifier(scenario, created);
-    }
-
     @Nonnull
-    public static String createPathForGame(@Nonnull final GameIdentifier id) {
-        return "/api/game/" + format(id);
+    public static String createPathForGame(@Nonnull final UUID game) {
+        Objects.requireNonNull(game);
+        return "/api/game/" + game;
     }
 }

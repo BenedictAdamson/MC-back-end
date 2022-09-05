@@ -29,15 +29,15 @@ import java.util.UUID;
 public record UserGameAssociationDTO(
         @Id
         UUID user,
-        GameIdentifierDTO game
+        UUID game
 ) {
     @Nonnull
     static UserGameAssociationDTO convertToDTO(@Nonnull UUID userId, @Nonnull UserGameAssociation association) {
-        return new UserGameAssociationDTO(userId, GameIdentifierDTO.convertToDTO(association.getGame()));
+        return new UserGameAssociationDTO(userId, association.getGame());
     }
 
     @Nonnull
     static UserGameAssociation convertFromDTO(@Nonnull UserGameAssociationDTO dto) {
-        return new UserGameAssociation(dto.user(), GameIdentifierDTO.convertFromDTO(dto.game()));
+        return new UserGameAssociation(dto.user(),dto.game());
     }
 }

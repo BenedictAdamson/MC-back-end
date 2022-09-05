@@ -48,35 +48,35 @@ public class MCSpringRepositoryAdapter extends MCRepository {
     public final class AdapterContext extends Context {
 
         @Override
-        protected void addGameUncached(@Nonnull GameIdentifier id, @Nonnull UUID scenarioId, @Nonnull Game game) {
-            gameRepository.save(GameDTO.convertToDTO(id, game));
+        protected void addGameUncached(@Nonnull UUID gameId, @Nonnull UUID scenarioId, @Nonnull Game game) {
+            gameRepository.save(GameDTO.convertToDTO(gameId, scenarioId, game));
         }
 
         @Override
-        protected void updateGameUncached(@Nonnull GameIdentifier id, @Nonnull UUID scenarioId, @Nonnull Game game) {
-            gameRepository.save(GameDTO.convertToDTO(id, game));
+        protected void updateGameUncached(@Nonnull UUID gameId, @Nonnull UUID scenarioId, @Nonnull Game game) {
+            gameRepository.save(GameDTO.convertToDTO(gameId, scenarioId, game));
         }
 
         @Nonnull
         @Override
-        protected Optional<FindGameResult> findGameUncached(@Nonnull GameIdentifier id) {
-            final var gameDtoOptional = gameRepository.findById(GameIdentifierDTO.convertToDTO(id));
+        protected Optional<FindGameResult> findGameUncached(@Nonnull UUID id) {
+            final var gameDtoOptional = gameRepository.findById(id);
             if (gameDtoOptional.isEmpty()) {
                 return Optional.empty();
             }
             final var gameDto = gameDtoOptional.get();
-            final var scenarioId = gameDto.identifier().scenario();
+            final var scenarioId = gameDto.scenario();
             return gameDtoOptional.map(dto -> new FindGameResult(GameDTO.convertFromDTO(dto), scenarioId));
         }
 
         @Nonnull
         @Override
-        protected Iterable<Map.Entry<GameIdentifier, FindGameResult>> findAllGamesUncached() {
-            List<Map.Entry<GameIdentifier, FindGameResult>> result = new ArrayList<>();
+        protected Iterable<Map.Entry<UUID, FindGameResult>> findAllGamesUncached() {
+            List<Map.Entry<UUID, FindGameResult>> result = new ArrayList<>();
             for (var gameDTO: gameRepository.findAll()) {
                 result.add(new AbstractMap.SimpleImmutableEntry<>(
-                        GameIdentifierDTO.convertFromDTO(gameDTO.identifier()),
-                        new FindGameResult(GameDTO.convertFromDTO(gameDTO), gameDTO.identifier().scenario())
+                        gameDTO.identifier(),
+                        new FindGameResult(GameDTO.convertFromDTO(gameDTO), gameDTO.scenario())
                 ));
             }
             return result;

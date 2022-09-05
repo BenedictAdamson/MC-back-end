@@ -4,6 +4,7 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
+import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.rest.GameResponse
 
@@ -46,7 +47,7 @@ class GameBESpec extends BESpecification {
 
         when: "try to examine the game"
         def gameResponse = requestGetGame(gameId, user)
-        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
+        def gamePlayersResponse = requestGetGame(gameId, user)
         def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
 
         then: "provides the game"
@@ -58,10 +59,10 @@ class GameBESpec extends BESpecification {
         def mayJoin = expectEncodedResponse(mayJoinResponse, Boolean.class)
 
         and: "the game indicates its scenario"
-        game.identifier().scenario() == scenarioId
+        game.scenario() == scenarioId
 
         and: "the game indicates the date and time that the game was set up"
-        game.identifier().created() != null
+        game.created() != null
 
         and: "the game indicates whether it is recruiting players"
         expect(gamePlayers.recruiting(), Matchers.instanceOf(Boolean.class))
@@ -93,7 +94,7 @@ class GameBESpec extends BESpecification {
         when: "try to examine the game"
         def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
         def gameResponse = requestGetGame(gameId, user)
-        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
+        def gamePlayersResponse = requestGetGame(gameId, user)
 
         then: "provides the game"
         gameResponse.andExpect(status().isOk())
@@ -102,10 +103,10 @@ class GameBESpec extends BESpecification {
         def gamePlayers = expectEncodedResponse(gamePlayersResponse, GameResponse.class)
 
         and: "the game indicates its scenario"
-        game.identifier().scenario() == scenarioId
+        game.scenario() == scenarioId
 
         and: "the game indicates the date and time that the game was set up"
-        game.identifier().created() != null
+        game.created() != null
 
         and: "the game indicates whether it is recruiting players"
         expect(gamePlayers.recruiting(), Matchers.instanceOf(Boolean.class))
@@ -143,6 +144,7 @@ class GameBESpec extends BESpecification {
         final def findGameResultOptional = gameService.getGameAsGameManager(gameId)
         findGameResultOptional.isPresent()
         final def game = findGameResultOptional.map(r -> r.game()).get()
+        final def created = game.created
 
         and: "the game indicates that it is recruiting players"
         expect(game.recruiting, Matchers.instanceOf(Boolean.class))
@@ -155,7 +157,7 @@ class GameBESpec extends BESpecification {
 
         and: "the list of games includes the new game"
         def gameIds = gameService.getGameIdentifiersOfScenario(scenarioId).toList()
-        expect(gameIds, Matchers.hasItem(gameId))
+        expect(gameIds, Matchers.hasItem(new NamedUUID(gameId, created.toString())))
     }
 
     def "Only a game manager may add a game"() {
@@ -221,7 +223,7 @@ class GameBESpec extends BESpecification {
         def user = addUserWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER))
 
         when: "try to examine the game"
-        def gamePlayersResponse = requestGetGamePlayers(gameId, user)
+        def gamePlayersResponse = requestGetGame(gameId, user)
         def mayJoinResponse = requestGetMayJoinQuery(gameId, user)
 
         then: "provides the game"

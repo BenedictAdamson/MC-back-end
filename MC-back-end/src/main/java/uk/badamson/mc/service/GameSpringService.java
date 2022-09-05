@@ -23,8 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.badamson.mc.FindGameResult;
 import uk.badamson.mc.Game;
-import uk.badamson.mc.GameIdentifier;
 import uk.badamson.mc.IdentifiedValue;
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.repository.MCSpringRepositoryAdapter;
 
 import javax.annotation.Nonnull;
@@ -49,45 +49,45 @@ public class GameSpringService {
 
     @Nonnull
     @Transactional
-    public IdentifiedValue<GameIdentifier, Game> create(@Nonnull final UUID scenario) {
+    public IdentifiedValue<UUID, Game> create(@Nonnull final UUID scenario) {
         return delegate.create(scenario);
     }
 
     @Nonnull
     @Transactional
-    public Set<GameIdentifier> getGameIdentifiersOfScenario(@Nonnull final UUID scenario)
+    public Set<NamedUUID> getGameIdentifiersOfScenario(@Nonnull final UUID scenario)
             throws NoSuchElementException {
         return delegate.getGameIdentifiersOfScenario(scenario);
     }
 
     @Transactional
     @Nonnull
-    public Iterable<GameIdentifier> getGameIdentifiers() {
+    public Iterable<UUID> getGameIdentifiers() {
         return delegate.getGameIdentifiers();
     }
 
     @Transactional
     @Nonnull
-    public Game startGame(@Nonnull final GameIdentifier id)
+    public Game startGame(@Nonnull final UUID id)
             throws NoSuchElementException, IllegalGameStateException {
         return delegate.startGame(id);
     }
 
     @Transactional
-    public void stopGame(@Nonnull final GameIdentifier id)
+    public void stopGame(@Nonnull final UUID id)
             throws NoSuchElementException {
         delegate.stopGame(id);
     }
 
     @Transactional
-    public void endRecruitment(@Nonnull final GameIdentifier id)
+    public void endRecruitment(@Nonnull final UUID id)
             throws NoSuchElementException {
         delegate.endRecruitment(id);
     }
 
     @Transactional
     @Nonnull
-    public Optional<GameIdentifier> getCurrentGameOfUser(
+    public Optional<UUID> getCurrentGameOfUser(
             @Nonnull final UUID userId) {
         return delegate.getCurrentGameOfUser(userId);
     }
@@ -95,25 +95,25 @@ public class GameSpringService {
     @Transactional
     @Nonnull
     public Optional<FindGameResult> getGameAsGameManager(
-            @Nonnull final GameIdentifier id) {
+            @Nonnull final UUID id) {
         return delegate.getGameAsGameManager(id);
     }
 
     @Transactional
     @Nonnull
     public Optional<FindGameResult> getGameAsNonGameManager(
-            @Nonnull final GameIdentifier id, @Nonnull final UUID user) {
+            @Nonnull final UUID id, @Nonnull final UUID user) {
         return delegate.getGameAsNonGameManager(id, user);
     }
 
     @Transactional
-    public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final GameIdentifier game) {
+    public boolean mayUserJoinGame(@Nonnull final UUID user, @Nonnull final UUID game) {
         return delegate.mayUserJoinGame(user, game);
     }
 
     @Transactional
     public void userJoinsGame(@Nonnull final UUID userId,
-                              @Nonnull final GameIdentifier gameId)
+                              @Nonnull final UUID gameId)
             throws NoSuchElementException, UserAlreadyPlayingException,
             IllegalGameStateException, SecurityException {
         delegate.userJoinsGame(userId, gameId);

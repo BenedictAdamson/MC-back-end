@@ -70,8 +70,7 @@ class CurrentGameBESpec extends BESpecification {
         location != null
 
         when: "examine the current game"
-        def currentGameId = parseGamePath(location)
-        response = requestGetGamePlayers(currentGameId, user)
+        response = requestGetGame(gameId, user)
 
         then: "the game indicates which character the user is playing"
         def gamePlayers = expectEncodedResponse(response, GameResponse.class)

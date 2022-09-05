@@ -103,11 +103,11 @@ abstract class BESpecification extends Specification {
                 true, true, true, true))
     }
 
-    protected static GameIdentifier parseGamePath(final String path) {
+    protected static UUID parseGamePath(final String path) {
         Objects.requireNonNull(path, "path")
         final var pathVariable = GAME_PATH_URI_TEMPLATE.match(path)
         try {
-            return Paths.parseGameIdentifier(pathVariable.get("game"))
+            return UUID.fromString(pathVariable.get("game"))
         } catch (final RuntimeException e) {
             throw new IllegalArgumentException("Path " + path, e)
         }
@@ -122,27 +122,24 @@ abstract class BESpecification extends Specification {
         requestGetJson(Paths.CURRENT_GAME_PATH, loggedInUser)
     }
 
-    protected final ResultActions requestGetGamePlayers(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+
+    protected final ResultActions requestGetGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         requestGetJson(Paths.createPathForGame(gameId), loggedInUser)
     }
 
-    protected final ResultActions requestGetGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
-        requestGetJson(Paths.createPathForGame(gameId), loggedInUser)
-    }
-
-    protected final ResultActions requestGetMayJoinQuery(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetMayJoinQuery(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         requestGetJson(GameController.createPathForMayJoinQueryOf(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetScenarios(@Nullable User loggedInUser) {
-        requestGetJson('/api/scenario', loggedInUser)
+        requestGetJson(Paths.SCENARIOS_PATH, loggedInUser)
     }
 
     protected final ResultActions requestGetScenario(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
         requestGetJson(Paths.createPathForScenario(scenarioId), loggedInUser)
     }
 
-    protected final ResultActions requestGetGameCreationTimes(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
+    protected final ResultActions requestGetGamesOfScenario(@Nonnull UUID scenarioId, @Nullable User loggedInUser) {
         requestGetJson(Paths.createPathForGamesOfScenario(scenarioId), loggedInUser)
     }
 
@@ -162,7 +159,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestJoinGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestJoinGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForJoining(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -171,7 +168,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStartGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStartGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForStarting(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -180,7 +177,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestStopGame(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestStopGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForStopping(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
@@ -198,7 +195,7 @@ abstract class BESpecification extends Specification {
         mockMvc.perform(request)
     }
 
-    protected final ResultActions requestEndRecruitment(@Nonnull GameIdentifier gameId, @Nullable User loggedInUser) {
+    protected final ResultActions requestEndRecruitment(@Nonnull UUID gameId, @Nullable User loggedInUser) {
         final def path = GameController.createPathForEndRecruitmentOf(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
