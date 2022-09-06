@@ -61,7 +61,7 @@
             <plugin>
                <groupId>com.github.spotbugs</groupId>
                <artifactId>spotbugs-maven-plugin</artifactId>
-               <version>4.7.1.0</version>
+               <version>4.7.2.0</version>
             </plugin>
             <plugin>
                <groupId>com.spotify</groupId>
@@ -93,7 +93,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-javadoc-plugin</artifactId>
-               <version>3.4.0</version>
+               <version>3.4.1</version>
                <configuration>
                   <doclint>all,-missing</doclint>
                </configuration>
@@ -101,12 +101,12 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-jxr-plugin</artifactId>
-               <version>3.2.0</version>
+               <version>3.3.0</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-pmd-plugin</artifactId>
-               <version>3.17.0</version>
+               <version>3.19.0</version>
                <configuration>
                   <targetJdk>17</targetJdk>
                   <failurePriority>2</failurePriority>
@@ -118,7 +118,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-resources-plugin</artifactId>
-               <version>3.2.0</version>
+               <version>3.3.0</version>
                <configuration>
                   <propertiesEncoding>ISO-8859-1</propertiesEncoding>
                </configuration>
