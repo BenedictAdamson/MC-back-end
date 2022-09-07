@@ -6,7 +6,7 @@
       (the release repository) and MC-SNAPSHOT.repo (the SNAPSHOT repository). 
       Therefore, if you use this POM to deploy artifacts, your settings.xml configuration
       file should contain credentials (in a servers/server element) for those servers. -->
-   <!-- This POM provides plugin management for dockerfile-maven-plugin. 
+   <!-- This POM provides plugin management for docker-maven-plugin.
       Using that plugin will require credentials (in a servers/server element) 
       for any Docker registries you use, with an id equal to the DNS name of the 
       registry server. If you use the (default) Docker Hub registry, you will need 
@@ -64,9 +64,9 @@
                <version>4.7.2.0</version>
             </plugin>
             <plugin>
-               <groupId>com.spotify</groupId>
-               <artifactId>dockerfile-maven-plugin</artifactId>
-               <version>1.4.13</version>
+               <groupId>io.fabric8</groupId>
+               <artifactId>docker-maven-plugin</artifactId>
+               <version>0.40.2</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>

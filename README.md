@@ -85,7 +85,7 @@ MC is available from these public repositories:
         * [Maven Frontend Plugin](https://github.com/eirslett/frontend-maven-plugin)
         * [Spring Boot Maven Plugin](https://docs.spring.io/spring-boot/docs/2.1.3.RELEASE/maven-plugin/)
         * [SpotBugs Maven Plugin](https://spotbugs.github.io/spotbugs-maven-plugin/index.html)
-        * Spotify [Dockerfile Maven Plugin](https://github.com/spotify/dockerfile-maven)
+        * [Docker Maven Plugin](https://github.com/fabric8io/docker-maven-plugin)
     * [Ubuntu](https://ubuntu.com)
     * [Debian](https://debian.org)
 * Static analysis and testing:
@@ -118,3 +118,4 @@ MC is available from these public repositories:
     * [Eclipse Wild Web Developer](https://projects.eclipse.org/proposals/eclipse-wild-web-developer)
     * [Java 11](https://docs.oracle.com/javase/11/)
     * [Spring WebFlux](https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html)
+    * Spotify [Dockerfile Maven Plugin](https://github.com/spotify/dockerfile-maven)

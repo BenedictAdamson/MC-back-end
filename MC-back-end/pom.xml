@@ -114,26 +114,65 @@
          </plugin>
          <plugin>
             <!-- This MUST be after jdeb, so it can use the .deb package. -->
-            <groupId>com.spotify</groupId>
-            <artifactId>dockerfile-maven-plugin</artifactId>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+               <images>
+                  <image>
+                     <name>index.docker.io/benedictadamson/mc-back-end:${project.version}</name>
+                     <build>
+                        <from>openjdk:17-buster</from>
+                        <assembly>
+                           <inline>
+                              <files>
+                                 <file>
+                                    <source>target/missioncommand-be_${debian-package.version}_all.deb</source>
+                                    <destName>missioncommand-be.deb</destName>
+                                 </file>
+                              </files>
+                           </inline>
+                        </assembly>
+                        <labels>
+                           <version>${project.version}"</version>
+                           <description>The Mission Command game back-end server.</description>>
+                           <maintainer>badamson@spamcop.net</maintainer>
+                        </labels>
+                        <ports>
+                           <port>8080</port>
+                        </ports>
+                        <runCmds>
+                           <run>dpkg -i --force-depends /maven/missioncommand-be.deb</run>
+                           <run>rm -rf /etc/mission-command /usr/lib/systemd</run>
+                           <run>rm /maven/missioncommand-be.deb</run>
+                        </runCmds>
+                        <user>mission-command</user>
+                        <workdir>/home/mission-command</workdir>
+                        <entryPoint>
+                           <exec>
+                              <arg>/usr/bin/mcbe</arg>
+                           </exec>
+                        </entryPoint>
+                        <cmd>[]</cmd>
+                     </build>
+                  </image>
+               </images>
+            </configuration>
             <executions>
                <execution>
-                  <id>default</id>
+                  <id>build image</id>
+                  <phase>package</phase>
                   <goals>
                      <goal>build</goal>
+                  </goals>
+               </execution>
+               <execution>
+                  <id>deploy image</id>
+                  <phase>deploy</phase>
+                  <goals>
                      <goal>push</goal>
                   </goals>
                </execution>
             </executions>
-            <configuration>
-               <repository>index.docker.io/benedictadamson/mc-back-end</repository>
-               <tag>${project.version}</tag>
-               <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-               <buildArgs>
-                  <VERSION>${project.version}</VERSION>
-                  <PACKAGEVERSION>${debian-package.version}</PACKAGEVERSION>
-               </buildArgs>
-            </configuration>
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
