@@ -24,6 +24,11 @@
 # but the frontend-maven-plugin installs those.
 
 FROM debian:11
+
+ARG JENKINSUID
+ARG JENKINSGID
+ARG DOCKERGID
+
 RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
@@ -51,3 +56,10 @@ RUN apt-get -y update && apt-get -y install \
    docker-ce-cli \
    google-chrome-stable \
    helm
+
+# Setup users and groups
+RUN groupadd -g ${JENKINSGID} jenkins
+RUN groupmod -g ${DOCKERGID} docker
+RUN useradd -c "Jenkins user" -g ${JENKINSGID} -G ${DOCKERGID} -M -N -u ${JENKINSUID} jenkins
+
+WORKDIR /home/jenkins/agent

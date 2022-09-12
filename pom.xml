@@ -160,14 +160,14 @@
    </build>
    <distributionManagement>
       <repository>
-         <id>MC.repo</id>
+         <id>local.repo</id>
          <name>MC Repository</name>
-         <url>http://localhost:8081/repository/maven-releases/</url>
+         <url>http://weorc:8081/repository/maven-releases/</url>
       </repository>
       <snapshotRepository>
-         <id>MC-SNAPSHOT.repo</id>
+         <id>local-SNAPSHOT.repo</id>
          <name>MC Repository</name>
-         <url>http://localhost:8081/repository/maven-snapshots/</url>
+         <url>http://weorc:8081/repository/maven-snapshots/</url>
       </snapshotRepository>
    </distributionManagement>
    <dependencyManagement>

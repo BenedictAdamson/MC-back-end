@@ -26,9 +26,10 @@
   *     - That settings.xml configuration should provide authentication credentials
   *       (in server/servers elements) for the services with the following IDs:
   *         - MC.repo: the Maven release repository, at localhost:8081 
-  *         - MC-SNAPSHOT.repo: the Maven SNAPSHOT repository, at localhost:8081 
+  *         - MC-SNAPSHOT.repo: the Maven SNAPSHOT repository, at localhost:8081
+  * Docker Pipeline
   * Pipeline Utility Steps
-  * Warnings 5
+  * Warnings Next Generation
   *
   * An administrator will need to permit scripts to use method org.apache.maven.model.Model getVersion.
   */
@@ -37,7 +38,8 @@ pipeline {
     agent {
         dockerfile {
             filename 'Jenkins.Dockerfile'
-            args '-v $HOME/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock --network="host"'
+            additionalBuildArgs  '--build-arg JENKINSUID=`id -u jenkins` --build-arg JENKINSGID=`id -g jenkins` --build-arg DOCKERGID=`stat -c %g /var/run/docker.sock`'
+            args '-v $HOME:/home/jenkins -v /var/run/docker.sock:/var/run/docker.sock --network="host" -u jenkins:jenkins --group-add docker'
         }
     }
     triggers {
@@ -45,11 +47,12 @@ pipeline {
     }
     environment {
         JAVA_HOME = '/usr/lib/jvm/java-1.17.0-openjdk-amd64'
+        PATH = '/usr/sbin:/usr/bin:/sbin:/bin'
     }
     stages {
         stage('Clean') { 
             steps {
-                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){
                     sh 'mvn -B -s $MAVEN_SETTINGS clean'
                 }
             }
