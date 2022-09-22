@@ -63,7 +63,7 @@
          </dependency>
          <dependency>
             <groupId>uk.badamson.mc</groupId>
-            <artifactId>MC-code</artifactId>
+            <artifactId>MC-core</artifactId>
             <version>${MC.core.version}</version>
          </dependency>
       </dependencies>
