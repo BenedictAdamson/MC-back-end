@@ -16,7 +16,7 @@
       <artifactId>MC-parent</artifactId>
       <version>3.1.1</version>
    </parent>
-   <artifactId>MC</artifactId>
+   <artifactId>MC-web</artifactId>
    <version>3.1.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <organization>
@@ -30,15 +30,16 @@
       </license>
    </licenses>
    <scm>
-      <connection>scm:git:git@github.com:BenedictAdamson/MC.git</connection>
-      <developerConnection>scm:git:git@github.com:BenedictAdamson/MC.git</developerConnection>
-      <url>https://github.com/BenedictAdamson/MC</url>
+      <connection>scm:git:git@github.com:BenedictAdamson/MC-web.git</connection>
+      <developerConnection>scm:git:git@github.com:BenedictAdamson/MC-web.git</developerConnection>
+      <url>https://github.com/BenedictAdamson/MC-web</url>
    </scm>
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
       <debian-package.version>3.1.0</debian-package.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
+      <MC.core.version>3.1.0-SNAPSHOT</MC.core.version>
    </properties>
    <build />
    <distributionManagement>
@@ -53,13 +54,25 @@
          <url>http://weorc:8081/repository/maven-snapshots/</url>
       </snapshotRepository>
    </distributionManagement>
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>uk.badamson.mc</groupId>
+            <artifactId>MC-model</artifactId>
+            <version>${MC.core.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>uk.badamson.mc</groupId>
+            <artifactId>MC-code</artifactId>
+            <version>${MC.core.version}</version>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
    <modules>
       <module>MC-back-end</module>
-      <module>MC-core</module>
       <module>MC-database</module>
       <module>MC-front-end</module>
       <module>MC-integration</module>
-      <module>MC-model</module>
       <module>MC-REST</module>
    </modules>
 </project>
