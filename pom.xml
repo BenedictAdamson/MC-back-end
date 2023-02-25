@@ -14,7 +14,7 @@
    <parent>
       <groupId>uk.badamson.mc</groupId>
       <artifactId>MC-parent</artifactId>
-      <version>3.1.1</version>
+      <version>3.1.2</version>
    </parent>
    <artifactId>MC-web</artifactId>
    <version>3.1.1-SNAPSHOP</version>
@@ -39,7 +39,7 @@
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
       <debian-package.version>3.1.0</debian-package.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
-      <MC.core.version>3.1.0</MC.core.version>
+      <MC.core.version>3.2.0</MC.core.version>
    </properties>
    <build />
    <distributionManagement>
