@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,7 @@ public class GameController {
     @Nonnull
     private final GameSpringService gameService;
 
+    @Autowired
     GameController(@Nonnull final GameSpringService gameService) {
         this.gameService = Objects.requireNonNull(gameService, "gameService");
     }
