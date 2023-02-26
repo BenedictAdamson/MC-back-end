@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -43,53 +43,15 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
-/**
- * <p>
- * End-points for the game HTTP resources.
- * </p>
- */
 @RestController
 public class GameController {
 
-
-    public static final String START_PARAM = "start";
-
-    public static final String STOP_PARAM = "stop";
-
-    public static final String END_RECRUITMENT_PARAM = "endRecruitment";
-
-    public static final String MAY_JOIN_PARAM = "mayJoin";
-
-    public static final String JOIN_PARAM = "join";
 
     @Nonnull
     private final GameSpringService gameService;
 
     GameController(@Nonnull final GameSpringService gameService) {
         this.gameService = Objects.requireNonNull(gameService, "gameService");
-    }
-
-    @Nonnull
-    public static String createPathForStarting(@Nonnull final UUID id) {
-        return Paths.createPathForGame(id) + "?" + START_PARAM;
-    }
-
-    @Nonnull
-    public static String createPathForStopping(@Nonnull final UUID id) {
-        return Paths.createPathForGame(id) + "?" + STOP_PARAM;
-    }
-
-    public static String createPathForEndRecruitmentOf(
-            final UUID id) {
-        return Paths.createPathForGame(id) + "?" + END_RECRUITMENT_PARAM;
-    }
-
-    public static String createPathForJoining(final UUID id) {
-        return Paths.createPathForGame(id) + "?" + JOIN_PARAM;
-    }
-
-    public static String createPathForMayJoinQueryOf(final UUID id) {
-        return Paths.createPathForGame(id) + "?" + MAY_JOIN_PARAM;
     }
 
     /**
@@ -115,13 +77,13 @@ public class GameController {
      * @return The response.
      * @throws NullPointerException    If {@code scenario} is null.
      * @throws ResponseStatusException <ul>
-     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                                                            there is no scenario with the given {@code scenario} ID.</li>
-     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
-     *                                                                                                            (Internal Server Error)} if there is data access error.</li>
-     *                                                                                                            </ul>
+     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                                                                                                                                                                                            there is no scenario with the given {@code scenario} ID.</li>
+     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
+     *                                                                                                                                                                                                            (Internal Server Error)} if there is data access error.</li>
+     *                                                                                                                                                                                                            </ul>
      */
     @PostMapping(Paths.GAMES_PATH_PATTERN)
     @Nonnull
@@ -190,7 +152,7 @@ public class GameController {
         }
     }
 
-    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {START_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.GAME_START_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> startGame(
@@ -212,7 +174,7 @@ public class GameController {
         }
     }
 
-    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {STOP_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.GAME_STOP_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> stopGame(
@@ -233,6 +195,7 @@ public class GameController {
                     e);
         }
     }
+
     /**
      * <p>
      * Behaviour of the GET verb for a game players resource.
@@ -269,7 +232,7 @@ public class GameController {
      *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {END_RECRUITMENT_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.END_GAME_RECRUITMENT_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
@@ -331,27 +294,27 @@ public class GameController {
      *
      * @return The response.
      * @throws ResponseStatusException <ul>
-     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                                                            there is no game that has identification information equivalent to the given
-     *                                                                                                            {@code scenario} and {@code created}.</li>
-     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
-     *                                                                                                            any of the following are true:
-     *                                                                                                            <ul>
-     *                                                                                                            <li>If the {@code user} is already playing a different
-     *                                                                                                            game.</li>
-     *                                                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
-     *                                                                                                            recruiting} players.
-     *                                                                                                            </ul>
-     *                                                                                                            </li>
-     *                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
-     *                                                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
-     *                                                                                                            games.</li>
-     *                                                                                                            </ul>
+     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                                                                                                                                                                                            there is no game that has identification information equivalent to the given
+     *                                                                                                                                                                                                            {@code scenario} and {@code created}.</li>
+     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
+     *                                                                                                                                                                                                            any of the following are true:
+     *                                                                                                                                                                                                            <ul>
+     *                                                                                                                                                                                                            <li>If the {@code user} is already playing a different
+     *                                                                                                                                                                                                            game.</li>
+     *                                                                                                                                                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
+     *                                                                                                                                                                                                            recruiting} players.
+     *                                                                                                                                                                                                            </ul>
+     *                                                                                                                                                                                                            </li>
+     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
+     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
+     *                                                                                                                                                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
+     *                                                                                                                                                                                                            games.</li>
+     *                                                                                                                                                                                                            </ul>
      */
-    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {JOIN_PARAM})
+    @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
     @Nonnull
     public ResponseEntity<Void> joinGame(
@@ -398,7 +361,7 @@ public class GameController {
      *                                 is no game that has identification information equivalent to the given
      *                                 {@code scenario} and {@code created}.
      */
-    @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {MAY_JOIN_PARAM})
+    @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.MAY_JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
                                @Nonnull @PathVariable("game") final UUID game) {

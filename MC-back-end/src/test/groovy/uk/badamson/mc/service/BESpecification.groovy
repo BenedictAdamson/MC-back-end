@@ -12,7 +12,6 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.util.UriTemplate
 import spock.lang.Specification
 import uk.badamson.mc.*
-import uk.badamson.mc.presentation.GameController
 import uk.badamson.mc.repository.UserSpringRepository
 import uk.badamson.mc.rest.Paths
 import uk.badamson.mc.rest.UserDetailsRequest
@@ -28,8 +27,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-/**
- * © Copyright Benedict Adamson 2021-22.
+/*
+ * © Copyright Benedict Adamson 2021-23.
  *
  * This file is part of MC.
  *
@@ -128,7 +127,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestGetMayJoinQuery(@Nonnull UUID gameId, @Nullable User loggedInUser) {
-        requestGetJson(GameController.createPathForMayJoinQueryOf(gameId), loggedInUser)
+        requestGetJson(Paths.createPathForMayJoinQueryOfGame(gameId), loggedInUser)
     }
 
     protected final ResultActions requestGetScenarios(@Nullable User loggedInUser) {
@@ -160,7 +159,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestJoinGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
-        final def path = GameController.createPathForJoining(gameId)
+        final def path = Paths.createPathForJoiningGame(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())
@@ -169,7 +168,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestStartGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
-        final def path = GameController.createPathForStarting(gameId)
+        final def path = Paths.createPathForStartingGame(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())
@@ -178,7 +177,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestStopGame(@Nonnull UUID gameId, @Nullable User loggedInUser) {
-        final def path = GameController.createPathForStopping(gameId)
+        final def path = Paths.createPathForStoppingGame(gameId)
         var request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())
@@ -196,7 +195,7 @@ abstract class BESpecification extends Specification {
     }
 
     protected final ResultActions requestEndRecruitment(@Nonnull UUID gameId, @Nullable User loggedInUser) {
-        final def path = GameController.createPathForEndRecruitmentOf(gameId)
+        final def path = Paths.createPathForEndRecruitmentOfGame(gameId)
         def request = post(path).accept(MediaType.APPLICATION_JSON)
         if (loggedInUser != null) {
             request = request.with(user(SpringUser.convertToSpring(loggedInUser))).with(csrf())

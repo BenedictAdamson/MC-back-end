@@ -406,7 +406,7 @@ public class GameControllerTest {
 
         private ResultActions test(final UUID id, final User user,
                                    final boolean hasCsrfToken) throws Exception {
-            final var path = GameController.createPathForEndRecruitmentOf(id);
+            final var path = Paths.createPathForEndRecruitmentOfGame(id);
             var request = post(path);
             if (user != null) {
                 request = request.with(user(SpringUser.convertToSpring(user)));
@@ -553,7 +553,7 @@ public class GameControllerTest {
 
         private ResultActions performRequest(final UUID game,
                                              final User user, final boolean hasCsrfToken) throws Exception {
-            final var path = GameController.createPathForJoining(game);
+            final var path = Paths.createPathForJoiningGame(game);
             var request = post(path);
             if (user != null) {
                 request = request.with(user(SpringUser.convertToSpring(user)));
@@ -662,7 +662,7 @@ public class GameControllerTest {
 
         private ResultActions test(final UUID game, final User user)
                 throws Exception {
-            final var path = GameController.createPathForMayJoinQueryOf(game);
+            final var path = Paths.createPathForMayJoinQueryOfGame(game);
             var request = get(path).accept(MediaType.APPLICATION_JSON)
                     .with(csrf());
             if (user != null) {
