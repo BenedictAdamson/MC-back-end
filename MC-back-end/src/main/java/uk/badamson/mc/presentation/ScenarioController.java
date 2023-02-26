@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.Scenario;
 import uk.badamson.mc.rest.Paths;
+import uk.badamson.mc.rest.Reasons;
 import uk.badamson.mc.rest.ScenarioResponse;
 import uk.badamson.mc.service.ScenarioSpringService;
 
@@ -36,11 +37,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * <p>
- * End-points for the scenario and scenarios HTTP resources.
- * </p>
- */
 @RestController
 public class ScenarioController {
 
@@ -52,14 +48,7 @@ public class ScenarioController {
     }
 
     /**
-     * <p>
-     * Behaviour of the GET verb for the scenarios list.
-     * </p>
-     * <p>
-     * Returns a list of all the scenarios.
-     * </p>
-     *
-     * @return The response.
+     * @return a list of all the scenarios.
      */
     @GetMapping(Paths.SCENARIOS_PATH)
     @Nonnull
@@ -68,25 +57,18 @@ public class ScenarioController {
     }
 
     /**
-     * <p>
-     * Behaviour of the GET verb for a scenario resource.
-     * </p>
-     *
-     * @param id The unique ID of the wanted scenario.
-     * @return The response.
-     * @throws NullPointerException    If {@code id} is null.
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no scenario with the given {@code id}.
+     *                                 is no scenario with the given {@code id} ID.
      */
     @GetMapping(Paths.SCENARIO_PATH_PATTERN)
     @Nonnull
-    public ScenarioResponse getScenario(@Nonnull @PathVariable final UUID id) {
-        final Optional<Scenario> scenario = service.getScenario(id);
+    public ScenarioResponse getScenario(@Nonnull @PathVariable("id") final UUID scenarioId) {
+        final Optional<Scenario> scenario = service.getScenario(scenarioId);
         if (scenario.isPresent()) {
-            return scenario.map(s -> ScenarioResponse.convertToResponse(id, s)).get();
+            return scenario.map(s -> ScenarioResponse.convertToResponse(scenarioId, s)).get();
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized ID");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.SCENARIO_NOT_FOUND);
         }
     }
 }
