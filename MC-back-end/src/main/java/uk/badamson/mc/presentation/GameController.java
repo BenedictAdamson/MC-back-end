@@ -28,9 +28,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import uk.badamson.mc.*;
+import uk.badamson.mc.Authority;
+import uk.badamson.mc.FindGameResult;
+import uk.badamson.mc.Game;
+import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.rest.Paths;
+import uk.badamson.mc.rest.Reasons;
 import uk.badamson.mc.service.GameSpringService;
 import uk.badamson.mc.service.IllegalGameStateException;
 import uk.badamson.mc.service.UserAlreadyPlayingException;
@@ -40,18 +44,24 @@ import uk.badamson.mc.spring.SpringUser;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.net.URI;
-import java.time.Instant;
 import java.util.*;
 
 @RestController
 public class GameController {
-
 
     @Nonnull
     private final GameSpringService gameService;
 
     GameController(@Nonnull final GameSpringService gameService) {
         this.gameService = Objects.requireNonNull(gameService, "gameService");
+    }
+
+    @Nonnull
+    private static ResponseEntity<Void> createRedirectResponseForGame(@Nonnull UUID game) {
+        URI location = URI.create(Paths.createPathForGame(game));
+        final var headers = new HttpHeaders();
+        headers.setLocation(location);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     /**
@@ -65,7 +75,7 @@ public class GameController {
      * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
      * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
      * <li>A {@linkplain HttpHeaders#getLocation()
-     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
+     * Location} {@linkplain ResponseEntity#getHeaders() header} giving the
      * {@linkplain Paths#createPathForGame(UUID) path} of the new game.</li>
      * </ul>
      * </li>
@@ -73,17 +83,12 @@ public class GameController {
      * equal to the given scenario identifier.</li>
      * </ul>
      *
-     * @param scenario The unique ID of the scenario for which to create a game.
-     * @return The response.
-     * @throws NullPointerException    If {@code scenario} is null.
-     * @throws ResponseStatusException <ul>
-     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                                                                                                                                                            there is no scenario with the given {@code scenario} ID.</li>
-     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
-     *                                                                                                                                                                                                            (Internal Server Error)} if there is data access error.</li>
-     *                                                                                                                                                                                                            </ul>
+     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus()
+     *                                 status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                 there is no scenario with the given {@code scenario} ID.
+     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
+     *                                 status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
+     *                                 (Internal Server Error)} if there is data access error.
      */
     @PostMapping(Paths.GAMES_PATH_PATTERN)
     @Nonnull
@@ -91,19 +96,15 @@ public class GameController {
     public ResponseEntity<Void> createGameForScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
         try {
-            final var identifier = gameService.create(scenario).getIdentifier();
-
-            final var location = URI.create(Paths.createPathForGame(identifier));
-            final var headers = new HttpHeaders();
-            headers.setLocation(location);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            final var game = gameService.create(scenario).getIdentifier();
+            return createRedirectResponseForGame(game);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized ID", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.SCENARIO_NOT_FOUND, e);
         } catch (final DataAccessException e) {
             // Hard to test
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    e.getMessage(), e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e
+            );
         }
     }
 
@@ -120,7 +121,7 @@ public class GameController {
         try {
             return gameService.getGameIdentifiersOfScenario(scenario);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "scenario not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.SCENARIO_NOT_FOUND, e);
         }
     }
 
@@ -134,13 +135,13 @@ public class GameController {
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
     public GameResponse getGame(
-            @Nonnull @AuthenticationPrincipal final SpringUser user,
+            @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
             @Nonnull @PathVariable("game") final UUID game) {
         final Optional<FindGameResult> findResult;
-        if (user.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
+        if (requestingUser.getAuthorities().contains(SpringAuthority.ROLE_MANAGE_GAMES)) {
             findResult = gameService.getGameAsGameManager(game);
-        } else if (user.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
-            findResult = gameService.getGameAsNonGameManager(game, user.getId());
+        } else if (requestingUser.getAuthorities().contains(SpringAuthority.ROLE_PLAYER)) {
+            findResult = gameService.getGameAsNonGameManager(game, requestingUser.getId());
         } else {
             throw new IllegalArgumentException("Request not permitted for role");
         }
@@ -148,7 +149,7 @@ public class GameController {
         if (findResult.isPresent()) {
             return findResult.map(fr -> GameResponse.convertToResponse(game, fr.scenarioId(), fr.game())).get();
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND);
         }
     }
 
@@ -156,21 +157,16 @@ public class GameController {
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> startGame(
-            @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("game") final UUID gameId) {
-        Objects.requireNonNull(user, "user");
+            @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
+            @Nonnull @PathVariable("game") final UUID game) {
+        Objects.requireNonNull(requestingUser, "requestingUser");
         try {
-            gameService.startGame(gameId);
-            final var location = URI.create(Paths.createPathForGame(gameId));
-            final var headers = new HttpHeaders();
-            headers.setLocation(location);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            gameService.startGame(game);
+            return createRedirectResponseForGame(game);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized game ID", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND, e);
         } catch (final IllegalGameStateException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
-                    e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, Reasons.GAME_STATE_CONFLICT, e);
         }
     }
 
@@ -178,74 +174,27 @@ public class GameController {
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> stopGame(
-            @Nonnull @AuthenticationPrincipal final SpringUser user,
-            @Nonnull @PathVariable("game") final UUID gameId) {
-        Objects.requireNonNull(user, "user");
+            @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
+            @Nonnull @PathVariable("game") final UUID game) {
+        Objects.requireNonNull(requestingUser, "requestingUser");
         try {
-            gameService.stopGame(gameId);
-            final var location = URI.create(Paths.createPathForGame(gameId));
-            final var headers = new HttpHeaders();
-            headers.setLocation(location);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            gameService.stopGame(game);
+            return createRedirectResponseForGame(game);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized game ID", e);
-        } catch (final IllegalGameStateException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
-                    e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND, e);
         }
     }
 
-    /**
-     * <p>
-     * Behaviour of the GET verb for a game players resource.
-     * </p>
-     * <ul>
-     * <li>Returns a (non null) game players container.</li>
-     * <li>The {@linkplain GameIdentifier#getScenario() scenario identifier} of the
-     * game identifier of the game players
-     * container {@linkplain UUID#equals(Object) is equivalent to} the given
-     * scenario ID</li>
-     * <li>The {@linkplain GameIdentifier#getCreated() creation time} of the
-     * game identifier of the game players
-     * container {@linkplain Instant#equals(Object) is equivalent to} the given
-     * creation time</li>
-     * </ul>
-     * <ul>
-     * <li>{@linkplain GameSpringService#endRecruitment(UUID) ends
-     * recruitment} for the game with the given ID.</li>
-     * <li>Returns a redirect to the modified game players resource. That is, a
-     * response with
-     * <ul>
-     * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
-     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
-     * <li>A {@linkplain HttpHeaders#getLocation()
-     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain Paths#createPathForGame(UUID) path} of the
-     * resource.</li>
-     * </ul>
-     * </li>
-     * </ul>
-     *
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has identification information equivalent to the given
-     *                                 {@code scenario} and {@code created}.
-     */
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.END_GAME_RECRUITMENT_PARAM})
     @RolesAllowed("MANAGE_GAMES")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
-            @Nonnull @PathVariable("game") final UUID id) {
+            @Nonnull @PathVariable("game") final UUID game) {
         try {
-            gameService.endRecruitment(id);
-            final var location = URI.create(Paths.createPathForGame(id));
-            final var headers = new HttpHeaders();
-            headers.setLocation(location);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            gameService.endRecruitment(game);
+            return createRedirectResponseForGame(game);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized IDs", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND, e);
         }
     }
 
@@ -258,18 +207,16 @@ public class GameController {
              * Must return Not Found rather than Unauthorized, because otherwise
              * web browsers will pop up an authentication dialogue
              */
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Not Found Because Unauthorized");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED.getReasonPhrase());
 
         }
-        final Optional<UUID> gameId = gameService.getCurrentGameOfUser(user.getId());
-        if (gameId.isPresent()) {
+        final Optional<UUID> game = gameService.getCurrentGameOfUser(user.getId());
+        if (game.isPresent()) {
             final var headers = new HttpHeaders();
-            headers.setLocation(URI.create(Paths.createPathForGame(gameId.get())));
+            headers.setLocation(URI.create(Paths.createPathForGame(game.get())));
             return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "No current game");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND);
         }
     }
 
@@ -292,27 +239,21 @@ public class GameController {
      * </li>
      * </ul>
      *
-     * @return The response.
-     * @throws ResponseStatusException <ul>
-     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                                                                                                                                                                                            there is no game that has identification information equivalent to the given
-     *                                                                                                                                                                                                            {@code scenario} and {@code created}.</li>
-     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
-     *                                                                                                                                                                                                            any of the following are true:
-     *                                                                                                                                                                                                            <ul>
-     *                                                                                                                                                                                                            <li>If the {@code user} is already playing a different
-     *                                                                                                                                                                                                            game.</li>
-     *                                                                                                                                                                                                            <li>If the game is not {@linkplain Game#isRecruiting()
-     *                                                                                                                                                                                                            recruiting} players.
-     *                                                                                                                                                                                                            </ul>
-     *                                                                                                                                                                                                            </li>
-     *                                                                                                                                                                                                            <li>With a {@linkplain ResponseStatusException#getStatus()
-     *                                                                                                                                                                                                            status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
-     *                                                                                                                                                                                                            the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
-     *                                                                                                                                                                                                            games.</li>
-     *                                                                                                                                                                                                            </ul>
+     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus()
+     *                                 status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
+     *                                 there is no game that has identification information equivalent to the given
+     *                                 {@code scenario} and {@code created}.
+     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
+     *                                 status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
+     *                                 any of the following are true:
+     *                                 if the {@code user} is already playing a different
+     *                                 game;
+     *                                 If the game is not {@linkplain Game#isRecruiting()
+     *                                 recruiting} players.
+     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
+     *                                 status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
+     *                                 the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
+     *                                 games.
      */
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
@@ -323,19 +264,16 @@ public class GameController {
         Objects.requireNonNull(user, "user");
         try {
             gameService.userJoinsGame(user.getId(), game);
-            final var location = URI.create(Paths.createPathForGame(game));
-            final var headers = new HttpHeaders();
-            headers.setLocation(location);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            return createRedirectResponseForGame(game);
         } catch (final NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "unrecognized IDs", e);
-        } catch (final IllegalGameStateException
-                       | UserAlreadyPlayingException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(),
-                    e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND, e);
+        } catch (final IllegalGameStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, Reasons.GAME_STATE_CONFLICT, e);
+        } catch (final UserAlreadyPlayingException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, Reasons.USER_STATE_CONFLICT, e);
         }
     }
+
 
     /**
      * <p>
@@ -358,8 +296,7 @@ public class GameController {
      *
      * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
      *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has identification information equivalent to the given
-     *                                 {@code scenario} and {@code created}.
+     *                                 is no game that has the given {@code game} ID.
      */
     @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.MAY_JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
@@ -369,7 +306,7 @@ public class GameController {
         if (gameService.getGameAsGameManager(game).isPresent()) {
             return gameService.mayUserJoinGame(user.getId(), game);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "unrecognized IDs");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Reasons.GAME_NOT_FOUND);
         }
     }
 }
