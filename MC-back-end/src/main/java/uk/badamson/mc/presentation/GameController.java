@@ -29,9 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import uk.badamson.mc.Authority;
 import uk.badamson.mc.FindGameResult;
-import uk.badamson.mc.Game;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.rest.Paths;
@@ -66,32 +64,6 @@ public class GameController {
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
-    /**
-     * <p>
-     * Create a game for a given scenario.
-     * </p>
-     * <ul>
-     * <li>Creates a new game for the given scenario.</li>
-     * <li>Returns a redirect to the newly created game. That is, a response with
-     * <ul>
-     * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
-     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
-     * <li>A {@linkplain HttpHeaders#getLocation()
-     * Location} {@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain Paths#createPathForGame(UUID) path} of the new game.</li>
-     * </ul>
-     * </li>
-     * <li>The scenario ID part of the identifier of the newly created game is
-     * equal to the given scenario identifier.</li>
-     * </ul>
-     *
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus()
-     *                                 status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                 there is no scenario with the given {@code scenario} ID.
-     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
-     *                                 status} of {@linkplain HttpStatus#INTERNAL_SERVER_ERROR 500
-     *                                 (Internal Server Error)} if there is data access error.
-     */
     @PostMapping(Paths.GAMES_PATH_PATTERN)
     @Nonnull
     @RolesAllowed("MANAGE_GAMES")
@@ -110,11 +82,6 @@ public class GameController {
         }
     }
 
-    /**
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no scenario with the given {@code scenario} ID.
-     */
     @GetMapping(Paths.GAMES_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
@@ -127,12 +94,6 @@ public class GameController {
         }
     }
 
-    /**
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has identification information equivalent to the given
-     *                                 {@code scenario} and {@code created}.
-     */
     @GetMapping(Paths.GAME_PATH_PATTERN)
     @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
     @Nonnull
@@ -222,41 +183,6 @@ public class GameController {
         }
     }
 
-    /**
-     * <p>
-     * Add the requesting user as a {@linkplain Game#getUsers() player} of
-     * a given game.
-     * </p>
-     * <ul>
-     * <li>Returns a redirect to the game players
-     * resource of the game. That is, a response with
-     * <ul>
-     * <li>A {@linkplain ResponseEntity#getStatusCode() status code} of
-     * {@linkplain HttpStatus#FOUND 302 (Found)}</li>
-     * <li>A {@linkplain HttpHeaders#getLocation()
-     * Location}{@linkplain ResponseEntity#getHeaders() header} giving the
-     * {@linkplain Paths#createPathForGame(UUID) path} of the game
-     * players resource.</li>
-     * </ul>
-     * </li>
-     * </ul>
-     *
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus()
-     *                                 status} of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if
-     *                                 there is no game that has identification information equivalent to the given
-     *                                 {@code scenario} and {@code created}.
-     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
-     *                                 status} of {@linkplain HttpStatus#CONFLICT 409 (Conflict)} if
-     *                                 any of the following are true:
-     *                                 if the {@code user} is already playing a different
-     *                                 game;
-     *                                 If the game is not {@linkplain Game#isRecruiting()
-     *                                 recruiting} players.
-     *                                 Or, with a {@linkplain ResponseStatusException#getStatus()
-     *                                 status} of {@linkplain HttpStatus#FORBIDDEN 403 (Forbidden)} if
-     *                                 the {@code user} does not have {@linkplain Authority#ROLE_PLAYER permission} to play
-     *                                 games.
-     */
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
     @Nonnull
@@ -276,30 +202,6 @@ public class GameController {
         }
     }
 
-
-    /**
-     * <p>
-     * Whether the requesting user can become one of the
-     * {@linkplain Game#getUsers() players} of a given game.
-     * </p>
-     * <p>
-     * That is, whether all the following are true.
-     * </p>
-     * <ul>
-     * <li>The{@code user} is the ID of a known user.</li>
-     * <li>The {@code game} is the ID of a known game.</li>
-     * <li>The {@code user} is not already playing a different game.</li>
-     * <li>The {@code user} has
-     * {@linkplain Authority#ROLE_PLAYER permission} to play games. Note that the
-     * given user need not be the current user.</li>
-     * <li>The game is {@linkplain Game#isRecruiting() recruiting}
-     * players.</li>
-     * </ul>
-     *
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no game that has the given {@code game} ID.
-     */
     @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.MAY_JOIN_GAME_PARAM})
     @RolesAllowed("PLAYER")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
