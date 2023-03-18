@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020,22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -19,6 +19,7 @@ package uk.badamson.mc.presentation;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,8 +27,12 @@ import uk.badamson.mc.TestConfiguration;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
+/**
+ * Tests {@link PresentationLayerSpringConfiguration}
+ */
 @SpringBootTest(classes = TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectMapperTest {
@@ -35,14 +40,21 @@ public class ObjectMapperTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    public void instant_canDeserialize() {
-        assertTrue(objectMapper
-                .canDeserialize(objectMapper.constructType(Instant.class)));
-    }
+    /**
+     * Tests for java.time.{@link Instant}.
+     */
+    @Nested
+    public class JavaTimeInstant {
+        @Test
+        public void canDeserialize() {
+            final var javaType = objectMapper.constructType(Instant.class);
+            assertThat(objectMapper.canDeserialize(javaType), is(true));
+        }
 
-    @Test
-    public void instant_canSerialize() {
-        assertTrue(objectMapper.canSerialize(Instant.class));
+        @Test
+        public void canSerialize() {
+            assertThat(objectMapper.canSerialize(Instant.class), is(true));
+        }
+
     }
 }
