@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 @RestController
 public class ScenarioController {
 
+    @Nonnull
     private final ScenarioSpringService service;
 
     @Autowired
@@ -47,20 +48,12 @@ public class ScenarioController {
         this.service = Objects.requireNonNull(service);
     }
 
-    /**
-     * @return a list of all the scenarios.
-     */
     @GetMapping(Paths.SCENARIOS_PATH)
     @Nonnull
     public Stream<NamedUUID> getAll() {
         return service.getNamedScenarioIdentifiers();
     }
 
-    /**
-     * @throws ResponseStatusException With a {@linkplain ResponseStatusException#getStatus() status}
-     *                                 of {@linkplain HttpStatus#NOT_FOUND 404 (Not Found)} if there
-     *                                 is no scenario with the given {@code id} ID.
-     */
     @GetMapping(Paths.SCENARIO_PATH_PATTERN)
     @Nonnull
     public ScenarioResponse getScenario(@Nonnull @PathVariable("id") final UUID scenarioId) {

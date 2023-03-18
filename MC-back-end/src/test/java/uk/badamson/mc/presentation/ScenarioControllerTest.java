@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020,22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -59,6 +59,9 @@ public class ScenarioControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /**
+     * Tests {@link ScenarioController#getAll()}
+     */
     @Test
     public void getAll() throws Exception {
         final var request = get("/api/scenario")
@@ -74,24 +77,38 @@ public class ScenarioControllerTest {
                 });
     }
 
+    private UUID getKnownScenarioId() {
+        final Optional<UUID> idOptional = service.getScenarioIdentifiers().findAny();
+        assert idOptional.isPresent();
+        return idOptional.get();
+    }
+
+    private UUID createUnknownScenarioId() {
+        final var ids = service.getScenarioIdentifiers()
+                .collect(toUnmodifiableSet());
+        var id = UUID.randomUUID();
+        while (ids.contains(id)) {
+            id = UUID.randomUUID();
+        }
+        return id;
+    }
+
+    /**
+     * Tests {@link ScenarioController#getScenario(UUID)}
+     */
     @Nested
     public class GetScenario {
 
         @Test
         public void absent() throws Exception {
-            final var ids = service.getScenarioIdentifiers()
-                    .collect(toUnmodifiableSet());
-            var id = UUID.randomUUID();
-            while (ids.contains(id)) {
-                id = UUID.randomUUID();
-            }
+            final var id = createUnknownScenarioId();
 
-            final var response = perform(id);
+            final var response = getScenario(id);
 
             response.andExpect(status().isNotFound());
         }
 
-        private ResultActions perform(final UUID id) throws Exception {
+        private ResultActions getScenario(final UUID id) throws Exception {
             final var path = Paths.createPathForScenario(id);
             final var request = get(path).accept(MediaType.APPLICATION_JSON);
 
@@ -100,11 +117,9 @@ public class ScenarioControllerTest {
 
         @Test
         public void present() throws Exception {
-            final Optional<UUID> idOptional = service.getScenarioIdentifiers().findAny();
-            assertThat("id", idOptional.isPresent());
-            final var id = idOptional.get();
+            final var id = getKnownScenarioId();
 
-            final var response = perform(id);
+            final var response = getScenario(id);
 
             response.andExpect(status().isOk());
             final var jsonResponse = response.andReturn().getResponse()
@@ -114,4 +129,5 @@ public class ScenarioControllerTest {
         }
 
     }
+
 }
