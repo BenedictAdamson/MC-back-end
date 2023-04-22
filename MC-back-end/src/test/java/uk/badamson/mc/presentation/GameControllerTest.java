@@ -31,7 +31,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.badamson.mc.*;
-import uk.badamson.mc.repository.GameSpringRepository;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.rest.NamedUUID;
 import uk.badamson.mc.rest.Paths;
@@ -46,15 +45,14 @@ import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class GameControllerTest {
@@ -65,8 +63,6 @@ public class GameControllerTest {
     private static final User USER_WITH_ALL_AUTHORITIES = new User(
             UUID.randomUUID(), "jeff", "password", Authority.ALL,
             true, true, true, true);
-    @Autowired
-    GameSpringRepository gameRepository;
     @Autowired
     ScenarioSpringService scenarioService;
     @Autowired

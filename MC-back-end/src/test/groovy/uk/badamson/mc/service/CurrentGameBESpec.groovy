@@ -2,7 +2,6 @@ package uk.badamson.mc.service
 
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.Authority
 import uk.badamson.mc.rest.GameResponse
 
@@ -10,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static spock.util.matcher.HamcrestSupport.expect
 
 /**
- * © Copyright Benedict Adamson 2021-22.
+ * © Copyright Benedict Adamson 2021-23.
  *
  * This file is part of MC.
  *
@@ -31,8 +30,7 @@ import static spock.util.matcher.HamcrestSupport.expect
 /**
  * The system provides information about the game that a player is currently playing
  */
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class CurrentGameBESpec extends BESpecification {
 
     def "May examine current-game only if playing"() {

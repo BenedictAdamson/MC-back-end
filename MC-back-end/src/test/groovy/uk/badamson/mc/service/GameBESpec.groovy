@@ -5,14 +5,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
 import uk.badamson.mc.NamedUUID
-import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
 
 /**
- * © Copyright Benedict Adamson 2020-22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -33,8 +32,7 @@ import static spock.util.matcher.HamcrestSupport.expect
 /**
  * The Mission Command game can have multiple games (plays) for each scenario
  */
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class GameBESpec extends BESpecification {
 
     def "Examine game as player"() {

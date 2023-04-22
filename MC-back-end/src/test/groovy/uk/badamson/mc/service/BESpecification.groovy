@@ -46,8 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 abstract class BESpecification extends Specification {
 
     private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(

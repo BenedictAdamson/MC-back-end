@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.badamson.mc.TestConfiguration;
 
 import java.time.Instant;
 
@@ -33,8 +32,7 @@ import static org.hamcrest.Matchers.is;
 /**
  * Tests {@link PresentationLayerSpringConfiguration}
  */
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectMapperTest {
 
     @Autowired

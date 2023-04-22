@@ -5,13 +5,12 @@ import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Unroll
 import uk.badamson.mc.Authority
-import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.User
 import uk.badamson.mc.rest.NamedUUID
 import uk.badamson.mc.rest.ScenarioResponse
 
 import static spock.util.matcher.HamcrestSupport.expect
-/** © Copyright Benedict Adamson 2019,20,22.
+/** © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -32,8 +31,7 @@ import static spock.util.matcher.HamcrestSupport.expect
 /**
  * The Mission Command game provides multiple scenarios that can be played.
  */
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class ScenarioBESpec extends BESpecification {
 
     def "List scenarios"() {

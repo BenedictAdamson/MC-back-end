@@ -3,7 +3,6 @@ package uk.badamson.mc.service
 import com.fasterxml.jackson.core.type.TypeReference
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
-import uk.badamson.mc.TestConfiguration
 import uk.badamson.mc.Authority
 import uk.badamson.mc.rest.AuthorityValue
 import uk.badamson.mc.rest.UserDetailsRequest
@@ -12,7 +11,7 @@ import uk.badamson.mc.rest.UserResponse
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static spock.util.matcher.HamcrestSupport.expect
 /**
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -33,8 +32,7 @@ import static spock.util.matcher.HamcrestSupport.expect
 /**
  * Mission Command is a multi-player game. To conserve resources, play on a server is restricted to only known (and presumably trusted) users.
  */
-@SpringBootTest(classes = TestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class UserBESpec extends BESpecification {
 
     def "List users"() {
