@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
-public class LogoutTest {
+public class LogoutRESTTest {
 
     private static final String PATH = "/logout";
 
