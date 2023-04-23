@@ -1,4 +1,4 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
 /*
  * © Copyright Benedict Adamson 2020-23.
  *
@@ -36,6 +36,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.badamson.mc.*;
+import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.rest.GameResponse;
 import uk.badamson.mc.rest.NamedUUID;
 import uk.badamson.mc.rest.Paths;
