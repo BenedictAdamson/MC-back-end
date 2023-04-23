@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.spring.SpringAuthority;
@@ -27,11 +28,12 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.UUID;
 
-final class Fixtures {
+public final class Fixtures {
 
 
     static final BasicUserDetails ADMINISTRATOR = BasicUserDetails
             .createAdministrator("password");
+    public static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
 
     private static String createUserName(@Nonnull final UUID id) {
         return "jeff-" + id;

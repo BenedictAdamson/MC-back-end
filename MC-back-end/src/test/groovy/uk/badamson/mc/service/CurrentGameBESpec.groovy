@@ -2,7 +2,13 @@ package uk.badamson.mc.service
 
 import org.hamcrest.Matchers
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.spock.Testcontainers
+import spock.lang.Shared
 import uk.badamson.mc.Authority
+import uk.badamson.mc.presentation.Fixtures
 import uk.badamson.mc.rest.GameResponse
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

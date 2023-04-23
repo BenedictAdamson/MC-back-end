@@ -5,13 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.util.UriTemplate
+import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.spock.Testcontainers
+import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.*
+import uk.badamson.mc.presentation.Fixtures
 import uk.badamson.mc.repository.UserSpringRepository
 import uk.badamson.mc.rest.Paths
 import uk.badamson.mc.rest.UserDetailsRequest
@@ -47,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@Testcontainers
 abstract class BESpecification extends Specification {
 
     private static final UriTemplate GAME_PATH_URI_TEMPLATE = new UriTemplate(
@@ -55,6 +62,15 @@ abstract class BESpecification extends Specification {
     private static final UriTemplate USER_PATH_TEMPLATE = new UriTemplate('/api/user/{id}')
 
     private static int nUsers
+
+    @Shared
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE)
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        mongoDBContainer.start()
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
+    }
 
     @Autowired
     protected ScenarioSpringService scenarioService
