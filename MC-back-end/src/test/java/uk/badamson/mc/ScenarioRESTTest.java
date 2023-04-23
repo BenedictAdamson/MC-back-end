@@ -1,4 +1,4 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
 /*
  * © Copyright Benedict Adamson 2020-23.
  *
@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import uk.badamson.mc.Fixtures;
+import uk.badamson.mc.presentation.ScenarioController;
 import uk.badamson.mc.rest.NamedUUID;
 import uk.badamson.mc.rest.Paths;
 import uk.badamson.mc.rest.ScenarioResponse;
