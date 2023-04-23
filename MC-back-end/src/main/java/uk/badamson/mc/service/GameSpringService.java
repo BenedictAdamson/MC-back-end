@@ -49,7 +49,7 @@ public class GameSpringService {
 
     @Nonnull
     @Transactional
-    public IdentifiedValue<UUID, Game> create(@Nonnull final UUID scenario) {
+    public IdentifiedValue<UUID, Game> create(@Nonnull final UUID scenario) throws NoSuchElementException {
         return delegate.create(scenario);
     }
 
