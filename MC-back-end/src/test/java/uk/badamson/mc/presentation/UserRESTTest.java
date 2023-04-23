@@ -38,6 +38,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.badamson.mc.Authority;
 import uk.badamson.mc.BasicUserDetails;
+import uk.badamson.mc.Fixtures;
 import uk.badamson.mc.User;
 import uk.badamson.mc.rest.AuthorityValue;
 import uk.badamson.mc.rest.Paths;

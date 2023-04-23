@@ -17,7 +17,6 @@ import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.*
-import uk.badamson.mc.presentation.Fixtures
 import uk.badamson.mc.repository.UserSpringRepository
 import uk.badamson.mc.rest.Paths
 import uk.badamson.mc.rest.UserDetailsRequest

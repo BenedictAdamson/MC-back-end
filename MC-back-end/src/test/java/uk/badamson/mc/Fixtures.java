@@ -1,4 +1,4 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
 /*
  * © Copyright Benedict Adamson 2020-23.
  *
@@ -19,8 +19,6 @@ package uk.badamson.mc.presentation;
  */
 
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.BasicUserDetails;
 import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -31,7 +29,7 @@ import java.util.UUID;
 public final class Fixtures {
 
 
-    static final BasicUserDetails ADMINISTRATOR = BasicUserDetails
+    public static final BasicUserDetails ADMINISTRATOR = BasicUserDetails
             .createAdministrator("password");
     public static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
 
@@ -39,32 +37,32 @@ public final class Fixtures {
         return "jeff-" + id;
     }
 
-    static String createUserName() {
+    public static String createUserName() {
         return createUserName(UUID.randomUUID());
     }
 
-    static BasicUserDetails createBasicUserDetailsWithAllRoles() {
+    public static BasicUserDetails createBasicUserDetailsWithAllRoles() {
         final var id = UUID.randomUUID();
         return new BasicUserDetails(createUserName(id),"secret",
                 Authority.ALL,
                 true, true, true, true);
     }
 
-    static BasicUserDetails createBasicUserDetailsWithPlayerRole() {
+    public static BasicUserDetails createBasicUserDetailsWithPlayerRole() {
         final var id = UUID.randomUUID();
         return new BasicUserDetails(createUserName(id),"secret",
                 EnumSet.of(Authority.ROLE_PLAYER),
                 true, true, true, true);
     }
 
-    static BasicUserDetails createBasicUserDetailsWithManageGamesRole() {
+    public static BasicUserDetails createBasicUserDetailsWithManageGamesRole() {
         final var id = UUID.randomUUID();
         return new BasicUserDetails(createUserName(id),"secret",
                 EnumSet.of(Authority.ROLE_MANAGE_GAMES),
                 true, true, true, true);
     }
 
-    static SpringUser createUserWithAllRoles() {
+    public static SpringUser createUserWithAllRoles() {
         final var id = UUID.randomUUID();
         return new SpringUser(id, createUserName(id),"secret",
                 SpringAuthority.ALL,

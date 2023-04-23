@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.badamson.mc.Fixtures;
 import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
 
