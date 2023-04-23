@@ -61,7 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
-public class GameControllerTest {
+public class GameRESTTest {
 
     private static final TypeReference<List<NamedUUID>> GAME_ID_LIST = new TypeReference<>() {
     };
