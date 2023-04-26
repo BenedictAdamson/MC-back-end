@@ -17,7 +17,7 @@
       <version>3.1.5</version>
    </parent>
    <artifactId>MC-web</artifactId>
-   <version>3.1.3</version>
+   <version>3.1.4</version>
    <packaging>pom</packaging>
    <organization>
       <name>Benedict Adamson</name>
@@ -39,7 +39,7 @@
       <repository.releases.url>http://thegn:8081/repository/maven-releases/</repository.releases.url>
       <repository.snapshot.url>http://thegn:8081/repository/maven-snapshots/</repository.snapshot.url>
       <!-- Debian package version IDs may not have a -SNAPSHOT suffix. -->
-      <debian-package.version>3.1.2</debian-package.version>
+      <debian-package.version>3.1.4</debian-package.version>
       <helm.init.add-default-repo>false</helm.init.add-default-repo>
       <MC.core.version>3.2.2</MC.core.version>
    </properties>
