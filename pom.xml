@@ -16,7 +16,7 @@
       <artifactId>MC-parent</artifactId>
       <version>3.1.6</version>
    </parent>
-   <artifactId>MC-web</artifactId>
+   <artifactId>MC-back-end</artifactId>
    <version>3.1.4</version>
    <packaging>pom</packaging>
    <organization>
@@ -71,10 +71,7 @@
       </dependencies>
    </dependencyManagement>
    <modules>
-      <module>MC-back-end</module>
-      <module>MC-database</module>
-      <module>MC-front-end</module>
-      <module>MC-integration</module>
+      <module>MC-Spring</module>
       <module>MC-REST</module>
    </modules>
 </project>

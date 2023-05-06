@@ -4,10 +4,10 @@
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>uk.badamson.mc</groupId>
-      <artifactId>MC-web</artifactId>
+      <artifactId>MC-back-end</artifactId>
       <version>3.1.4</version>
    </parent>
-   <artifactId>MC-back-end</artifactId>
+   <artifactId>MC-Spring</artifactId>
    <packaging>jar</packaging>
    <build>
       <resources>

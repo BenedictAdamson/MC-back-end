@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>uk.badamson.mc</groupId>
-        <artifactId>MC-web</artifactId>
+        <artifactId>MC-back-end</artifactId>
         <version>3.1.4</version>
     </parent>
     <artifactId>MC-REST</artifactId>
