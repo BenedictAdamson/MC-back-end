@@ -1,7 +1,7 @@
-// Jenkinsfile for the MC project
+// Jenkinsfile for the MC-back-end project
 
 /* 
- * © Copyright Benedict Adamson 2018-22.
+ * © Copyright Benedict Adamson 2018-23.
  * 
  * This file is part of MC.
  *
@@ -100,7 +100,6 @@ pipeline {
 					]
             }
             junit 'MC-*/target/*-reports/**/TEST-*.xml'
-            junit 'MC-*/target/karma-reports/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'MC-*/target/*.deb', fingerprint: true
