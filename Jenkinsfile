@@ -67,7 +67,7 @@ pipeline {
         	 */
             when{
                 not{
-                    branch 'master'
+                    branch 'main'
                 }
             } 
             steps {
@@ -79,7 +79,7 @@ pipeline {
         stage('Build, verify and deploy') {
         	/* Includes pushing Docker images. */
             when{
-                 branch 'master'
+                 branch 'main'
             } 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
