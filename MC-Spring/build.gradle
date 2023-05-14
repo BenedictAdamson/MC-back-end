@@ -1,20 +1,26 @@
 plugins {
     id 'uk.badamson.mc.be.java-conventions'
+    id 'com.github.spotbugs' version '5.0.14'
+    id 'org.springframework.boot' version '2.7.10'
+    id 'pmd'
 }
 
+apply plugin: 'io.spring.dependency-management'
+
 dependencies {
-    api libs.mc.core
     api libs.mc.model
+    api libs.mc.core
     api project(':MC-REST')
     api libs.jackson.datatype.jsr310
     api libs.spotbugs
-    api libs.spring.boot.starter.actuator
-    api libs.spring.boot.starter.data.mongodb
-    api libs.spring.boot.starter.json
-    api libs.spring.boot.starter.security
-    api libs.spring.boot.starter.test
-    api libs.spring.boot.starter.web
-    api libs.spring.security.test
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation libs.logback.classic
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.engine
@@ -30,4 +36,23 @@ description = 'MC-Spring'
 
 java {
     withJavadocJar()
+    withSourcesJar()
 }
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+spotbugs {
+    effort = 'Max'
+    reportLevel = 'Low'
+}
+spotbugsTest.enabled = false
+
+pmd {
+    ruleSetConfig = resources.text.fromFile('src/test/resources/pmd-ruleset.xml')
+}
+pmdTest.enabled = false

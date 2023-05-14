@@ -15,10 +15,6 @@ dependencyResolutionManagement {
             version('spock', {
                 strictly '2.3-groovy-3.0'
             })
-            version('spring-boot', {
-                strictly '[2.7, 2.8['
-                prefer '2.7.10'
-            })
             version('testcontainers', {
                 strictly '[1.18, 1.19['
                 prefer '1.18.0'
@@ -48,16 +44,6 @@ dependencyResolutionManagement {
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
             library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
-            library('spring-boot-starter-actuator', 'org.springframework.boot', 'spring-boot-starter-actuator').versionRef('spring-boot')
-            library('spring-boot-starter-data-mongodb', 'org.springframework.boot', 'spring-boot-starter-data-mongodb').versionRef('spring-boot')
-            library('spring-boot-starter-json', 'org.springframework.boot', 'spring-boot-starter-json').versionRef('spring-boot')
-            library('spring-boot-starter-security', 'org.springframework.boot', 'spring-boot-starter-security').versionRef('spring-boot')
-            library('spring-boot-starter-test', 'org.springframework.boot', 'spring-boot-starter-test').versionRef('spring-boot')
-            library('spring-boot-starter-web', 'org.springframework.boot', 'spring-boot-starter-web').versionRef('spring-boot')
-            library('spring-security-test', 'org.springframework.security', 'spring-security-test').version {
-                strictly '[5.7, 5.8['
-                prefer '5.7.7'
-            }
             library('testcontainers-junit', 'org.testcontainers', 'junit-jupiter').versionRef('testcontainers')
             library('testcontainers-mongodb', 'org.testcontainers', 'mongodb').versionRef('testcontainers')
             library('dbc-assertions', 'uk.badamson:DBC-assertions:3.0.3')
