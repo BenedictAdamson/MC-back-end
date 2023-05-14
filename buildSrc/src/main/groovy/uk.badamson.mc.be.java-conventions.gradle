@@ -1,0 +1,73 @@
+/**
+ * uk.badamson.mc.be.java-conventions.gradle
+ * Gradle conventions for Java code in the MC-back-end project.
+ *
+ * This code makes use of password credentials for the release and snapshot Maven repositories;
+ * both are simply named "maven", so ~/.gradle/gradle.properties (for example)
+ * should set correct values for the properties mavenUsername and mavenPassword.
+ */
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+def releasesRepoUrl = 'http://thegn:8081/repository/maven-releases/'
+def snapshotsRepoUrl = 'http://thegn:8081/repository/maven-snapshots/'
+
+repositories {
+    mavenLocal()
+    maven {
+        url releasesRepoUrl
+        allowInsecureProtocol = true
+    }
+    maven {
+        url snapshotsRepoUrl
+        allowInsecureProtocol = true
+    }
+    mavenCentral()
+}
+
+group = 'uk.badamson.mc'
+version = '3.2.2-SNAPSHOT'
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+            pom {
+                organization {
+                    name = 'Benedict Adamson'
+                }
+                licenses {
+                    license {
+                        name = 'GNU Affero General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/agpl.html'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:BenedictAdamson/MC-back-end.git'
+                    developerConnection = 'scm:git:git@github.com:BenedictAdamson/MC-back-end.git'
+                    url = 'https://github.com/BenedictAdamson/MC-back-end'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            allowInsecureProtocol = true
+            credentials(PasswordCredentials)
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    (options as StandardJavadocDocletOptions).addBooleanOption('Xdoclint:all,-missing', true)
+}

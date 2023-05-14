@@ -3,7 +3,7 @@
  */
 
 plugins {
-    id 'uk.badamson.mc.java-conventions'
+    id 'uk.badamson.mc.be.java-conventions'
 }
 
 dependencies {
