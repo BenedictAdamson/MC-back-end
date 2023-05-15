@@ -2,10 +2,12 @@ plugins {
     id 'uk.badamson.mc.be.java-conventions'
     id 'com.github.spotbugs' version '5.0.14'
     id 'org.springframework.boot' version '2.7.10'
+    id 'com.netflix.nebula.deb' version '11.3.0'
     id 'pmd'
 }
 
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.netflix.nebula.deb'
 
 dependencies {
     api libs.mc.model
@@ -44,6 +46,44 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+tasks.register('packageDeb', Deb) {
+    packageName = 'missioncommand-be'
+    version = (project.version as String).replace('-SNAPSHOT', '')
+    release = 1
+    priority = 'optional'
+    maintainer = 'Benedict Adamson <badamson@spamcop.net>'
+    description = 'back-end of the MC game server'
+    distribution = 'stable'
+
+    preInstall file('src/deb/control/preinst')
+    postInstall file('src/deb/control/postinst')
+    preUninstall file('src/deb/control/prerm')
+
+    requires('java11-runtime-headless')
+
+    into '/usr'
+
+    from(bootJar.outputs.files) {
+        into 'share/lib'
+    }
+    from('src/main/sh/mcbe') {
+        into 'bin'
+        fileMode 0755
+    }
+    from('src/main/systemd/mission-command-be.service') {
+        into 'lib/systemd/user'
+    }
+    from('src/main/systemd/be.env') {
+        into '/etc/mission-command'
+    }
+    from('src/main/systemd/adminpsswd.secret') {
+        into '/etc/mission-command'
+        fileType CONFIG
+        fileMode 0600
+    }
+    link('/usr/share/lib/MC-back-end.jar', "MC-back-end-${project.version}.jar")
 }
 
 spotbugs {
