@@ -35,6 +35,7 @@ dependencies {
 }
 
 description = 'MC-Spring'
+def dockerImage = "benedictadamson/mc-back-end:${project.version}"
 
 java {
     withJavadocJar()
@@ -100,7 +101,18 @@ tasks.register('prepareDockerBuildContext', Copy) {
 tasks.register('buildDockerImage', Exec) {
     group = 'Publishing'
     dependsOn ':MC-Spring:prepareDockerBuildContext'
-    commandLine 'docker', 'build', '--tag', "benedictadamson/mc-back-end:${project.version}", "${project.buildDir}/docker/context"
+    commandLine 'docker', 'build', '--tag', dockerImage, "${project.buildDir}/docker/context"
+}
+tasks.register('loginDockerHub', Exec) {
+    def credentials = providers.credentials(PasswordCredentials, 'dockerhub').get()
+    standardInput = new ByteArrayInputStream(credentials.password.bytes)
+    commandLine 'docker', 'login', '--username', credentials.username, '--password-stdin'
+}
+tasks.register('pushDockerImage', Exec) {
+    group = 'Publishing'
+    dependsOn ':MC-Spring:buildDockerImage'
+    dependsOn ':MC-Spring:loginDockerHub'
+    commandLine 'docker', 'image', 'push', dockerImage
 }
 
 spotbugs {
