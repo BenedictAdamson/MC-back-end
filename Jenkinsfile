@@ -43,6 +43,11 @@ pipeline {
         PATH = '/usr/sbin:/usr/bin:/sbin:/bin'
     }
     stages {
+        stage('Clean') {
+            steps {
+                sh './gradlew clean'
+            }
+        }
         stage('Check, test and publish') {
         	/* Does not push the Docker image. Pushing images of development ("SNAPSHOT") versions can be
         	 * troublesome because it can result in situations when the remote and local repositories hold different
