@@ -85,7 +85,7 @@ tasks.register('packageDeb', Deb) {
         fileType CONFIG
         fileMode 0600
     }
-    link('/usr/share/lib/MC-back-end.jar', "MC-back-end-${project.version}.jar")
+    link('/usr/share/lib/MC-Spring.jar', "MC-Spring-${project.version}.jar")
 }
 
 tasks.register('prepareDockerBuildContext', Copy) {
