@@ -86,6 +86,20 @@ tasks.register('packageDeb', Deb) {
     link('/usr/share/lib/MC-back-end.jar', "MC-back-end-${project.version}.jar")
 }
 
+tasks.register('prepareDockerBuildContext', Copy) {
+    dependsOn ':MC-Spring:packageDeb'
+    from 'src/main/docker/Dockerfile'
+    from(packageDeb.outputs.files) {
+        include '*.deb'
+        rename 'missioncommand-be_.*_all.deb', 'missioncommand-be.deb'
+    }
+    into "${project.buildDir}/docker/context"
+}
+tasks.register('buildDockerImage', Exec) {
+    dependsOn ':MC-Spring:prepareDockerBuildContext'
+    commandLine 'docker', 'build', '--tag', "benedictadamson/mc-back-end:${project.version}", "${project.buildDir}/docker/context"
+}
+
 spotbugs {
     effort = 'Max'
     reportLevel = 'Low'
