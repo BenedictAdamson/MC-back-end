@@ -49,6 +49,7 @@ test {
 }
 
 tasks.register('packageDeb', Deb) {
+    group = 'Publishing'
     packageName = 'missioncommand-be'
     version = (project.version as String).replace('-SNAPSHOT', '')
     release = 1
@@ -87,6 +88,7 @@ tasks.register('packageDeb', Deb) {
 }
 
 tasks.register('prepareDockerBuildContext', Copy) {
+    group = 'Publishing'
     dependsOn ':MC-Spring:packageDeb'
     from 'src/main/docker/Dockerfile'
     from(packageDeb.outputs.files) {
@@ -96,6 +98,7 @@ tasks.register('prepareDockerBuildContext', Copy) {
     into "${project.buildDir}/docker/context"
 }
 tasks.register('buildDockerImage', Exec) {
+    group = 'Publishing'
     dependsOn ':MC-Spring:prepareDockerBuildContext'
     commandLine 'docker', 'build', '--tag', "benedictadamson/mc-back-end:${project.version}", "${project.buildDir}/docker/context"
 }
