@@ -12,4 +12,4 @@ if [ -n "$CREDENTIALS_DIRECTORY" ]; then
     export ADMINISTRATOR_PASSWORD
   fi
 fi
-exec java -jar "$ROOT"/usr/share/lib/MC-back-end.jar "$@"
+exec java -jar "$ROOT"/usr/share/lib/MC-Spring.jar "$@"
