@@ -18,7 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
@@ -26,8 +25,7 @@ import java.util.Properties;
 public final class SutVersions {
 
     private static final Properties APPLICATION_PROPERTIES = loadApplicationProperties();
-    public static final String MC_WEB_VERSION = getApplicationProperty("build.version");
-    public static final String MC_BACK_END_VERSION = getApplicationProperty("MC.backend.version");
+    public static final String MC_BACK_END_VERSION = getBuildVersion();
 
     private static Properties loadApplicationProperties() {
         final var stream = Thread.currentThread().getContextClassLoader()
@@ -46,8 +44,8 @@ public final class SutVersions {
         return properties;
     }
 
-    private static String getApplicationProperty(@Nonnull String key) {
-        final String version = APPLICATION_PROPERTIES.getProperty(key);
+    private static String getBuildVersion() {
+        final String version = APPLICATION_PROPERTIES.getProperty("build.version");
         if (version == null || version.isEmpty()) {
             throw new IllegalStateException("missing property in application.properties resource");
         }

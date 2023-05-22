@@ -9,6 +9,19 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.netflix.nebula.deb'
 
+sourceSets {
+    intTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+
+configurations {
+    intTestImplementation.extendsFrom implementation
+    intTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
 dependencies {
     api libs.mc.model
     api libs.mc.core
@@ -32,6 +45,13 @@ dependencies {
     testImplementation libs.testcontainers.mongodb
     testImplementation libs.dbc.assertions
     compileOnly libs.persistence.api
+    intTestImplementation libs.junit.jupiter.api
+    intTestImplementation libs.junit.jupiter.engine
+    intTestImplementation libs.junit.platform.console
+    intTestImplementation libs.testcontainers.junit
+    intTestImplementation libs.testcontainers.mongodb
+    intTestImplementation 'org.springframework:spring-webflux'
+    intTestImplementation 'org.springframework:spring-test'
 }
 
 description = 'MC-Spring'
@@ -126,25 +146,8 @@ pmd {
 }
 pmdTest.enabled = false
 
-sourceSets {
-    intTest {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-}
-
-
-configurations {
-    intTestImplementation.extendsFrom implementation
-    intTestRuntimeOnly.extendsFrom runtimeOnly
-}
-
-dependencies {
-    intTestImplementation libs.junit.jupiter.api
-    intTestImplementation libs.junit.jupiter.engine
-    intTestImplementation libs.junit.platform.console
-    intTestImplementation libs.testcontainers.junit
-    intTestImplementation libs.testcontainers.mongodb
+processIntTestResources {
+    expand(projectVersion: project.version)
 }
 
 tasks.register('integrationTest', Test) {
@@ -154,6 +157,7 @@ tasks.register('integrationTest', Test) {
     testClassesDirs = sourceSets.intTest.output.classesDirs
     classpath = sourceSets.intTest.runtimeClasspath
     shouldRunAfter test
+    dependsOn ':MC-Spring:buildDockerImage'
 
     useJUnitPlatform()
 

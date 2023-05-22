@@ -18,9 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.GenericContainer;
-import uk.badamson.mc.presentation.McReverseProxyContainer;
-import uk.badamson.mc.repository.McDatabaseContainer;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,42 +35,26 @@ public class McContainers extends BaseContainers {
     private static final String ADMINISTRATOR_PASSWORD = "secret4";
     private static final String BE_HOST = "be";
     private static final String DB_HOST = "db";
-    private static final String REVERSE_PROXY_HOST = "in";
+    private static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
 
-    private static final URI BASE_PRIVATE_NETWORK_URI = URI
-            .create("http://" + REVERSE_PROXY_HOST);
-
-    private static final String DB_ROOT_PASSWORD = "secret2";
-    private static final String DB_USER_PASSWORD = "secret3";
-    private final McDatabaseContainer db;
+    private final MongoDBContainer db;
     private final McBackEndContainer be;
-    private final McReverseProxyContainer in;
 
-    /**
-     * @param failureRecordingDirectory The location of a directory in which to store files holding
-     *                                  verbose information about failed test cases. Or {@code null} if
-     *                                  no such records are to be made.
-     */
     public McContainers(@Nullable final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
-        db = new McDatabaseContainer(
-                DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(getNetwork())
+        db = new MongoDBContainer(MONGO_DB_IMAGE).withNetwork(getNetwork())
                 .withNetworkAliases(DB_HOST);
-        be = new McBackEndContainer(DB_HOST,
-                DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(getNetwork())
+        db.start();
+        be = new McBackEndContainer(db.getReplicaSetUrl(), ADMINISTRATOR_PASSWORD)
+                .withNetwork(getNetwork())
                 .withNetworkAliases(BE_HOST);
-        in = McReverseProxyContainer.createWithRealBe()
-                .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
+        be.start();
     }
 
     private static void assertThatNoErrorMessagesLogged(final String container,
                                                         final String logs) {
         assertThat(container + " logs no errors", logs,
                 not(containsString("ERROR:")));
-    }
-
-    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
-        return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
     @Nonnull
@@ -82,9 +65,6 @@ public class McContainers extends BaseContainers {
     public void assertThatNoErrorMessagesLogged() {
         assertThatNoErrorMessagesLogged("db", db.getLogs());
         assertThatNoErrorMessagesLogged("be", be.getLogs());
-        assertThatNoErrorMessagesLogged("fe", getFrontEnd().getLogs());
-        assertThatNoErrorMessagesLogged("in", in.getLogs());
-        assertThatNoErrorMessagesLogged("browser", getBrowser().getLogs());
     }
 
     @Override
@@ -93,21 +73,15 @@ public class McContainers extends BaseContainers {
          * Close the resources top-down, to reduce the number of transient
          * connection errors.
          */
-        in.close();
         be.close();
         db.close();
         super.close();
     }
 
     @Nonnull
-    public URI createUriFromPath(final HttpServer server, final String path) {
-        GenericContainer<?> container = switch (server) {
-            case BACK_END -> be;
-            case FRONT_END -> getFrontEnd();
-            case INGRESS -> in;
-        };
-        final var base = URI.create("http://" + container.getHost() + ":"
-                + container.getFirstMappedPort());
+    public URI createUriFromPath(final String path) {
+        final var base = URI.create("http://" + be.getHost() + ":"
+                + be.getFirstMappedPort());
         return base.resolve(path);
     }
 
@@ -117,7 +91,6 @@ public class McContainers extends BaseContainers {
         super.retainLogFiles(prefix);
         retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
         retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
-        retainLogFile(getFailureRecordingDirectory(), prefix, REVERSE_PROXY_HOST, in);
     }
 
     @Override
@@ -126,9 +99,8 @@ public class McContainers extends BaseContainers {
          * Start the containers bottom-up, and wait until each is ready, to reduce
          * the number of transient connection errors.
          */
-        startInParallel(db, getFrontEnd(), getBrowser());
+        db.start();
         be.start();
-        in.start();
     }
 
     @Override
@@ -137,15 +109,9 @@ public class McContainers extends BaseContainers {
          * Stop the resources top-down, to reduce the number of transient
          * connection errors.
          */
-        getBrowser().stop();
-        in.stop();
-        getFrontEnd().stop();
         be.stop();
         db.stop();
         close();
     }
 
-    public enum HttpServer {
-        BACK_END, FRONT_END, INGRESS
-    }// enum
 }

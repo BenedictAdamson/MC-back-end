@@ -27,11 +27,6 @@ import org.testcontainers.utility.DockerImageName;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 
-/**
- * <p>
- * A Testcontainers Docker container for the MC-back-end.
- * </p>
- */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
     private static final int PORT = 8080;
@@ -50,14 +45,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     private final String administratorPassword;
 
     @SuppressWarnings("resource")
-    McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
+    McBackEndContainer(final String mongoDbReplicaSetUrl,
                        final String administratorPassword) {
         super(IMAGE);
         this.administratorPassword = administratorPassword;
         waitingFor(WAIT_STRATEGY);
-        withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
         withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
-        withCommand("--spring.data.mongodb.host=" + mongoDbHost);
+        withCommand("--spring.data.mongodb.uri=" + mongoDbReplicaSetUrl);
         addExposedPort(PORT);
     }
 
