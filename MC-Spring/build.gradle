@@ -140,7 +140,11 @@ configurations {
 }
 
 dependencies {
-    intTestImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    intTestImplementation libs.junit.jupiter.api
+    intTestImplementation libs.junit.jupiter.engine
+    intTestImplementation libs.junit.platform.console
+    intTestImplementation libs.testcontainers.junit
+    intTestImplementation libs.testcontainers.mongodb
 }
 
 tasks.register('integrationTest', Test) {
