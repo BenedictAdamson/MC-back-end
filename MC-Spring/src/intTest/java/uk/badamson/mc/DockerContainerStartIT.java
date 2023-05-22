@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class PristineIT {
+public class DockerContainerStartIT {
 
     private static McContainers containers;
 
