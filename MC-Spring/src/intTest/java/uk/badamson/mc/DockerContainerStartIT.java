@@ -18,29 +18,15 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 public class DockerContainerStartIT {
 
-    private static McContainers containers;
-
-    @BeforeAll
-    public static void open() {
-        containers = new McContainers(null);
-    }
-
-    @AfterAll
-    public static void stop() {
-        if (containers != null) {
-            containers.stop();
-            containers = null;
-        }
-    }
-
+    @Container
+    private final McContainers containers = new McContainers(null);
 
     @Test
     public void start() {

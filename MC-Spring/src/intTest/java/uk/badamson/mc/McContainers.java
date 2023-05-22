@@ -61,12 +61,13 @@ public final class McContainers implements Startable, TestLifecycleAware {
                 throw new IllegalArgumentException(e);
             }
         }
-        db = new MongoDBContainer(MONGO_DB_IMAGE).withNetwork(network)
-                .withNetworkAliases(DB_HOST);
+        db = new MongoDBContainer(MONGO_DB_IMAGE);
+        db.withNetwork(network);
+        db.withNetworkAliases(DB_HOST);
         db.start();
-        be = new McBackEndContainer(db.getReplicaSetUrl(), ADMINISTRATOR_PASSWORD)
-                .withNetwork(network)
-                .withNetworkAliases(BE_HOST);
+        be = new McBackEndContainer(db.getReplicaSetUrl(), ADMINISTRATOR_PASSWORD);
+        be.withNetwork(network);
+        be.withNetworkAliases(BE_HOST);
         be.start();
     }
 
@@ -95,7 +96,7 @@ public final class McContainers implements Startable, TestLifecycleAware {
         assertThatNoErrorMessagesLogged("be", be.getLogs());
     }
 
-    @javax.annotation.OverridingMethodsMustInvokeSuper
+    @OverridingMethodsMustInvokeSuper
     @Override
     public void close() {
         /*
@@ -108,7 +109,6 @@ public final class McContainers implements Startable, TestLifecycleAware {
     }
 
     private void retainLogFiles(final String prefix) {
-        assert failureRecordingDirectory != null;
         assert failureRecordingDirectory != null;
         retainLogFile(failureRecordingDirectory, prefix, DB_HOST, db);
         retainLogFile(failureRecordingDirectory, prefix, BE_HOST, be);
