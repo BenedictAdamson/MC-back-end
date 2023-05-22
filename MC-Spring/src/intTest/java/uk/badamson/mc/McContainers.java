@@ -18,19 +18,28 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.URI;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class McContainers extends BaseContainers {
+public final class McContainers implements Startable, TestLifecycleAware {
 
     private static final String ADMINISTRATOR_PASSWORD = "secret4";
     private static final String BE_HOST = "be";
@@ -39,14 +48,24 @@ public class McContainers extends BaseContainers {
 
     private final MongoDBContainer db;
     private final McBackEndContainer be;
+    @Nullable
+    private final Path failureRecordingDirectory;
+    private final Network network = Network.newNetwork();
 
     public McContainers(@Nullable final Path failureRecordingDirectory) {
-        super(failureRecordingDirectory);
-        db = new MongoDBContainer(MONGO_DB_IMAGE).withNetwork(getNetwork())
+        this.failureRecordingDirectory = failureRecordingDirectory;
+        if (failureRecordingDirectory != null) {
+            try {
+                Files.createDirectories(failureRecordingDirectory);
+            } catch (final IOException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        db = new MongoDBContainer(MONGO_DB_IMAGE).withNetwork(network)
                 .withNetworkAliases(DB_HOST);
         db.start();
         be = new McBackEndContainer(db.getReplicaSetUrl(), ADMINISTRATOR_PASSWORD)
-                .withNetwork(getNetwork())
+                .withNetwork(network)
                 .withNetworkAliases(BE_HOST);
         be.start();
     }
@@ -57,9 +76,18 @@ public class McContainers extends BaseContainers {
                 not(containsString("ERROR:")));
     }
 
-    @Nonnull
-    public final McBackEndContainer getBackEnd() {
-        return be;
+    private static void retainLogFile(
+            @Nonnull final Path directory,
+            @Nonnull final String baseFileName,
+            @Nonnull final String host,
+            @Nonnull final GenericContainer<?> container) {
+        final String leafName = baseFileName + "-" + host + ".log";
+        final Path path = directory.resolve(leafName);
+        try {
+            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void assertThatNoErrorMessagesLogged() {
@@ -67,6 +95,7 @@ public class McContainers extends BaseContainers {
         assertThatNoErrorMessagesLogged("be", be.getLogs());
     }
 
+    @javax.annotation.OverridingMethodsMustInvokeSuper
     @Override
     public void close() {
         /*
@@ -75,22 +104,14 @@ public class McContainers extends BaseContainers {
          */
         be.close();
         db.close();
-        super.close();
+        network.close();
     }
 
-    @Nonnull
-    public URI createUriFromPath(final String path) {
-        final var base = URI.create("http://" + be.getHost() + ":"
-                + be.getFirstMappedPort());
-        return base.resolve(path);
-    }
-
-    @Override
-    protected void retainLogFiles(final String prefix) {
-        assert getFailureRecordingDirectory() != null;
-        super.retainLogFiles(prefix);
-        retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
-        retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
+    private void retainLogFiles(final String prefix) {
+        assert failureRecordingDirectory != null;
+        assert failureRecordingDirectory != null;
+        retainLogFile(failureRecordingDirectory, prefix, DB_HOST, db);
+        retainLogFile(failureRecordingDirectory, prefix, BE_HOST, be);
     }
 
     @Override
@@ -112,6 +133,15 @@ public class McContainers extends BaseContainers {
         be.stop();
         db.stop();
         close();
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void afterTest(final TestDescription description, final Optional<Throwable> throwable) {
+        if (failureRecordingDirectory != null) {
+            final var prefix = description.getFilesystemFriendlyName();
+            retainLogFiles(prefix);
+        }
     }
 
 }

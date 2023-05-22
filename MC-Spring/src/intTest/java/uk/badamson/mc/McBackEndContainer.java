@@ -24,7 +24,6 @@ import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.annotation.Nonnull;
 import java.time.Duration;
 
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
@@ -42,22 +41,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
             .withStartupTimeout(Duration.ofSeconds(20))
             .withStrategy(Wait.forLogMessage(".*" + STARTED_MESSAGE + ".*", 1));
 
-    private final String administratorPassword;
-
     @SuppressWarnings("resource")
     McBackEndContainer(final String mongoDbReplicaSetUrl,
                        final String administratorPassword) {
         super(IMAGE);
-        this.administratorPassword = administratorPassword;
         waitingFor(WAIT_STRATEGY);
         withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
         withCommand("--spring.data.mongodb.uri=" + mongoDbReplicaSetUrl);
         addExposedPort(PORT);
-    }
-
-    @Nonnull
-    McBackEndClient createClient() {
-        return new McBackEndClient(getHost(), getMappedPort(PORT), administratorPassword);
     }
 
 }

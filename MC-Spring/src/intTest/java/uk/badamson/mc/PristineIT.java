@@ -18,14 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
-@Tag("IT")
-public class PristineIT implements AutoCloseable {
+public class PristineIT {
 
     private static McContainers containers;
 
@@ -42,14 +41,8 @@ public class PristineIT implements AutoCloseable {
         }
     }
 
-    @Override
-    public void close() {
-        stop();
-    }
-
 
     @Test
-    @Order(1)
     public void start() {
         containers.assertThatNoErrorMessagesLogged();
     }
