@@ -6,7 +6,7 @@ dependencyResolutionManagement {
         libs {
             version('junit', {
                 strictly '[5.9, 5.10['
-                prefer '5.9.2'
+                prefer '5.9.3'
             })
             version('mc', {
                 strictly '[3.2, 3.3['
