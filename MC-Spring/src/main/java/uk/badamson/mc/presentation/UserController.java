@@ -36,7 +36,7 @@ import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;

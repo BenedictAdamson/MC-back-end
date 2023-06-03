@@ -41,7 +41,7 @@ import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.util.*;
 
