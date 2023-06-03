@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             })
             version('testcontainers', {
                 strictly '[1.18, 1.19['
-                prefer '1.18.0'
+                prefer '1.18.3'
             })
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
