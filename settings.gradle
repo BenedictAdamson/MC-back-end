@@ -35,7 +35,7 @@ dependencyResolutionManagement {
             }
             library('groovy', 'org.codehaus.groovy', 'groovy').version {
                 strictly '[3.0, 3.1['
-                prefer '3.0.17'
+                prefer '3.0.19'
             }
             library('hamcrest', 'org.hamcrest:hamcrest:2.2')
             library('junit-jupiter-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
