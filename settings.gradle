@@ -16,8 +16,8 @@ dependencyResolutionManagement {
                 strictly '2.3-groovy-3.0'
             })
             version('testcontainers', {
-                strictly '[1.18, 1.19['
-                prefer '1.18.3'
+                strictly '[1.19, 1.20['
+                prefer '1.19.1'
             })
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
