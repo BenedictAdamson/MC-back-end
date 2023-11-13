@@ -40,7 +40,7 @@ dependencyResolutionManagement {
             library('hamcrest', 'org.hamcrest:hamcrest:2.2')
             library('junit-jupiter-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
-            library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.9.3')
+            library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.10.1')
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
             library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
