@@ -30,8 +30,8 @@ dependencyResolutionManagement {
             }
             library('persistence-api', 'javax.persistence:javax.persistence-api:2.2')
             library('spotbugs', 'com.github.spotbugs', 'spotbugs-annotations').version {
-                strictly '[4.7, 4.8['
-                prefer '4.7.3'
+                strictly '[4.8, 4.9['
+                prefer '4.8.1'
             }
             library('groovy', 'org.codehaus.groovy', 'groovy').version {
                 strictly '[3.0, 3.1['
