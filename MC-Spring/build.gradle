@@ -50,6 +50,7 @@ dependencies {
     intTestImplementation libs.junit.platform.console
     intTestImplementation libs.testcontainers.junit
     intTestImplementation libs.testcontainers.mongodb
+    intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.30'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
 }

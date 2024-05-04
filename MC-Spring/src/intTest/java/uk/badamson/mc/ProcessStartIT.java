@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 @Testcontainers
 public class ProcessStartIT {
-    public static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
+    private static final DockerImageName MONGO_DB_IMAGE = ProcessFixtures.MONGO_DB_IMAGE;
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
     private static final String ADMINISTRATOR_PASSWORD = "LetMeIn2";
 

@@ -152,6 +152,10 @@ public final class McBackEndProcess implements AutoCloseable {
 
     @Nonnull
     private final Delegate delegate;
+    @Nonnegative
+    final int serverPort;
+    @Nonnegative
+    final int debugPort;
 
     public McBackEndProcess(
             @Nonnegative final int serverPort,
@@ -161,6 +165,8 @@ public final class McBackEndProcess implements AutoCloseable {
             @Nonnull final String administratorPassword,
             @Nonnull final List<String> options
     ) throws IllegalStateException, TimeoutException {
+        this.serverPort = serverPort;
+        this.debugPort = debugPort;
         final var processBuilder = new ProcessBuilder(createCommandLine(serverPort, debugPort, dbUri, options))
                 .redirectErrorStream(true);
         setEnvironment(processBuilder.environment(), mongoDbPassword, administratorPassword);
@@ -210,6 +216,11 @@ public final class McBackEndProcess implements AutoCloseable {
     @Override
     public void close() {
         delegate.close();
+    }
+
+    @Nonnegative
+    public int getServerPort() {
+        return serverPort;
     }
 
     public void waitForLogMessage(
