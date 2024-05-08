@@ -42,16 +42,16 @@ import java.util.stream.Stream;
 
 public final class McBackEndClient {
 
-    private static final String XSRF_TOKEN_COOKIE_NAME = "XSRF-TOKEN";
-
     static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(Paths.USER_PATH_PATTERN);
 
     private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(Paths.GAME_PATH_PATTERN);
 
+    private static final String XSRF_TOKEN_COOKIE_NAME = "XSRF-TOKEN";
+    private static final String SCHEME = "http";
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final String SCHEME = "http";
 
     @Nonnull
     private final String baseUrl;
@@ -68,7 +68,8 @@ public final class McBackEndClient {
         this.administrator = User.createAdministrator(administratorPassword);
     }
 
-    private @Nonnull String createBaseUrl(
+    @Nonnull
+    private static String createBaseUrl(
             @Nonnull final String host,
             @Nonnegative final int port
     ) {
@@ -170,7 +171,9 @@ public final class McBackEndClient {
 
     @Nonnull
     public WebTestClient connectWebTestClient() {
-        return WebTestClient.bindToServer().baseUrl(baseUrl).build();
+        return WebTestClient.bindToServer()
+                .baseUrl(baseUrl)
+                .build();
     }
 
     private RequestBodySpec createCreateGameRequest(
@@ -256,7 +259,8 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForJoiningGame(gameId);
-        final var request = connectWebTestClient().get().uri(path)
+        final var request = connectWebTestClient().get()
+                .uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,

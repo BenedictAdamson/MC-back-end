@@ -426,7 +426,7 @@ public class GameRestIT {
 
             final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, false, false, false);
 
-            response.expectStatus().isUnauthorized();
+            response.expectStatus().isForbidden();
         }
 
         @Test
@@ -446,6 +446,7 @@ public class GameRestIT {
             final var authorities = EnumSet.complementOf(EnumSet
                     .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
+            MC_BACK_END_CLIENT.addUser(user);
 
             final var response = test(gameId, user, true, true, false);
 
@@ -485,10 +486,18 @@ public class GameRestIT {
             ) {
                 final var gameId = createGame();
 
-                final var response = EndRecruitment.this.test(gameId, user, includeAuthentication, includeSessionCookie, false);
+                final WebTestClient.ResponseSpec response;
+                final var cookies = MC_BACK_END_CLIENT.login(user);
+                try {
+                    response = MC_BACK_END_CLIENT.endRecruitment(gameId, user, cookies, includeAuthentication, includeSessionCookie, true);
+                } finally {
+                    MC_BACK_END_CLIENT.logout(user, cookies);
+                }
 
-                response.expectStatus().isFound();
-                response.expectHeader().location(Paths.createPathForGame(gameId));
+                // The client will have followed the redirect
+                response.expectStatus().isOk();
+                response.expectBody(GameResponse.class)
+                        .value(GameResponse::identifier, is(gameId));
             }
         }
 
@@ -534,8 +543,10 @@ public class GameRestIT {
                 MC_BACK_END_CLIENT.logout(user, cookies);
             }
 
-            response.expectStatus().isTemporaryRedirect();
-            response.expectHeader().location(Paths.createPathForGame(gameId));
+            // The client will have followed the redirect.
+            response.expectStatus().isOk();
+            response.expectBody(GameResponse.class)
+                    .value(GameResponse::identifier, is(gameId));
         }
 
         @Test
@@ -632,7 +643,7 @@ public class GameRestIT {
             // Tough test: game exists and CSRF token provided
             final var gameId = createGame();
 
-            final var response = joinGame(gameId, ProcessFixtures.ADMINISTRATOR, false, true, true);
+            final var response = joinGame(gameId, ProcessFixtures.ADMINISTRATOR, false, false, true);
 
             response.expectStatus().isUnauthorized();
         }
@@ -642,7 +653,7 @@ public class GameRestIT {
             // Tough test: game exists and user has all authorities
             final var gameId = createGame();
 
-            final var response = joinGame(gameId, ProcessFixtures.ADMINISTRATOR, true, true, false);
+            final var response = joinGame(gameId, ProcessFixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isForbidden();
         }
@@ -654,8 +665,7 @@ public class GameRestIT {
              * token provided
              */
             final var gameId = createGame();
-            final var authorities = EnumSet
-                    .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
+            final Set<Authority> authorities = EnumSet .complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
             MC_BACK_END_CLIENT.addUser(user);
 
@@ -715,7 +725,11 @@ public class GameRestIT {
             try {
                 userJoinsGame(gameIdB, ProcessFixtures.ADMINISTRATOR, cookies);
 
-                response = joinGame(gameIdA, ProcessFixtures.ADMINISTRATOR, true, true, true);
+                response = MC_BACK_END_CLIENT.joinGame(
+                        gameIdA,
+                        ProcessFixtures.ADMINISTRATOR, cookies,
+                        true, true, true
+                );
             } finally {
                 MC_BACK_END_CLIENT.logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
@@ -726,42 +740,38 @@ public class GameRestIT {
         public class ValidRequest {
             @Test
             public void verbose() {
-                final var gameId = createGame();
-                // Tough test: user has a minimum set of authorities
-                final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-                MC_BACK_END_CLIENT.addUser(user);
-
-                final var response = joinGame(gameId, user, true, true, true);
-
-                response.expectStatus().isFound();
-                response.expectHeader().location(Paths.createPathForGame(gameId));
+                test(true, true);
             }
 
             @Test
             public void withoutSession() {
-                final var gameId = createGame();
-                // Tough test: user has a minimum set of authorities
-                final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-                MC_BACK_END_CLIENT.addUser(user);
-
-                final var response = joinGame(gameId, user, true, false, true);
-
-                response.expectStatus().isFound();
-                response.expectHeader().location(Paths.createPathForGame(gameId));
+                test(true, false);
             }
 
             @Test
             public void inSession() {
+                test(false, true);
+            }
+
+            private void test(
+                    final boolean includeAuthentication,
+                    final boolean includeSessionCookie
+            ) {
+                assert includeAuthentication || includeSessionCookie;
                 final var gameId = createGame();
                 // Tough test: user has a minimum set of authorities
                 final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-                MC_BACK_END_CLIENT.addUser(user);
+                final var userId = MC_BACK_END_CLIENT.addUser(user);
 
-                final var response = joinGame(gameId, user, false, true, true);
+                final var response = joinGame(gameId, user, includeAuthentication, includeSessionCookie, true);
 
-                response.expectStatus().isFound();
-                response.expectHeader().location(Paths.createPathForGame(gameId));
+                // The client followed the redirect
+                response.expectStatus().isOk();
+                response.expectBody(GameResponse.class)
+                        .value(GameResponse::identifier, is(gameId));
+                // TODO: check that the user has joined the game
             }
+
         }
 
     }
@@ -862,6 +872,7 @@ public class GameRestIT {
             final var gameId = UUID.randomUUID();
             final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
+            MC_BACK_END_CLIENT.addUser(user);
 
             final var response = mayJoin(gameId, user, true, true, true);
 
@@ -916,7 +927,9 @@ public class GameRestIT {
         @Test
         public void insufficientAuthority() {
             final var gameId = createGame();
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)));
+            Set<Authority> authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
+            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
+            MC_BACK_END_CLIENT.addUser(user);
             final var cookies = MC_BACK_END_CLIENT.login(user);
             final WebTestClient.ResponseSpec response;
             try {
@@ -1025,7 +1038,8 @@ public class GameRestIT {
             @Nonnull MultiValueMap<String, HttpCookie> cookies
     ) {
         final var response = MC_BACK_END_CLIENT.joinGame(gameId, user, cookies, true, true, true);
-        response.expectStatus().isFound();
+        // Client will have followed the redirect.
+        response.expectStatus().isOk();
     }
 
     private void endRecruitment(UUID gameId) {
