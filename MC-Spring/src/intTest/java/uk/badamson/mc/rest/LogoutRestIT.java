@@ -115,7 +115,7 @@ public class LogoutRestIT {
             final boolean includeXsrfToken
     ) {
         final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient(PATH).post();
+        final var request = MC_BACK_END_CLIENT.connectWebTestClient().post().uri(PATH);
         McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
         try {
             return request.exchange();

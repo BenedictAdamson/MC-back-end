@@ -69,8 +69,8 @@ public class ScenarioRestIT {
      */
     @Test
     public void getAll() {
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient("/api/scenario")
-                .get()
+        final var request = MC_BACK_END_CLIENT.connectWebTestClient()
+                .get().uri("/api/scenario")
                 .accept(MediaType.APPLICATION_JSON);
 
         final var response = request.exchange();
@@ -108,8 +108,8 @@ public class ScenarioRestIT {
         }
 
         private WebTestClient.ResponseSpec getScenario(final UUID id) {
-            return MC_BACK_END_CLIENT.connectWebTestClient(Paths.createPathForScenario(id))
-                    .get()
+            return MC_BACK_END_CLIENT.connectWebTestClient()
+                    .get().uri(Paths.createPathForScenario(id))
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange();
         }

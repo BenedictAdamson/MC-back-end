@@ -30,7 +30,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriTemplate;
 import uk.badamson.mc.rest.Paths;
-import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -55,9 +54,7 @@ public final class McBackEndClient {
     public static final String SCHEME = "http";
 
     @Nonnull
-    private final String host;
-    @Nonnegative
-    private final int port;
+    private final String baseUrl;
     @Nonnull
     private final User administrator;
 
@@ -66,11 +63,21 @@ public final class McBackEndClient {
             @Nonnegative final int port,
             @Nonnull final String administratorPassword
     ) {
-        Objects.requireNonNull(host);
         Objects.requireNonNull(administratorPassword);
-        this.host = host;
-        this.port = port;
+        this.baseUrl = createBaseUrl(host, port);
         this.administrator = User.createAdministrator(administratorPassword);
+    }
+
+    private @Nonnull String createBaseUrl(
+            @Nonnull final String host,
+            @Nonnegative final int port
+    ) {
+        Objects.requireNonNull(host);
+        try {
+            return new URI(SCHEME, null, host, port, "", null, null).toString();
+        } catch (final URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public static String encodeAsJson(final Object obj) {
@@ -140,7 +147,7 @@ public final class McBackEndClient {
             Objects.requireNonNull(userDetails, "userDetails");
 
             final var cookies = login(administrator);
-            final var headers = connectWebTestClient("/api/user").post()
+            final var headers = connectWebTestClient().post().uri("/api/user")
                     .contentType(MediaType.APPLICATION_JSON);
             secure(headers, administrator, cookies, true, true);
             final var request = headers.bodyValue(encodeAsJson(userDetails));
@@ -162,14 +169,8 @@ public final class McBackEndClient {
     }
 
     @Nonnull
-    public WebTestClient connectWebTestClient(@Nonnull final String path) {
-        final URI uri;
-        try {
-            uri = new URI(SCHEME, null, host, port, path, null, null);
-        } catch (final URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
+    public WebTestClient connectWebTestClient() {
+        return WebTestClient.bindToServer().baseUrl(baseUrl).build();
     }
 
     private RequestBodySpec createCreateGameRequest(
@@ -180,7 +181,7 @@ public final class McBackEndClient {
         Objects.requireNonNull(cookies, "cookies");
 
         final var path = Paths.createPathForGamesOfScenario(scenario);
-        final var request = connectWebTestClient(path).post()
+        final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         secure(request, user, cookies, true, true);
         return request;
@@ -201,13 +202,14 @@ public final class McBackEndClient {
 
     private RequestHeadersSpec<?> createGetSelfRequest(final String username,
                                                        final String password) {
-        return connectWebTestClient("/api/self").get()
+        return connectWebTestClient().get().uri("/api/self")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(headers -> headers.setBasicAuth(username, password));
     }
 
     public Stream<NamedUUID> getScenarios() {
-        return connectWebTestClient("/api/scenario").get().accept(MediaType.APPLICATION_JSON)
+        return connectWebTestClient().get().uri("/api/scenario")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange().returnResult(uk.badamson.mc.rest.NamedUUID.class)
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
@@ -239,7 +241,7 @@ public final class McBackEndClient {
             @Nullable final BasicUserDetails user,
             @Nonnull final MultiValueMap<String, HttpCookie> cookies
     ) {
-        final var request = connectWebTestClient("/logout").post();
+        final var request = connectWebTestClient().post().uri("/logout");
         secure(request, user, cookies, true, true);
         final var response = request.exchange();
         response.expectStatus().is2xxSuccessful();
@@ -254,7 +256,7 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForJoiningGame(gameId);
-        final var request = connectWebTestClient(path).get()
+        final var request = connectWebTestClient().get().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,
@@ -271,7 +273,7 @@ public final class McBackEndClient {
             final boolean includeAuthentication,
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
-        final var request = connectWebTestClient(Paths.CURRENT_GAME_PATH).get()
+        final var request = connectWebTestClient().get().uri(Paths.CURRENT_GAME_PATH)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,
@@ -290,7 +292,7 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForEndRecruitmentOfGame(gameId);
-        final var request = connectWebTestClient(path).post()
+        final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,
@@ -309,7 +311,7 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForStartingGame(gameId);
-        final var request = connectWebTestClient(path).post()
+        final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,
@@ -328,7 +330,7 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForStoppingGame(gameId);
-        final var request = connectWebTestClient(path).post()
+        final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
                 request, includeAuthentication? user: null,

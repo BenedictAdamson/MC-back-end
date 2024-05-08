@@ -166,7 +166,7 @@ public class GameRestIT {
                 final boolean includeXsrfToken) {
             final var cookies = MC_BACK_END_CLIENT.login(user);
             final var path = Paths.createPathForGamesOfScenario(scenarioId);
-            final var request = MC_BACK_END_CLIENT.connectWebTestClient(path).post()
+            final var request = MC_BACK_END_CLIENT.connectWebTestClient().post().uri(path)
                     .accept(MediaType.APPLICATION_JSON);
             McBackEndClient.secure(
                     request, includeAuthentication? user: null,
@@ -230,7 +230,7 @@ public class GameRestIT {
                 final boolean includeXsrfToken) {
             final var cookies = MC_BACK_END_CLIENT.login(user);
             final var path = Paths.createPathForGame(gameId);
-            final var request = MC_BACK_END_CLIENT.connectWebTestClient(path).get()
+            final var request = MC_BACK_END_CLIENT.connectWebTestClient().get().uri(path)
                     .accept(MediaType.APPLICATION_JSON);
             McBackEndClient.secure(
                     request, includeAuthentication? user: null,
@@ -387,7 +387,7 @@ public class GameRestIT {
                 final boolean includeXsrfToken) {
             final var cookies = MC_BACK_END_CLIENT.login(user);
             final var path = Paths.createPathForGamesOfScenario(scenarioId);
-            final var request = MC_BACK_END_CLIENT.connectWebTestClient(path).get()
+            final var request = MC_BACK_END_CLIENT.connectWebTestClient().get().uri(path)
                     .accept(MediaType.APPLICATION_JSON);
             McBackEndClient.secure(
                     request, includeAuthentication? user: null,
@@ -833,7 +833,7 @@ public class GameRestIT {
                 final boolean includeXsrfToken) {
             final var path = Paths.createPathForMayJoinQueryOfGame(gameId);
             final var cookies = MC_BACK_END_CLIENT.login(user);
-            final var request = MC_BACK_END_CLIENT.connectWebTestClient(path).get()
+            final var request = MC_BACK_END_CLIENT.connectWebTestClient().get().uri(path)
                     .accept(MediaType.APPLICATION_JSON);
             McBackEndClient.secure(
                     request, includeAuthentication? user: null,

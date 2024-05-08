@@ -71,7 +71,7 @@ public class UserRestIT {
             final boolean includeXsrfToken
     ) {
         final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var headers = MC_BACK_END_CLIENT.connectWebTestClient("/api/user").post()
+        final var headers = MC_BACK_END_CLIENT.connectWebTestClient().post().uri("/api/user")
                 .contentType(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(headers, loggedInUser, cookies, includeSessionCookie, includeXsrfToken);
         final var request = headers.bodyValue(McBackEndClient.encodeAsJson(addingUserDetails));
@@ -92,8 +92,8 @@ public class UserRestIT {
         final var path = Paths.createPathForUser(id);
         BasicUserDetails authenticatingUser = includeAuthentication ? loggedInUser : null;
         final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient(path)
-                .get()
+        final var request = MC_BACK_END_CLIENT.connectWebTestClient()
+                .get().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
         try {
