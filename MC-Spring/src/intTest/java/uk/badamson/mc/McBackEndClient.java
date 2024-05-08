@@ -23,7 +23,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.util.LinkedMultiValueMap;
@@ -89,10 +88,9 @@ public final class McBackEndClient {
         }
     }
 
-    @SuppressFBWarnings(value="DCN_NULLPOINTER_EXCEPTION", justification="exception translation")
+    @SuppressFBWarnings(value = "DCN_NULLPOINTER_EXCEPTION", justification = "exception translation")
     private static UUID parseCreateGameResponse(final ResponseSpec response) {
         Objects.requireNonNull(response, "response");
-
         try {
             final var location = response.returnResult(String.class)
                     .getResponseHeaders().getLocation();
@@ -112,10 +110,10 @@ public final class McBackEndClient {
             final boolean includeXsrfToken) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(cookies, "cookies");
-        final var sessionCookie = includeSessionCookie?
+        final var sessionCookie = includeSessionCookie ?
                 Objects.requireNonNull(cookies.getFirst(SESSION_COOKIE_NAME))
                 : null;
-        final var xsrfCookie = includeXsrfToken?
+        final var xsrfCookie = includeXsrfToken ?
                 Objects.requireNonNull(cookies.getFirst(XSRF_TOKEN_COOKIE_NAME))
                 : null;
         secure(request, authenticatingUser, sessionCookie, xsrfCookie);
@@ -143,29 +141,36 @@ public final class McBackEndClient {
         }
     }
 
+    public WebTestClient.ResponseSpec addUser(
+            @Nonnull final BasicUserDetails loggedInUser,
+            @Nonnull final BasicUserDetails addingUserDetails,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken
+    ) {
+        final var headers = connectWebTestClient().post().uri("/api/user")
+                .contentType(MediaType.APPLICATION_JSON);
+        McBackEndClient.secure(headers, loggedInUser, cookies, includeSessionCookie, includeXsrfToken);
+        final var request = headers.bodyValue(McBackEndClient.encodeAsJson(addingUserDetails));
+        return request.exchange();
+    }
+
     public UUID addUser(final BasicUserDetails userDetails) {
+        Objects.requireNonNull(userDetails, "userDetails");
+
+        final var cookies = login(administrator);
         try {
-            Objects.requireNonNull(userDetails, "userDetails");
-
-            final var cookies = login(administrator);
-            final var headers = connectWebTestClient().post().uri("/api/user")
-                    .contentType(MediaType.APPLICATION_JSON);
-            secure(headers, administrator, cookies, true, true);
-            final var request = headers.bodyValue(encodeAsJson(userDetails));
-
-            final var response = request.exchange();
+            final var response = addUser(administrator, userDetails, cookies, true, true);
             response.expectStatus().isFound();
             final var location = response.returnResult(Void.class)
                     .getResponseHeaders().getLocation();
-            if(location == null) {
+            if (location == null) {
                 throw new IllegalStateException("response has Location header");
             }
-            final var id = UUID.fromString(
+            return UUID.fromString(
                     USER_URI_TEMPLATE.match(location.toString()).get("id"));
+        } finally {
             logout(administrator, cookies);
-            return id;
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to add user", e);
         }
     }
 
@@ -176,44 +181,40 @@ public final class McBackEndClient {
                 .build();
     }
 
-    private RequestBodySpec createCreateGameRequest(
-            @Nonnull final UUID scenario,
-            @Nullable final User user,
-            @Nonnull final MultiValueMap<String, HttpCookie> cookies
-    ) {
-        Objects.requireNonNull(cookies, "cookies");
-
-        final var path = Paths.createPathForGamesOfScenario(scenario);
-        final var request = connectWebTestClient().post().uri(path)
+    public WebTestClient.ResponseSpec getUser(
+            @Nonnull final UUID id,
+            @Nullable final BasicUserDetails authenticatingUser,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken) {
+        final var path = Paths.createPathForUser(id);
+        final var request = connectWebTestClient()
+                .get().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
-        secure(request, user, cookies, true, true);
-        return request;
+        McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
+        return request.exchange();
     }
 
     public UUID createGame(final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
 
         final var cookies = login(administrator);
-        final var request = createCreateGameRequest(scenario, administrator,
-                cookies);
-        final var response = request.exchange();
-        logout(administrator, cookies);
-
+        final WebTestClient.ResponseSpec response;
+        try {
+            final var path = Paths.createPathForGamesOfScenario(scenario);
+            final var request = connectWebTestClient().post().uri(path)
+                    .accept(MediaType.APPLICATION_JSON);
+            secure(request, administrator, cookies, true, true);
+            response = request.exchange();
+        } finally {
+            logout(administrator, cookies);
+        }
         response.expectStatus().isFound();
         return parseCreateGameResponse(response);
     }
 
-    private RequestHeadersSpec<?> createGetSelfRequest(final String username,
-                                                       final String password) {
-        return connectWebTestClient().get().uri("/api/self")
-                .accept(MediaType.APPLICATION_JSON)
-                .headers(headers -> headers.setBasicAuth(username, password));
-    }
-
     public Stream<NamedUUID> getScenarios() {
-        return connectWebTestClient().get().uri("/api/scenario")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange().returnResult(uk.badamson.mc.rest.NamedUUID.class)
+        return getAllScenarios().returnResult(uk.badamson.mc.rest.NamedUUID.class)
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
@@ -236,17 +237,28 @@ public final class McBackEndClient {
 
     @Nonnull
     public ResponseSpec getSelf(@Nonnull BasicUserDetails user) {
-        return createGetSelfRequest(user.getUsername(), user.getPassword())
+        return connectWebTestClient().get().uri("/api/self")
+                .accept(MediaType.APPLICATION_JSON)
+                .headers(headers -> headers.setBasicAuth(user.getUsername(), user.getPassword()))
                 .exchange();
+    }
+
+    public WebTestClient.ResponseSpec logout(
+            @Nullable final BasicUserDetails authenticatingUser,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken
+    ) {
+        final var request = connectWebTestClient().post().uri("/logout");
+        McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
+        return request.exchange();
     }
 
     public void logout(
             @Nullable final BasicUserDetails user,
             @Nonnull final MultiValueMap<String, HttpCookie> cookies
     ) {
-        final var request = connectWebTestClient().post().uri("/logout");
-        secure(request, user, cookies, true, true);
-        final var response = request.exchange();
+        final var response = logout(user, cookies, true, true);
         response.expectStatus().is2xxSuccessful();
     }
 
@@ -259,11 +271,11 @@ public final class McBackEndClient {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken) {
         final var path = Paths.createPathForJoiningGame(gameId);
-        final var request = connectWebTestClient().get()
+        final var request = connectWebTestClient().post()
                 .uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
-                request, includeAuthentication? user: null,
+                request, includeAuthentication ? user : null,
                 cookies,
                 includeSessionCookie, includeXsrfToken
         );
@@ -280,7 +292,7 @@ public final class McBackEndClient {
         final var request = connectWebTestClient().get().uri(Paths.CURRENT_GAME_PATH)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
-                request, includeAuthentication? user: null,
+                request, includeAuthentication ? user : null,
                 cookies,
                 includeSessionCookie, includeXsrfToken
         );
@@ -299,7 +311,7 @@ public final class McBackEndClient {
         final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
-                request, includeAuthentication? user: null,
+                request, includeAuthentication ? user : null,
                 cookies,
                 includeSessionCookie, includeXsrfToken
         );
@@ -318,7 +330,7 @@ public final class McBackEndClient {
         final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
-                request, includeAuthentication? user: null,
+                request, includeAuthentication ? user : null,
                 cookies,
                 includeSessionCookie, includeXsrfToken
         );
@@ -337,10 +349,102 @@ public final class McBackEndClient {
         final var request = connectWebTestClient().post().uri(path)
                 .accept(MediaType.APPLICATION_JSON);
         McBackEndClient.secure(
+                request, includeAuthentication ? user : null,
+                cookies,
+                includeSessionCookie, includeXsrfToken
+        );
+        return request.exchange();
+    }
+
+    @Nonnull
+    public WebTestClient.ResponseSpec createGameForScenario(
+            @Nonnull final UUID scenarioId,
+            @Nonnull final BasicUserDetails user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeAuthentication,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken) {
+        final var path = Paths.createPathForGamesOfScenario(scenarioId);
+        final var request = connectWebTestClient().post().uri(path)
+                .accept(MediaType.APPLICATION_JSON);
+        McBackEndClient.secure(
                 request, includeAuthentication? user: null,
                 cookies,
                 includeSessionCookie, includeXsrfToken
         );
         return request.exchange();
+    }
+
+    @Nonnull
+    public WebTestClient.ResponseSpec getGame(
+            @Nonnull final UUID gameId,
+            @Nonnull final BasicUserDetails user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeAuthentication,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken) {
+        final var path = Paths.createPathForGame(gameId);
+        final var request = connectWebTestClient().get().uri(path)
+                .accept(MediaType.APPLICATION_JSON);
+        McBackEndClient.secure(
+                request, includeAuthentication ? user : null,
+                cookies,
+                includeSessionCookie, includeXsrfToken
+        );
+        return request.exchange();
+    }
+
+    @Nonnull
+    public WebTestClient.ResponseSpec getGamesOfScenario(
+            @Nonnull final UUID scenarioId,
+            @Nonnull final BasicUserDetails user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeAuthentication,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken
+    ) {
+        final var path = Paths.createPathForGamesOfScenario(scenarioId);
+        final var request = connectWebTestClient().get().uri(path)
+                .accept(MediaType.APPLICATION_JSON);
+        McBackEndClient.secure(
+                request, includeAuthentication ? user : null,
+                cookies,
+                includeSessionCookie, includeXsrfToken
+        );
+        return request.exchange();
+    }
+
+    @Nonnull
+    public WebTestClient.ResponseSpec mayJoin(
+            @Nonnull final UUID gameId,
+            @Nonnull final BasicUserDetails user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies,
+            final boolean includeAuthentication,
+            final boolean includeSessionCookie,
+            final boolean includeXsrfToken
+    ) {
+        final var path = Paths.createPathForMayJoinQueryOfGame(gameId);
+        final var request = connectWebTestClient().get().uri(path)
+                .accept(MediaType.APPLICATION_JSON);
+        McBackEndClient.secure(
+                request, includeAuthentication ? user : null,
+                cookies,
+                includeSessionCookie, includeXsrfToken
+        );
+        return request.exchange();
+    }
+
+    public WebTestClient.ResponseSpec getAllScenarios() {
+        return connectWebTestClient()
+                .get().uri("/api/scenario")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange();
+    }
+
+    public WebTestClient.ResponseSpec getScenario(final UUID id) {
+        return connectWebTestClient()
+                .get().uri(Paths.createPathForScenario(id))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange();
     }
 }

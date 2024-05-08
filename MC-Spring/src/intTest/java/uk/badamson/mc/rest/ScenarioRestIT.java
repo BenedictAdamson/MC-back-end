@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.MongoDBContainer;
 import uk.badamson.mc.McBackEndClient;
 import uk.badamson.mc.McBackEndProcess;
@@ -32,7 +30,6 @@ import uk.badamson.mc.ProcessFixtures;
 import uk.badamson.mc.presentation.ScenarioController;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -42,25 +39,25 @@ public class ScenarioRestIT {
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
     private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
 
-    private static MongoDBContainer MONGO_DB_CONTAINER;
-    private static McBackEndProcess MC_BACK_END_PROCESS;
-    private static McBackEndClient MC_BACK_END_CLIENT;
+    private static MongoDBContainer mongoDBContainer;
+    private static McBackEndProcess mcBackEndProcess;
+    private static McBackEndClient mcBackEndClient;
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
-        MONGO_DB_CONTAINER = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        MONGO_DB_CONTAINER.start();
-        final var mongoDBPath = MONGO_DB_CONTAINER.getReplicaSetUrl();
-        MC_BACK_END_PROCESS = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        MC_BACK_END_CLIENT = new McBackEndClient(
-                "localhost", MC_BACK_END_PROCESS.getServerPort(), ADMINISTRATOR_PASSWORD
+        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
+        mongoDBContainer.start();
+        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
+        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
+        mcBackEndClient = new McBackEndClient(
+                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
         );
     }
 
     @AfterAll
     public static void tearDown() {
-        MC_BACK_END_PROCESS.close();
-        MONGO_DB_CONTAINER.close();
+        mcBackEndProcess.close();
+        mongoDBContainer.close();
     }
 
 
@@ -69,11 +66,7 @@ public class ScenarioRestIT {
      */
     @Test
     public void getAll() {
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient()
-                .get().uri("/api/scenario")
-                .accept(MediaType.APPLICATION_JSON);
-
-        final var response = request.exchange();
+        final var response = mcBackEndClient.getAllScenarios();
 
         response.expectStatus().isOk();
         response.expectBody(new ParameterizedTypeReference<List<NamedUUID>>() {})
@@ -91,7 +84,7 @@ public class ScenarioRestIT {
         public void absent() {
             final var id = UUID.randomUUID();
 
-            final var response = getScenario(id);
+            final var response = mcBackEndClient.getScenario(id);
 
             response.expectStatus().isNotFound();
         }
@@ -100,22 +93,15 @@ public class ScenarioRestIT {
         public void present() {
             final var id = getKnownScenarioId();
 
-            final var response = getScenario(id);
+            final var response = mcBackEndClient.getScenario(id);
 
             response.expectStatus().isOk();
             response.expectBody(ScenarioResponse.class)
                     .value(ScenarioResponse::identifier, is(id));
         }
 
-        private WebTestClient.ResponseSpec getScenario(final UUID id) {
-            return MC_BACK_END_CLIENT.connectWebTestClient()
-                    .get().uri(Paths.createPathForScenario(id))
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange();
-        }
-
         private UUID getKnownScenarioId() {
-            return MC_BACK_END_CLIENT.getScenarios().findAny().orElseThrow().getId();
+            return mcBackEndClient.getScenarios().findAny().orElseThrow().getId();
         }
 
     }

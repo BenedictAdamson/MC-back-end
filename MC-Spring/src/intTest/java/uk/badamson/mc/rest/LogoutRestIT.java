@@ -40,27 +40,26 @@ import java.util.concurrent.TimeoutException;
 public class LogoutRestIT {
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
     private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
-    private static final String PATH = "/logout";
 
-    private static MongoDBContainer MONGO_DB_CONTAINER;
-    private static McBackEndProcess MC_BACK_END_PROCESS;
-    private static McBackEndClient MC_BACK_END_CLIENT;
+    private static MongoDBContainer mongoDBContainer;
+    private static McBackEndProcess mcBackEndProcess;
+    private static McBackEndClient mcBackEndClient;
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
-        MONGO_DB_CONTAINER = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        MONGO_DB_CONTAINER.start();
-        final var mongoDBPath = MONGO_DB_CONTAINER.getReplicaSetUrl();
-        MC_BACK_END_PROCESS = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        MC_BACK_END_CLIENT = new McBackEndClient(
-                "localhost", MC_BACK_END_PROCESS.getServerPort(), ADMINISTRATOR_PASSWORD
+        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
+        mongoDBContainer.start();
+        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
+        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
+        mcBackEndClient = new McBackEndClient(
+                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
         );
     }
 
     @AfterAll
     public static void tearDown() {
-        MC_BACK_END_PROCESS.close();
-        MONGO_DB_CONTAINER.close();
+        mcBackEndProcess.close();
+        mongoDBContainer.close();
     }
 
     @Test
@@ -101,7 +100,7 @@ public class LogoutRestIT {
     @Test
     public void fullRequestNonAdministrator() {
         final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-        MC_BACK_END_CLIENT.addUser(requestingUser);
+        mcBackEndClient.addUser(requestingUser);
 
         final var response = test(requestingUser, requestingUser, true, true);
 
@@ -114,13 +113,11 @@ public class LogoutRestIT {
             final boolean includeSessionCookie,
             final boolean includeXsrfToken
     ) {
-        final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient().post().uri(PATH);
-        McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
+        final var cookies = mcBackEndClient.login(loggedInUser);
         try {
-            return request.exchange();
+            return mcBackEndClient.logout(authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
         } finally {
-            MC_BACK_END_CLIENT.logout(loggedInUser, cookies);
+            mcBackEndClient.logout(loggedInUser, cookies);// force logout
         }
     }
 

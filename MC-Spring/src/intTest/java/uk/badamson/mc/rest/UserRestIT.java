@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.MongoDBContainer;
 import uk.badamson.mc.*;
@@ -43,64 +42,25 @@ public class UserRestIT {
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
     private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
 
-    private static MongoDBContainer MONGO_DB_CONTAINER;
-    private static McBackEndProcess MC_BACK_END_PROCESS;
-    private static McBackEndClient MC_BACK_END_CLIENT;
+    private static MongoDBContainer mongoDBContainer;
+    private static McBackEndProcess mcBackEndProcess;
+    private static McBackEndClient mcBackEndClient;
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
-        MONGO_DB_CONTAINER = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        MONGO_DB_CONTAINER.start();
-        final var mongoDBPath = MONGO_DB_CONTAINER.getReplicaSetUrl();
-        MC_BACK_END_PROCESS = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        MC_BACK_END_CLIENT = new McBackEndClient(
-                "localhost", MC_BACK_END_PROCESS.getServerPort(), ADMINISTRATOR_PASSWORD
+        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
+        mongoDBContainer.start();
+        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
+        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
+        mcBackEndClient = new McBackEndClient(
+                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
         );
     }
 
     @AfterAll
     public static void tearDown() {
-        MC_BACK_END_PROCESS.close();
-        MONGO_DB_CONTAINER.close();
-    }
-
-    private WebTestClient.ResponseSpec addUser(
-            @Nonnull final BasicUserDetails loggedInUser,
-            @Nonnull final BasicUserDetails addingUserDetails,
-            final boolean includeSessionCookie,
-            final boolean includeXsrfToken
-    ) {
-        final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var headers = MC_BACK_END_CLIENT.connectWebTestClient().post().uri("/api/user")
-                .contentType(MediaType.APPLICATION_JSON);
-        McBackEndClient.secure(headers, loggedInUser, cookies, includeSessionCookie, includeXsrfToken);
-        final var request = headers.bodyValue(McBackEndClient.encodeAsJson(addingUserDetails));
-
-        try {
-            return request.exchange();
-        } finally {
-            MC_BACK_END_CLIENT.logout(loggedInUser, cookies);
-        }
-    }
-
-    private WebTestClient.ResponseSpec getUser(
-            @Nonnull final UUID id,
-            @Nonnull final BasicUserDetails loggedInUser,
-            final boolean includeAuthentication,
-            final boolean includeSessionCookie,
-            final boolean includeXsrfToken) {
-        final var path = Paths.createPathForUser(id);
-        BasicUserDetails authenticatingUser = includeAuthentication ? loggedInUser : null;
-        final var cookies = MC_BACK_END_CLIENT.login(loggedInUser);
-        final var request = MC_BACK_END_CLIENT.connectWebTestClient()
-                .get().uri(path)
-                .accept(MediaType.APPLICATION_JSON);
-        McBackEndClient.secure(request, authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
-        try {
-            return request.exchange();
-        } finally {
-            MC_BACK_END_CLIENT.logout(loggedInUser, cookies);
-        }
+        mcBackEndProcess.close();
+        mongoDBContainer.close();
     }
 
 
@@ -113,9 +73,9 @@ public class UserRestIT {
         @Test
         public void administrator() {
             final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            MC_BACK_END_CLIENT.addUser(performingUser);
+            mcBackEndClient.addUser(performingUser);
 
-            final var response = addUser(performingUser, ProcessFixtures.ADMINISTRATOR, true, true);
+            final var response = test(performingUser, ProcessFixtures.ADMINISTRATOR, true, true);
 
             response.expectStatus().isBadRequest();
         }
@@ -123,11 +83,11 @@ public class UserRestIT {
         @Test
         public void duplicate() {
             final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            MC_BACK_END_CLIENT.addUser(performingUser);
+            mcBackEndClient.addUser(performingUser);
             final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            addUser(performingUser, addingUserDetails, true, true);
+            test(performingUser, addingUserDetails, true, true);
 
-            final var response = addUser(performingUser, addingUserDetails, true, true);
+            final var response = test(performingUser, addingUserDetails, true, true);
 
             response.expectStatus().isEqualTo(HttpStatus.CONFLICT);
         }
@@ -136,7 +96,7 @@ public class UserRestIT {
         public void noAuthentication() {
             final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = addUser(ProcessFixtures.ADMINISTRATOR, addingUserDetails, false, false);
+            final var response = test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, false, false);
 
             response.expectStatus().is4xxClientError();
         }
@@ -145,7 +105,7 @@ public class UserRestIT {
         public void noCsrfToken() {
             final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = addUser(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, false);
+            final var response = test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -164,11 +124,30 @@ public class UserRestIT {
             }
 
             private void test(@Nonnull final BasicUserDetails addingUserDetails) {
-                final var response = addUser(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, true);
+                final var response = AddUser.this.test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, true);
 
                 response.expectStatus().isFound();
                 final var location = response.returnResult(String.class).getResponseHeaders().getLocation();
                 assertThat("localtion", location, notNullValue());
+            }
+        }
+
+        private WebTestClient.ResponseSpec test(
+                @Nonnull final BasicUserDetails loggedInUser,
+                @Nonnull final BasicUserDetails addingUserDetails,
+                final boolean includeSessionCookie,
+                final boolean includeXsrfToken
+        ) {
+            final var cookies = mcBackEndClient.login(loggedInUser);
+            try {
+                return mcBackEndClient.addUser(
+                        loggedInUser,
+                        addingUserDetails,
+                        cookies,
+                        includeSessionCookie, includeXsrfToken
+                );
+            } finally {
+                mcBackEndClient.logout(loggedInUser, cookies);
             }
         }
 
@@ -183,11 +162,11 @@ public class UserRestIT {
         @Test
         public void twice() {
             final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var userId = MC_BACK_END_CLIENT.addUser(requestingUser);
+            final var userId = mcBackEndClient.addUser(requestingUser);
 
-            MC_BACK_END_CLIENT.getSelf(requestingUser);
+            mcBackEndClient.getSelf(requestingUser);
 
-            final var response2 = MC_BACK_END_CLIENT.getSelf(requestingUser);
+            final var response2 = mcBackEndClient.getSelf(requestingUser);
 
             /*
              * We can not check the response body for equivalence to a JSON
@@ -210,7 +189,7 @@ public class UserRestIT {
         public void unknownUser() {
             final var detailsOfRequestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = MC_BACK_END_CLIENT.getSelf(detailsOfRequestingUser);
+            final var response = mcBackEndClient.getSelf(detailsOfRequestingUser);
 
             response.expectStatus().isUnauthorized();
         }
@@ -219,14 +198,14 @@ public class UserRestIT {
         public void wrongPassword() {
             // Tough test: user-name is valid
             final var detailsOfRealUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            MC_BACK_END_CLIENT.addUser(detailsOfRealUser);
+            mcBackEndClient.addUser(detailsOfRealUser);
             final var userDetailsWithWrongPassword = new BasicUserDetails(detailsOfRealUser.getUsername(),
                     "wrong-password",
                     detailsOfRealUser.getAuthorities(),
                     true, true, true, true);
 
 
-            final var response = MC_BACK_END_CLIENT.getSelf(userDetailsWithWrongPassword);
+            final var response = mcBackEndClient.getSelf(userDetailsWithWrongPassword);
 
             response.expectStatus().isUnauthorized();
         }
@@ -244,9 +223,9 @@ public class UserRestIT {
             }
 
             private void test(final BasicUserDetails requestingUser) {
-                final var userId =MC_BACK_END_CLIENT.addUser(requestingUser);
+                final var userId = mcBackEndClient.addUser(requestingUser);
 
-                final var response = MC_BACK_END_CLIENT.getSelf(requestingUser);
+                final var response = mcBackEndClient.getSelf(requestingUser);
 
                 response.expectStatus().isOk();
                 response.expectBody(UserResponse.class)
@@ -275,11 +254,11 @@ public class UserRestIT {
             authorities.remove(Authority.ROLE_MANAGE_USERS);
             final var requestingUser = new BasicUserDetails(ProcessFixtures.createUserName(), "password1",
                     authorities, true, true, true, true);
-            MC_BACK_END_CLIENT.addUser(requestingUser);
+            mcBackEndClient.addUser(requestingUser);
             final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = MC_BACK_END_CLIENT.addUser(requestedUser);
+            final var requestedUserId = mcBackEndClient.addUser(requestedUser);
 
-            final var response = getUser(requestedUserId, requestingUser, true, true, true);
+            final var response = test(requestedUserId, requestingUser, true, true, true);
 
             response.expectStatus().isForbidden();
         }
@@ -288,9 +267,9 @@ public class UserRestIT {
         public void noAuthentication() {
             // Tough test: user exists
             final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = MC_BACK_END_CLIENT.addUser(requestedUser);
+            final var requestedUserId = mcBackEndClient.addUser(requestedUser);
 
-            final var response = getUser(requestedUserId, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isUnauthorized();
         }
@@ -300,7 +279,7 @@ public class UserRestIT {
             // Tough test: has permission
             final var requestedUserId = UUID.randomUUID();
 
-            final var response = getUser(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -316,9 +295,9 @@ public class UserRestIT {
             @Test
             public void requesterIsAdministrator() {
                 final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = MC_BACK_END_CLIENT.addUser(requestedUser);
+                final var requestedUserId = mcBackEndClient.addUser(requestedUser);
 
-                final var response = getUser(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+                final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
 
                 response.expectStatus().isOk();
                 response.expectBody(UserResponse.class)
@@ -354,11 +333,11 @@ public class UserRestIT {
                 final var requestingUserName = ProcessFixtures.createUserName();
                 final var requestingUser = new BasicUserDetails(requestingUserName, "password1",
                         authorities, true, true, true, true);
-                MC_BACK_END_CLIENT.addUser(requestingUser);
+                mcBackEndClient.addUser(requestingUser);
                 final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = MC_BACK_END_CLIENT.addUser(requestedUser);
+                final var requestedUserId = mcBackEndClient.addUser(requestedUser);
 
-                final var response = getUser(
+                final var response = test(
                         requestedUserId, requestingUser,
                         includeAuthentication, includeSessionCookie, includeXsrfToken
                 );
@@ -368,5 +347,23 @@ public class UserRestIT {
                         .value(UserResponse::id, is(requestedUserId));
             }
         }
+
+        private WebTestClient.ResponseSpec test(
+                @Nonnull final UUID id,
+                @Nonnull final BasicUserDetails loggedInUser,
+                final boolean includeAuthentication,
+                final boolean includeSessionCookie,
+                final boolean includeXsrfToken) {
+            BasicUserDetails authenticatingUser = includeAuthentication ? loggedInUser : null;
+            final var cookies = mcBackEndClient.login(loggedInUser);
+            try {
+                return mcBackEndClient.getUser(
+                        id,
+                        authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
+            } finally {
+                mcBackEndClient.logout(loggedInUser, cookies);
+            }
+        }
+
     }
 }
