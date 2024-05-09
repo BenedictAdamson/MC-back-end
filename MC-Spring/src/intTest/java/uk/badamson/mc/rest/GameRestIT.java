@@ -18,79 +18,21 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.MultiValueMap;
-import org.testcontainers.containers.MongoDBContainer;
 import uk.badamson.mc.*;
 import uk.badamson.mc.presentation.GameController;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.Matchers.*;
 
-public class GameRestIT {
-    private static final String MONGO_DB_PASSWORD = "LetMeIn1";
-    private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
-
-    private static MongoDBContainer mongoDBContainer;
-    private static McBackEndProcess mcBackEndProcess;
-    private static McBackEndClient mcBackEndClient;
-
-    @BeforeAll
-    public static void setUp() throws TimeoutException {
-        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        mongoDBContainer.start();
-        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
-        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        mcBackEndClient = new McBackEndClient(
-                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
-        );
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        mcBackEndProcess.close();
-        mongoDBContainer.close();
-    }
-
-    @Nonnull
-    private UUID createGame() {
-        return mcBackEndClient.createGame(getAScenarioId());
-    }
-
-    @Nonnull
-    private UUID getAScenarioId() {
-        return mcBackEndClient.getScenarios().findAny().orElseThrow().getId();
-    }
-
-    private void userJoinsGame(
-            @Nonnull UUID gameId,
-            @Nonnull BasicUserDetails user,
-            @Nonnull MultiValueMap<String, HttpCookie> cookies
-    ) {
-        final var response = mcBackEndClient.joinGame(gameId, user, cookies, true, true, true);
-        // Client will have followed the redirect.
-        response.expectStatus().isFound();
-    }
-
-    private void endRecruitment(UUID gameId) {
-        final var cookies = mcBackEndClient.login(ProcessFixtures.ADMINISTRATOR);
-        try {
-            mcBackEndClient.endRecruitment(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, true, true);
-        } finally {
-            mcBackEndClient.logout(ProcessFixtures.ADMINISTRATOR, cookies);
-        }
-    }
+public class GameRestIT extends RestIT {
 
     /**
      * Tests {@link GameController#createGameForScenario(UUID)}
@@ -120,7 +62,7 @@ public class GameRestIT {
             final var scenarioId = getAScenarioId();
             final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(scenarioId, user, true, true, true);
 
@@ -143,16 +85,16 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
                 return mcBackEndClient.createGameForScenario(
                         scenarioId,
-                        user,
+                        includeAuthentication? user: null,
                         cookies,
-                        includeAuthentication, includeSessionCookie, includeXsrfToken
+                        includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -166,7 +108,7 @@ public class GameRestIT {
             @Test
             public void verboseByNonAdministrator() {
                 final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 test(user, true, true);
             }
@@ -231,7 +173,7 @@ public class GameRestIT {
                     EnumSet.of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES)
             );
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(id, user, true, true, true);
 
@@ -245,15 +187,15 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
                 return mcBackEndClient.getGame(
                         gameId,
-                        user, cookies,
-                        includeAuthentication, includeSessionCookie, includeXsrfToken
+                        includeAuthentication? user: null, cookies,
+                        includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -287,7 +229,7 @@ public class GameRestIT {
             ) {
                 final var id = createGame();
                 final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.of(authority));
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 final var response = GetGame.this.test(id, user, includeAuthentication, includeSessionCookie, true);
 
@@ -332,7 +274,7 @@ public class GameRestIT {
             final var authorities = EnumSet.complementOf(EnumSet
                     .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(scenario, user, true, true, true);
 
@@ -346,15 +288,15 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
                 return mcBackEndClient.getGamesOfScenario(
                         scenarioId,
-                        user, cookies,
-                        includeAuthentication, includeSessionCookie, includeXsrfToken
+                        includeAuthentication? user: null, cookies,
+                        includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -369,7 +311,7 @@ public class GameRestIT {
             @Test
             public void asPlayer() {
                 final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 test(user, true, true, true);
             }
@@ -377,7 +319,7 @@ public class GameRestIT {
             @Test
             public void asManageGamesRole() {
                 final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 test(user, true, true, true);
             }
@@ -397,7 +339,7 @@ public class GameRestIT {
                               final boolean includeSessionCookie,
                               final boolean includeXsrfToken) {
                 final var scenarioId = getAScenarioId();
-                final var gameId = mcBackEndClient.createGame(scenarioId);
+                final var gameId = createGame(scenarioId);
                 createGame();
 
                 final var response = GetGameIdentifiersOfScenario.this.test(scenarioId, user, includeAuthentication, includeSessionCookie, includeXsrfToken);
@@ -456,7 +398,7 @@ public class GameRestIT {
             final var authorities = EnumSet.complementOf(EnumSet
                     .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, false);
 
@@ -470,11 +412,11 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
-                return mcBackEndClient.endRecruitment(gameId, user, cookies, includeAuthentication, includeSessionCookie, includeXsrfToken);
+                return mcBackEndClient.endRecruitment(gameId, includeAuthentication?user: null, cookies, includeSessionCookie, includeXsrfToken);
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -489,7 +431,7 @@ public class GameRestIT {
             @Test
             public void manageGamesRole() {
                 final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 test(user, true, true);
             }
@@ -512,11 +454,11 @@ public class GameRestIT {
                 final var gameId = createGame();
 
                 final WebTestClient.ResponseSpec response;
-                final var cookies = mcBackEndClient.login(user);
+                final var cookies = login(user);
                 try {
-                    response = mcBackEndClient.endRecruitment(gameId, user, cookies, includeAuthentication, includeSessionCookie, true);
+                    response = mcBackEndClient.endRecruitment(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, true);
                 } finally {
-                    mcBackEndClient.logout(user, cookies);
+                    logout(user, cookies);
                 }
 
                 response.expectStatus().isFound();
@@ -537,18 +479,18 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
 
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
                 response = mcBackEndClient.getCurrentGame(
                         user, cookies,
-                        true, true, true
+                        true, true
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
 
             response.expectStatus().isTemporaryRedirect();
@@ -560,18 +502,18 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
 
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
                 response = mcBackEndClient.getCurrentGame(
-                        user, cookies,
-                        false, false, true
+                        null, cookies,
+                        false, true
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
 
             /*
@@ -586,18 +528,18 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
 
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
                 response = mcBackEndClient.getCurrentGame(
-                        user, cookies,
-                        false, false, false
+                        null, cookies,
+                        false, false
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
 
             /*
@@ -611,16 +553,16 @@ public class GameRestIT {
         public void noCurrentGame() {
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
             try {
                 response = mcBackEndClient.getCurrentGame(
                         user, cookies,
-                        true, true, false
+                        true, false
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
 
             /*
@@ -676,7 +618,7 @@ public class GameRestIT {
             final var gameId = createGame();
             final Set<Authority> authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, true);
 
@@ -704,15 +646,15 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
                 return mcBackEndClient.joinGame(
                         gameId,
-                        user, cookies,
-                        includeAuthentication, includeSessionCookie, includeXsrfToken
+                        includeAuthentication? user: null, cookies,
+                        includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -725,7 +667,7 @@ public class GameRestIT {
             final var gameIdA = createGame();
             final var gameIdB = createGame();
             assert !gameIdA.equals(gameIdB);
-            final var cookies = mcBackEndClient.login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameIdB, ProcessFixtures.ADMINISTRATOR, cookies);
@@ -733,10 +675,10 @@ public class GameRestIT {
                 response = mcBackEndClient.joinGame(
                         gameIdA,
                         ProcessFixtures.ADMINISTRATOR, cookies,
-                        true, true, true
+                        true, true
                 );
             } finally {
-                mcBackEndClient.logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isEqualTo(HttpStatus.CONFLICT);
         }
@@ -766,7 +708,7 @@ public class GameRestIT {
                 final var gameId = createGame();
                 // Tough test: user has a minimum set of authorities
                 final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-                mcBackEndClient.addUser(user);
+                addUser(user);
 
                 final var response = JoinGame.this.test(gameId, user, includeAuthentication, includeSessionCookie, true);
 
@@ -789,7 +731,7 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, true);
 
@@ -802,7 +744,7 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, false);
 
@@ -815,7 +757,7 @@ public class GameRestIT {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, false, false, true);
 
@@ -828,7 +770,7 @@ public class GameRestIT {
             endRecruitment(gameId);
             // Tough test: user has a minimum set of authorities
             final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, true);
 
@@ -843,15 +785,15 @@ public class GameRestIT {
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
                 return mcBackEndClient.mayJoin(
                         gameId,
-                        user, cookies,
-                        includeAuthentication, includeSessionCookie, includeXsrfToken
+                        includeAuthentication? user: null, cookies,
+                        includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -870,7 +812,7 @@ public class GameRestIT {
             final var gameId = UUID.randomUUID();
             final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_PLAYER));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = test(gameId, user, true, true, true);
 
@@ -888,7 +830,7 @@ public class GameRestIT {
         public void validRequest() {
             final var gameId = createGame();
             final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-            mcBackEndClient.addUser(user);
+            addUser(user);
 
             final var response = testAuthenticated(gameId, user);
 
@@ -899,12 +841,12 @@ public class GameRestIT {
         @Test
         public void noAuthentication() {
             final var gameId = createGame();
-            final var cookies = mcBackEndClient.login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, false, false, true);
+                response = mcBackEndClient.startGame(gameId, null, cookies, false, true);
             } finally {
-                mcBackEndClient.logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isUnauthorized();
         }
@@ -912,12 +854,12 @@ public class GameRestIT {
         @Test
         public void noCsrfToken() {
             final var gameId = createGame();
-            final var cookies = mcBackEndClient.login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, true, false);
+                response = mcBackEndClient.startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, false);
             } finally {
-                mcBackEndClient.logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isForbidden();
         }
@@ -927,13 +869,13 @@ public class GameRestIT {
             final var gameId = createGame();
             Set<Authority> authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, user, cookies, true, true, true);
+                response = mcBackEndClient.startGame(gameId, user, cookies, true, true);
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
             response.expectStatus().isForbidden();
         }
@@ -941,11 +883,11 @@ public class GameRestIT {
         private WebTestClient.ResponseSpec testAuthenticated(
                 final UUID gameId,
                 final BasicUserDetails user) {
-            final var cookies = mcBackEndClient.login(user);
+            final var cookies = login(user);
             try {
-                return mcBackEndClient.startGame(gameId, user, cookies, true, true, true);
+                return mcBackEndClient.startGame(gameId, user, cookies, true, true);
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
 
@@ -1019,13 +961,13 @@ public class GameRestIT {
                 final boolean includeXsrfToken
         ) {
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            mcBackEndClient.addUser(user);
-            final var cookies = mcBackEndClient.login(user);
+            addUser(user);
+            final var cookies = login(user);
             try {
-                mcBackEndClient.startGame(gameId, user, cookies, true, true, true);
-                return mcBackEndClient.stopGame(gameId, user, cookies, includeAuthentication, includeSessionCookie, includeXsrfToken);
+                mcBackEndClient.startGame(gameId, user, cookies, true, true);
+                return mcBackEndClient.stopGame(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, includeXsrfToken);
             } finally {
-                mcBackEndClient.logout(user, cookies);
+                logout(user, cookies);
             }
         }
     }

@@ -18,13 +18,10 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.MongoDBContainer;
 import uk.badamson.mc.*;
 import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.spring.SpringUser;
@@ -33,36 +30,11 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class UserRestIT {
-    private static final String MONGO_DB_PASSWORD = "LetMeIn1";
-    private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
-
-    private static MongoDBContainer mongoDBContainer;
-    private static McBackEndProcess mcBackEndProcess;
-    private static McBackEndClient mcBackEndClient;
-
-    @BeforeAll
-    public static void setUp() throws TimeoutException {
-        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        mongoDBContainer.start();
-        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
-        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        mcBackEndClient = new McBackEndClient(
-                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
-        );
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        mcBackEndProcess.close();
-        mongoDBContainer.close();
-    }
-
+public class UserRestIT extends RestIT {
 
     /**
      * Tests {@link UserController#addUser(UserDetailsRequest)}
@@ -73,7 +45,7 @@ public class UserRestIT {
         @Test
         public void administrator() {
             final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            mcBackEndClient.addUser(performingUser);
+            addUser(performingUser);
 
             final var response = test(performingUser, ProcessFixtures.ADMINISTRATOR, true, true);
 
@@ -83,7 +55,7 @@ public class UserRestIT {
         @Test
         public void duplicate() {
             final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            mcBackEndClient.addUser(performingUser);
+            addUser(performingUser);
             final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
             test(performingUser, addingUserDetails, true, true);
 
@@ -138,7 +110,7 @@ public class UserRestIT {
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken
         ) {
-            final var cookies = mcBackEndClient.login(loggedInUser);
+            final var cookies = login(loggedInUser);
             try {
                 return mcBackEndClient.addUser(
                         loggedInUser,
@@ -147,7 +119,7 @@ public class UserRestIT {
                         includeSessionCookie, includeXsrfToken
                 );
             } finally {
-                mcBackEndClient.logout(loggedInUser, cookies);
+                logout(loggedInUser, cookies);
             }
         }
 
@@ -162,7 +134,7 @@ public class UserRestIT {
         @Test
         public void twice() {
             final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var userId = mcBackEndClient.addUser(requestingUser);
+            final var userId = addUser(requestingUser);
 
             mcBackEndClient.getSelf(requestingUser);
 
@@ -198,7 +170,7 @@ public class UserRestIT {
         public void wrongPassword() {
             // Tough test: user-name is valid
             final var detailsOfRealUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            mcBackEndClient.addUser(detailsOfRealUser);
+            addUser(detailsOfRealUser);
             final var userDetailsWithWrongPassword = new BasicUserDetails(detailsOfRealUser.getUsername(),
                     "wrong-password",
                     detailsOfRealUser.getAuthorities(),
@@ -223,7 +195,7 @@ public class UserRestIT {
             }
 
             private void test(final BasicUserDetails requestingUser) {
-                final var userId = mcBackEndClient.addUser(requestingUser);
+                final var userId = addUser(requestingUser);
 
                 final var response = mcBackEndClient.getSelf(requestingUser);
 
@@ -254,9 +226,9 @@ public class UserRestIT {
             authorities.remove(Authority.ROLE_MANAGE_USERS);
             final var requestingUser = new BasicUserDetails(ProcessFixtures.createUserName(), "password1",
                     authorities, true, true, true, true);
-            mcBackEndClient.addUser(requestingUser);
+            addUser(requestingUser);
             final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = mcBackEndClient.addUser(requestedUser);
+            final var requestedUserId = addUser(requestedUser);
 
             final var response = test(requestedUserId, requestingUser, true, true, true);
 
@@ -267,7 +239,7 @@ public class UserRestIT {
         public void noAuthentication() {
             // Tough test: user exists
             final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = mcBackEndClient.addUser(requestedUser);
+            final var requestedUserId = addUser(requestedUser);
 
             final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, false, false, false);
 
@@ -295,7 +267,7 @@ public class UserRestIT {
             @Test
             public void requesterIsAdministrator() {
                 final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = mcBackEndClient.addUser(requestedUser);
+                final var requestedUserId = addUser(requestedUser);
 
                 final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
 
@@ -333,9 +305,9 @@ public class UserRestIT {
                 final var requestingUserName = ProcessFixtures.createUserName();
                 final var requestingUser = new BasicUserDetails(requestingUserName, "password1",
                         authorities, true, true, true, true);
-                mcBackEndClient.addUser(requestingUser);
+                addUser(requestingUser);
                 final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = mcBackEndClient.addUser(requestedUser);
+                final var requestedUserId = addUser(requestedUser);
 
                 final var response = test(
                         requestedUserId, requestingUser,
@@ -355,13 +327,13 @@ public class UserRestIT {
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken) {
             BasicUserDetails authenticatingUser = includeAuthentication ? loggedInUser : null;
-            final var cookies = mcBackEndClient.login(loggedInUser);
+            final var cookies = login(loggedInUser);
             try {
                 return mcBackEndClient.getUser(
                         id,
                         authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
             } finally {
-                mcBackEndClient.logout(loggedInUser, cookies);
+                logout(loggedInUser, cookies);
             }
         }
 

@@ -18,48 +18,17 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
-import org.testcontainers.containers.MongoDBContainer;
-import uk.badamson.mc.McBackEndClient;
-import uk.badamson.mc.McBackEndProcess;
-import uk.badamson.mc.ProcessFixtures;
 import uk.badamson.mc.presentation.ScenarioController;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.Matchers.*;
 
-public class ScenarioRestIT {
-    private static final String MONGO_DB_PASSWORD = "LetMeIn1";
-    private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
-
-    private static MongoDBContainer mongoDBContainer;
-    private static McBackEndProcess mcBackEndProcess;
-    private static McBackEndClient mcBackEndClient;
-
-    @BeforeAll
-    public static void setUp() throws TimeoutException {
-        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
-        mongoDBContainer.start();
-        final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
-        mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
-        mcBackEndClient = new McBackEndClient(
-                "localhost", mcBackEndProcess.getServerPort(), ADMINISTRATOR_PASSWORD
-        );
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        mcBackEndProcess.close();
-        mongoDBContainer.close();
-    }
-
+public class ScenarioRestIT extends RestIT {
 
     /**
      * Tests {@link ScenarioController#getAll()}
@@ -101,7 +70,7 @@ public class ScenarioRestIT {
         }
 
         private UUID getKnownScenarioId() {
-            return mcBackEndClient.getScenarios().findAny().orElseThrow().getId();
+            return getScenarios().findAny().orElseThrow().getId();
         }
 
     }
