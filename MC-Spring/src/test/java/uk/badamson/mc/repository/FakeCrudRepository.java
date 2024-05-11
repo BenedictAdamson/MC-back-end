@@ -56,7 +56,7 @@ abstract class FakeCrudRepository<T, ID> implements CrudRepository<T, ID> {
     @Nonnull
     @Override
     public final Optional<T> findById(@Nonnull ID id) {
-        return Optional.of(data.get(id));
+        return Optional.ofNullable(data.get(id));
     }
 
     @Override
