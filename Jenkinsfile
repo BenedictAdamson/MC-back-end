@@ -83,6 +83,7 @@ pipeline {
 					]
             }
             junit 'MC-*/build/test-results/test/TEST-*.xml'
+            junit 'MC-*/build/test-results/integrationTest/TEST-*.xml'
         }
         success {
             archiveArtifacts artifacts: 'MC-*/build/distributions/*.deb', fingerprint: true

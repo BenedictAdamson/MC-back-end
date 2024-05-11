@@ -16,8 +16,8 @@ dependencyResolutionManagement {
                 strictly '2.3-groovy-3.0'
             })
             version('testcontainers', {
-                strictly '[1.18, 1.19['
-                prefer '1.18.3'
+                strictly '[1.19, 1.20['
+                prefer '1.19.1'
             })
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
@@ -30,17 +30,17 @@ dependencyResolutionManagement {
             }
             library('persistence-api', 'javax.persistence:javax.persistence-api:2.2')
             library('spotbugs', 'com.github.spotbugs', 'spotbugs-annotations').version {
-                strictly '[4.7, 4.8['
-                prefer '4.7.3'
+                strictly '[4.8, 4.9['
+                prefer '4.8.5'
             }
             library('groovy', 'org.codehaus.groovy', 'groovy').version {
                 strictly '[3.0, 3.1['
-                prefer '3.0.17'
+                prefer '3.0.19'
             }
             library('hamcrest', 'org.hamcrest:hamcrest:2.2')
             library('junit-jupiter-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
-            library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.9.3')
+            library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.10.1')
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
             library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')

@@ -1,7 +1,7 @@
 plugins {
     id 'uk.badamson.mc.be.java-conventions'
     id 'com.github.spotbugs' version '5.0.14'
-    id 'org.springframework.boot' version '2.7.12'
+    id 'org.springframework.boot' version '2.7.17'
     id 'com.netflix.nebula.deb' version '11.3.0'
     id 'pmd'
 }
@@ -50,6 +50,7 @@ dependencies {
     intTestImplementation libs.junit.platform.console
     intTestImplementation libs.testcontainers.junit
     intTestImplementation libs.testcontainers.mongodb
+    intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.30'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
 }
@@ -157,8 +158,6 @@ tasks.register('integrationTest', Test) {
 
     testClassesDirs = sourceSets.intTest.output.classesDirs
     classpath = sourceSets.intTest.runtimeClasspath
-    shouldRunAfter test
-    dependsOn ':MC-Spring:buildDockerImage'
 
     useJUnitPlatform()
 

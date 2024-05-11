@@ -1,6 +1,6 @@
-package uk.badamson.mc;
+package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2020-24.
+ * © Copyright Benedict Adamson 2024.
  *
  * This file is part of MC.
  *
@@ -18,25 +18,26 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.utility.DockerImageName;
+import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
-public final class Fixtures {
-
-
-    public static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
-
-    private static String createUserName(@Nonnull final UUID id) {
-        return "jeff-" + id;
+public class FakeUserSpringRepository extends FakeCrudRepository<SpringUser, UUID> implements UserSpringRepository {
+    @Nonnull
+    @Override
+    public Optional<SpringUser> findByUsername(@Nonnull String username) {
+        Objects.requireNonNull(username);
+        return entityStream()
+                .filter(e -> e.getUsername().equals(username))
+                .findAny();
     }
 
-    public static BasicUserDetails createBasicUserDetailsWithAllRoles() {
-        final var id = UUID.randomUUID();
-        return new BasicUserDetails(createUserName(id),"secret",
-                Authority.ALL,
-                true, true, true, true);
+    @Nonnull
+    @Override
+    protected UUID idOf(@Nonnull SpringUser entity) {
+        return entity.getId();
     }
-
 }

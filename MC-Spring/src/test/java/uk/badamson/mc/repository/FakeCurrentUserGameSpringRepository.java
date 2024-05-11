@@ -1,6 +1,6 @@
-package uk.badamson.mc;
+package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2024.
  *
  * This file is part of MC.
  *
@@ -18,18 +18,15 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-public class DockerContainerStartIT {
+import javax.annotation.Nonnull;
+import java.util.UUID;
 
-    @Container
-    private final McContainers containers = new McContainers(null);
+public final class FakeCurrentUserGameSpringRepository extends FakeCrudRepository<UserGameAssociationDTO, UUID> implements CurrentUserGameSpringRepository {
 
-    @Test
-    public void start() {
-        containers.assertThatNoErrorMessagesLogged();
+    @Nonnull
+    @Override
+    protected UUID idOf(@Nonnull UserGameAssociationDTO entity) {
+        return entity.user();
     }
 }
