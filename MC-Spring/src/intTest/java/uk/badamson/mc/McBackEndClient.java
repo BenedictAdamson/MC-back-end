@@ -95,6 +95,7 @@ public final class McBackEndClient {
         }
     }
 
+    @SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH", justification = "SpotBugs bug")
     private static void secure(
             @Nonnull final RequestHeadersSpec<?> request,
             @Nullable final BasicUserDetails authenticatingUser,

@@ -18,6 +18,7 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,6 +44,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#createGameForScenario(UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class CreateGameForScenario {
         @Test
         public void noAuthentication() {
@@ -149,6 +151,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#getGame(SpringUser, UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class GetGame {
 
         @Test
@@ -251,6 +254,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#getGameIdentifiersOfScenario(UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class GetGameIdentifiersOfScenario {
 
         @Test
@@ -306,6 +310,7 @@ public class GameRestIT extends RestIT {
         }
 
         @Nested
+        @SuppressFBWarnings(value="SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Required for JUnit 5")
         public class ValidRequest {
 
             @Test
@@ -364,6 +369,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#endRecruitment(UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class EndRecruitment {
 
         @Test
@@ -477,6 +483,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#getCurrentGame(SpringUser)}.
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class GetCurrentGame {
 
         @Test
@@ -583,6 +590,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#joinGame(SpringUser, UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class JoinGame {
 
         @Test
@@ -729,6 +737,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#mayJoinGame(SpringUser, UUID)}.
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class MayJoinGame {
 
         @Test
@@ -830,6 +839,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#startGame(SpringUser, UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class StartGame {
         @Test
         public void validRequest() {
@@ -911,6 +921,7 @@ public class GameRestIT extends RestIT {
      * Tests Spring annotations on {@link GameController#stopGame(SpringUser, UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class StopGame {
         @Test
         public void validRequest() {

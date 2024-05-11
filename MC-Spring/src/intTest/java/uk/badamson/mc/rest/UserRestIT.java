@@ -18,6 +18,7 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,7 @@ public class UserRestIT extends RestIT {
      * Tests Spring annotations on {@link UserController#addUser(UserDetailsRequest)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class AddUser {
 
         @Test
@@ -134,6 +136,7 @@ public class UserRestIT extends RestIT {
      * Tests Spring annotations on {@link UserController#getSelf(SpringUser)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class GetSelf {
 
         @Test
@@ -222,6 +225,7 @@ public class UserRestIT extends RestIT {
      * Tests Spring annotations on {@link UserController#getUser(UUID)}
      */
     @Nested
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification = "SpotBugs bug")
     public class GetUser {
         @Test
         public void forbidden() {
