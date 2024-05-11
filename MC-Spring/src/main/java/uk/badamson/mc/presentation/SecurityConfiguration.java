@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020-23.
+ * © Copyright Benedict Adamson 2020,22.
  *
  * This file is part of MC.
  *
@@ -38,6 +38,14 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
         justification = "delegates to framework method that does so")
 public class SecurityConfiguration {
 
+    private static void configureAuthorizedRequests(final HttpSecurity http)
+            throws Exception {
+        http.authorizeRequests().antMatchers("/api/user/**").authenticated();
+        http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
+        http.authorizeRequests().antMatchers("/api/game/**").authenticated();
+    }
+
+
     private static void configureCsrfProtection(final HttpSecurity http)
             throws Exception {
         http.csrf(customizer -> customizer.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
@@ -52,6 +60,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         configureHttpBasic(http);
         configureCsrfProtection(http);
+        configureAuthorizedRequests(http);
         // login and logout pages are configured by default
         return http.build();
     }

@@ -22,7 +22,7 @@ dependencyResolutionManagement {
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
                 strictly '[1.2, 1.5['
-                prefer '1.4.7'
+                prefer '1.2.12'
             }
             library('jackson-datatype-jsr310', 'com.fasterxml.jackson.datatype', 'jackson-datatype-jsr310').version {
                 strictly '[2.13, 2.15['
