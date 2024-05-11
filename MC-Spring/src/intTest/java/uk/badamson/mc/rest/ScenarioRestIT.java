@@ -22,16 +22,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import uk.badamson.mc.presentation.ScenarioController;
+import uk.badamson.mc.presentation.SecurityConfiguration;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 
+/**
+ * Tests {@link SecurityConfiguration}.
+ * Tests Spring annotations on {@link ScenarioController}.
+ */
 public class ScenarioRestIT extends RestIT {
 
     /**
-     * Tests {@link ScenarioController#getAll()}
+     * Tests Spring annotations on {@link ScenarioController#getAll()}
      */
     @Test
     public void getAll() {
@@ -44,7 +49,7 @@ public class ScenarioRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link ScenarioController#getScenario(UUID)}
+     * Tests Spring annotations on {@link ScenarioController#getScenario(UUID)}
      */
     @Nested
     public class GetScenario {

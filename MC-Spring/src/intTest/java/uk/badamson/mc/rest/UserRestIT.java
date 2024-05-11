@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.badamson.mc.*;
+import uk.badamson.mc.presentation.SecurityConfiguration;
 import uk.badamson.mc.presentation.UserController;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -34,10 +35,14 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * Tests {@link SecurityConfiguration}.
+ * Tests Spring annotations on {@link UserController}.
+ */
 public class UserRestIT extends RestIT {
 
     /**
-     * Tests {@link UserController#addUser(UserDetailsRequest)}
+     * Tests Spring annotations on {@link UserController#addUser(UserDetailsRequest)}
      */
     @Nested
     public class AddUser {
@@ -126,7 +131,7 @@ public class UserRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link UserController#getSelf(SpringUser)}
+     * Tests Spring annotations on {@link UserController#getSelf(SpringUser)}
      */
     @Nested
     public class GetSelf {
@@ -214,7 +219,7 @@ public class UserRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link UserController#getUser(UUID)}
+     * Tests Spring annotations on {@link UserController#getUser(UUID)}
      */
     @Nested
     public class GetUser {

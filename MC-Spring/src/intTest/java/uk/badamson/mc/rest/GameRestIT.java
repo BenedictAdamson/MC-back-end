@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.badamson.mc.*;
 import uk.badamson.mc.presentation.GameController;
+import uk.badamson.mc.presentation.SecurityConfiguration;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
@@ -32,10 +33,14 @@ import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 
+/**
+ * Tests {@link SecurityConfiguration}.
+ * Tests Spring annotations on {@link GameController}.
+ */
 public class GameRestIT extends RestIT {
 
     /**
-     * Tests {@link GameController#createGameForScenario(UUID)}
+     * Tests Spring annotations on {@link GameController#createGameForScenario(UUID)}
      */
     @Nested
     public class CreateGameForScenario {
@@ -141,7 +146,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests of {@link GameController#getGame(SpringUser, UUID)}
+     * Tests Spring annotations on {@link GameController#getGame(SpringUser, UUID)}
      */
     @Nested
     public class GetGame {
@@ -243,7 +248,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#getGameIdentifiersOfScenario(UUID)}
+     * Tests Spring annotations on {@link GameController#getGameIdentifiersOfScenario(UUID)}
      */
     @Nested
     public class GetGameIdentifiersOfScenario {
@@ -356,7 +361,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#endRecruitment(UUID)}
+     * Tests Spring annotations on {@link GameController#endRecruitment(UUID)}
      */
     @Nested
     public class EndRecruitment {
@@ -469,7 +474,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#getCurrentGame(SpringUser)}.
+     * Tests Spring annotations on {@link GameController#getCurrentGame(SpringUser)}.
      */
     @Nested
     public class GetCurrentGame {
@@ -575,7 +580,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#joinGame(SpringUser, UUID)}
+     * Tests Spring annotations on {@link GameController#joinGame(SpringUser, UUID)}
      */
     @Nested
     public class JoinGame {
@@ -721,7 +726,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#mayJoinGame(SpringUser, UUID)}.
+     * Tests Spring annotations on {@link GameController#mayJoinGame(SpringUser, UUID)}.
      */
     @Nested
     public class MayJoinGame {
@@ -822,7 +827,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#startGame(SpringUser, UUID)}
+     * Tests Spring annotations on {@link GameController#startGame(SpringUser, UUID)}
      */
     @Nested
     public class StartGame {
@@ -903,7 +908,7 @@ public class GameRestIT extends RestIT {
     }
 
     /**
-     * Tests {@link GameController#stopGame(SpringUser, UUID)}
+     * Tests Spring annotations on {@link GameController#stopGame(SpringUser, UUID)}
      */
     @Nested
     public class StopGame {
