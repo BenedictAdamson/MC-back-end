@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020-23.
+ * © Copyright Benedict Adamson 2020-24.
  *
  * This file is part of MC.
  *
@@ -19,53 +19,23 @@ package uk.badamson.mc;
  */
 
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.spring.SpringAuthority;
-import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import java.util.EnumSet;
 import java.util.UUID;
 
 public final class Fixtures {
 
 
-    public static final BasicUserDetails ADMINISTRATOR = BasicUserDetails
-            .createAdministrator("password");
     public static final DockerImageName MONGO_DB_IMAGE = DockerImageName.parse("mongo:4.4");
 
     private static String createUserName(@Nonnull final UUID id) {
         return "jeff-" + id;
     }
 
-    public static String createUserName() {
-        return createUserName(UUID.randomUUID());
-    }
-
     public static BasicUserDetails createBasicUserDetailsWithAllRoles() {
         final var id = UUID.randomUUID();
         return new BasicUserDetails(createUserName(id),"secret",
                 Authority.ALL,
-                true, true, true, true);
-    }
-
-    public static BasicUserDetails createBasicUserDetailsWithPlayerRole() {
-        final var id = UUID.randomUUID();
-        return new BasicUserDetails(createUserName(id),"secret",
-                EnumSet.of(Authority.ROLE_PLAYER),
-                true, true, true, true);
-    }
-
-    public static BasicUserDetails createBasicUserDetailsWithManageGamesRole() {
-        final var id = UUID.randomUUID();
-        return new BasicUserDetails(createUserName(id),"secret",
-                EnumSet.of(Authority.ROLE_MANAGE_GAMES),
-                true, true, true, true);
-    }
-
-    public static SpringUser createUserWithAllRoles() {
-        final var id = UUID.randomUUID();
-        return new SpringUser(id, createUserName(id),"secret",
-                SpringAuthority.ALL,
                 true, true, true, true);
     }
 
