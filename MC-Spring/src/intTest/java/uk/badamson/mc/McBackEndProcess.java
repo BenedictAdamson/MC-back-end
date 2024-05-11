@@ -18,11 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.*;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -36,6 +39,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@SuppressFBWarnings(value = "DCN_NULLPOINTER_EXCEPTION", justification="Chained exception")
 public final class McBackEndProcess implements AutoCloseable {
 
     private static final String VERSION = SutVersions.MC_BACK_END_VERSION;
@@ -44,17 +48,23 @@ public final class McBackEndProcess implements AutoCloseable {
     private static final Path JAR_PATH;
     private static final Duration POLL_INTERVAL = Duration.ofMillis(10);
     private static final RandomGenerator RANDOM_GENERATOR = RandomGenerator.getDefault();
+    private static final Charset ENCODING = Charset.defaultCharset();
 
     static {
         final var applicationPropertiesUrl = Thread.currentThread().getContextClassLoader().getResource("application.properties");
         final Path applicationPropertiesPath;
         try {
-            applicationPropertiesPath = Paths.get(Objects.requireNonNull(applicationPropertiesUrl).toURI());
+            applicationPropertiesPath = Paths.get(Objects.requireNonNull(applicationPropertiesUrl).toURI()).toAbsolutePath();
         } catch (URISyntaxException | NullPointerException e) {
             throw new IllegalStateException(e);
         }
-        final var jarDirectory = applicationPropertiesPath.toAbsolutePath()
-                .getParent().getParent().getParent().getParent();
+        final Path jarDirectory;
+        try {
+            jarDirectory = applicationPropertiesPath.getParent().getParent().getParent().getParent();
+            Objects.requireNonNull(jarDirectory);
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Missing parent directory in path " + applicationPropertiesPath, e);
+        }
         final var buildDir = jarDirectory.resolve("build").resolve("libs");
         JAR_PATH = buildDir.resolve(JAR_FILENAME);
     }
@@ -109,7 +119,7 @@ public final class McBackEndProcess implements AutoCloseable {
         }
 
         synchronized String getLog() {
-            return logBytes.toString();
+            return logBytes.toString(ENCODING);
         }
 
 

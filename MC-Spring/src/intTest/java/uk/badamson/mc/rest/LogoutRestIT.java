@@ -85,7 +85,7 @@ public class LogoutRestIT extends RestIT {
     ) {
         final var cookies = login(loggedInUser);
         try {
-            return mcBackEndClient.logout(authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
+            return getMcBackEndClient().logout(authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
         } finally {
             logout(loggedInUser, cookies);// force logout
         }

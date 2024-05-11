@@ -112,7 +112,7 @@ public class UserRestIT extends RestIT {
         ) {
             final var cookies = login(loggedInUser);
             try {
-                return mcBackEndClient.addUser(
+                return getMcBackEndClient().addUser(
                         loggedInUser,
                         addingUserDetails,
                         cookies,
@@ -136,9 +136,9 @@ public class UserRestIT extends RestIT {
             final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
             final var userId = addUser(requestingUser);
 
-            mcBackEndClient.getSelf(requestingUser);
+            getMcBackEndClient().getSelf(requestingUser);
 
-            final var response2 = mcBackEndClient.getSelf(requestingUser);
+            final var response2 = getMcBackEndClient().getSelf(requestingUser);
 
             /*
              * We can not check the response body for equivalence to a JSON
@@ -161,7 +161,7 @@ public class UserRestIT extends RestIT {
         public void unknownUser() {
             final var detailsOfRequestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = mcBackEndClient.getSelf(detailsOfRequestingUser);
+            final var response = getMcBackEndClient().getSelf(detailsOfRequestingUser);
 
             response.expectStatus().isUnauthorized();
         }
@@ -177,7 +177,7 @@ public class UserRestIT extends RestIT {
                     true, true, true, true);
 
 
-            final var response = mcBackEndClient.getSelf(userDetailsWithWrongPassword);
+            final var response = getMcBackEndClient().getSelf(userDetailsWithWrongPassword);
 
             response.expectStatus().isUnauthorized();
         }
@@ -197,7 +197,7 @@ public class UserRestIT extends RestIT {
             private void test(final BasicUserDetails requestingUser) {
                 final var userId = addUser(requestingUser);
 
-                final var response = mcBackEndClient.getSelf(requestingUser);
+                final var response = getMcBackEndClient().getSelf(requestingUser);
 
                 response.expectStatus().isOk();
                 response.expectBody(UserResponse.class)
@@ -329,7 +329,7 @@ public class UserRestIT extends RestIT {
             BasicUserDetails authenticatingUser = includeAuthentication ? loggedInUser : null;
             final var cookies = login(loggedInUser);
             try {
-                return mcBackEndClient.getUser(
+                return getMcBackEndClient().getUser(
                         id,
                         authenticatingUser, cookies, includeSessionCookie, includeXsrfToken);
             } finally {

@@ -87,7 +87,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.createGameForScenario(
+                return getMcBackEndClient().createGameForScenario(
                         scenarioId,
                         includeAuthentication? user: null,
                         cookies,
@@ -189,7 +189,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.getGame(
+                return getMcBackEndClient().getGame(
                         gameId,
                         includeAuthentication? user: null, cookies,
                         includeSessionCookie, includeXsrfToken
@@ -290,7 +290,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.getGamesOfScenario(
+                return getMcBackEndClient().getGamesOfScenario(
                         scenarioId,
                         includeAuthentication? user: null, cookies,
                         includeSessionCookie, includeXsrfToken
@@ -414,7 +414,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.endRecruitment(gameId, includeAuthentication?user: null, cookies, includeSessionCookie, includeXsrfToken);
+                return getMcBackEndClient().endRecruitment(gameId, includeAuthentication?user: null, cookies, includeSessionCookie, includeXsrfToken);
             } finally {
                 logout(user, cookies);
             }
@@ -456,7 +456,7 @@ public class GameRestIT extends RestIT {
                 final WebTestClient.ResponseSpec response;
                 final var cookies = login(user);
                 try {
-                    response = mcBackEndClient.endRecruitment(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, true);
+                    response = getMcBackEndClient().endRecruitment(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, true);
                 } finally {
                     logout(user, cookies);
                 }
@@ -485,7 +485,7 @@ public class GameRestIT extends RestIT {
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
-                response = mcBackEndClient.getCurrentGame(
+                response = getMcBackEndClient().getCurrentGame(
                         user, cookies,
                         true, true
                 );
@@ -508,7 +508,7 @@ public class GameRestIT extends RestIT {
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
-                response = mcBackEndClient.getCurrentGame(
+                response = getMcBackEndClient().getCurrentGame(
                         null, cookies,
                         false, true
                 );
@@ -534,7 +534,7 @@ public class GameRestIT extends RestIT {
             final WebTestClient.ResponseSpec response;
             try {
                 userJoinsGame(gameId, user, cookies);
-                response = mcBackEndClient.getCurrentGame(
+                response = getMcBackEndClient().getCurrentGame(
                         null, cookies,
                         false, false
                 );
@@ -557,7 +557,7 @@ public class GameRestIT extends RestIT {
             final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.getCurrentGame(
+                response = getMcBackEndClient().getCurrentGame(
                         user, cookies,
                         true, false
                 );
@@ -648,7 +648,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.joinGame(
+                return getMcBackEndClient().joinGame(
                         gameId,
                         includeAuthentication? user: null, cookies,
                         includeSessionCookie, includeXsrfToken
@@ -672,7 +672,7 @@ public class GameRestIT extends RestIT {
             try {
                 userJoinsGame(gameIdB, ProcessFixtures.ADMINISTRATOR, cookies);
 
-                response = mcBackEndClient.joinGame(
+                response = getMcBackEndClient().joinGame(
                         gameIdA,
                         ProcessFixtures.ADMINISTRATOR, cookies,
                         true, true
@@ -787,7 +787,7 @@ public class GameRestIT extends RestIT {
                 final boolean includeXsrfToken) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.mayJoin(
+                return getMcBackEndClient().mayJoin(
                         gameId,
                         includeAuthentication? user: null, cookies,
                         includeSessionCookie, includeXsrfToken
@@ -844,7 +844,7 @@ public class GameRestIT extends RestIT {
             final var cookies = login(ProcessFixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, null, cookies, false, true);
+                response = getMcBackEndClient().startGame(gameId, null, cookies, false, true);
             } finally {
                 logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
@@ -857,7 +857,7 @@ public class GameRestIT extends RestIT {
             final var cookies = login(ProcessFixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, false);
+                response = getMcBackEndClient().startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, false);
             } finally {
                 logout(ProcessFixtures.ADMINISTRATOR, cookies);
             }
@@ -873,7 +873,7 @@ public class GameRestIT extends RestIT {
             final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
             try {
-                response = mcBackEndClient.startGame(gameId, user, cookies, true, true);
+                response = getMcBackEndClient().startGame(gameId, user, cookies, true, true);
             } finally {
                 logout(user, cookies);
             }
@@ -885,7 +885,7 @@ public class GameRestIT extends RestIT {
                 final BasicUserDetails user) {
             final var cookies = login(user);
             try {
-                return mcBackEndClient.startGame(gameId, user, cookies, true, true);
+                return getMcBackEndClient().startGame(gameId, user, cookies, true, true);
             } finally {
                 logout(user, cookies);
             }
@@ -964,8 +964,8 @@ public class GameRestIT extends RestIT {
             addUser(user);
             final var cookies = login(user);
             try {
-                mcBackEndClient.startGame(gameId, user, cookies, true, true);
-                return mcBackEndClient.stopGame(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, includeXsrfToken);
+                getMcBackEndClient().startGame(gameId, user, cookies, true, true);
+                return getMcBackEndClient().stopGame(gameId, includeAuthentication? user: null, cookies, includeSessionCookie, includeXsrfToken);
             } finally {
                 logout(user, cookies);
             }

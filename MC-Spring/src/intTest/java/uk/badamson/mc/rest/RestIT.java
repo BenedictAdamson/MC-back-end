@@ -40,7 +40,7 @@ public abstract class RestIT {
 
     private static MongoDBContainer mongoDBContainer;
     private static McBackEndProcess mcBackEndProcess;
-    protected static McBackEndClient mcBackEndClient;
+    private static McBackEndClient mcBackEndClient;
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
@@ -57,6 +57,10 @@ public abstract class RestIT {
     public static void tearDown() {
         mcBackEndProcess.close();
         mongoDBContainer.close();
+    }
+
+    protected final McBackEndClient getMcBackEndClient() {
+        return mcBackEndClient;
     }
 
     @Nonnull
@@ -90,9 +94,9 @@ public abstract class RestIT {
     }
 
     @Nonnull
-    protected final Stream<uk.badamson.mc.NamedUUID> getScenarios() {
-        return mcBackEndClient.getAllScenarios().returnResult(uk.badamson.mc.rest.NamedUUID.class)
-                .getResponseBody().toStream().map(ni -> new uk.badamson.mc.NamedUUID(ni.getId(), ni.getTitle()));
+    protected final Stream<NamedUUID> getScenarios() {
+        return mcBackEndClient.getAllScenarios().returnResult(NamedUUID.class)
+                .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
     protected final void userJoinsGame(

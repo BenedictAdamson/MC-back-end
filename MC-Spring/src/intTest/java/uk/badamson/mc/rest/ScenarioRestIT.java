@@ -35,7 +35,7 @@ public class ScenarioRestIT extends RestIT {
      */
     @Test
     public void getAll() {
-        final var response = mcBackEndClient.getAllScenarios();
+        final var response = getMcBackEndClient().getAllScenarios();
 
         response.expectStatus().isOk();
         response.expectBody(new ParameterizedTypeReference<List<NamedUUID>>() {})
@@ -53,7 +53,7 @@ public class ScenarioRestIT extends RestIT {
         public void absent() {
             final var id = UUID.randomUUID();
 
-            final var response = mcBackEndClient.getScenario(id);
+            final var response = getMcBackEndClient().getScenario(id);
 
             response.expectStatus().isNotFound();
         }
@@ -62,7 +62,7 @@ public class ScenarioRestIT extends RestIT {
         public void present() {
             final var id = getKnownScenarioId();
 
-            final var response = mcBackEndClient.getScenario(id);
+            final var response = getMcBackEndClient().getScenario(id);
 
             response.expectStatus().isOk();
             response.expectBody(ScenarioResponse.class)
