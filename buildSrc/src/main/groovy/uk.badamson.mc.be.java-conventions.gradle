@@ -29,7 +29,7 @@ repositories {
 }
 
 group = 'uk.badamson.mc'
-version = '3.2.8'
+version = '3.2.9'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
