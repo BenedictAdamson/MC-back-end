@@ -158,8 +158,6 @@ tasks.register('integrationTest', Test) {
 
     testClassesDirs = sourceSets.intTest.output.classesDirs
     classpath = sourceSets.intTest.runtimeClasspath
-    shouldRunAfter test
-    dependsOn ':MC-Spring:buildDockerImage'
 
     useJUnitPlatform()
 
