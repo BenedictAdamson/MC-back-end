@@ -12,8 +12,8 @@ plugins {
     id 'maven-publish'
 }
 
-def releasesRepoUrl = 'http://thegn:8081/repository/maven-releases/'
-def snapshotsRepoUrl = 'http://thegn:8081/repository/maven-snapshots/'
+def releasesRepoUrl = 'http://thegn:8081/releases/'
+def snapshotsRepoUrl = 'http://thegn:8081/snapshots/'
 
 repositories {
     mavenLocal()
