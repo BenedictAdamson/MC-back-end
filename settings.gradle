@@ -10,7 +10,7 @@ dependencyResolutionManagement {
             })
             version('mc', {
                 strictly '[3.2, 3.3['
-                prefer '3.2.4'
+                prefer '3.2.6'
             })
             version('spock', {
                 strictly '2.3-groovy-3.0'
@@ -46,7 +46,7 @@ dependencyResolutionManagement {
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
             library('testcontainers-junit', 'org.testcontainers', 'junit-jupiter').versionRef('testcontainers')
             library('testcontainers-mongodb', 'org.testcontainers', 'mongodb').versionRef('testcontainers')
-            library('dbc-assertions', 'uk.badamson:DBC-assertions:3.0.3')
+            library('dbc-assertions', 'uk.badamson:DBC-assertions:3.0.4')
             library('mc-core', 'uk.badamson.mc', 'MC-core').versionRef('mc')
             library('mc-model', 'uk.badamson.mc', 'MC-model').versionRef('mc')
         }
