@@ -9,6 +9,11 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.netflix.nebula.deb'
 
+
+description = 'MC-Spring'
+def dockerImage = "benedictadamson/mc-back-end:${project.version}"
+
+
 sourceSets {
     intTest {
         compileClasspath += sourceSets.main.output
@@ -16,11 +21,11 @@ sourceSets {
     }
 }
 
-
 configurations {
     intTestImplementation.extendsFrom implementation
     intTestRuntimeOnly.extendsFrom runtimeOnly
 }
+
 
 dependencies {
     api libs.mc.model
@@ -55,13 +60,12 @@ dependencies {
     intTestImplementation 'org.springframework:spring-test'
 }
 
-description = 'MC-Spring'
-def dockerImage = "benedictadamson/mc-back-end:${project.version}"
 
 java {
     withJavadocJar()
     withSourcesJar()
 }
+
 
 test {
     useJUnitPlatform()
