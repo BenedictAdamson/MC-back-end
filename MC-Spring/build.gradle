@@ -24,6 +24,7 @@ sourceSets {
 configurations {
     intTestImplementation.extendsFrom implementation
     intTestRuntimeOnly.extendsFrom runtimeOnly
+    frontEndResources
 }
 
 
@@ -58,6 +59,7 @@ dependencies {
     intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.30'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
+    frontEndResources 'uk.badamson.mc:MC-front-end:3.3.3:client@tgz'
 }
 
 
@@ -65,6 +67,18 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+
+tasks.register('importFrontEndResources', Copy) {
+    group = 'Other'
+    from tarTree(configurations.frontEndResources.singleFile)
+    include "MC-front-end-*/**"
+    eachFile { fcd ->
+        fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+    }
+    includeEmptyDirs = false
+    destinationDir file('build/resources/main/static')
+}
+tasks.processResources.dependsOn('importFrontEndResources')
 
 
 test {
