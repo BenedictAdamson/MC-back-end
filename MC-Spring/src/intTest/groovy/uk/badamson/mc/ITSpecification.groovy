@@ -39,7 +39,6 @@ import java.util.stream.Stream
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@Testcontainers
 abstract class ITSpecification extends Specification {
 
     private static final String MONGO_DB_PASSWORD = "LetMeIn1"
@@ -80,6 +79,7 @@ abstract class ITSpecification extends Specification {
         mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD)
         mcBackEndClient = new McBackEndClient("localhost", mcBackEndProcess.getServerPort())
         browser = createBrowserContainer()
+        browser.start()
         webDriver = new RemoteWebDriver(browser.getSeleniumAddress(), CAPABILITIES)
     }
 
@@ -97,15 +97,19 @@ abstract class ITSpecification extends Specification {
 
     void cleanup() {
         if (failureRecordingDirectory != null) {
-            retainScreenshot(specificationName)
+//FIXME            retainScreenshot(specificationName)
         }
     }
 
 
     void cleanupSpec() {
+        webDriver.close()
+        webDriver = null
+        browser.close()
+        browser = null
         mcBackEndProcess.close()
-        mongoDBContainer.close()
         mcBackEndProcess = null
+        mongoDBContainer.close()
         mongoDBContainer = null
     }
 
