@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -24,6 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import uk.badamson.mc.McBackEndClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -76,8 +77,10 @@ public final class HomePage extends Page {
      * @param webDriver The web driver interface to use for accessing the page.
      * @throws NullPointerException If {@code webDriver} is null.
      */
-    public HomePage(final WebDriver webDriver) {
-        super(webDriver);
+    public HomePage(
+            @Nonnull final McBackEndClient mcBackEndClient,
+            @Nonnull final WebDriver webDriver) {
+        super(mcBackEndClient, webDriver);
     }
 
     public void assertHeadingIncludesNameOfGame() {

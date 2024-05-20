@@ -73,6 +73,11 @@ public final class McBackEndClient {
         }
     }
 
+    public URI resolvePath(String path) {
+        // TODO change baseURL to be a URI
+        return URI.create(baseUrl).resolve(path);
+    }
+
     private static String encodeAsJson(final Object obj) {
         try {
             return OBJECT_MAPPER.writeValueAsString(obj);

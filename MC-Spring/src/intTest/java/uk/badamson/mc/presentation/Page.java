@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -25,7 +25,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.opentest4j.AssertionFailedError;
-import uk.badamson.mc.McContainers;
+import uk.badamson.mc.McBackEndClient;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
@@ -169,10 +169,6 @@ public abstract class Page {
         return assertHasElement("Has element " + by, parent, by);
     }
 
-    private static URI createUrl(final String path) {
-        return McContainers.createIngressPrivateNetworkUriFromPath(path);
-    }
-
     private static String getPathOfUrl(final String url) {
         return URI.create(url).getPath();
     }
@@ -194,6 +190,7 @@ public abstract class Page {
         return element.getAttribute("disabled") == null;
     }
 
+    private final McBackEndClient mcBackEndClient;
     private final WebDriver webDriver;
 
     private final Matcher<String> IS_VALID_PATH = new CustomTypeSafeMatcher<>("Has valid path") {
@@ -214,19 +211,25 @@ public abstract class Page {
      * @throws NullPointerException If {@code page} is null.
      */
     protected Page(@Nonnull final Page page) {
-        this.webDriver = Objects.requireNonNull(page, "page").webDriver;
+        Objects.requireNonNull(page, "page");
+        this.mcBackEndClient = page.mcBackEndClient;
+        this.webDriver = page.webDriver;
     }
 
     /**
      * <p>
-     * Construct a page object using a given web driver interface.
+     * Construct a page object not associated with an existing page.
      * </p>
      *
      * @param webDriver The web driver interface to use for accessing the page.
      * @throws NullPointerException If {@code webDriver} is null.
      */
-    protected Page(@Nonnull final WebDriver webDriver) {
+    protected Page(
+            @Nonnull final McBackEndClient mcBackEndClient,
+            @Nonnull final WebDriver webDriver
+    ) {
         this.webDriver = Objects.requireNonNull(webDriver, "webDriver");
+        this.mcBackEndClient = Objects.requireNonNull(mcBackEndClient, "mcBackEndClient");
     }
 
     public final void assertHasErrorMessage() {
@@ -367,11 +370,16 @@ public abstract class Page {
      *                                       a {@linkplain #getValidPath() fixed path}.
      */
     public final void get() throws UnsupportedOperationException {
+        webDriver.get(getUri().toASCIIString());
+    }
+
+    @Nonnull
+    private URI getUri() throws UnsupportedOperationException {
         final var path = getValidPath();
         if (path.isEmpty()) {
             throw new UnsupportedOperationException("No path to get");
         }
-        webDriver.get(createUrl(path.get()).toASCIIString());
+        return mcBackEndClient.resolvePath(path.get());
     }
 
     @Nonnull
