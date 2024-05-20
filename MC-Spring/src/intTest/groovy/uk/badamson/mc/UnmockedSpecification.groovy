@@ -7,7 +7,7 @@ import spock.lang.Specification
 
 import java.nio.file.Path
 /**
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *

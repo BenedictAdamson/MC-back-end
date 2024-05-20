@@ -51,15 +51,18 @@ dependencies {
     testImplementation libs.testcontainers.mongodb
     testImplementation libs.dbc.assertions
     compileOnly libs.persistence.api
+    intTestImplementation libs.groovy
     intTestImplementation libs.junit.jupiter.api
     intTestImplementation libs.junit.jupiter.engine
     intTestImplementation libs.junit.platform.console
     intTestImplementation libs.selenium.firefox.driver
     intTestImplementation libs.selenium.remote.driver
     intTestImplementation libs.selenium.support
+    intTestImplementation libs.spock.core
     intTestImplementation libs.testcontainers.junit
     intTestImplementation libs.testcontainers.mongodb
     intTestImplementation libs.testcontainers.selenium
+    intTestImplementation libs.testcontainers.spock
     intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.30'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
