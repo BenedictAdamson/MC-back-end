@@ -44,7 +44,7 @@ abstract class ITSpecification extends Specification {
 
     private static final String MONGO_DB_PASSWORD = "LetMeIn1"
     private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword()
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs")
+    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of('build', 'test-results', 'integrationTest', 'failure-records')
     private static final Capabilities CAPABILITIES = new FirefoxOptions()
             .addPreference("security.insecure_field_warning.contextual.enabled", false)
 
