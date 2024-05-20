@@ -54,8 +54,12 @@ dependencies {
     intTestImplementation libs.junit.jupiter.api
     intTestImplementation libs.junit.jupiter.engine
     intTestImplementation libs.junit.platform.console
+    intTestImplementation libs.selenium.firefox.driver
+    intTestImplementation libs.selenium.remote.driver
+    intTestImplementation libs.selenium.support
     intTestImplementation libs.testcontainers.junit
     intTestImplementation libs.testcontainers.mongodb
+    intTestImplementation libs.testcontainers.selenium
     intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.30'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'

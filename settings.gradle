@@ -12,6 +12,7 @@ dependencyResolutionManagement {
                 strictly '[3.2, 3.3['
                 prefer '3.2.6'
             })
+            version('selenium', '4.1.4')
             version('spock', {
                 strictly '2.3-groovy-3.0'
             })
@@ -42,10 +43,15 @@ dependencyResolutionManagement {
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
             library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.10.1')
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
+            library('selenium-firefox-driver', 'org.seleniumhq.selenium', 'selenium-firefox-driver').versionRef('selenium')
+            library('selenium-remote-driver', 'org.seleniumhq.selenium', 'selenium-remote-driver').versionRef('selenium')
+            library('selenium-support', 'org.seleniumhq.selenium', 'selenium-support').versionRef('selenium')
             library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
             library('testcontainers-junit', 'org.testcontainers', 'junit-jupiter').versionRef('testcontainers')
             library('testcontainers-mongodb', 'org.testcontainers', 'mongodb').versionRef('testcontainers')
+            library('testcontainers-selenium', 'org.testcontainers', 'selenium').versionRef('testcontainers')
+            library('testcontainers-spock', 'org.testcontainers', 'spock').versionRef('testcontainers')
             library('dbc-assertions', 'uk.badamson:DBC-assertions:3.0.4')
             library('mc-core', 'uk.badamson.mc', 'MC-core').versionRef('mc')
             library('mc-model', 'uk.badamson.mc', 'MC-model').versionRef('mc')
