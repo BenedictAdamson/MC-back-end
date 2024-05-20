@@ -6,7 +6,7 @@ import uk.badamson.mc.presentation.HomePage
 import javax.annotation.Nonnull
 
 /**
- * © Copyright Benedict Adamson 2020-23.
+ * © Copyright Benedict Adamson 2020-24.
  *
  * This file is part of MC.
  *
@@ -27,7 +27,7 @@ import javax.annotation.Nonnull
 /**
  * The Mission Command game can have multiple games (plays) for each scenario
  */
-class GameSpec extends UnmockedSpecification {
+class GameSpec extends ITSpecification {
 
     void setupSpec() {
         specificationName = 'GameSpec'
@@ -126,8 +126,8 @@ class GameSpec extends UnmockedSpecification {
     }
 
     private HomePage loginAsUserWithRole(@Nonnull final Authority role) {
-        def user = world.createUserWithRoles(Set.of(role), Set.of())
-        def homePage = world.navigateToHomePage()
+        def user = createUserWithRoles(Set.of(role), Set.of())
+        def homePage = navigateToHomePage()
         final var loginPage = homePage.navigateToLoginPage()
         loginPage.submitLoginForm(user.getUsername(), user.getPassword())
         homePage.awaitIsReady()
@@ -135,9 +135,9 @@ class GameSpec extends UnmockedSpecification {
     }
 
     private GamePage createGame(@Nonnull HomePage homePage) {
-        final var scenario = world.getScenarios().findFirst().get().getId()
+        final var scenario = getScenarios().findFirst().get().getId()
         final var scenarioIndex = 0
-        final var gameId = world.createGame(scenario)
+        final var gameId = createGame(scenario)
         final def scenarioPage = homePage.navigateToScenariosPage()
                 .navigateToScenario(scenarioIndex)
         scenarioPage.navigateToGamePage(gameId)

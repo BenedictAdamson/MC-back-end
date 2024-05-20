@@ -1,6 +1,6 @@
 package uk.badamson.mc
 /**
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -21,7 +21,7 @@ package uk.badamson.mc
 /**
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
  */
-class HomePageSpec extends UnmockedSpecification {
+class HomePageSpec extends ITSpecification {
 
     void setupSpec() {
         specificationName = 'HomePageSpec'
@@ -31,11 +31,11 @@ class HomePageSpec extends UnmockedSpecification {
         given: "the DNS name, example.com, of an MC server"
         // do nothing
         and: "not logged in"
-        world.currentUserIsUnknownUser()
+        currentUserIsUnknownUser()
         and: "not resuming a session"
         // do nothing
         when: "the potential user gives the obvious URL https://example.com/ to a web browser"
-        def homePage = world.navigateToHomePage()
+        def homePage = navigateToHomePage()
         then: "MC serves the home page"
         homePage.assertInvariants()
         and: "the home page title includes the name of the game"

@@ -1,6 +1,6 @@
 package uk.badamson.mc
 /**
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -21,7 +21,7 @@ package uk.badamson.mc
 /**
  * Mission Command is a multi-player game. To conserve resources, play on a server is restricted to only known (and presumably trusted) users.
  */
-class UserSpec extends UnmockedSpecification {
+class UserSpec extends ITSpecification {
 
   void setupSpec() {
     specificationName = 'UserSpec'
@@ -29,10 +29,10 @@ class UserSpec extends UnmockedSpecification {
 
   def "Login"() {
     given: "user with any role"
-    def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
+    def user = createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
 
     and: "not logged in"
-    def homePage = world.navigateToHomePage()
+    def homePage = navigateToHomePage()
 
     when: "log in using correct password"
     final var loginPage = homePage.navigateToLoginPage()
@@ -56,8 +56,8 @@ class UserSpec extends UnmockedSpecification {
 
   def "Logout"() {
     given: "logged in as user with any role"
-    def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
-    def homePage = world.navigateToHomePage()
+    def user = createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
+    def homePage = navigateToHomePage()
     def loginPage = homePage.navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
     homePage.awaitIsReady()
@@ -73,10 +73,10 @@ class UserSpec extends UnmockedSpecification {
 
   def "Login denied"() {
     given: "unknown user"
-    def user = world.currentUserIsUnknownUser()
+    def user = currentUserIsUnknownUser()
 
     when: "try to login"
-    final var loginPage = world.navigateToHomePage().navigateToLoginPage()
+    final var loginPage = navigateToHomePage().navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
     loginPage.awaitIsReadyAndErrorMessage()
 
