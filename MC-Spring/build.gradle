@@ -1,9 +1,10 @@
 plugins {
     id 'uk.badamson.mc.be.java-conventions'
-    id 'com.github.spotbugs' version '5.0.14'
-    id 'org.springframework.boot' version '2.7.17'
-    id 'com.netflix.nebula.deb' version '11.3.0'
+    id 'groovy'
     id 'pmd'
+    id 'com.github.spotbugs' version '5.0.14'
+    id 'com.netflix.nebula.deb' version '11.3.0'
+    id 'org.springframework.boot' version '2.7.17'
 }
 
 apply plugin: 'io.spring.dependency-management'
