@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2018-24.
  *
  * This file is part of MC.
  *
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * <p>
@@ -32,7 +31,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * </p>
  */
 @ComponentScan("uk.badamson.mc.presentation")
-@EnableWebMvc
 @Import(value = {SecurityConfiguration.class})
 public class PresentationLayerSpringConfiguration {
 
