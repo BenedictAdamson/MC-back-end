@@ -10,13 +10,13 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.testcontainers.containers.BrowserWebDriverContainer
 import org.testcontainers.containers.MongoDBContainer
-import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.presentation.HomePage
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Stream
@@ -43,7 +43,7 @@ abstract class ITSpecification extends Specification {
 
     private static final String MONGO_DB_PASSWORD = "LetMeIn1"
     private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword()
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of('build', 'test-results', 'integrationTest', 'failure-records')
+    private static final Path FAILURE_RECORDING_DIRECTORY = Path.of('build', 'test-results', 'integrationTest', 'failure-records')
     private static final Capabilities CAPABILITIES = new FirefoxOptions()
             .addPreference("security.insecure_field_warning.contextual.enabled", false)
 
@@ -61,9 +61,9 @@ abstract class ITSpecification extends Specification {
     @Shared
     protected static String specificationName = getClass().simpleName
     @Shared
-    private static Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY
-    @Shared
     private static int nUsers
+    @Shared
+    private static int nTests
 
     private static <TYPE> boolean intersects(final Set<TYPE> set1,
                                              final Set<TYPE> set2) {
@@ -73,6 +73,7 @@ abstract class ITSpecification extends Specification {
 
 
     void setupSpec() {
+        Files.createDirectories(FAILURE_RECORDING_DIRECTORY)
         mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE)
         mongoDBContainer.start()
         final def mongoDBPath = mongoDBContainer.getReplicaSetUrl()
@@ -83,22 +84,22 @@ abstract class ITSpecification extends Specification {
         webDriver = new RemoteWebDriver(browser.getSeleniumAddress(), CAPABILITIES)
     }
 
+    void setup() {
+        ++nTests
+    }
+
     @Nonnull
     private static BrowserWebDriverContainer createBrowserContainer() {
         final var browser = new BrowserWebDriverContainer<>()
         browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(Objects.requireNonNull(cmd).getHostConfig())
                 .withCpuCount(2L))
         browser.withCapabilities(CAPABILITIES)
-        if (failureRecordingDirectory != null) {
-            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile())
-        }
+        browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, FAILURE_RECORDING_DIRECTORY.toFile())
         browser
     }
 
     void cleanup() {
-        if (failureRecordingDirectory != null) {
-//FIXME            retainScreenshot(specificationName)
-        }
+        retainScreenshot()
     }
 
 
@@ -108,6 +109,7 @@ abstract class ITSpecification extends Specification {
         browser.close()
         browser = null
         mcBackEndProcess.close()
+        retainLog()
         mcBackEndProcess = null
         mongoDBContainer.close()
         mongoDBContainer = null
@@ -210,18 +212,25 @@ abstract class ITSpecification extends Specification {
         return new User(id, userDetails)
     }
 
-    private static void retainScreenshot(@Nonnull final String baseFileName) {
-        if (failureRecordingDirectory != null) {
-            final String leafName = baseFileName + ".png"
-            final Path path = failureRecordingDirectory.resolve(leafName)
-            try {
-                assert webDriver != null
-                final var bytes = webDriver.getScreenshotAs(OutputType.BYTES)
-                Files.write(path, bytes)
-            } catch (final IOException e) {
-                throw new RuntimeException(e)
-            }
+    private static void retainScreenshot() {
+        final String leafName = specificationName + "-" + nTests + ".png"
+        final Path path = FAILURE_RECORDING_DIRECTORY.resolve(leafName)
+        try {
+            assert webDriver != null
+            final var bytes = webDriver.getScreenshotAs(OutputType.BYTES)
+            Files.write(path, bytes)
+        } catch (final IOException e) {
+            throw new RuntimeException(e)
+        }
+    }
 
+    private static void retainLog() {
+        final String leafName = specificationName + ".log"
+        final Path path = FAILURE_RECORDING_DIRECTORY.resolve(leafName)
+        try {
+            Files.write(path, mcBackEndProcess.getLog().getBytes(StandardCharsets.UTF_8))
+        } catch (final IOException e) {
+            throw new RuntimeException(e)
         }
     }
 
