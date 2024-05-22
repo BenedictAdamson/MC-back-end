@@ -24,7 +24,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.*;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +49,7 @@ public final class McBackEndProcess implements AutoCloseable {
     private static final Duration POLL_INTERVAL = Duration.ofMillis(10);
     private static final RandomGenerator RANDOM_GENERATOR = RandomGenerator.getDefault();
     private static final Charset ENCODING = Charset.defaultCharset();
+    private static final InetAddress LOCAL_ADDRESS;
 
     static {
         final var applicationPropertiesUrl = Thread.currentThread().getContextClassLoader().getResource("application.properties");
@@ -67,6 +68,11 @@ public final class McBackEndProcess implements AutoCloseable {
         }
         final var buildDir = jarDirectory.resolve("build").resolve("libs");
         JAR_PATH = buildDir.resolve(JAR_FILENAME);
+        try {
+            LOCAL_ADDRESS = InetAddress.getByName("localhost");
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static void setEnvironment(
@@ -190,6 +196,7 @@ public final class McBackEndProcess implements AutoCloseable {
                 waitForLogMessage("Finished Spring Data repository scanning", Duration.ofSeconds(10));
                 waitForLogMessage("Opened connection", Duration.ofSeconds(5));
                 waitForLogMessage("Started", Duration.ofSeconds(30));
+                waitForListeningPort(serverPort, Duration.ofSeconds(5));
             } catch (TimeoutException e) {
                 delegate.close();
                 var e2 = new TimeoutException(
@@ -234,10 +241,11 @@ public final class McBackEndProcess implements AutoCloseable {
     }
 
     public void waitForLogMessage(
-            String message,
-            Duration timeout
+            @Nonnull String message,
+            @Nonnull Duration timeout
     ) throws IOException, InterruptedException, TimeoutException {
         Objects.requireNonNull(message);
+        Objects.requireNonNull(timeout);
         var now = Instant.now();
         String log = getLog();
         boolean found = log.contains(message);
@@ -254,6 +262,23 @@ public final class McBackEndProcess implements AutoCloseable {
         }
         if (!found) {
             throw new TimeoutException("Timeout while awaiting " + message);
+        }
+    }
+
+    public void waitForListeningPort(
+            @Nonnegative int port,
+            @Nonnull Duration timeout
+    ) throws IOException, TimeoutException {
+        Objects.requireNonNull(timeout);
+        var socketAddress = new InetSocketAddress(LOCAL_ADDRESS, port);
+        try {
+            try(final Socket s = new Socket()) {
+                s.connect(socketAddress, (int) timeout.toMillis());
+            }
+        } catch (SocketTimeoutException e) {
+            var e2 = new TimeoutException("Timeout while awaiting listening port");
+            e2.initCause(e);
+            throw e2;
         }
     }
 
