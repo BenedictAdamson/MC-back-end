@@ -25,10 +25,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.opentest4j.AssertionFailedError;
-import uk.badamson.mc.McBackEndClient;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -190,8 +191,8 @@ public abstract class Page {
         return element.getAttribute("disabled") == null;
     }
 
-    private final McBackEndClient mcBackEndClient;
     private final WebDriver webDriver;
+    private final URI baseUri;
 
     private final Matcher<String> IS_VALID_PATH = new CustomTypeSafeMatcher<>("Has valid path") {
 
@@ -212,7 +213,7 @@ public abstract class Page {
      */
     protected Page(@Nonnull final Page page) {
         Objects.requireNonNull(page, "page");
-        this.mcBackEndClient = page.mcBackEndClient;
+        this.baseUri = page.baseUri;
         this.webDriver = page.webDriver;
     }
 
@@ -220,16 +221,25 @@ public abstract class Page {
      * <p>
      * Construct a page object not associated with an existing page.
      * </p>
-     *
-     * @param webDriver The web driver interface to use for accessing the page.
-     * @throws NullPointerException If {@code webDriver} is null.
      */
     protected Page(
-            @Nonnull final McBackEndClient mcBackEndClient,
+            @Nonnegative final int serverPort,
             @Nonnull final WebDriver webDriver
     ) {
         this.webDriver = Objects.requireNonNull(webDriver, "webDriver");
-        this.mcBackEndClient = Objects.requireNonNull(mcBackEndClient, "mcBackEndClient");
+        this.baseUri = createBaseUri(serverPort);
+    }
+
+    @Nonnull
+    private static URI createBaseUri(@Nonnegative final int serverPort) {
+        try {
+            return new URI(
+                    "http", null, "host.testcontainers.internal", serverPort,
+                    null, null, null
+            );
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public final void assertHasErrorMessage() {
@@ -379,7 +389,7 @@ public abstract class Page {
         if (path.isEmpty()) {
             throw new UnsupportedOperationException("No path to get");
         }
-        return mcBackEndClient.resolvePath(path.get());
+        return baseUri.resolve(path.get());
     }
 
     @Nonnull

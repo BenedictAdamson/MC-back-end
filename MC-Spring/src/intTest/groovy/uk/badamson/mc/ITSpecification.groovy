@@ -8,6 +8,7 @@ import org.springframework.http.HttpCookie
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
+import org.testcontainers.Testcontainers
 import org.testcontainers.containers.BrowserWebDriverContainer
 import org.testcontainers.containers.MongoDBContainer
 import spock.lang.Shared
@@ -78,7 +79,9 @@ abstract class ITSpecification extends Specification {
         mongoDBContainer.start()
         final def mongoDBPath = mongoDBContainer.getReplicaSetUrl()
         mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD)
-        mcBackEndClient = new McBackEndClient("localhost", mcBackEndProcess.getServerPort())
+        def backEndPort = mcBackEndProcess.getServerPort()
+        mcBackEndClient = new McBackEndClient("localhost", backEndPort)
+        Testcontainers.exposeHostPorts(backEndPort)
         browser = createBrowserContainer()
         browser.start()
         webDriver = new RemoteWebDriver(browser.getSeleniumAddress(), CAPABILITIES)
@@ -243,7 +246,7 @@ abstract class ITSpecification extends Specification {
     }
 
     final HomePage navigateToHomePage() {
-        final var homePage = new HomePage(mcBackEndClient, webDriver)
+        final var homePage = new HomePage(mcBackEndProcess.getServerPort(), webDriver)
         homePage.get()
         homePage.awaitIsReady()
         return homePage

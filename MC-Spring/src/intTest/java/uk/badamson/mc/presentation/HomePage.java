@@ -26,6 +26,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import uk.badamson.mc.McBackEndClient;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import java.util.Optional;
@@ -78,9 +79,9 @@ public final class HomePage extends Page {
      * @throws NullPointerException If {@code webDriver} is null.
      */
     public HomePage(
-            @Nonnull final McBackEndClient mcBackEndClient,
+            @Nonnegative final int serverPort,
             @Nonnull final WebDriver webDriver) {
-        super(mcBackEndClient, webDriver);
+        super(serverPort, webDriver);
     }
 
     public void assertHeadingIncludesNameOfGame() {
