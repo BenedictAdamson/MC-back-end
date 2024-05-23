@@ -24,11 +24,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import uk.badamson.mc.McBackEndClient;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
+import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -76,12 +75,11 @@ public final class HomePage extends Page {
      * </p>
      *
      * @param webDriver The web driver interface to use for accessing the page.
-     * @throws NullPointerException If {@code webDriver} is null.
      */
     public HomePage(
-            @Nonnegative final int serverPort,
+            @Nonnull URI baseUri,
             @Nonnull final WebDriver webDriver) {
-        super(serverPort, webDriver);
+        super(baseUri, webDriver);
     }
 
     public void assertHeadingIncludesNameOfGame() {

@@ -15,6 +15,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.presentation.HomePage
 
+import javax.annotation.Nonnegative
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 import java.nio.charset.StandardCharsets
@@ -246,10 +247,22 @@ abstract class ITSpecification extends Specification {
     }
 
     final HomePage navigateToHomePage() {
-        final var homePage = new HomePage(mcBackEndProcess.getServerPort(), webDriver)
+        final var homePage = new HomePage(createBrowserBaseUri(mcBackEndProcess.getServerPort()), webDriver)
         homePage.get()
         homePage.awaitIsReady()
         return homePage
+    }
+
+    @Nonnull
+    private static URI createBrowserBaseUri(@Nonnegative final int serverPort) {
+        try {
+            return new URI(
+                    "http", null, "host.testcontainers.internal", serverPort,
+                    null, null, null
+            );
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
 }

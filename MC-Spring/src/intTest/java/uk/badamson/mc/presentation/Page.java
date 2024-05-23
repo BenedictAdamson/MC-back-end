@@ -26,10 +26,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.opentest4j.AssertionFailedError;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -223,23 +221,11 @@ public abstract class Page {
      * </p>
      */
     protected Page(
-            @Nonnegative final int serverPort,
+            @Nonnull URI baseUri,
             @Nonnull final WebDriver webDriver
     ) {
         this.webDriver = Objects.requireNonNull(webDriver, "webDriver");
-        this.baseUri = createBaseUri(serverPort);
-    }
-
-    @Nonnull
-    private static URI createBaseUri(@Nonnegative final int serverPort) {
-        try {
-            return new URI(
-                    "http", null, "host.testcontainers.internal", serverPort,
-                    null, null, null
-            );
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
+        this.baseUri = Objects.requireNonNull(baseUri, "baseUri");
     }
 
     public final void assertHasErrorMessage() {
