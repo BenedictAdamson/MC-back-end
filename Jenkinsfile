@@ -86,8 +86,9 @@ pipeline {
             junit 'MC-*/build/test-results/integrationTest/TEST-*.xml'
         }
         success {
-            archiveArtifacts artifacts: 'MC-*/build/distributions/*.deb', fingerprint: true
-            archiveArtifacts artifacts: 'MC-*/build/libs/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'MC-Spring/build/distributions/*.deb', fingerprint: true
+            archiveArtifacts artifacts: 'MC-REST/build/libs/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'MC-Spring/build/libs/*.jar', fingerprint: true
         }
     }
 }
