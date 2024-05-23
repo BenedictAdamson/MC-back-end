@@ -13,7 +13,7 @@ apply plugin: 'com.netflix.nebula.deb'
 import java.time.Instant
 
 description = 'MC-Spring'
-def dockerImage = "benedictadamson/mc-back-end:${project.version}"
+def dockerImage = "benedictadamson/mc-back-end:${version}"
 
 
 sourceSets {
@@ -98,11 +98,13 @@ test {
     }
 }
 
+String debVersion = (version as String).replace('-SNAPSHOT', '')
+int debRelease = (version as String).contains('-SNAPSHOT')? 1 : 2
 tasks.register('packageDeb', Deb) {
     group = 'Publishing'
     packageName = 'missioncommand-be'
-    version = (project.version as String).replace('-SNAPSHOT', '')
-    release = 1
+    version = debVersion
+    release = debRelease
     priority = 'optional'
     maintainer = 'Benedict Adamson <badamson@spamcop.net>'
     description = 'back-end of the MC game server'
@@ -134,7 +136,7 @@ tasks.register('packageDeb', Deb) {
         fileType CONFIG
         fileMode 0600
     }
-    link('/usr/share/lib/MC-Spring.jar', "MC-Spring-${project.version}.jar")
+    link('/usr/share/lib/MC-Spring.jar', "MC-Spring-${version}.jar")
 }
 
 tasks.register('prepareDockerBuildContext', Copy) {
