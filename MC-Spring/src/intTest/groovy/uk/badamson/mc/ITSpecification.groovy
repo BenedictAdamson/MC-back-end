@@ -11,6 +11,7 @@ import org.springframework.util.MultiValueMap
 import org.testcontainers.Testcontainers
 import org.testcontainers.containers.BrowserWebDriverContainer
 import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.lifecycle.TestDescription
 import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.presentation.HomePage
@@ -67,6 +68,18 @@ abstract class ITSpecification extends Specification {
     @Shared
     private static int nTests
 
+    private TestDescription description = new TestDescription() {
+        @Override
+        String getTestId() {
+            specificationName + '-' + nTests
+        }
+
+        @Override
+        String getFilesystemFriendlyName() {
+            getTestId()
+        }
+    }
+
     private static <TYPE> boolean intersects(final Set<TYPE> set1,
                                              final Set<TYPE> set2) {
         /* The sets intersect if we can find any element in both. */
@@ -91,6 +104,7 @@ abstract class ITSpecification extends Specification {
     void setup() {
         ++nTests
         webDriver.manage().deleteAllCookies()
+        browser.beforeTest(description)
     }
 
     @Nonnull
@@ -105,6 +119,7 @@ abstract class ITSpecification extends Specification {
 
     void cleanup() {
         retainScreenshot()
+        browser.afterTest(description, Optional.empty())
     }
 
 
