@@ -169,11 +169,13 @@ spotbugs {
     reportLevel = 'Low'
 }
 spotbugsTest.enabled = false
+spotbugsIntTest.enabled = false
 
 pmd {
     ruleSetConfig = resources.text.fromFile('src/test/resources/pmd-ruleset.xml')
 }
 pmdTest.enabled = false
+pmdIntTest.enabled = false
 
 processResources {
     expand(
