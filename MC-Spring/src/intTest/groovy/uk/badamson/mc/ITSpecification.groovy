@@ -90,6 +90,7 @@ abstract class ITSpecification extends Specification {
 
     void setup() {
         ++nTests
+        webDriver.manage().deleteAllCookies()
     }
 
     @Nonnull
