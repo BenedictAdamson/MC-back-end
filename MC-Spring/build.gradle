@@ -10,6 +10,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.netflix.nebula.deb'
 
+import java.time.Instant
 
 description = 'MC-Spring'
 def dockerImage = "benedictadamson/mc-back-end:${project.version}"
@@ -174,8 +175,11 @@ pmd {
 }
 pmdTest.enabled = false
 
-processIntTestResources {
-    expand(projectVersion: project.version)
+processResources {
+    expand(
+            version: version,
+            timestamp: Instant.now().toString()
+    )
 }
 
 tasks.register('integrationTest', Test) {
