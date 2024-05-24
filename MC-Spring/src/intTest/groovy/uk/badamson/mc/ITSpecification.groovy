@@ -124,15 +124,23 @@ abstract class ITSpecification extends Specification {
 
 
     void cleanupSpec() {
-        webDriver.close()
-        webDriver = null
-        browser.close()
-        browser = null
-        mcBackEndProcess.close()
-        retainLog()
-        mcBackEndProcess = null
-        mongoDBContainer.close()
-        mongoDBContainer = null
+        if (webDriver != null) {
+            webDriver.close()
+            webDriver = null
+        }
+        if (browser != null) {
+            browser.close()
+            browser = null
+        }
+        if (mcBackEndProcess != null) {
+            mcBackEndProcess.close()
+            retainLog()
+            mcBackEndProcess = null
+        }
+        if (mongoDBContainer != null) {
+            mongoDBContainer.close()
+            mongoDBContainer = null
+        }
     }
 
     @Nonnull
