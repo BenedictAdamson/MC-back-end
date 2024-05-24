@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020,22.
+ * © Copyright Benedict Adamson 2020-24.
  *
  * This file is part of MC.
  *
@@ -40,9 +40,15 @@ public class SecurityConfiguration {
 
     private static void configureAuthorizedRequests(final HttpSecurity http)
             throws Exception {
-        http.authorizeRequests().antMatchers("/api/user/**").authenticated();
-        http.authorizeRequests().antMatchers("/login", "/logout").permitAll();
-        http.authorizeRequests().antMatchers("/api/game/**").authenticated();
+        http.securityMatcher("/api/user/**").authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated()
+        );
+        http.securityMatcher("/login", "/logout").authorizeHttpRequests(authorize -> authorize
+                .anyRequest().permitAll()
+        );
+        http.securityMatcher("/api/game/**").authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated()
+        );
     }
 
 

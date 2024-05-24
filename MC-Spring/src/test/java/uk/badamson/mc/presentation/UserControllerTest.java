@@ -82,7 +82,7 @@ public class UserControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> addUser(request));
 
-            assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+            assertThat(exception.getStatusCode(), is(HttpStatus.CONFLICT));
         }
 
         @Test
@@ -94,7 +94,7 @@ public class UserControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> addUser(request));
 
-            assertThat(exception.getStatus(), is(HttpStatus.BAD_REQUEST));
+            assertThat(exception.getStatusCode(), is(HttpStatus.BAD_REQUEST));
         }
 
         private ResponseEntity<Void> addUser(
@@ -160,7 +160,7 @@ public class UserControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> test(id));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test

@@ -21,6 +21,7 @@ package uk.badamson.mc.presentation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 import uk.badamson.mc.NamedUUID;
 import uk.badamson.mc.rest.ScenarioResponse;
@@ -54,7 +55,7 @@ public class ScenarioControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> getScenario(scenario));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test

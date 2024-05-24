@@ -12,9 +12,9 @@ dependencyResolutionManagement {
                 strictly '[3.2, 3.3['
                 prefer '3.2.6'
             })
-            version('selenium', '4.1.4')
+            version('selenium', '4.5.3')
             version('spock', {
-                strictly '2.3-groovy-3.0'
+                strictly '2.3-groovy-4.0'
             })
             version('testcontainers', {
                 strictly '[1.19, 1.20['
@@ -22,8 +22,8 @@ dependencyResolutionManagement {
             })
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
-                strictly '[1.2, 1.5['
-                prefer '1.2.12'
+                strictly '[1.4, 1.6['
+                prefer '1.4.11'
             }
             library('jackson-datatype-jsr310', 'com.fasterxml.jackson.datatype', 'jackson-datatype-jsr310').version {
                 strictly '[2.13, 2.15['
@@ -34,11 +34,12 @@ dependencyResolutionManagement {
                 strictly '[4.8, 4.9['
                 prefer '4.8.5'
             }
-            library('groovy', 'org.codehaus.groovy', 'groovy').version {
-                strictly '[3.0, 3.1['
-                prefer '3.0.19'
+            library('groovy', 'org.apache.groovy', 'groovy').version {
+                strictly '[4.0, 4.1['
+                prefer '4.0.15'
             }
             library('hamcrest', 'org.hamcrest:hamcrest:2.2')
+            library('jsr250-api', 'javax.annotation:jsr250-api:1.0')
             library('junit-jupiter-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
             library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.10.1')

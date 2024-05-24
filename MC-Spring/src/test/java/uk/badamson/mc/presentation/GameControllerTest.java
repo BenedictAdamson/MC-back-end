@@ -52,7 +52,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> createGameForScenario(scenario));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -85,7 +85,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> getGameIdentifiersOfScenario(scenario));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -116,7 +116,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> getGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -171,7 +171,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> startGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -196,7 +196,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> startGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+            assertThat(exception.getStatusCode(), is(HttpStatus.CONFLICT));
         }
 
         private ResponseEntity<Void> startGame(
@@ -218,7 +218,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> stopGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -253,7 +253,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> endRecruitment(game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -283,7 +283,7 @@ public class GameControllerTest extends ControllerTest {
         public void noAuthenticatedUser() {
             final var exception = assertThrows(ResponseStatusException.class, () -> getCurrentGame(null));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -292,7 +292,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> getCurrentGame(user));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
@@ -324,7 +324,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> joinGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
 
         }
 
@@ -336,7 +336,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> joinGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+            assertThat(exception.getStatusCode(), is(HttpStatus.CONFLICT));
         }
 
         @Test
@@ -348,7 +348,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> joinGame(user, gameA));
 
-            assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+            assertThat(exception.getStatusCode(), is(HttpStatus.CONFLICT));
 
         }
 
@@ -385,7 +385,7 @@ public class GameControllerTest extends ControllerTest {
 
             final var exception = assertThrows(ResponseStatusException.class, () -> mayJoinGame(user, game));
 
-            assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
+            assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
         }
 
         @Test
