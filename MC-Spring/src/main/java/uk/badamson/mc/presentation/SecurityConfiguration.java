@@ -21,6 +21,7 @@ package uk.badamson.mc.presentation;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,17 +39,22 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
         justification = "delegates to framework method that does so")
 public class SecurityConfiguration {
 
-    private static void configureAuthorizedRequests(final HttpSecurity http)
+    @Bean
+    @Order(2)
+    public SecurityFilterChain  authenticatedPathsSecurityFilterChain(final HttpSecurity http)
             throws Exception {
-        http.securityMatcher("/api/user/**").authorizeHttpRequests(authorize -> authorize
+        return http.securityMatcher("/api/user/**", "/api/game/**").authorizeHttpRequests(authorize -> authorize
                 .anyRequest().authenticated()
-        );
-        http.securityMatcher("/login", "/logout").authorizeHttpRequests(authorize -> authorize
+        ).build();
+    }
+
+    @Bean
+    @Order(3)
+    public SecurityFilterChain permitAllPathsSecurityFilterChain(final HttpSecurity http)
+            throws Exception {
+        return http.securityMatcher("/login", "/logout").authorizeHttpRequests(authorize -> authorize
                 .anyRequest().permitAll()
-        );
-        http.securityMatcher("/api/game/**").authorizeHttpRequests(authorize -> authorize
-                .anyRequest().authenticated()
-        );
+        ).build();
     }
 
 
@@ -63,10 +69,10 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain pathlessSecurityFilterChain(HttpSecurity http) throws Exception {
         configureHttpBasic(http);
         configureCsrfProtection(http);
-        configureAuthorizedRequests(http);
         // login and logout pages are configured by default
         return http.build();
     }
