@@ -102,6 +102,9 @@ test {
 String debVersion = (version as String).replace('-SNAPSHOT', '')
 int debRelease = (version as String).contains('-SNAPSHOT')? 1 : 2
 tasks.register('packageDeb', Deb) {
+    inputs.property('debVersion', debVersion)
+    inputs.property('debRelease', debRelease)
+
     group = 'Publishing'
     packageName = 'missioncommand-be'
     version = debVersion
@@ -151,6 +154,8 @@ tasks.register('prepareDockerBuildContext', Copy) {
     into "${project.buildDir}/docker/context"
 }
 tasks.register('buildDockerImage', Exec) {
+    inputs.property('dockerImage', dockerImage)
+
     group = 'Publishing'
     dependsOn ':MC-Spring:prepareDockerBuildContext'
     commandLine 'docker', 'build', '--tag', dockerImage, "${project.buildDir}/docker/context"
@@ -191,7 +196,7 @@ tasks.register('integrationTest', Test) {
     description = 'Runs integration tests.'
     group = 'verification'
 
-    dependsOn test
+    dependsOn tasks.bootJar
 
     testClassesDirs = sourceSets.intTest.output.classesDirs
     classpath = sourceSets.intTest.runtimeClasspath
