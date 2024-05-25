@@ -1,0 +1,2 @@
+MC-back-end ${version}
+© Copyright Benedict Adamson 2019-24.
