@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * Tests {@link SecurityConfiguration}.
@@ -215,6 +216,11 @@ public class UserRestIT extends RestIT {
                                 UserResponse::authorities,
                                 is(AuthorityValue.convertToValue(requestingUser.getAuthorities()))
                         );
+                final var cookies = response.returnResult(UserResponse.class).getResponseCookies();
+                assertAll(
+                        () -> assertThat(cookies, hasKey(McBackEndClient.SESSION_COOKIE_NAME)),
+                        () -> assertThat(cookies, hasKey(McBackEndClient.XSRF_TOKEN_COOKIE_NAME))
+                );
             }
 
         }
