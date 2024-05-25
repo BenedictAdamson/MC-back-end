@@ -194,27 +194,41 @@ public class UserRestIT extends RestIT {
         @Nested
         public class Valid {
             @Test
+            public void administrator() {
+                final BasicUserDetails user = ProcessFixtures.ADMINISTRATOR;
+
+                final var response = getMcBackEndClient().getSelf(user);
+
+                verifyResponse(response, User.ADMINISTRATOR_ID, user);
+            }
+
+            @Test
             public void a() {
-                test(ProcessFixtures.createBasicUserDetailsWithAllRoles());
+                testForNewUser(ProcessFixtures.createBasicUserDetailsWithAllRoles());
             }
 
             @Test
             public void b() {
-                test(ProcessFixtures.createBasicUserDetailsWithPlayerRole());
+                testForNewUser(ProcessFixtures.createBasicUserDetailsWithPlayerRole());
             }
 
-            private void test(final BasicUserDetails requestingUser) {
+            private void testForNewUser(final BasicUserDetails requestingUser) {
                 final var userId = addUser(requestingUser);
 
                 final var response = getMcBackEndClient().getSelf(requestingUser);
 
+                verifyResponse(response, userId, requestingUser);
+            }
+
+            private static void verifyResponse(
+                    WebTestClient.ResponseSpec response, UUID userId, BasicUserDetails user) {
                 response.expectStatus().isOk();
                 response.expectBody(UserResponse.class)
                         .value(UserResponse::id, is(userId))
-                        .value(UserResponse::username, is(requestingUser.getUsername()))
+                        .value(UserResponse::username, is(user.getUsername()))
                         .value(
                                 UserResponse::authorities,
-                                is(AuthorityValue.convertToValue(requestingUser.getAuthorities()))
+                                is(AuthorityValue.convertToValue(user.getAuthorities()))
                         );
                 final var cookies = response.returnResult(UserResponse.class).getResponseCookies();
                 assertAll(
