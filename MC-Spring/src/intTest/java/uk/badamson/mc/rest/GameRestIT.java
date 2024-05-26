@@ -406,11 +406,10 @@ public class GameRestIT extends RestIT {
 
         @Test
         public void insufficientAuthority() {
-            // Tough test: game exists, user has all other authorities, and CSRF
+            // Tough test: game exists, user has all other authorities, and session
             // token provided
             final var gameId = createGame();
-            final var authorities = EnumSet.complementOf(EnumSet
-                    .of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES));
+            final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
             final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
             addUser(user);
 
