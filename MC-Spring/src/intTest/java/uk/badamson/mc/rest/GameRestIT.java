@@ -946,10 +946,8 @@ public class GameRestIT extends RestIT {
         @Test
         public void insufficientAuthority() {
             final var gameId = createGame();
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)));
-            addUser(user);
 
-            final var response = test(user, gameId, true, true, true);
+            final var response = test(userWithoutManageGamesRole, gameId, true, true, true);
 
             response.expectStatus().isForbidden();
         }
