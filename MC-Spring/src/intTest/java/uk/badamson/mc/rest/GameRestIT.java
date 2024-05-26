@@ -42,11 +42,16 @@ import static org.hamcrest.Matchers.*;
 public class GameRestIT extends RestIT {
 
     private static BasicUserDetails userWithManageGamesRole;
+    private static BasicUserDetails userWithoutManageGamesRole;
 
     @BeforeAll
     public static void setupUsers() {
         userWithManageGamesRole = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
+        userWithoutManageGamesRole = ProcessFixtures.createBasicUserDetailsWithAuthorities(
+                EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
+        );
         addUser(userWithManageGamesRole);
+        addUser(userWithoutManageGamesRole);
     }
 
     /**
@@ -76,11 +81,8 @@ public class GameRestIT extends RestIT {
         @Test
         public void insufficientAuthority() {
             final var scenarioId = getAScenarioId();
-            final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            addUser(user);
 
-            final var response = test(scenarioId, user, true, true, true);
+            final var response = test(scenarioId, userWithoutManageGamesRole, true, true, true);
 
             response.expectStatus().isForbidden();
         }
@@ -409,11 +411,8 @@ public class GameRestIT extends RestIT {
             // Tough test: game exists, user has all other authorities, and session
             // token provided
             final var gameId = createGame();
-            final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            addUser(user);
 
-            final var response = test(gameId, user, true, true, false);
+            final var response = test(gameId, userWithoutManageGamesRole, true, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -879,9 +878,7 @@ public class GameRestIT extends RestIT {
         @Test
         public void insufficientAuthority() {
             final var gameId = createGame();
-            Set<Authority> authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES));
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            addUser(user);
+            final var user = userWithoutManageGamesRole;
             final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
             try {
