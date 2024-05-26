@@ -19,6 +19,7 @@ package uk.badamson.mc.rest;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * Tests Spring annotations on {@link UserController}.
  */
 public class UserRestIT extends RestIT {
+    private static BasicUserDetails userWithAllRoles;
+    private static UUID userWithAllRolesId;
+
+    @BeforeAll
+    public static void setupUsers() {
+        userWithAllRoles = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+        userWithAllRolesId = addUser(userWithAllRoles);
+    }
 
     /**
      * Tests Spring annotations on {@link UserController#addUser(UserDetailsRequest)}
@@ -52,19 +61,16 @@ public class UserRestIT extends RestIT {
 
         @Test
         public void administrator() {
-            final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            addUser(performingUser);
-
-            final var response = test(performingUser, ProcessFixtures.ADMINISTRATOR, true, true);
+            final var response = test(userWithAllRoles, ProcessFixtures.ADMINISTRATOR, true, true);
 
             response.expectStatus().isBadRequest();
         }
 
         @Test
         public void duplicate() {
-            final var performingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            addUser(performingUser);
+            final var performingUser = userWithAllRoles;
             final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+
             test(performingUser, addingUserDetails, true, true);
 
             final var response = test(performingUser, addingUserDetails, true, true);
@@ -151,8 +157,8 @@ public class UserRestIT extends RestIT {
 
         @Test
         public void twice() {
-            final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var userId = addUser(requestingUser);
+            final var requestingUser = userWithAllRoles;
+            final var userId = userWithAllRolesId;
 
             getMcBackEndClient().getSelf(requestingUser);
 
@@ -187,8 +193,7 @@ public class UserRestIT extends RestIT {
         @Test
         public void wrongPassword() {
             // Tough test: user-name is valid
-            final var detailsOfRealUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            addUser(detailsOfRealUser);
+            final var detailsOfRealUser = userWithAllRoles;
             final var userDetailsWithWrongPassword = new BasicUserDetails(detailsOfRealUser.getUsername(),
                     "wrong-password",
                     detailsOfRealUser.getAuthorities(),
@@ -213,17 +218,20 @@ public class UserRestIT extends RestIT {
 
             @Test
             public void a() {
-                testForNewUser(ProcessFixtures.createBasicUserDetailsWithAllRoles());
+                test(userWithAllRoles, userWithAllRolesId);
             }
 
             @Test
             public void b() {
-                testForNewUser(ProcessFixtures.createBasicUserDetailsWithPlayerRole());
+                BasicUserDetails requestingUser = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+                final var userId = addUser(requestingUser);
+                test(requestingUser, userId);
             }
 
-            private void testForNewUser(final BasicUserDetails requestingUser) {
-                final var userId = addUser(requestingUser);
-
+            private void test(
+                    final BasicUserDetails requestingUser,
+                    final UUID userId
+            ) {
                 final var response = getMcBackEndClient().getSelf(requestingUser);
 
                 verifyResponse(response, userId, requestingUser);
@@ -265,8 +273,7 @@ public class UserRestIT extends RestIT {
             final var requestingUser = new BasicUserDetails(ProcessFixtures.createUserName(), "password1",
                     authorities, true, true, true, true);
             addUser(requestingUser);
-            final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = addUser(requestedUser);
+            final var requestedUserId = userWithAllRolesId;
 
             final var response = test(requestedUserId, requestingUser, true, true, true);
 
@@ -276,8 +283,7 @@ public class UserRestIT extends RestIT {
         @Test
         public void noAuthentication() {
             // Tough test: user exists
-            final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-            final var requestedUserId = addUser(requestedUser);
+            final var requestedUserId = userWithAllRolesId;
 
             final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, false, false, false);
 
@@ -304,8 +310,7 @@ public class UserRestIT extends RestIT {
 
             @Test
             public void requesterIsAdministrator() {
-                final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = addUser(requestedUser);
+                final var requestedUserId = userWithAllRolesId;
 
                 final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
 
@@ -344,8 +349,7 @@ public class UserRestIT extends RestIT {
                 final var requestingUser = new BasicUserDetails(requestingUserName, "password1",
                         authorities, true, true, true, true);
                 addUser(requestingUser);
-                final var requestedUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
-                final var requestedUserId = addUser(requestedUser);
+                final var requestedUserId = userWithAllRolesId;
 
                 final var response = test(
                         requestedUserId, requestingUser,
