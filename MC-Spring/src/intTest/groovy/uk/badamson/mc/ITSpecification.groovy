@@ -283,9 +283,9 @@ abstract class ITSpecification extends Specification {
             return new URI(
                     "http", null, "host.testcontainers.internal", serverPort,
                     null, null, null
-            );
+            )
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(e)
         }
     }
 
