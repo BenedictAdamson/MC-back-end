@@ -5,20 +5,20 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             version('junit', {
-                strictly '[5.9, 5.10['
-                prefer '5.9.3'
+                strictly '[5.10, 5.11['
+                prefer '5.10.2'
             })
             version('mc', {
                 strictly '[3.2, 3.3['
                 prefer '3.2.6'
             })
-            version('selenium', '4.8.3')
+            version('selenium', '4.14.1')
             version('spock', {
                 strictly '2.3-groovy-4.0'
             })
             version('testcontainers', {
                 strictly '[1.19, 1.20['
-                prefer '1.19.1'
+                prefer '1.19.8'
             })
 
             library('logback-classic', 'ch.qos.logback', 'logback-classic').version {
