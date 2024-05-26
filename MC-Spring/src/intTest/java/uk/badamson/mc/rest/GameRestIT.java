@@ -19,6 +19,7 @@ package uk.badamson.mc.rest;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
@@ -39,6 +40,14 @@ import static org.hamcrest.Matchers.*;
  * Tests Spring annotations on {@link GameController}.
  */
 public class GameRestIT extends RestIT {
+
+    private static BasicUserDetails userWithManageGamesRole;
+
+    @BeforeAll
+    public static void setupUsers() {
+        userWithManageGamesRole = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
+        addUser(userWithManageGamesRole);
+    }
 
     /**
      * Tests Spring annotations on {@link GameController#createGameForScenario(UUID)}
@@ -114,10 +123,7 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void verboseByNonAdministrator() {
-                final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                addUser(user);
-
-                test(user, true, true);
+                test(userWithManageGamesRole, true, true);
             }
 
             @Test
@@ -328,10 +334,7 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void asManageGamesRole() {
-                final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                addUser(user);
-
-                test(user, true, true, true);
+                test(userWithManageGamesRole, true, true, true);
             }
 
             @Test
@@ -441,10 +444,7 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void manageGamesRole() {
-                final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-                addUser(user);
-
-                test(user, true, true);
+                test(userWithManageGamesRole, true, true);
             }
 
             @Test
@@ -844,10 +844,8 @@ public class GameRestIT extends RestIT {
         @Test
         public void validRequest() {
             final var gameId = createGame();
-            final var user = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-            addUser(user);
 
-            final var response = testAuthenticated(gameId, user);
+            final var response = testAuthenticated(gameId, userWithManageGamesRole);
 
             response.expectStatus().isFound();
             response.expectHeader().location(Paths.createPathForGame(gameId));

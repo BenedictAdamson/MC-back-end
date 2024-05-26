@@ -118,7 +118,7 @@ public abstract class RestIT {
     }
 
     @Nonnull
-    protected final UUID addUser(@Nonnull final BasicUserDetails userDetails) {
+    protected static UUID addUser(@Nonnull final BasicUserDetails userDetails) {
         Objects.requireNonNull(userDetails, "userDetails");
 
         final var cookies = login(ProcessFixtures.ADMINISTRATOR);
@@ -141,7 +141,7 @@ public abstract class RestIT {
     }
 
     @Nonnull
-    protected final MultiValueMap<String, HttpCookie> login(
+    protected static MultiValueMap<String, HttpCookie> login(
             @Nonnull final BasicUserDetails user
     ) {
         final var response = mcBackEndClient.getSelf(user);
@@ -159,7 +159,7 @@ public abstract class RestIT {
         return result;
     }
 
-    protected final void logout(
+    protected static void logout(
             @Nullable final BasicUserDetails user,
             @Nonnull final MultiValueMap<String, HttpCookie> cookies
     ) {
