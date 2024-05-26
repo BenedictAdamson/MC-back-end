@@ -4,7 +4,7 @@ plugins {
     id 'pmd'
     id 'com.github.spotbugs' version '5.0.14'
     id 'com.netflix.nebula.deb' version '11.3.0'
-    id 'org.springframework.boot' version '3.0.13'
+    id 'org.springframework.boot' version '3.1.12'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -65,7 +65,7 @@ dependencies {
     intTestImplementation libs.testcontainers.mongodb
     intTestImplementation libs.testcontainers.selenium
     intTestImplementation libs.testcontainers.spock
-    intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.1.13'
+    intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.1.19'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
     frontEndResources 'uk.badamson.mc:MC-front-end:3.3.3:client@tgz'
