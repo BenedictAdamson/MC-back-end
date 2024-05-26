@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -36,7 +36,6 @@ import uk.badamson.mc.service.UserSpringService;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
@@ -56,7 +55,7 @@ public class UserController {
 
     @PostMapping(Paths.USERS_PATH)
     @ResponseStatus(HttpStatus.CREATED)
-    @RolesAllowed("MANAGE_USERS")
+    @PreAuthorize("hasRole('MANAGE_USERS')")
     public ResponseEntity<Void> addUser(
             @RequestBody final UserDetailsRequest detailsOfUserToAdd
     ) {
@@ -87,7 +86,7 @@ public class UserController {
     }
 
     @GetMapping(Paths.USER_PATH_PATTERN)
-    @RolesAllowed("MANAGE_USERS")
+    @PreAuthorize("hasRole('MANAGE_USERS')")
     @Nonnull
     public UserResponse getUser(@Nonnull @PathVariable("id") final UUID id) {
         return service.getUser(id)

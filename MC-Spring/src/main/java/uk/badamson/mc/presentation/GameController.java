@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -23,6 +23,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +42,6 @@ import uk.badamson.mc.spring.SpringAuthority;
 import uk.badamson.mc.spring.SpringUser;
 
 import javax.annotation.Nonnull;
-import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class GameController {
 
     @PostMapping(Paths.GAMES_PATH_PATTERN)
     @Nonnull
-    @RolesAllowed("MANAGE_GAMES")
+    @PreAuthorize("hasRole('MANAGE_GAMES')")
     public ResponseEntity<Void> createGameForScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
         try {
@@ -83,7 +83,7 @@ public class GameController {
     }
 
     @GetMapping(Paths.GAMES_PATH_PATTERN)
-    @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
+    @PreAuthorize("hasRole('MANAGE_GAMES') || hasRole('PLAYER')")
     @Nonnull
     public Set<NamedUUID> getGameIdentifiersOfScenario(
             @Nonnull @PathVariable("scenario") final UUID scenario) {
@@ -95,7 +95,7 @@ public class GameController {
     }
 
     @GetMapping(Paths.GAME_PATH_PATTERN)
-    @RolesAllowed({"MANAGE_GAMES", "PLAYER"})
+    @PreAuthorize("hasRole('MANAGE_GAMES') || hasRole('PLAYER')")
     @Nonnull
     public GameResponse getGame(
             @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
@@ -117,7 +117,7 @@ public class GameController {
     }
 
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.GAME_START_PARAM})
-    @RolesAllowed("MANAGE_GAMES")
+    @PreAuthorize("hasRole('MANAGE_GAMES')")
     @Nonnull
     public ResponseEntity<Void> startGame(
             @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
@@ -134,7 +134,7 @@ public class GameController {
     }
 
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.GAME_STOP_PARAM})
-    @RolesAllowed("MANAGE_GAMES")
+    @PreAuthorize("hasRole('MANAGE_GAMES')")
     @Nonnull
     public ResponseEntity<Void> stopGame(
             @Nonnull @AuthenticationPrincipal final SpringUser requestingUser,
@@ -149,7 +149,7 @@ public class GameController {
     }
 
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.END_GAME_RECRUITMENT_PARAM})
-    @RolesAllowed("MANAGE_GAMES")
+    @PreAuthorize("hasRole('MANAGE_GAMES')")
     @Nonnull
     public ResponseEntity<Void> endRecruitment(
             @Nonnull @PathVariable("game") final UUID game) {
@@ -184,7 +184,7 @@ public class GameController {
     }
 
     @PostMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.JOIN_GAME_PARAM})
-    @RolesAllowed("PLAYER")
+    @PreAuthorize("hasRole('PLAYER')")
     @Nonnull
     public ResponseEntity<Void> joinGame(
             @Nonnull @AuthenticationPrincipal final SpringUser user,
@@ -203,7 +203,7 @@ public class GameController {
     }
 
     @GetMapping(path = Paths.GAME_PATH_PATTERN, params = {Paths.MAY_JOIN_GAME_PARAM})
-    @RolesAllowed("PLAYER")
+    @PreAuthorize("hasRole('PLAYER')")
     public boolean mayJoinGame(@Nonnull @AuthenticationPrincipal final SpringUser user,
                                @Nonnull @PathVariable("game") final UUID game) {
         Objects.requireNonNull(user, "user");

@@ -36,7 +36,6 @@ dependencies {
     api project(':MC-REST')
     api libs.jackson.datatype.jsr310
     api libs.spotbugs
-    api libs.jsr250.api
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-json'

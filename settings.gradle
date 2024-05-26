@@ -39,7 +39,6 @@ dependencyResolutionManagement {
                 prefer '4.0.15'
             }
             library('hamcrest', 'org.hamcrest:hamcrest:2.2')
-            library('jsr250-api', 'javax.annotation:jsr250-api:1.0')
             library('junit-jupiter-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
             library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.10.1')

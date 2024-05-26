@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 /*
- * © Copyright Benedict Adamson 2020-23.
+ * © Copyright Benedict Adamson 2020-24.
  *
  * This file is part of MC.
  *
@@ -28,7 +28,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * </p>
  */
 @Configuration
-@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 public class MethodSecurityConfiguration {
 
 }
