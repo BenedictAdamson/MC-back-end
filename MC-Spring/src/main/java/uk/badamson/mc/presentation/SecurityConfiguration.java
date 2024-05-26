@@ -19,6 +19,10 @@ package uk.badamson.mc.presentation;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -29,6 +33,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 /**
  * <p>
@@ -40,6 +49,22 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
         justification = "delegates to framework method that does so")
 public class SecurityConfiguration {
+
+    static final class CsrfCookieFilter extends OncePerRequestFilter {
+
+        // Render the token value to a cookie by causing the deferred token to be loaded
+        @Override
+        protected void doFilterInternal(
+                @Nonnull HttpServletRequest request,
+                @Nonnull HttpServletResponse response,
+                @Nonnull FilterChain filterChain
+        ) throws ServletException, IOException {
+            CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
+            csrfToken.getToken();
+
+            filterChain.doFilter(request, response);
+        }
+    }
 
     @Bean
     @Order(2)
@@ -62,7 +87,8 @@ public class SecurityConfiguration {
 
     private static void configureCsrfProtection(final HttpSecurity http)
             throws Exception {
-        http.csrf(customizer -> customizer.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+        http.csrf(customizer -> customizer.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class); ;
     }
 
     private static void configureHttpBasic(final HttpSecurity http)
