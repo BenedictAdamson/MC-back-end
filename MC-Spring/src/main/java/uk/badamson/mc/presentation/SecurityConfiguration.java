@@ -22,10 +22,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
@@ -65,7 +67,15 @@ public class SecurityConfiguration {
 
     private static void configureHttpBasic(final HttpSecurity http)
             throws Exception {
-        http.httpBasic(Customizer.withDefaults());
+        // Store the authentication, despite Basic Authentication being stateless, to create a session.
+        http.httpBasic(customizer -> customizer.addObjectPostProcessor(new ObjectPostProcessor<BasicAuthenticationFilter>() {
+                    @Override
+                    public <O extends BasicAuthenticationFilter> O postProcess(O filter) {
+                        filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
+                        return filter;
+                    }
+                })
+        );
     }
 
     @Bean
