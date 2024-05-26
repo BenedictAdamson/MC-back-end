@@ -104,11 +104,20 @@ public class UserRestIT extends RestIT {
             }
 
             private void test(@Nonnull final BasicUserDetails addingUserDetails) {
-                final var response = AddUser.this.test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, true);
-
-                response.expectStatus().isFound();
-                final var location = response.returnResult(String.class).getResponseHeaders().getLocation();
-                assertThat("localtion", location, notNullValue());
+                final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+                try {
+                    var result = getMcBackEndClient().addUser(
+                            ProcessFixtures.ADMINISTRATOR,
+                            addingUserDetails,
+                            cookies,
+                            true, true
+                    );
+                    result.expectStatus().isFound();
+                    final var location = result.returnResult(String.class).getResponseHeaders().getLocation();
+                    assertThat("location", location, notNullValue());
+                } finally {
+                    logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                }
             }
         }
 
