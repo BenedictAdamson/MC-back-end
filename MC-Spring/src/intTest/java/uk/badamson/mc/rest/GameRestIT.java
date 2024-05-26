@@ -218,32 +218,32 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void asGamesManager() {
-                test(Authority.ROLE_MANAGE_GAMES, true, true);
+                test(userWithManageGamesRole, true, true);
             }
 
             @Test
             public void asPlayer() {
-                test(Authority.ROLE_PLAYER, true, true);
+                final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER));
+                addUser(user);
+                test(user, true, true);
             }
 
             @Test
             public void withAuthentication() {
-                test(Authority.ROLE_MANAGE_GAMES, true, false);
+                test(userWithManageGamesRole, true, false);
             }
 
             @Test
             public void inSession() {
-                test(Authority.ROLE_MANAGE_GAMES, false, true);
+                test(userWithManageGamesRole, false, true);
             }
 
             private void test(
-                    @Nonnull final Authority authority,
+                    @Nonnull final BasicUserDetails user,
                     final boolean includeAuthentication,
                     final boolean includeSessionCookie
             ) {
                 final var id = createGame();
-                final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.of(authority));
-                addUser(user);
 
                 final var response = GetGame.this.test(id, user, includeAuthentication, includeSessionCookie, true);
 
