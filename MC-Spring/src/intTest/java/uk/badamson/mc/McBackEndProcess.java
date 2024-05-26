@@ -226,7 +226,22 @@ public final class McBackEndProcess implements AutoCloseable {
 
     private static int randomServerPort() {
         return RANDOM_GENERATOR.ints(49152, 65535)
+                .filter(McBackEndProcess::isPortInFree)
                 .findAny().orElseThrow();
+    }
+
+    private static boolean isPortInFree(
+            @Nonnegative int port
+    ) {
+        var socketAddress = new InetSocketAddress(LOCAL_ADDRESS, port);
+        try {
+            try (final Socket s = new Socket()) {
+                s.connect(socketAddress, 500);
+                return false;
+            }
+        } catch (IOException e) {
+            return true;
+        }
     }
 
     @Override
