@@ -1,6 +1,6 @@
 package uk.badamson.mc.service;
 /*
- * © Copyright Benedict Adamson 2019-23.
+ * © Copyright Benedict Adamson 2019-24.
  *
  * This file is part of MC.
  *
@@ -22,8 +22,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,15 +43,11 @@ import static org.hamcrest.Matchers.*;
 public class ScenarioSpringServiceTest {
 
     @Container
+    @ServiceConnection
     static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
 
     @Autowired
     ScenarioSpringService service;
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
 
     private Set<UUID> getIds() {
         return service.getScenarioIdentifiers().collect(toUnmodifiableSet());
