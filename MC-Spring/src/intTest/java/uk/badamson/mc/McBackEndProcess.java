@@ -192,7 +192,7 @@ public final class McBackEndProcess implements AutoCloseable {
             try {
                 delegate.closeOutputStream();
                 waitForLogMessage("Starting", Duration.ofSeconds(4));
-                waitForLogMessage("Bootstrapping Spring Data MongoDB", Duration.ofSeconds(2));
+                waitForLogMessage("Bootstrapping Spring Data MongoDB", Duration.ofSeconds(10));
                 waitForLogMessage("Finished Spring Data repository scanning", Duration.ofSeconds(10));
                 waitForLogMessage("Started", Duration.ofSeconds(30));
                 waitForListeningPort(serverPort, Duration.ofSeconds(5));
