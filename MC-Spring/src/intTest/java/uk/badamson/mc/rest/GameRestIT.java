@@ -919,7 +919,7 @@ public class GameRestIT extends RestIT {
         public void validRequest() {
             final var gameId = createGame();
 
-            final var response = test(EnumSet.of(Authority.ROLE_MANAGE_GAMES), gameId, true, true, true);
+            final var response = test(userWithManageGamesRole, gameId, true, true, true);
 
             response.expectStatus().isFound();
             response.expectHeader().location(Paths.createPathForGame(gameId));
@@ -929,7 +929,7 @@ public class GameRestIT extends RestIT {
         public void noAuthentication() {
             final var gameId = createGame();
 
-            final var response = test(EnumSet.of(Authority.ROLE_MANAGE_GAMES), gameId, false, false, true);
+            final var response = test(userWithManageGamesRole, gameId, false, false, true);
 
             response.expectStatus().isUnauthorized();
         }
@@ -938,7 +938,7 @@ public class GameRestIT extends RestIT {
         public void noCsrfToken() {
             final var gameId = createGame();
 
-            final var response = test(EnumSet.of(Authority.ROLE_MANAGE_GAMES), gameId, true, true, false);
+            final var response = test(userWithManageGamesRole, gameId, true, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -946,8 +946,10 @@ public class GameRestIT extends RestIT {
         @Test
         public void insufficientAuthority() {
             final var gameId = createGame();
+            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)));
+            addUser(user);
 
-            final var response = test(EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES)), gameId, true, true, true);
+            final var response = test(user, gameId, true, true, true);
 
             response.expectStatus().isForbidden();
         }
@@ -956,20 +958,18 @@ public class GameRestIT extends RestIT {
         public void unknownGame() {
             final var gameId = UUID.randomUUID();
 
-            final var response = test(EnumSet.of(Authority.ROLE_MANAGE_GAMES), gameId, true, true, true);
+            final var response = test(userWithManageGamesRole, gameId, true, true, true);
 
             response.expectStatus().isNotFound();
         }
 
         private WebTestClient.ResponseSpec test(
-                @Nonnull final Set<Authority> authorities,
+                @Nonnull final BasicUserDetails user,
                 @Nonnull final UUID gameId,
                 final boolean includeAuthentication,
                 final boolean includeSessionCookie,
                 final boolean includeXsrfToken
         ) {
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
-            addUser(user);
             final var cookies = login(user);
             try {
                 getMcBackEndClient().startGame(gameId, user, cookies, true, true);
