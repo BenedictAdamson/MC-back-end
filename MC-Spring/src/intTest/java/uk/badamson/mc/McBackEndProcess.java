@@ -191,7 +191,8 @@ public final class McBackEndProcess implements AutoCloseable {
             new Thread(delegate).start();
             try {
                 delegate.closeOutputStream();
-                waitForLogMessage("Starting", Duration.ofSeconds(4));
+                waitForLogMessage("MC-back-end", Duration.ofSeconds(3));
+                waitForLogMessage("Starting", Duration.ofSeconds(6));
                 waitForLogMessage("Bootstrapping Spring Data MongoDB", Duration.ofSeconds(10));
                 waitForLogMessage("Finished Spring Data repository scanning", Duration.ofSeconds(10));
                 waitForLogMessage("Started", Duration.ofSeconds(30));
