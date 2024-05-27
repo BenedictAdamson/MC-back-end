@@ -186,6 +186,7 @@ pmdTest.enabled = false
 pmdIntTest.enabled = false
 
 processResources {
+    inputs.property('version', version)
     expand(
             version: version,
             timestamp: Instant.now().toString()
