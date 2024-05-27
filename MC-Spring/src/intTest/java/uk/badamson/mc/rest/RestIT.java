@@ -55,8 +55,14 @@ public abstract class RestIT {
 
     @AfterAll
     public static void tearDown() {
-        mcBackEndProcess.close();
-        mongoDBContainer.close();
+       mcBackEndClient = null;
+        if (mcBackEndProcess != null) {
+            mcBackEndProcess.close();
+            mcBackEndProcess = null;
+        }
+        if (mongoDBContainer != null) {
+            mongoDBContainer.close();
+        }
     }
 
     protected final McBackEndClient getMcBackEndClient() {
