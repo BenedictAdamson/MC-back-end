@@ -151,7 +151,7 @@ tasks.register('pushDeb', Exec) {
     inputs.property('aptRepo', aptRepo)
     group = 'Publishing'
     dependsOn ':MC-Spring:packageDeb'
-    commandLine 'apt', 'repo', 'add', aptRepo, packageDeb.outputs.files.singleFile
+    commandLine 'aptly', 'repo', 'add', aptRepo, packageDeb.outputs.files
 }
 
 tasks.register('prepareDockerBuildContext', Copy) {
