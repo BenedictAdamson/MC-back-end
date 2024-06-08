@@ -53,14 +53,14 @@ pipeline {
                 sh './gradlew check spotbugsMain pmdMain'
             }
         }
-        stage('Integration test') {
-            steps {
-                sh './gradlew integrationTest'
-            }
-        }
         stage('Package') {
             steps {
                 sh './gradlew packageDeb prepareDockerBuildContext'
+            }
+        }
+        stage('Integration test') {
+            steps {
+                sh './gradlew integrationTest'
             }
         }
         stage('Publish') {
