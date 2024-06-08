@@ -36,7 +36,7 @@ RUN apt-get -y update && apt-get -y install \
    gnupg-agent \
    maven \
    openjdk-17-jdk-headless \
-   software-properties-common \
+   software-properties-common
 # Add third-party repositories
 RUN apt-get remove -y openjdk-11-jre-headless
 # Add Chrome repository
