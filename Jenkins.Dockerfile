@@ -23,7 +23,7 @@
 # Also need nodejs, npm and Angular,
 # but the frontend-maven-plugin installs those.
 
-FROM debian:12
+FROM debian:11
 
 ARG JENKINSUID
 ARG JENKINSGID
