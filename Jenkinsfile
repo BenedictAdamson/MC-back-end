@@ -50,12 +50,12 @@ pipeline {
         }
         stage('Build, unit test and static verification') {
             steps {
-                sh './gradlew check spotbugsMain pmdMain'
+                sh './gradlew build check spotbugsMain pmdMain'
             }
         }
         stage('Package') {
             steps {
-                sh './gradlew packageDeb prepareDockerBuildContext'
+                sh './gradlew jar bootJar javadocJar sourcesJar packageDeb prepareDockerBuildContext'
             }
         }
         stage('Integration test') {
