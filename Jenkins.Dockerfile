@@ -23,7 +23,7 @@
 # Also need nodejs, npm and Angular,
 # but the frontend-maven-plugin installs those.
 
-FROM debian:11
+FROM debian:12
 
 ARG JENKINSUID
 ARG JENKINSGID
@@ -36,7 +36,8 @@ RUN apt-get -y update && apt-get -y install \
    gnupg-agent \
    maven \
    openjdk-17-jdk-headless \
-   software-properties-common
+   software-properties-common \
+# Add third-party repositories
 RUN apt-get remove -y openjdk-11-jre-headless
 # Add Chrome repository
 RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -49,8 +50,12 @@ RUN add-apt-repository -y \
 # Add Helm repository
 RUN curl https://helm.baltorepo.com/organization/signing.asc | apt-key add -
 RUN echo "deb https://baltocdn.com/helm/stable/debian/ all main" > /etc/apt/sources.list.d/helm-stable-debian.list
-# Install Chrome, Docker and Helm
+# Add aptly repository
+RUN echo "deb http://repo.aptly.info/ squeeze main" > /etc/apt/sources.list.d/aptly.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A0546A43624A8331
+# Install third-party packages
 RUN apt-get -y update && apt-get -y install \
+   aptly \
    containerd.io \
    docker-ce \
    docker-ce-cli \
