@@ -69,6 +69,9 @@ dependencies {
     intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.1.19'
     intTestImplementation 'org.springframework:spring-webflux'
     intTestImplementation 'org.springframework:spring-test'
+    intTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+    intTestImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    intTestImplementation 'org.springframework.security:spring-security-test'
     frontEndResources 'uk.badamson.mc:MC-front-end:3.3.12:client@tgz'
 }
 

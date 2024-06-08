@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2020-23.
+ * © Copyright Benedict Adamson 2020-24.
  *
  * This file is part of MC.
  *
