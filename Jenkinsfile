@@ -77,6 +77,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'maven', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh './gradlew publishToMavenLocal publishAllPublicationsToMavenRepository -PmavenUsername=$USERNAME -PmavenPassword=$PASSWORD'
                 }
+                sh './gradelw pushDeb'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh './gradlew buildDockerImage pushDockerImage -PdockerhubUsername=$USERNAME -PdockerhubPassword=$PASSWORD'
                 }
