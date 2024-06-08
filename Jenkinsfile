@@ -58,24 +58,25 @@ pipeline {
                 sh './gradlew integrationTest'
             }
         }
+        stage('Package') {
+            steps {
+                sh './gradlew packageDeb prepareDockerBuildContext'
+            }
+        }
         stage('Publish') {
-        	/* Does not push the Docker image. Pushing images of development ("SNAPSHOT") versions can be
+        	/* Do only for the main branch because pushing images of development ("SNAPSHOT") versions can be
         	 * troublesome because it can result in situations when the remote and local repositories hold different
         	 * versions with the same tag, leading to confusion about which version is actually used,
         	 * and inconsistencies for environments (such as minikube and Kubernetes in general) that do not use the
         	 * local Docker registry.
         	 */
+            when{
+                 branch 'main'
+            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'maven', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh './gradlew publish buildDockerImage -PmavenUsername=$USERNAME -PmavenPassword=$PASSWORD'
                 }
-            }
-        }
-        stage('Push Docker image') {
-            when{
-                 branch 'main'
-            } 
-            steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh './gradlew pushDockerImage -PdockerhubUsername=$USERNAME -PdockerhubPassword=$PASSWORD'
                 }
