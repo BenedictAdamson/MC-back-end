@@ -1,7 +1,7 @@
-# Dockerfile for the use in the Jenkinsfile for the MC project,
+# Dockerfile for the use by Jenkins for the MC project,
 # to set up the build environment for Jenkins to use.
 
-# © Copyright Benedict Adamson 2018-22.
+# © Copyright Benedict Adamson 2018-24.
 # 
 # This file is part of MC.
 #

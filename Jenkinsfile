@@ -48,7 +48,17 @@ pipeline {
                 sh './gradlew clean'
             }
         }
-        stage('Check, test and publish') {
+        stage('Build, unit test and static verification') {
+            steps {
+                sh './gradlew check spotbugsMain pmdMain'
+            }
+        }
+        stage('Integration test') {
+            steps {
+                sh './gradlew integrationTest'
+            }
+        }
+        stage('Publish') {
         	/* Does not push the Docker image. Pushing images of development ("SNAPSHOT") versions can be
         	 * troublesome because it can result in situations when the remote and local repositories hold different
         	 * versions with the same tag, leading to confusion about which version is actually used,
@@ -57,7 +67,7 @@ pipeline {
         	 */
             steps {
                 withCredentials([usernamePassword(credentialsId: 'maven', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh './gradlew check test publish buildDockerImage -PmavenUsername=$USERNAME -PmavenPassword=$PASSWORD'
+                    sh './gradlew publish buildDockerImage -PmavenUsername=$USERNAME -PmavenPassword=$PASSWORD'
                 }
             }
         }

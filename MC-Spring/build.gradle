@@ -208,5 +208,3 @@ tasks.register('integrationTest', Test) {
         events "passed"
     }
 }
-
-check.dependsOn integrationTest
