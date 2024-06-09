@@ -147,15 +147,14 @@ tasks.register('packageDeb', Deb) {
     link('/usr/share/lib/MC-Spring.jar', "MC-Spring-${version}.jar")
 }
 
-tasks.register('aptlyCreateRepo', Exec) {
-    inputs.property('aptRepo', aptRepo)
-    group = 'Publishing'
-    commandLine 'aptly', 'repo', 'create', aptRepo
-}
+/*
+ * Must have run aptly repo create $aptRepo
+ * Unfortunately can not do that in the build script
+ * because aptly does not provide a means for making the command idempotent.
+ */
 tasks.register('aptlyAddDeb', Exec) {
     inputs.property('aptRepo', aptRepo)
     group = 'Publishing'
-    dependsOn ':MC-Spring:aptlyCreateRepo'
     dependsOn ':MC-Spring:packageDeb'
     commandLine 'aptly', 'repo', 'add', aptRepo, file("build/distributions/missioncommand-be_${debVersion}-${debRelease}_all.deb")
 }
