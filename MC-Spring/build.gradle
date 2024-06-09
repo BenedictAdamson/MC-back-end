@@ -156,7 +156,7 @@ tasks.register('aptlyAddDeb', Exec) {
     inputs.property('aptRepo', aptRepo)
     group = 'Publishing'
     dependsOn ':MC-Spring:packageDeb'
-    commandLine 'aptly', 'repo', 'add', aptRepo, file("build/distributions/missioncommand-be_${debVersion}-${debRelease}_all.deb")
+    commandLine 'aptly', 'repo', 'add', '-force-replace', aptRepo, file("build/distributions/missioncommand-be_${debVersion}-${debRelease}_all.deb")
 }
 tasks.register('aptlyPublishDeb', Exec) {
     inputs.property('aptRepo', aptRepo)
