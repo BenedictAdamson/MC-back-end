@@ -31,6 +31,7 @@ ARG DOCKERGID
 
 RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
+   bzip2 \
    ca-certificates \
    curl \
    gnupg-agent \
