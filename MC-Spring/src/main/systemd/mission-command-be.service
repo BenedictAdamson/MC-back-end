@@ -38,6 +38,14 @@ PrivateTmp=true
 ProtectClock=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
+
+# kill configuration: use the defaults
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+
 ProtectKernelLogs=true
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
@@ -47,12 +55,5 @@ StandardOutput=append:/var/log/mission-command/be.log
 StandardError=inherit
 LoadCredential=adminpsswd:/etc/mission-command/adminpsswd.secret
 LoadCredential=mongodb-mc-psswd:/etc/mission-command/mongodb-mc-psswd.secret
-
-# kill configuration: use the defaults
-
-[Install]
-WantedBy=multi-user.target
-
-[Service]
 ExecStart=/usr/bin/mcbe
 TimeoutStartSec=13
