@@ -20,7 +20,6 @@ After=network.target
 # Can not run if the installation is corrupt or purged:
 ConditionFileIsExecutable=/usr/bin/mcbe
 ConditionPathIsDirectory=/home/mission-command
-ConditionUser=mission-command
 # Can not run if not configured:
 ConditionFileNotEmpty=/etc/mission-command/adminpsswd.secret
 ConditionFileNotEmpty=/etc/mission-command/mongodb-mc-psswd.secret
@@ -50,6 +49,7 @@ EnvironmentFile=-/etc/mission-command/be.env
 StandardInput=null
 StandardOutput=append:/var/log/mission-command/be.log
 StandardError=inherit
+User=mission-command
 LoadCredential=adminpsswd:/etc/mission-command/adminpsswd.secret
 LoadCredential=mongodb-mc-psswd:/etc/mission-command/mongodb-mc-psswd.secret
 ExecStart=/usr/bin/mcbe
