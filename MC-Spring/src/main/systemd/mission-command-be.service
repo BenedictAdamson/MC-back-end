@@ -25,7 +25,12 @@ ConditionUser=mission-command
 ConditionFileNotEmpty=/etc/mission-command/adminpsswd.secret
 ConditionFileNotEmpty=/etc/mission-command/mongodb-mc-psswd.secret
 
-# exec configuration
+# kill configuration: use the defaults
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
 
 WorkingDirectory=/home/mission-command
 User=mission-command
@@ -38,14 +43,6 @@ PrivateTmp=true
 ProtectClock=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
-
-# kill configuration: use the defaults
-
-[Install]
-WantedBy=multi-user.target
-
-[Service]
-
 ProtectKernelLogs=true
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
