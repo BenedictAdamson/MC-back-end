@@ -162,7 +162,7 @@ tasks.register('aptlyPublishDeb', Exec) {
     inputs.property('aptRepo', aptRepo)
     group = 'Publishing'
     dependsOn ':MC-Spring:aptlyAddDeb'
-    commandLine 'aptly', 'publish', 'update', 'bookworm', 'mc'
+    commandLine 'aptly', 'publish', 'update', '-batch', '-force-overwrite', '-passphrase-file=/home/jenkins/gpgpassphrase', 'bookworm', 'mc'
 }
 
 tasks.register('prepareDockerBuildContext', Copy) {
