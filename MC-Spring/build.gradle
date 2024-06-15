@@ -108,6 +108,13 @@ int debRelease = (version as String).contains('-SNAPSHOT')? 1 : 2
 tasks.register('packageDeb', Deb) {
     inputs.property('debVersion', debVersion)
     inputs.property('debRelease', debRelease)
+    inputs.file('src/deb/control/preinst')
+    inputs.file('src/deb/control/postinst')
+    inputs.file('src/deb/control/postinst')
+    inputs.file('src/main/sh/mcbe')
+    inputs.file('src/main/systemd/be.env')
+    inputs.file('src/main/systemd/adminpsswd.secret')
+    inputs.file('src/main/systemd/mission-command-be.service')
 
     group = 'Publishing'
     packageName = 'missioncommand-be'
@@ -122,7 +129,7 @@ tasks.register('packageDeb', Deb) {
     postInstall file('src/deb/control/postinst')
     preUninstall file('src/deb/control/prerm')
 
-    requires('java11-runtime-headless')
+    requires('java17-runtime-headless')
 
     into '/usr'
 
