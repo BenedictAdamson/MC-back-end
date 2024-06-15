@@ -134,7 +134,7 @@ tasks.register('packageDeb', Deb) {
         fileMode 0755
     }
     from('src/main/systemd/mission-command-be.service') {
-        into 'lib/systemd/user'
+        into 'lib/systemd/system'
     }
     from('src/main/systemd/be.env') {
         into '/etc/mission-command'
