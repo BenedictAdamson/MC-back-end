@@ -19,7 +19,6 @@ After=network.target
 
 # Can not run if the installation is corrupt or purged:
 ConditionFileIsExecutable=/usr/bin/mcbe
-ConditionPathIsDirectory=/home/mission-command
 # Can not run if not configured:
 ConditionFileNotEmpty=/etc/mission-command/adminpsswd.secret
 ConditionFileNotEmpty=/etc/mission-command/mongodb-mc-psswd.secret
@@ -31,7 +30,6 @@ WantedBy=multi-user.target
 
 [Service]
 
-WorkingDirectory=/home/mission-command
 User=mission-command
 NoNewPrivileges=true
 Nice=5
