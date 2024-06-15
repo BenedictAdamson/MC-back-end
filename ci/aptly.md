@@ -5,3 +5,8 @@ This assumes that the repository has been created, as tje `jenkins` user, using 
 ```
 aptly repo create mc
 ```
+It then must have been _published_:
+```
+aptly publish repo -batch -force-overwrite -passphrase-file=/home/jenkins/gpgpassphrase -distribution=bookworm -architectures=all mc mc
+```
+This allows the build commands to _update_ that repository.
