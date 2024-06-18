@@ -240,6 +240,7 @@ tasks.register('springIntegrationTest', Test) {
         events "passed"
     }
 }
+check.dependsOn(springIntegrationTest)
 
 tasks.register('bootJarIntegrationTest', Test) {
     description = 'Runs integration tests that use the boot JAR produced by Spring.'
@@ -260,6 +261,7 @@ tasks.register('bootJarIntegrationTest', Test) {
     }
     shouldRunAfter(tasks.springIntegrationTest)
 }
+check.dependsOn(bootJarIntegrationTest)
 
 tasks.register('uiIntegrationTest', Test) {
     description = 'Runs integration tests test through the UI.'
@@ -281,3 +283,4 @@ tasks.register('uiIntegrationTest', Test) {
     }
     shouldRunAfter(tasks.bootJarIntegrationTest)
 }
+check.dependsOn(uiIntegrationTest)
