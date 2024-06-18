@@ -222,18 +222,62 @@ processResources {
     )
 }
 
-tasks.register('integrationTest', Test) {
-    description = 'Runs integration tests.'
+tasks.register('springIntegrationTest', Test) {
+    description = 'Runs integration tests that use Spring directly.'
     group = 'verification'
 
-    dependsOn tasks.bootJar
+    dependsOn compileJava
+    dependsOn compileTestJava
 
     testClassesDirs = sourceSets.intTest.output.classesDirs
     classpath = sourceSets.intTest.runtimeClasspath
 
-    useJUnitPlatform()
+    useJUnitPlatform({
+        includeTags 'Spring'
+    })
 
     testLogging {
         events "passed"
     }
+}
+
+tasks.register('bootJarIntegrationTest', Test) {
+    description = 'Runs integration tests that use the boot JAR produced by Spring.'
+    group = 'verification'
+
+    dependsOn tasks.bootJar
+    dependsOn compileTestJava
+
+    testClassesDirs = sourceSets.intTest.output.classesDirs
+    classpath = sourceSets.intTest.runtimeClasspath
+
+    useJUnitPlatform({
+        includeTags 'BootJAR'
+    })
+
+    testLogging {
+        events "passed"
+    }
+    shouldRunAfter(tasks.springIntegrationTest)
+}
+
+tasks.register('uiIntegrationTest', Test) {
+    description = 'Runs integration tests test through the UI.'
+    group = 'verification'
+
+    dependsOn tasks.bootJar
+    dependsOn compileTestJava
+    dependsOn compileTestGroovy
+
+    testClassesDirs = sourceSets.intTest.output.classesDirs
+    classpath = sourceSets.intTest.runtimeClasspath
+
+    useJUnitPlatform({
+        includeTags 'UI'
+    })
+
+    testLogging {
+        events "passed"
+    }
+    shouldRunAfter(tasks.bootJarIntegrationTest)
 }
