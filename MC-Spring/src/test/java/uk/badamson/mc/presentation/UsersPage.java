@@ -18,6 +18,7 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -76,12 +77,12 @@ public final class UsersPage extends Page {
     public void assertListOfUsersIncludes(final String name) {
         Objects.requireNonNull(name, "name");
         final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
-        assertThat(list.getText(), containsString(name));
+        MatcherAssert.assertThat(list.getText(), containsString(name));
     }
 
     public void assertListOfUsersNotEmpty() {
         final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
-        assertThat(list.findElements(By.tagName("li")), not(empty()));
+        MatcherAssert.assertThat(list.findElements(By.tagName("li")), not(empty()));
     }
 
     @Override

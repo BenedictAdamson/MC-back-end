@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -88,7 +89,7 @@ public final class HomePage extends Page {
 
     private void assertHeadingIncludesNameOfGame(final WebElement body) {
         final var heading = assertHasElement(body, By.tagName("h1"));// guard
-        assertThat(heading.getText(), containsString(GAME_NAME));
+        MatcherAssert.assertThat(heading.getText(), containsString(GAME_NAME));
     }
 
     public void assertReportsThatLoggedIn() {

@@ -17,16 +17,7 @@ def dockerImage = "benedictadamson/mc-back-end:${version}"
 def aptRepo = 'mc'
 
 
-sourceSets {
-    intTest {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-}
-
 configurations {
-    intTestImplementation.extendsFrom implementation
-    intTestRuntimeOnly.extendsFrom runtimeOnly
     frontEndResources
 }
 
@@ -55,24 +46,24 @@ dependencies {
     testImplementation libs.testcontainers.mongodb
     testImplementation libs.dbc.assertions
     compileOnly libs.persistence.api
-    intTestImplementation libs.groovy
-    intTestImplementation libs.junit.jupiter.api
-    intTestImplementation libs.junit.jupiter.engine
-    intTestImplementation libs.junit.platform.console
-    intTestImplementation libs.selenium.firefox.driver
-    intTestImplementation libs.selenium.remote.driver
-    intTestImplementation libs.selenium.support
-    intTestImplementation libs.spock.core
-    intTestImplementation libs.testcontainers.junit
-    intTestImplementation libs.testcontainers.mongodb
-    intTestImplementation libs.testcontainers.selenium
-    intTestImplementation libs.testcontainers.spock
-    intTestImplementation 'io.projectreactor.netty:reactor-netty-http:1.1.19'
-    intTestImplementation 'org.springframework:spring-webflux'
-    intTestImplementation 'org.springframework:spring-test'
-    intTestImplementation 'org.springframework.boot:spring-boot-starter-test'
-    intTestImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    intTestImplementation 'org.springframework.security:spring-security-test'
+    testImplementation libs.groovy
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.engine
+    testImplementation libs.junit.platform.console
+    testImplementation libs.selenium.firefox.driver
+    testImplementation libs.selenium.remote.driver
+    testImplementation libs.selenium.support
+    testImplementation libs.spock.core
+    testImplementation libs.testcontainers.junit
+    testImplementation libs.testcontainers.mongodb
+    testImplementation libs.testcontainers.selenium
+    testImplementation libs.testcontainers.spock
+    testImplementation 'io.projectreactor.netty:reactor-netty-http:1.1.19'
+    testImplementation 'org.springframework:spring-webflux'
+    testImplementation 'org.springframework:spring-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.security:spring-security-test'
     frontEndResources 'uk.badamson.mc:MC-front-end:3.3.12:client@tgz'
 }
 
@@ -96,7 +87,12 @@ tasks.processResources.dependsOn('importFrontEndResources')
 
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform({
+        excludeTags 'Spring', 'BootJAR', 'UI'
+    })
+    filter {
+        excludeTestsMatching '*Spec'
+    }
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat 'full'
@@ -206,13 +202,11 @@ spotbugs {
     reportLevel = 'Low'
 }
 spotbugsTest.enabled = false
-spotbugsIntTest.enabled = false
 
 pmd {
     ruleSetConfig = resources.text.fromFile('src/test/resources/pmd-ruleset.xml')
 }
 pmdTest.enabled = false
-pmdIntTest.enabled = false
 
 processResources {
     inputs.property('version', version)
@@ -229,8 +223,8 @@ tasks.register('springIntegrationTest', Test) {
     dependsOn compileJava
     dependsOn compileTestJava
 
-    testClassesDirs = sourceSets.intTest.output.classesDirs
-    classpath = sourceSets.intTest.runtimeClasspath
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
 
     useJUnitPlatform({
         includeTags 'Spring'
@@ -251,8 +245,8 @@ tasks.register('bootJarIntegrationTest', Test) {
     dependsOn tasks.bootJar
     dependsOn compileTestJava
 
-    testClassesDirs = sourceSets.intTest.output.classesDirs
-    classpath = sourceSets.intTest.runtimeClasspath
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
 
     useJUnitPlatform({
         includeTags 'BootJAR'
@@ -275,8 +269,8 @@ tasks.register('uiIntegrationTest', Test) {
     dependsOn compileTestJava
     dependsOn compileTestGroovy
 
-    testClassesDirs = sourceSets.intTest.output.classesDirs
-    classpath = sourceSets.intTest.runtimeClasspath
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
 
     useJUnitPlatform({
         includeTags 'UI'

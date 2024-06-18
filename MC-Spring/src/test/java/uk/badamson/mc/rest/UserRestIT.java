@@ -19,6 +19,7 @@ package uk.badamson.mc.rest;
  */
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -251,8 +252,8 @@ public class UserRestIT extends RestIT {
                         );
                 final var cookies = response.returnResult(UserResponse.class).getResponseCookies();
                 assertAll(
-                        () -> assertThat(cookies, hasKey(McBackEndClient.SESSION_COOKIE_NAME)),
-                        () -> assertThat(cookies, hasKey(McBackEndClient.XSRF_TOKEN_COOKIE_NAME))
+                        () -> assertThat(cookies, Matchers.hasKey(McBackEndClient.SESSION_COOKIE_NAME)),
+                        () -> assertThat(cookies, Matchers.hasKey(McBackEndClient.XSRF_TOKEN_COOKIE_NAME))
                 );
             }
 

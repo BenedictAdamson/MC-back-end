@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
@@ -187,13 +188,13 @@ public final class GamePage extends Page {
     public void assertIndicatesIsNotRecruitingPlayers() {
         final var element = assertHasElement(getBody(),
                 RECRUITING_ELEMENT_LOCATOR);
-        assertThat(element.getText(), INDICATES_IS_NOT_RECRUITING_PLAYERS);
+        MatcherAssert.assertThat(element.getText(), INDICATES_IS_NOT_RECRUITING_PLAYERS);
     }
 
     public void assertIndicatesIsRecruitingPlayers() {
         final var element = assertHasElement(getBody(),
                 RECRUITING_ELEMENT_LOCATOR);
-        assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
+        MatcherAssert.assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
     }
 
     public void assertIndicatesNotRunning() {
@@ -239,7 +240,7 @@ public final class GamePage extends Page {
 
     public void assertIndicatesUserMayNotJoinGame() {
         final var element = assertHasElement(getBody(), JOINABLE_ELEMENT_LOCATOR);
-        assertThat(element.getText(), INDICATES_IS_NOT_JOINABLE);
+        MatcherAssert.assertThat(element.getText(), INDICATES_IS_NOT_JOINABLE);
     }
 
     public void assertIndicatesWhetherGameHasPlayers() {
