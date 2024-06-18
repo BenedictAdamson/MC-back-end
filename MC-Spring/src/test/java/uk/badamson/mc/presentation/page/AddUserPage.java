@@ -1,6 +1,6 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc.presentation.page;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -29,29 +29,27 @@ import static org.hamcrest.Matchers.is;
 
 /**
  * <p>
- * A <i>page object</i> for the login page.
+ * A <i>page object</i> for the add user page.
  * </p>
  */
 @Immutable
-public final class LoginPage extends Page {
+public final class AddUserPage extends Page {
 
-    private static final String PATH = "/login";
+    private static final String PATH = "/user?add";
+
+    private final UsersPage usersPage;
 
     /**
      * <p>
-     * Construct a login page object associated with an existing page.
+     * Construct a user page associated with a given users page.
      * </p>
      *
-     * @param page The existing page.
-     * @throws NullPointerException If {@code page} is null.
+     * @param usersPage The users page.
+     * @throws NullPointerException If {@code usersPage} is null.
      */
-    public LoginPage(final Page page) {
-        super(page);
-    }
-
-    public void assertRejectedLogin() {
-        assertInvariants();// guard
-        assertHasErrorMessage();
+    public AddUserPage(final UsersPage usersPage) {
+        super(usersPage);
+        this.usersPage = usersPage;
     }
 
     @Override
@@ -59,15 +57,23 @@ public final class LoginPage extends Page {
         assertThat("path", path, is(PATH));
     }
 
-    public void submitLoginForm(final String user, final String password) {
+    public Page submitForm(final String user, final String password) {
         Objects.requireNonNull(user, "user");
         Objects.requireNonNull(password, "password");
         requireIsReady();
 
-        final var body = getBody();
-        body.findElement(By.name("username")).sendKeys(user);
-        body.findElement(By.xpath("//input[@type='password']"))
+        getBody().findElement(By.name("username")).sendKeys(user);
+        getBody().findElement(By.xpath("//input[@type='password']"))
                 .sendKeys(password);
-        body.findElement(By.xpath("//button[@type='submit']")).submit();
+        getBody().findElement(By.xpath("//button[@type='submit']")).submit();
+
+        /* Must either transition to the Users' Page, or report an error. */
+        usersPage.awaitIsReady();
+        if (usersPage.isCurrentPath()) {
+            return usersPage;
+        } else {
+            return this;
+        }
     }
+
 }

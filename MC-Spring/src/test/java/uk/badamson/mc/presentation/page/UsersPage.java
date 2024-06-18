@@ -1,4 +1,4 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc.presentation.page;
 /*
  * © Copyright Benedict Adamson 2019-20,22.
  *

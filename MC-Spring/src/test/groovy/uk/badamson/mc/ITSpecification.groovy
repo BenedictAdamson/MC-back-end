@@ -14,10 +14,7 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.lifecycle.TestDescription
 import spock.lang.Shared
 import spock.lang.Specification
-import uk.badamson.mc.Authority
-import uk.badamson.mc.BasicUserDetails
-import uk.badamson.mc.User
-import uk.badamson.mc.presentation.HomePage
+import uk.badamson.mc.presentation.page.HomePage
 
 import javax.annotation.Nonnegative
 import javax.annotation.Nonnull

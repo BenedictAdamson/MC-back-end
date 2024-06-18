@@ -1,8 +1,8 @@
 package uk.badamson.mc
 
 import org.junit.jupiter.api.Tag
-import uk.badamson.mc.presentation.GamePage
-import uk.badamson.mc.presentation.HomePage
+import uk.badamson.mc.presentation.page.GamePage
+import uk.badamson.mc.presentation.page.HomePage
 
 import javax.annotation.Nonnull
 
