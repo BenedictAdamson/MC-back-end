@@ -94,8 +94,7 @@ pipeline {
                 	pmdParser(pattern: '**/build/reports/pmd/*.xml')
 					]
             }
-            junit 'MC-*/build/test-results/test/TEST-*.xml'
-            junit 'MC-*/build/test-results/integrationTest/TEST-*.xml'
+            junit 'MC-*/build/test-results/*/TEST-*.xml'
         }
         success {
             archiveArtifacts artifacts: 'MC-Spring/build/distributions/*.deb', fingerprint: true
