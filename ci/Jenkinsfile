@@ -50,7 +50,7 @@ pipeline {
         }
         stage('Build, unit test and static verification') {
             steps {
-                sh './gradlew build check spotbugsMain pmdMain'
+                sh './gradlew build test spotbugsMain pmdMain'
             }
         }
         stage('Package') {
