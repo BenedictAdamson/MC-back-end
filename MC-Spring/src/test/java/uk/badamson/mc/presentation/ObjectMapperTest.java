@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +33,7 @@ import static org.hamcrest.Matchers.is;
 /**
  * Tests {@link PresentationLayerSpringConfiguration}
  */
+@Tag("Spring")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectMapperTest {
 

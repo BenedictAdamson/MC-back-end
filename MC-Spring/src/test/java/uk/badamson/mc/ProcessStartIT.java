@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -26,6 +27,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.concurrent.TimeoutException;
 
+@Tag("BootJAR")
 @Testcontainers
 public class ProcessStartIT {
     private static final DockerImageName MONGO_DB_IMAGE = ProcessFixtures.MONGO_DB_IMAGE;
