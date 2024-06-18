@@ -237,7 +237,8 @@ tasks.register('springIntegrationTest', Test) {
     })
 
     testLogging {
-        events "passed"
+        events "passed", "skipped", "failed"
+        exceptionFormat 'full'
     }
 }
 check.dependsOn(springIntegrationTest)
@@ -257,7 +258,8 @@ tasks.register('bootJarIntegrationTest', Test) {
     })
 
     testLogging {
-        events "passed"
+        events "passed", "skipped", "failed"
+        exceptionFormat 'full'
     }
     shouldRunAfter(tasks.springIntegrationTest)
 }
@@ -279,7 +281,8 @@ tasks.register('uiIntegrationTest', Test) {
     })
 
     testLogging {
-        events "passed"
+        events "passed", "skipped", "failed"
+        exceptionFormat 'full'
     }
     shouldRunAfter(tasks.bootJarIntegrationTest)
 }
