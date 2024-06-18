@@ -272,9 +272,11 @@ tasks.register('uiIntegrationTest', Test) {
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
 
-    useJUnitPlatform({
-        includeTags 'UI'
-    })
+    useJUnitPlatform()
+
+    filter {
+        includeTestsMatching '*Spec'
+    }
 
     testLogging {
         events "passed", "skipped", "failed"
