@@ -27,8 +27,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import uk.badamson.mc.Fixtures;
 import uk.badamson.mc.NamedUUID;
+import uk.badamson.mc.ProcessFixtures;
 import uk.badamson.mc.Scenario;
 
 import java.util.Optional;
@@ -46,7 +46,7 @@ public class ScenarioSpringServiceTest {
 
     @Container
     @ServiceConnection
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
 
     @Autowired
     ScenarioSpringService service;

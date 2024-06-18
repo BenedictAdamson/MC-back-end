@@ -45,7 +45,7 @@ public class GameSpringServiceTest {
 
     @Container
     @ServiceConnection
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
     private static int nUsers;
     @Autowired
     private GameSpringService gameService;

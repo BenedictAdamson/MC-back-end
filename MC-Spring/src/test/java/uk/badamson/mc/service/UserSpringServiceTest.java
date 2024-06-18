@@ -28,10 +28,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import uk.badamson.mc.Authority;
-import uk.badamson.mc.BasicUserDetails;
-import uk.badamson.mc.Fixtures;
-import uk.badamson.mc.User;
+import uk.badamson.mc.*;
 import uk.badamson.mc.rest.UserResponse;
 import uk.badamson.mc.spring.SpringUser;
 
@@ -56,7 +53,7 @@ public class UserSpringServiceTest {
 
     @Container
     @ServiceConnection
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
     @Autowired
     UserSpringService service;
     @Autowired
@@ -134,14 +131,14 @@ public class UserSpringServiceTest {
 
         @Test
         public void alreadyExists() {
-            final BasicUserDetails user = Fixtures.createBasicUserDetailsWithAllRoles();
+            final BasicUserDetails user = ProcessFixtures.createBasicUserDetailsWithAllRoles();
             add(user);
             assertThrows(UserExistsException.class, () -> add(user));
         }
 
         @Test
         public void doesNotAlreadyExist() {
-            final var userDetails = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var userDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
 
             add(userDetails);
 
@@ -189,7 +186,7 @@ public class UserSpringServiceTest {
 
         @Test
         public void present() {
-            final var userDetails = Fixtures.createBasicUserDetailsWithAllRoles();
+            final var userDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
             final var userName = userDetails.getUsername();
             add(userDetails);
 
