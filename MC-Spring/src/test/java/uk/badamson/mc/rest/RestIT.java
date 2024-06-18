@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 public abstract class RestIT {
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
-    private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword();
+    private static final String ADMINISTRATOR_PASSWORD = Fixtures.ADMINISTRATOR.getPassword();
 
     private static MongoDBContainer mongoDBContainer;
     private static McBackEndProcess mcBackEndProcess;
@@ -44,7 +44,7 @@ public abstract class RestIT {
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
-        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
+        mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
         mongoDBContainer.start();
         final var mongoDBPath = mongoDBContainer.getReplicaSetUrl();
         mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD);
@@ -78,16 +78,16 @@ public abstract class RestIT {
     protected final UUID createGame(@Nonnull final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
 
-        final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+        final var cookies = login(Fixtures.ADMINISTRATOR);
         final WebTestClient.ResponseSpec response;
         try {
             response = mcBackEndClient.createGameForScenario(
                     scenario,
-                    ProcessFixtures.ADMINISTRATOR, cookies,
+                    Fixtures.ADMINISTRATOR, cookies,
                     true, true
             );
         } finally {
-            logout(ProcessFixtures.ADMINISTRATOR, cookies);
+            logout(Fixtures.ADMINISTRATOR, cookies);
         }
         response.expectStatus().isFound();
         return McBackEndClient.parseCreateGameResponse(response);
@@ -115,11 +115,11 @@ public abstract class RestIT {
     }
 
     protected final void endRecruitment(UUID gameId) {
-        final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+        final var cookies = login(Fixtures.ADMINISTRATOR);
         try {
-            mcBackEndClient.endRecruitment(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, true);
+            mcBackEndClient.endRecruitment(gameId, Fixtures.ADMINISTRATOR, cookies, true, true);
         } finally {
-            logout(ProcessFixtures.ADMINISTRATOR, cookies);
+            logout(Fixtures.ADMINISTRATOR, cookies);
         }
     }
 
@@ -127,10 +127,10 @@ public abstract class RestIT {
     protected static UUID addUser(@Nonnull final BasicUserDetails userDetails) {
         Objects.requireNonNull(userDetails, "userDetails");
 
-        final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+        final var cookies = login(Fixtures.ADMINISTRATOR);
         try {
             final var response = mcBackEndClient.addUser(
-                    ProcessFixtures.ADMINISTRATOR, userDetails,
+                    Fixtures.ADMINISTRATOR, userDetails,
                     cookies, true, true)
                     ;
             response.expectStatus().isFound();
@@ -142,7 +142,7 @@ public abstract class RestIT {
             return UUID.fromString(
                     McBackEndClient.USER_URI_TEMPLATE.match(location.toString()).get("id"));
         } finally {
-            logout(ProcessFixtures.ADMINISTRATOR, cookies);
+            logout(Fixtures.ADMINISTRATOR, cookies);
         }
     }
 

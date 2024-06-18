@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 @Tag("BootJAR")
 @Testcontainers
 public class ProcessStartIT {
-    private static final DockerImageName MONGO_DB_IMAGE = ProcessFixtures.MONGO_DB_IMAGE;
+    private static final DockerImageName MONGO_DB_IMAGE = Fixtures.MONGO_DB_IMAGE;
     private static final String MONGO_DB_PASSWORD = "LetMeIn1";
     private static final String ADMINISTRATOR_PASSWORD = "LetMeIn2";
 

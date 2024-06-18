@@ -25,7 +25,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
 
-public final class ProcessFixtures {
+public final class Fixtures {
 
 
     public static final BasicUserDetails ADMINISTRATOR = BasicUserDetails

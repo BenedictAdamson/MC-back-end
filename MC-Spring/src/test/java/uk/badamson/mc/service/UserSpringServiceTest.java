@@ -53,7 +53,7 @@ public class UserSpringServiceTest {
 
     @Container
     @ServiceConnection
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE);
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE);
     @Autowired
     UserSpringService service;
     @Autowired
@@ -131,14 +131,14 @@ public class UserSpringServiceTest {
 
         @Test
         public void alreadyExists() {
-            final BasicUserDetails user = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final BasicUserDetails user = Fixtures.createBasicUserDetailsWithAllRoles();
             add(user);
             assertThrows(UserExistsException.class, () -> add(user));
         }
 
         @Test
         public void doesNotAlreadyExist() {
-            final var userDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var userDetails = Fixtures.createBasicUserDetailsWithAllRoles();
 
             add(userDetails);
 
@@ -186,7 +186,7 @@ public class UserSpringServiceTest {
 
         @Test
         public void present() {
-            final var userDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var userDetails = Fixtures.createBasicUserDetailsWithAllRoles();
             final var userName = userDetails.getUsername();
             add(userDetails);
 

@@ -45,7 +45,7 @@ import java.util.stream.Stream
 abstract class ITSpecification extends Specification {
 
     private static final String MONGO_DB_PASSWORD = "LetMeIn1"
-    private static final String ADMINISTRATOR_PASSWORD = ProcessFixtures.ADMINISTRATOR.getPassword()
+    private static final String ADMINISTRATOR_PASSWORD = Fixtures.ADMINISTRATOR.getPassword()
     private static final Path FAILURE_RECORDING_DIRECTORY = Path.of('build', 'test-results', 'integrationTest', 'failure-records')
     private static final Capabilities CAPABILITIES = new FirefoxOptions()
             .addPreference("security.insecure_field_warning.contextual.enabled", false)
@@ -89,7 +89,7 @@ abstract class ITSpecification extends Specification {
 
     void setupSpec() {
         Files.createDirectories(FAILURE_RECORDING_DIRECTORY)
-        mongoDBContainer = new MongoDBContainer(ProcessFixtures.MONGO_DB_IMAGE)
+        mongoDBContainer = new MongoDBContainer(Fixtures.MONGO_DB_IMAGE)
         mongoDBContainer.start()
         final def mongoDBPath = mongoDBContainer.getReplicaSetUrl()
         mcBackEndProcess = new McBackEndProcess(mongoDBPath, MONGO_DB_PASSWORD, ADMINISTRATOR_PASSWORD)
@@ -147,16 +147,16 @@ abstract class ITSpecification extends Specification {
     protected final UUID createGame(@Nonnull final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario")
 
-        final def cookies = login(ProcessFixtures.ADMINISTRATOR)
+        final def cookies = login(Fixtures.ADMINISTRATOR)
         WebTestClient.ResponseSpec response = null
         try {
             response = mcBackEndClient.createGameForScenario(
                     scenario,
-                    ProcessFixtures.ADMINISTRATOR, cookies,
+                    Fixtures.ADMINISTRATOR, cookies,
                     true, true
             )
         } finally {
-            logout(ProcessFixtures.ADMINISTRATOR, cookies)
+            logout(Fixtures.ADMINISTRATOR, cookies)
         }
         assert response != null
         response.expectStatus().isFound()
@@ -184,10 +184,10 @@ abstract class ITSpecification extends Specification {
     protected final UUID addUser(@Nonnull final BasicUserDetails userDetails) {
         Objects.requireNonNull(userDetails, "userDetails")
 
-        final var cookies = login(ProcessFixtures.ADMINISTRATOR)
+        final var cookies = login(Fixtures.ADMINISTRATOR)
         try {
             final var response = mcBackEndClient.addUser(
-                    ProcessFixtures.ADMINISTRATOR, userDetails,
+                    Fixtures.ADMINISTRATOR, userDetails,
                     cookies, true, true)
             response.expectStatus().isFound()
             final var location = response.returnResult(Void.class)
@@ -198,7 +198,7 @@ abstract class ITSpecification extends Specification {
             return UUID.fromString(
                     McBackEndClient.USER_URI_TEMPLATE.match(location.toString()).get("id"))
         } finally {
-            logout(ProcessFixtures.ADMINISTRATOR, cookies)
+            logout(Fixtures.ADMINISTRATOR, cookies)
         }
     }
 

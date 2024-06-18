@@ -51,7 +51,7 @@ public class UserRestIT extends RestIT {
 
     @BeforeAll
     public static void setupUsers() {
-        userWithAllRoles = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+        userWithAllRoles = Fixtures.createBasicUserDetailsWithAllRoles();
         userWithAllRolesId = addUser(userWithAllRoles);
     }
 
@@ -64,7 +64,7 @@ public class UserRestIT extends RestIT {
 
         @Test
         public void administrator() {
-            final var response = test(userWithAllRoles, ProcessFixtures.ADMINISTRATOR, true, true);
+            final var response = test(userWithAllRoles, Fixtures.ADMINISTRATOR, true, true);
 
             response.expectStatus().isBadRequest();
         }
@@ -72,7 +72,7 @@ public class UserRestIT extends RestIT {
         @Test
         public void duplicate() {
             final var performingUser = userWithAllRoles;
-            final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var addingUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
 
             test(performingUser, addingUserDetails, true, true);
 
@@ -83,18 +83,18 @@ public class UserRestIT extends RestIT {
 
         @Test
         public void noAuthentication() {
-            final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var addingUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, false, false);
+            final var response = test(Fixtures.ADMINISTRATOR, addingUserDetails, false, false);
 
             response.expectStatus().is4xxClientError();
         }
 
         @Test
         public void noCsrfToken() {
-            final var addingUserDetails = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var addingUserDetails = Fixtures.createBasicUserDetailsWithAllRoles();
 
-            final var response = test(ProcessFixtures.ADMINISTRATOR, addingUserDetails, true, false);
+            final var response = test(Fixtures.ADMINISTRATOR, addingUserDetails, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -104,19 +104,19 @@ public class UserRestIT extends RestIT {
 
             @Test
             public void addPlayer() {
-                test(ProcessFixtures.createBasicUserDetailsWithPlayerRole());
+                test(Fixtures.createBasicUserDetailsWithPlayerRole());
             }
 
             @Test
             public void addGamesManager() {
-                test(ProcessFixtures.createBasicUserDetailsWithManageGamesRole());
+                test(Fixtures.createBasicUserDetailsWithManageGamesRole());
             }
 
             private void test(@Nonnull final BasicUserDetails addingUserDetails) {
-                final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+                final var cookies = login(Fixtures.ADMINISTRATOR);
                 try {
                     var result = getMcBackEndClient().addUser(
-                            ProcessFixtures.ADMINISTRATOR,
+                            Fixtures.ADMINISTRATOR,
                             addingUserDetails,
                             cookies,
                             true, true
@@ -125,7 +125,7 @@ public class UserRestIT extends RestIT {
                     final var location = result.returnResult(String.class).getResponseHeaders().getLocation();
                     assertThat("location", location, notNullValue());
                 } finally {
-                    logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                    logout(Fixtures.ADMINISTRATOR, cookies);
                 }
             }
         }
@@ -186,7 +186,7 @@ public class UserRestIT extends RestIT {
 
         @Test
         public void unknownUser() {
-            final var detailsOfRequestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+            final var detailsOfRequestingUser = Fixtures.createBasicUserDetailsWithAllRoles();
 
             final var response = getMcBackEndClient().getSelf(detailsOfRequestingUser);
 
@@ -212,7 +212,7 @@ public class UserRestIT extends RestIT {
         public class Valid {
             @Test
             public void administrator() {
-                final BasicUserDetails user = ProcessFixtures.ADMINISTRATOR;
+                final BasicUserDetails user = Fixtures.ADMINISTRATOR;
 
                 final var response = getMcBackEndClient().getSelf(user);
 
@@ -226,7 +226,7 @@ public class UserRestIT extends RestIT {
 
             @Test
             public void b() {
-                BasicUserDetails requestingUser = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+                BasicUserDetails requestingUser = Fixtures.createBasicUserDetailsWithPlayerRole();
                 final var userId = addUser(requestingUser);
                 test(requestingUser, userId);
             }
@@ -273,7 +273,7 @@ public class UserRestIT extends RestIT {
             // Tough test: requesting user has maximum authority
             final var authorities = EnumSet.allOf(Authority.class);
             authorities.remove(Authority.ROLE_MANAGE_USERS);
-            final var requestingUser = new BasicUserDetails(ProcessFixtures.createUserName(), "password1",
+            final var requestingUser = new BasicUserDetails(Fixtures.createUserName(), "password1",
                     authorities, true, true, true, true);
             addUser(requestingUser);
             final var requestedUserId = userWithAllRolesId;
@@ -288,7 +288,7 @@ public class UserRestIT extends RestIT {
             // Tough test: user exists
             final var requestedUserId = userWithAllRolesId;
 
-            final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(requestedUserId, Fixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isUnauthorized();
         }
@@ -298,7 +298,7 @@ public class UserRestIT extends RestIT {
             // Tough test: has permission
             final var requestedUserId = UUID.randomUUID();
 
-            final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(requestedUserId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -315,7 +315,7 @@ public class UserRestIT extends RestIT {
             public void requesterIsAdministrator() {
                 final var requestedUserId = userWithAllRolesId;
 
-                final var response = test(requestedUserId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+                final var response = test(requestedUserId, Fixtures.ADMINISTRATOR, true, true, true);
 
                 response.expectStatus().isOk();
                 response.expectBody(UserResponse.class)
@@ -348,7 +348,7 @@ public class UserRestIT extends RestIT {
                     boolean includeSessionCookie,
                     boolean includeXsrfToken
             ) {
-                final var requestingUserName = ProcessFixtures.createUserName();
+                final var requestingUserName = Fixtures.createUserName();
                 final var requestingUser = new BasicUserDetails(requestingUserName, "password1",
                         authorities, true, true, true, true);
                 addUser(requestingUser);

@@ -49,11 +49,11 @@ public class GameRestIT extends RestIT {
 
     @BeforeAll
     public static void setupUsers() {
-        userWithManageGamesRole = ProcessFixtures.createBasicUserDetailsWithManageGamesRole();
-        userWithoutManageGamesRole = ProcessFixtures.createBasicUserDetailsWithAuthorities(
+        userWithManageGamesRole = Fixtures.createBasicUserDetailsWithManageGamesRole();
+        userWithoutManageGamesRole = Fixtures.createBasicUserDetailsWithAuthorities(
                 EnumSet.complementOf(EnumSet.of(Authority.ROLE_MANAGE_GAMES))
         );
-        userWithoutManageGamesOrPlayerRole = ProcessFixtures.createBasicUserDetailsWithAuthorities(
+        userWithoutManageGamesOrPlayerRole = Fixtures.createBasicUserDetailsWithAuthorities(
                 EnumSet.complementOf(
                         EnumSet.of(Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES)
                 )
@@ -73,7 +73,7 @@ public class GameRestIT extends RestIT {
         public void noAuthentication() {
             final var scenarioId = getAScenarioId();
 
-            final var response = test(scenarioId, ProcessFixtures.ADMINISTRATOR, false, false, true);
+            final var response = test(scenarioId, Fixtures.ADMINISTRATOR, false, false, true);
 
             response.expectStatus().isUnauthorized();
         }
@@ -82,7 +82,7 @@ public class GameRestIT extends RestIT {
         public void noCsrfToken() {
             final var scenarioId = getAScenarioId();
 
-            final var response = test(scenarioId, ProcessFixtures.ADMINISTRATOR, false, true, false);
+            final var response = test(scenarioId, Fixtures.ADMINISTRATOR, false, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -100,7 +100,7 @@ public class GameRestIT extends RestIT {
         public void unknownScenario() {
             final var scenarioId = UUID.randomUUID();
 
-            final var response = test(scenarioId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(scenarioId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -129,7 +129,7 @@ public class GameRestIT extends RestIT {
         public class ValidRequest {
             @Test
             public void verboseByAdministrator() {
-                test(ProcessFixtures.ADMINISTRATOR, true, true);
+                test(Fixtures.ADMINISTRATOR, true, true);
             }
 
             @Test
@@ -139,12 +139,12 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void inSession() {
-                test(ProcessFixtures.ADMINISTRATOR, false, true);
+                test(Fixtures.ADMINISTRATOR, false, true);
             }
 
             @Test
             public void withoutSession() {
-                test(ProcessFixtures.ADMINISTRATOR, true, false);
+                test(Fixtures.ADMINISTRATOR, true, false);
             }
 
             private void test(
@@ -175,7 +175,7 @@ public class GameRestIT extends RestIT {
         public void unknownGame() {
             final var id = UUID.randomUUID();
             /* Tough test: user is authorised. */
-            final var response = test(id, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(id, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -184,7 +184,7 @@ public class GameRestIT extends RestIT {
         public void noAuthentication() {
             /* Tough test: game exists. */
             final var id = createGame();
-            final var response = test(id, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(id, Fixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isUnauthorized();
         }
@@ -229,7 +229,7 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void asPlayer() {
-                final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER));
+                final var user = Fixtures.createBasicUserDetailsWithAuthorities(EnumSet.of(Authority.ROLE_PLAYER));
                 addUser(user);
                 test(user, true, true);
             }
@@ -273,7 +273,7 @@ public class GameRestIT extends RestIT {
         public void unknownScenario() {
             final var scenario = UUID.randomUUID();
 
-            final var response = test(scenario, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(scenario, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -283,7 +283,7 @@ public class GameRestIT extends RestIT {
             // Tough test: scenario exists
             final var scenario = getAScenarioId();
 
-            final var response = test(scenario, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(scenario, Fixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isUnauthorized();
         }
@@ -323,12 +323,12 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void asAdministrator() {
-                test(ProcessFixtures.ADMINISTRATOR, true, true, true);
+                test(Fixtures.ADMINISTRATOR, true, true, true);
             }
 
             @Test
             public void asPlayer() {
-                final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+                final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
                 addUser(user);
 
                 test(user, true, true, true);
@@ -341,12 +341,12 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void withAuthentication() {
-                test(ProcessFixtures.ADMINISTRATOR, true, false, false);
+                test(Fixtures.ADMINISTRATOR, true, false, false);
             }
 
             @Test
             public void withSession() {
-                test(ProcessFixtures.ADMINISTRATOR, false, true, true);
+                test(Fixtures.ADMINISTRATOR, false, true, true);
             }
 
             private void test(BasicUserDetails user,
@@ -382,7 +382,7 @@ public class GameRestIT extends RestIT {
             final var gameId = UUID.randomUUID();
             // Tough test: user has authority
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -392,7 +392,7 @@ public class GameRestIT extends RestIT {
             // Tough test: game exists and CSRF token provided
             final var gameId = createGame();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isForbidden();
         }
@@ -401,7 +401,7 @@ public class GameRestIT extends RestIT {
         public void noCsrfToken() {
             final var gameId = createGame();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, true, true, false);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, true, true, false);
 
             response.expectStatus().isForbidden();
         }
@@ -437,7 +437,7 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void administrator() {
-                test(ProcessFixtures.ADMINISTRATOR, true, true);
+                test(Fixtures.ADMINISTRATOR, true, true);
             }
 
             @Test
@@ -447,12 +447,12 @@ public class GameRestIT extends RestIT {
 
             @Test
             public void withAuthentication() {
-                test(ProcessFixtures.ADMINISTRATOR, true, false);
+                test(Fixtures.ADMINISTRATOR, true, false);
             }
 
             @Test
             public void inSession() {
-                test(ProcessFixtures.ADMINISTRATOR, false, true);
+                test(Fixtures.ADMINISTRATOR, false, true);
             }
 
             private void test(
@@ -488,7 +488,7 @@ public class GameRestIT extends RestIT {
         public void hasCurrentGame() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
             final var cookies = login(user);
 
@@ -511,7 +511,7 @@ public class GameRestIT extends RestIT {
         public void noAuthentication() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
             final var cookies = login(user);
 
@@ -537,7 +537,7 @@ public class GameRestIT extends RestIT {
         public void noCsrf() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
             final var cookies = login(user);
 
@@ -562,7 +562,7 @@ public class GameRestIT extends RestIT {
         @Test
         public void noCurrentGame() {
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
             final var cookies = login(user);
             final WebTestClient.ResponseSpec response;
@@ -595,7 +595,7 @@ public class GameRestIT extends RestIT {
         public void unknownGame() {
             final var gameId = UUID.randomUUID();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -605,7 +605,7 @@ public class GameRestIT extends RestIT {
             // Tough test: game exists and CSRF token provided
             final var gameId = createGame();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, false, false, true);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, false, false, true);
 
             response.expectStatus().isUnauthorized();
         }
@@ -615,7 +615,7 @@ public class GameRestIT extends RestIT {
             // Tough test: game exists and user has all authorities
             final var gameId = createGame();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, false, false, false);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, false, false, false);
 
             response.expectStatus().isForbidden();
         }
@@ -628,7 +628,7 @@ public class GameRestIT extends RestIT {
              */
             final var gameId = createGame();
             final Set<Authority> authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_PLAYER));
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
+            final var user = Fixtures.createBasicUserDetailsWithAuthorities(authorities);
             addUser(user);
 
             final var response = test(gameId, user, true, true, true);
@@ -645,7 +645,7 @@ public class GameRestIT extends RestIT {
             final var gameId = createGame();
             endRecruitment(gameId);
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isEqualTo(HttpStatus.CONFLICT);
         }
@@ -678,18 +678,18 @@ public class GameRestIT extends RestIT {
             final var gameIdA = createGame();
             final var gameIdB = createGame();
             assert !gameIdA.equals(gameIdB);
-            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(Fixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                userJoinsGame(gameIdB, ProcessFixtures.ADMINISTRATOR, cookies);
+                userJoinsGame(gameIdB, Fixtures.ADMINISTRATOR, cookies);
 
                 response = getMcBackEndClient().joinGame(
                         gameIdA,
-                        ProcessFixtures.ADMINISTRATOR, cookies,
+                        Fixtures.ADMINISTRATOR, cookies,
                         true, true
                 );
             } finally {
-                logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(Fixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isEqualTo(HttpStatus.CONFLICT);
         }
@@ -718,7 +718,7 @@ public class GameRestIT extends RestIT {
                 assert includeAuthentication || includeSessionCookie;
                 final var gameId = createGame();
                 // Tough test: user has a minimum set of authorities
-                final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+                final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
                 addUser(user);
 
                 final var response = JoinGame.this.test(gameId, user, includeAuthentication, includeSessionCookie, true);
@@ -742,7 +742,7 @@ public class GameRestIT extends RestIT {
         public void may() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
 
             final var response = test(gameId, user, true, true, true);
@@ -755,7 +755,7 @@ public class GameRestIT extends RestIT {
         public void noCsrfToken() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
 
             final var response = test(gameId, user, true, true, false);
@@ -768,7 +768,7 @@ public class GameRestIT extends RestIT {
         public void noAuthentication() {
             final var gameId = createGame();
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
 
             final var response = test(gameId, user, false, false, true);
@@ -781,7 +781,7 @@ public class GameRestIT extends RestIT {
             final var gameId = createGame();
             endRecruitment(gameId);
             // Tough test: user has a minimum set of authorities
-            final var user = ProcessFixtures.createBasicUserDetailsWithPlayerRole();
+            final var user = Fixtures.createBasicUserDetailsWithPlayerRole();
             addUser(user);
 
             final var response = test(gameId, user, true, true, true);
@@ -814,7 +814,7 @@ public class GameRestIT extends RestIT {
         public void unknownGame() {
             final var gameId = UUID.randomUUID();
 
-            final var response = test(gameId, ProcessFixtures.ADMINISTRATOR, true, true, true);
+            final var response = test(gameId, Fixtures.ADMINISTRATOR, true, true, true);
 
             response.expectStatus().isNotFound();
         }
@@ -823,7 +823,7 @@ public class GameRestIT extends RestIT {
         public void insufficientAuthority() {
             final var gameId = UUID.randomUUID();
             final var authorities = EnumSet.complementOf(EnumSet.of(Authority.ROLE_PLAYER));
-            final var user = ProcessFixtures.createBasicUserDetailsWithAuthorities(authorities);
+            final var user = Fixtures.createBasicUserDetailsWithAuthorities(authorities);
             addUser(user);
 
             final var response = test(gameId, user, true, true, true);
@@ -852,12 +852,12 @@ public class GameRestIT extends RestIT {
         @Test
         public void noAuthentication() {
             final var gameId = createGame();
-            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(Fixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
                 response = getMcBackEndClient().startGame(gameId, null, cookies, false, true);
             } finally {
-                logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(Fixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isUnauthorized();
         }
@@ -865,12 +865,12 @@ public class GameRestIT extends RestIT {
         @Test
         public void noCsrfToken() {
             final var gameId = createGame();
-            final var cookies = login(ProcessFixtures.ADMINISTRATOR);
+            final var cookies = login(Fixtures.ADMINISTRATOR);
             final WebTestClient.ResponseSpec response;
             try {
-                response = getMcBackEndClient().startGame(gameId, ProcessFixtures.ADMINISTRATOR, cookies, true, false);
+                response = getMcBackEndClient().startGame(gameId, Fixtures.ADMINISTRATOR, cookies, true, false);
             } finally {
-                logout(ProcessFixtures.ADMINISTRATOR, cookies);
+                logout(Fixtures.ADMINISTRATOR, cookies);
             }
             response.expectStatus().isForbidden();
         }
@@ -904,7 +904,7 @@ public class GameRestIT extends RestIT {
         public void unknownGame() {
             final var gameId = UUID.randomUUID();
 
-            final var response = testAuthenticated(gameId, ProcessFixtures.ADMINISTRATOR);
+            final var response = testAuthenticated(gameId, Fixtures.ADMINISTRATOR);
 
             response.expectStatus().isNotFound();
         }

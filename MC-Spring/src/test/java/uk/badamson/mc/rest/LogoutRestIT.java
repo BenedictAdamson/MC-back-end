@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.badamson.mc.BasicUserDetails;
-import uk.badamson.mc.ProcessFixtures;
+import uk.badamson.mc.Fixtures;
 import uk.badamson.mc.presentation.SecurityConfiguration;
 
 import javax.annotation.Nonnull;
@@ -36,42 +36,42 @@ public class LogoutRestIT extends RestIT {
 
     @Test
     public void noAuthentication() {
-        final var response = test(ProcessFixtures.ADMINISTRATOR, null, true, true);
+        final var response = test(Fixtures.ADMINISTRATOR, null, true, true);
 
         response.expectStatus().isNoContent();
     }
 
     @Test
     public void noCsrfToken() {
-        final var response = test(ProcessFixtures.ADMINISTRATOR, ProcessFixtures.ADMINISTRATOR, true, false);
+        final var response = test(Fixtures.ADMINISTRATOR, Fixtures.ADMINISTRATOR, true, false);
 
         response.expectStatus().isForbidden();
     }
 
     @Test
     public void noSession() {
-        final var response = test(ProcessFixtures.ADMINISTRATOR, ProcessFixtures.ADMINISTRATOR, false, true);
+        final var response = test(Fixtures.ADMINISTRATOR, Fixtures.ADMINISTRATOR, false, true);
 
         response.expectStatus().isNoContent();
     }
 
     @Test
     public void bareRequest() {
-        final var response = test(ProcessFixtures.ADMINISTRATOR, null, false, false);
+        final var response = test(Fixtures.ADMINISTRATOR, null, false, false);
 
         response.expectStatus().isForbidden();
     }
 
     @Test
     public void fullRequestAdministrator() {
-        final var response = test(ProcessFixtures.ADMINISTRATOR, ProcessFixtures.ADMINISTRATOR, true, true);
+        final var response = test(Fixtures.ADMINISTRATOR, Fixtures.ADMINISTRATOR, true, true);
 
         response.expectStatus().isNoContent();
     }
 
     @Test
     public void fullRequestNonAdministrator() {
-        final var requestingUser = ProcessFixtures.createBasicUserDetailsWithAllRoles();
+        final var requestingUser = Fixtures.createBasicUserDetailsWithAllRoles();
         addUser(requestingUser);
 
         final var response = test(requestingUser, requestingUser, true, true);
