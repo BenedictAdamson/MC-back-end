@@ -60,7 +60,7 @@ pipeline {
         }
         stage('Integration test') {
             steps {
-                sh './gradlew integrationTest'
+                sh './gradlew check'
             }
         }
         stage('Publish') {
