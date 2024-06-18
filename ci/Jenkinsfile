@@ -48,9 +48,9 @@ pipeline {
                 sh './gradlew clean'
             }
         }
-        stage('Build, unit test and static verification') {
+        stage('Compile, unit test and static verification') {
             steps {
-                sh './gradlew build test spotbugsMain pmdMain'
+                sh './gradlew classes test spotbugsMain pmdMain'
             }
         }
         stage('Package') {
