@@ -18,6 +18,7 @@ package uk.badamson.mc.rest;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.badamson.mc.BasicUserDetails;
@@ -30,6 +31,7 @@ import javax.annotation.Nullable;
 /**
  * Tests {@link SecurityConfiguration}
  */
+@Tag("BootJAR")
 public class LogoutRestIT extends RestIT {
 
     @Test

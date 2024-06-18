@@ -1,5 +1,6 @@
 package uk.badamson.mc
 
+import org.junit.jupiter.api.Tag
 import uk.badamson.mc.presentation.GamePage
 import uk.badamson.mc.presentation.HomePage
 
@@ -27,6 +28,7 @@ import javax.annotation.Nonnull
 /**
  * The Mission Command game can have multiple games (plays) for each scenario
  */
+@Tag("UI")
 class GameSpec extends ITSpecification {
 
     void setupSpec() {

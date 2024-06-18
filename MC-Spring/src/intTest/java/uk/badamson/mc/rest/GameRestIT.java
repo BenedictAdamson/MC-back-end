@@ -21,6 +21,7 @@ package uk.badamson.mc.rest;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ import static org.hamcrest.Matchers.*;
  * Tests {@link SecurityConfiguration}.
  * Tests Spring annotations on {@link GameController}.
  */
+@Tag("BootJAR")
 public class GameRestIT extends RestIT {
 
     private static BasicUserDetails userWithManageGamesRole;

@@ -1,4 +1,7 @@
 package uk.badamson.mc
+
+import org.junit.jupiter.api.Tag
+
 /**
  * © Copyright Benedict Adamson 2019-24.
  *
@@ -21,6 +24,7 @@ package uk.badamson.mc
 /**
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
  */
+@Tag("UI")
 class HomePageSpec extends ITSpecification {
 
     void setupSpec() {

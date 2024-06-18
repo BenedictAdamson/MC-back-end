@@ -20,6 +20,7 @@ package uk.badamson.mc.rest;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import uk.badamson.mc.presentation.ScenarioController;
@@ -34,6 +35,7 @@ import static org.hamcrest.Matchers.*;
  * Tests {@link SecurityConfiguration}.
  * Tests Spring annotations on {@link ScenarioController}.
  */
+@Tag("BootJAR")
 @SuppressFBWarnings(value="SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Required for JUnit 5")
 public class ScenarioRestIT extends RestIT {
 

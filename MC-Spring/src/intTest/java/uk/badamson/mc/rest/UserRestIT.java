@@ -21,6 +21,7 @@ package uk.badamson.mc.rest;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * Tests {@link SecurityConfiguration}.
  * Tests Spring annotations on {@link UserController}.
  */
+@Tag("BootJAR")
 public class UserRestIT extends RestIT {
     private static BasicUserDetails userWithAllRoles;
     private static UUID userWithAllRolesId;

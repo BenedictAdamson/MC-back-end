@@ -1,4 +1,7 @@
 package uk.badamson.mc
+
+import org.junit.jupiter.api.Tag
+
 /**
  * © Copyright Benedict Adamson 2019-24.
  *
@@ -21,6 +24,7 @@ package uk.badamson.mc
 /**
  * Mission Command is a multi-player game. To conserve resources, play on a server is restricted to only known (and presumably trusted) users.
  */
+@Tag("UI")
 class UserSpec extends ITSpecification {
 
   void setupSpec() {
